@@ -264,3 +264,4 @@ __pycache__/
 *.sln
 *.pyproj
 /cluster_pnjl/cluster_pnjl_env/
+/cluster_pnjl/env/
