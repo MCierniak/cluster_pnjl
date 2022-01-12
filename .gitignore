@@ -259,3 +259,8 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+#My ignores
+*.sln
+*.pyproj
+/cluster_pnjl/cluster_pnjl_env/
