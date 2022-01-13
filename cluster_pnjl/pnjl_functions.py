@@ -135,9 +135,17 @@ def U(T : float, Phi : complex, Phib : complex, **kwargs) -> complex:
     return -(T ** 4) * ((b2(T, **kwargs) / 2.0) * Phi * Phib + (b3 / 6.0) * ((Phi ** 3) + (Phib ** 3)) - (b4 / 4.0) * ((Phi * Phib) ** 2))
 def y_plus(p : float, T : float, mu : float, mass : float, a : float, **kwargs) -> float:
     #
+    #if mu > 200:
+    #    with open("D:/EoS/BDK/mu_test/y_lookup.dat", 'a', newline = '') as file:
+    #        writer = csv.writer(file, delimiter = '\t')
+    #        writer.writerow(["y_plus", p, T, mu, mass, a, kwargs])
     return math.exp(-(En(p, mass, **kwargs) - a * mu) / T)
 def y_minus(p : float, T : float, mu : float, mass : float, a : float, **kwargs) -> float:
     #
+    #if mu > 200:
+    #    with open("D:/EoS/BDK/mu_test/y_lookup.dat", 'a', newline = '') as file:
+    #        writer = csv.writer(file, delimiter = '\t')
+    #        writer.writerow(["y_minus", p, T, mu, mass, a, kwargs])
     return math.exp(-(En(p, mass, **kwargs) + a * mu) / T)
 def z_plus(p : float, T : float, mu : float, Phi : complex, Phib : complex, mass : float, a : int, **kwargs) -> complex:
     #positive energy, color charge
@@ -152,14 +160,14 @@ def z_plus(p : float, T : float, mu : float, Phi : complex, Phib : complex, mass
         return complex(-3.0 * (En(p, mass, **kwargs) - float(a) * mu) * np.heaviside(-(En(p, mass, **kwargs) - float(a) * mu), 0.5), 0.0)
     el = complex(0.0, 0.0)
     if a == 0:
-        return complex(1.5 * T * math.log((1.0 - ex) ** 2), 0.0)
+        return 3.0 * T * cmath.log(1.0 - ex)
     elif (a % 3 == 0) and (not a % 2 == 0):
-        return complex(3.0 * T * math.log(1.0 + ex), 0.0)
+        return 3.0 * T * cmath.log(1.0 + ex)
     elif (not a % 3 == 0) and (a % 2 == 0):
         el = 1.0 - 3.0 * Phib * ex + 3.0 * Phi *ex2 - ex3
         return T * cmath.log(el)
     elif (a % 3 == 0) and (a % 2 == 0):
-        return complex(1.5 * T * math.log((1.0 - ex) ** 2), 0.0)
+        return 3.0 * T * cmath.log(1.0 - ex)
     else:
         el = 1.0 + 3.0 * Phib * ex + 3.0 * Phi *ex2 + ex3
         return T * cmath.log(el)
@@ -176,14 +184,14 @@ def z_minus(p : float, T : float, mu : float, Phi : complex, Phib : complex, mas
         return complex(-3.0 * (En(p, mass, **kwargs) + float(a) * mu) * np.heaviside(-(En(p, mass, **kwargs) + float(a) * mu), 0.5), 0.0)
     el = complex(0.0, 0.0)
     if a == 0:
-        return complex(3.0 * T * math.log(1.0 - ex), 0.0)
+        return 3.0 * T * cmath.log(1.0 - ex)
     elif (a % 3 == 0) and (not a % 2 == 0):
-        return complex(3.0 * T * math.log(1.0 + ex), 0.0)
+        return 3.0 * T * cmath.log(1.0 + ex)
     elif (not a % 3 == 0) and (a % 2 == 0):
         el = 1.0 - 3.0 * Phib * ex + 3.0 * Phi *ex2 - ex3
         return T * cmath.log(el)
     elif (a % 3 == 0) and (a % 2 == 0):
-        return complex(3.0 * T * math.log(1.0 - ex), 0.0)
+        return 3.0 * T * cmath.log(1.0 - ex)
     else:
         el = 1.0 + 3.0 * Phib * ex + 3.0 * Phi *ex2 + ex3
         return T * cmath.log(el)
@@ -585,56 +593,56 @@ def K_minus_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs)
     fme = f_minus(M(T, mu, **kwargs), T, mu, Phi, Phib, 0.0, 1, **kwargs)
 
     return integral - ( (M(T, mu, **kwargs) / (3.0 * T)) * (fme.imag / T) * ( dMdT(T, mu, **kwargs) - M(T, mu, **kwargs) / T ))
-#def alpha_s(T : float, **kwargs) -> float:
-#    
-#    options = {'Nf' : default_Nf, 'Nc' : default_Nc, 'c' : default_c, 'd' : default_d}
-#    options.update(kwargs)
-#
-#    Nf = options['Nf']
-#    Nc = options['Nc']
-#    c = options['c']
-#    d = options['d']
-#
-#    r = d * T
-#    return ((12.0 * np.pi) / (11 * Nc - 2 * Nf)) * ( (1.0 / (math.log((r ** 2) / (c ** 2)))) - ((c ** 2) / ((r ** 2) - (c ** 2))) )
-#def dalpha_s_dT(T : float, **kwargs) -> float:
-#    
-#    options = {'Nf' : default_Nf, 'Nc' : default_Nc, 'c' : default_c, 'd' : default_d}
-#    options.update(kwargs)
-#
-#    Nf = options['Nf']
-#    Nc = options['Nc']
-#    c = options['c']
-#    d = options['d']
-#
-#    return ((12.0 * np.pi) / (11 * Nc - 2 * Nf)) * ((2.0 * (c ** 2) * (d ** 2) * T) / (((d ** 2) * (T ** 2) - (c ** 2)) ** 2) - 2.0 / (T * (( math.log(d ** 2) + math.log((T ** 2) / (c ** 2))) ** 2)))
 def alpha_s(T : float, mu : float, **kwargs) -> float:
     
-    options = {'c' : default_c, 'd' : default_d}
+    options = {'Nf' : default_Nf, 'Nc' : default_Nc, 'c' : default_c, 'd' : default_d}
     options.update(kwargs)
 
+    Nf = options['Nf']
+    Nc = options['Nc']
     c = options['c']
     d = options['d']
 
-    return c * ((((np.pi ** 2) * (T ** 2) + (mu ** 2)) / (2.0 * (np.pi ** 2))) ** d)
+    r = d * T
+    return ((12.0 * np.pi) / (11 * Nc - 2 * Nf)) * ( (1.0 / (math.log((r ** 2) / (c ** 2)))) - ((c ** 2) / ((r ** 2) - (c ** 2))) )
 def dalpha_s_dT(T : float, mu : float, **kwargs) -> float:
     
-    options = {'c' : default_c, 'd' : default_d}
+    options = {'Nf' : default_Nf, 'Nc' : default_Nc, 'c' : default_c, 'd' : default_d}
     options.update(kwargs)
 
+    Nf = options['Nf']
+    Nc = options['Nc']
     c = options['c']
     d = options['d']
 
-    return (2.0 ** (1.0 - d)) * c * d * (np.pi ** (2.0 - 2.0 * d)) * T * (((np.pi ** 2) * (T ** 2) + (mu ** 2)) ** (d - 1))
-def dalpha_s_dmu(T : float, mu : float, **kwargs) -> float:
-    
-    options = {'c' : default_c, 'd' : default_d}
-    options.update(kwargs)
-
-    c = options['c']
-    d = options['d']
-
-    return (2.0 ** (1.0 - d)) * c * d * (np.pi ** (2.0 - 2.0 * d)) * mu * (((np.pi ** 2) * (T ** 2) + (mu ** 2)) ** (d - 1))
+    return ((12.0 * np.pi) / (11 * Nc - 2 * Nf)) * ((2.0 * (c ** 2) * (d ** 2) * T) / (((d ** 2) * (T ** 2) - (c ** 2)) ** 2) - 2.0 / (T * (( math.log(d ** 2) + math.log((T ** 2) / (c ** 2))) ** 2)))
+#def alpha_s(T : float, mu : float, **kwargs) -> float:
+#    
+#    options = {'c' : default_c, 'd' : default_d}
+#    options.update(kwargs)
+#
+#    c = options['c']
+#    d = options['d']
+#
+#    return c * ((((np.pi ** 2) * (T ** 2) + (mu ** 2)) / (2.0 * (np.pi ** 2))) ** d)
+#def dalpha_s_dT(T : float, mu : float, **kwargs) -> float:
+#    
+#    options = {'c' : default_c, 'd' : default_d}
+#    options.update(kwargs)
+#
+#    c = options['c']
+#    d = options['d']
+#
+#    return (2.0 ** (1.0 - d)) * c * d * (np.pi ** (2.0 - 2.0 * d)) * T * (((np.pi ** 2) * (T ** 2) + (mu ** 2)) ** (d - 1))
+#def dalpha_s_dmu(T : float, mu : float, **kwargs) -> float:
+#    
+#    options = {'c' : default_c, 'd' : default_d}
+#    options.update(kwargs)
+#
+#    c = options['c']
+#    d = options['d']
+#
+#    return (2.0 ** (1.0 - d)) * c * d * (np.pi ** (2.0 - 2.0 * d)) * mu * (((np.pi ** 2) * (T ** 2) + (mu ** 2)) ** (d - 1))
 def sigma_plus_real(p : float, T : float, mu : float, Phi : complex, Phib : complex, mass : float, deriv_M_T : float, a : int, **kwargs) -> float:
     #
     return z_plus(p, T, mu, Phi, Phib, mass, a, **kwargs).real + f_plus(p, T, mu, Phi, Phib, mass, a, **kwargs).real * (En(p, mass, **kwargs) - float(a) * mu - T * dEn_dT(p, T, mu, mass, deriv_M_T, **kwargs))
