@@ -135,17 +135,10 @@ def U(T : float, Phi : complex, Phib : complex, **kwargs) -> complex:
     return -(T ** 4) * ((b2(T, **kwargs) / 2.0) * Phi * Phib + (b3 / 6.0) * ((Phi ** 3) + (Phib ** 3)) - (b4 / 4.0) * ((Phi * Phib) ** 2))
 def y_plus(p : float, T : float, mu : float, mass : float, a : float, **kwargs) -> float:
     #
-    #if mu > 200:
-    #    with open("D:/EoS/BDK/mu_test/y_lookup.dat", 'a', newline = '') as file:
-    #        writer = csv.writer(file, delimiter = '\t')
-    #        writer.writerow(["y_plus", p, T, mu, mass, a, kwargs])
+    #math.log1p
     return math.exp(-(En(p, mass, **kwargs) - a * mu) / T)
 def y_minus(p : float, T : float, mu : float, mass : float, a : float, **kwargs) -> float:
     #
-    #if mu > 200:
-    #    with open("D:/EoS/BDK/mu_test/y_lookup.dat", 'a', newline = '') as file:
-    #        writer = csv.writer(file, delimiter = '\t')
-    #        writer.writerow(["y_minus", p, T, mu, mass, a, kwargs])
     return math.exp(-(En(p, mass, **kwargs) + a * mu) / T)
 def z_plus(p : float, T : float, mu : float, Phi : complex, Phib : complex, mass : float, a : int, **kwargs) -> complex:
     #positive energy, color charge
@@ -154,8 +147,8 @@ def z_plus(p : float, T : float, mu : float, Phi : complex, Phib : complex, mass
     ex3 = 0.0
     try:
         ex = y_plus(p, T, mu, mass, float(a), **kwargs)
-        ex2 = y_plus(p, T, mu, mass, float(a), **kwargs) ** 2
-        ex3 = y_plus(p, T, mu, mass, float(a), **kwargs) ** 3
+        ex2 = ex ** 2
+        ex3 = ex ** 3
     except OverflowError :
         return complex(-3.0 * (En(p, mass, **kwargs) - float(a) * mu) * np.heaviside(-(En(p, mass, **kwargs) - float(a) * mu), 0.5), 0.0)
     el = complex(0.0, 0.0)

@@ -2675,9 +2675,9 @@ def PNJL_thermodynamics_mu_test():
     Pres_H_mu300        = []
     
     T = np.linspace(1.0, 450.0, 200)
-    mu0   = [0.0    for el in T]
-    mu200 = [200.0  for el in T]
-    mu300 = [300.0  for el in T]
+    mu0   = [0.0 for el in T]
+    mu200 = [200.0 / 3.0 for el in T]
+    mu300 = [300.0 / 3.0 for el in T]
     
     recalc_pl_mu0         = True
     recalc_pl_mu200       = True
