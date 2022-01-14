@@ -135,7 +135,6 @@ def U(T : float, Phi : complex, Phib : complex, **kwargs) -> complex:
     return -(T ** 4) * ((b2(T, **kwargs) / 2.0) * Phi * Phib + (b3 / 6.0) * ((Phi ** 3) + (Phib ** 3)) - (b4 / 4.0) * ((Phi * Phib) ** 2))
 def y_plus(p : float, T : float, mu : float, mass : float, a : float, **kwargs) -> float:
     #
-    #math.log1p
     return math.exp(-(En(p, mass, **kwargs) - a * mu) / T)
 def y_minus(p : float, T : float, mu : float, mass : float, a : float, **kwargs) -> float:
     #
@@ -609,33 +608,6 @@ def dalpha_s_dT(T : float, mu : float, **kwargs) -> float:
     d = options['d']
 
     return ((12.0 * np.pi) / (11 * Nc - 2 * Nf)) * ((2.0 * (c ** 2) * (d ** 2) * T) / (((d ** 2) * (T ** 2) - (c ** 2)) ** 2) - 2.0 / (T * (( math.log(d ** 2) + math.log((T ** 2) / (c ** 2))) ** 2)))
-#def alpha_s(T : float, mu : float, **kwargs) -> float:
-#    
-#    options = {'c' : default_c, 'd' : default_d}
-#    options.update(kwargs)
-#
-#    c = options['c']
-#    d = options['d']
-#
-#    return c * ((((np.pi ** 2) * (T ** 2) + (mu ** 2)) / (2.0 * (np.pi ** 2))) ** d)
-#def dalpha_s_dT(T : float, mu : float, **kwargs) -> float:
-#    
-#    options = {'c' : default_c, 'd' : default_d}
-#    options.update(kwargs)
-#
-#    c = options['c']
-#    d = options['d']
-#
-#    return (2.0 ** (1.0 - d)) * c * d * (np.pi ** (2.0 - 2.0 * d)) * T * (((np.pi ** 2) * (T ** 2) + (mu ** 2)) ** (d - 1))
-#def dalpha_s_dmu(T : float, mu : float, **kwargs) -> float:
-#    
-#    options = {'c' : default_c, 'd' : default_d}
-#    options.update(kwargs)
-#
-#    c = options['c']
-#    d = options['d']
-#
-#    return (2.0 ** (1.0 - d)) * c * d * (np.pi ** (2.0 - 2.0 * d)) * mu * (((np.pi ** 2) * (T ** 2) + (mu ** 2)) ** (d - 1))
 def sigma_plus_real(p : float, T : float, mu : float, Phi : complex, Phib : complex, mass : float, deriv_M_T : float, a : int, **kwargs) -> float:
     #
     return z_plus(p, T, mu, Phi, Phib, mass, a, **kwargs).real + f_plus(p, T, mu, Phi, Phib, mass, a, **kwargs).real * (En(p, mass, **kwargs) - float(a) * mu - T * dEn_dT(p, T, mu, mass, deriv_M_T, **kwargs))
@@ -809,7 +781,6 @@ def BDensity_Q(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -
         print("The integration in BDensity_Q did not succeed!")
 
     return ((2.0 * Nf * Nc) / (2.0 * (math.pi ** 2))) * integral
-#BDensity_pert derived using old alpha_s!!!
 def BDensity_pert(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
     I_plus_complex = complex(I_plus_real(T, mu, Phi, Phib, **kwargs), I_plus_imag(T, mu, Phi, Phib, **kwargs))
     I_minus_complex = complex(I_minus_real(T, mu, Phi, Phib, **kwargs), I_minus_imag(T, mu, Phi, Phib, **kwargs))
@@ -875,7 +846,6 @@ def SDensity_g(T : float, Phi : complex, Phib : complex, **kwargs) -> float:
     first = -(4.0 / T) * U(T, Phi, Phib, **kwargs)
     second = ((T ** 4) / 2) * Phib * Phi * (a1 * (T0 / (T ** 2)) + 2.0 * a2 * ((T0 ** 2) / (T ** 3)) + 3.0 * a3 * ((T0 ** 3) / (T ** 4)))
     return first.real - second.real
-#SDensity_pert derived using old alpha_s!!!
 def SDensity_pert(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
     I_plus_complex = complex(I_plus_real(T, mu, Phi, Phib, **kwargs), I_plus_imag(T, mu, Phi, Phib, **kwargs))
     I_minus_complex = complex(I_minus_real(T, mu, Phi, Phib, **kwargs), I_minus_imag(T, mu, Phi, Phib, **kwargs))
@@ -909,3 +879,152 @@ def SDensity_cluster(T : float, mu : float, Phi : complex, Phib : complex, bmass
         return -(float(dx) / (4.0 * (math.pi ** 2) * T)) * integral
     else:
         return (float(dx) / (2.0 * (math.pi ** 2) * T)) * integral
+
+def alt_z_plus(p : float, T : float, mu : float, Phi : complex, Phib : complex, mass : float, a : int, **kwargs) -> complex:
+    #positive energy, color charge
+    #check if this is correct!
+    if a == 0:
+        try:
+            ex = math.exp(En(p, mass, **kwargs) / T)
+        except OverflowError:
+            return complex(0.0, 0.0)
+        return complex(((p ** 4) / En(p, mass, **kwargs)) * (1.0 / (ex - 1.0)), 0.0)
+    elif a == 3:
+        try:
+            ex = math.exp((En(p, mass, **kwargs) - float(a) * mu) / T)
+        except OverflowError:
+            return complex(0.0, 0.0)
+        return complex(((p ** 4) / En(p, mass, **kwargs)) * (1.0 / (ex + 1.0)), 0.0)
+    elif a == 6:
+        try:
+            ex = math.exp((En(p, mass, **kwargs) - float(a) * mu) / T)
+        except OverflowError:
+            return complex(0.0, 0.0)
+        return complex(((p ** 4) / En(p, mass, **kwargs)) * (1.0 / (ex - 1.0)), 0.0)
+    else:
+        if a % 2 != 0:
+            part1 = 0.0
+            try:
+                ex1 = math.exp((En(p, mass, **kwargs) - float(a) * mu) / T)
+                exm1 = math.exp(-(En(p, mass, **kwargs) - float(a) * mu) / T)
+                exm2 = math.exp(-2.0 * (En(p, mass, **kwargs) - float(a) * mu) / T)
+                part1 = Phib / (ex1 + 3.0 * Phi * exm1 + exm2 + 3.0 * Phib)
+            except OverflowError:
+                part1 = 0.0
+            part2 = 0.0
+            try:
+                ex2 = math.exp(2.0 * (En(p, mass, **kwargs) - float(a) * mu) / T)
+                ex1 = math.exp((En(p, mass, **kwargs) - float(a) * mu) / T)
+                exm1 = math.exp(-(En(p, mass, **kwargs) - float(a) * mu) / T)
+                part2 = 2.0 * Phi / (ex2 + 3.0 * Phib * ex1 + exm1 + 3.0 * Phi)
+            except OverflowError:
+                part2 = 0.0
+            part3 = 0.0
+            try:
+                ex3 = math.exp(3.0 * (En(p, mass, **kwargs) - float(a) * mu) / T)
+                ex2 = math.exp(2.0 * (En(p, mass, **kwargs) - float(a) * mu) / T)
+                ex1 = math.exp((En(p, mass, **kwargs) - float(a) * mu) / T)
+                part3 = 1.0 / (ex3 + 3.0 * Phib * ex2 + 3.0 * Phi * ex1 + 1.0)
+            except OverflowError:
+                part3 = 0.0
+            return ((p ** 4) / En(p, mass, **kwargs)) * (part1 + part2 + part3)
+        else:
+            part1 = 0.0
+            try:
+                ex1 = math.exp((En(p, mass, **kwargs) - float(a) * mu) / T)
+                exm1 = math.exp(-(En(p, mass, **kwargs) - float(a) * mu) / T)
+                exm2 = math.exp(-2.0 * (En(p, mass, **kwargs) - float(a) * mu) / T)
+                part1 = Phi / (ex1 + 3.0 * Phib * exm1 - exm2 - 3.0 * Phi)
+            except OverflowError:
+                part1 = 0.0
+            part2 = 0.0
+            try:
+                ex2 = math.exp(2.0 * (En(p, mass, **kwargs) - float(a) * mu) / T)
+                ex1 = math.exp((En(p, mass, **kwargs) - float(a) * mu) / T)
+                exm1 = math.exp(-(En(p, mass, **kwargs) - float(a) * mu) / T)
+                part2 = -2.0 * Phib / (ex2 - 3.0 * Phi * ex1 - exm1 + 3.0 * Phib)
+            except OverflowError:
+                part2 = 0.0
+            part3 = 0.0
+            try:
+                ex3 = math.exp(3.0 * (En(p, mass, **kwargs) - float(a) * mu) / T)
+                ex2 = math.exp(2.0 * (En(p, mass, **kwargs) - float(a) * mu) / T)
+                ex1 = math.exp((En(p, mass, **kwargs) - float(a) * mu) / T)
+                part3 = 1.0 / (ex3 - 3.0 * Phi * ex2 + 3.0 * Phib * ex1 - 1.0)
+            except OverflowError:
+                part3 = 0.0
+            return ((p ** 4) / En(p, mass, **kwargs)) * (part1 + part2 + part3)
+def alt_z_minus(p : float, T : float, mu : float, Phi : complex, Phib : complex, mass : float, a : int, **kwargs) -> complex:
+    #negative energy, color anticharge
+    #check if this is correct!
+    if a == 0:
+        try:
+            ex = math.exp(En(p, mass, **kwargs) / T)
+        except OverflowError:
+            return complex(0.0, 0.0)
+        return complex(((p ** 4) / En(p, mass, **kwargs)) * (1.0 / (ex - 1.0)), 0.0)
+    elif a == 3:
+        try:
+            ex = math.exp((En(p, mass, **kwargs) + float(a) * mu) / T)
+        except OverflowError:
+            return complex(0.0, 0.0)
+        return complex(((p ** 4) / En(p, mass, **kwargs)) * (1.0 / (ex + 1.0)), 0.0)
+    elif a == 6:
+        try:
+            ex = math.exp((En(p, mass, **kwargs) + float(a) * mu) / T)
+        except OverflowError:
+            return complex(0.0, 0.0)
+        return complex(((p ** 4) / En(p, mass, **kwargs)) * (1.0 / (ex - 1.0)), 0.0)
+    else:
+        if a % 2 != 0:
+            part1 = 0.0
+            try:
+                ex1 = math.exp((En(p, mass, **kwargs) + float(a) * mu) / T)
+                exm1 = math.exp(-(En(p, mass, **kwargs) + float(a) * mu) / T)
+                exm2 = math.exp(-2.0 * (En(p, mass, **kwargs) + float(a) * mu) / T)
+                part1 = Phi / (ex1 + 3.0 * Phib * exm1 + exm2 + 3.0 * Phi)
+            except OverflowError:
+                part1 = 0.0
+            part2 = 0.0
+            try:
+                ex2 = math.exp(2.0 * (En(p, mass, **kwargs) + float(a) * mu) / T)
+                ex1 = math.exp((En(p, mass, **kwargs) + float(a) * mu) / T)
+                exm1 = math.exp(-(En(p, mass, **kwargs) + float(a) * mu) / T)
+                part2 = 2.0 * Phib / (ex2 + 3.0 * Phi * ex1 + exm1 + 3.0 * Phib)
+            except OverflowError:
+                part2 = 0.0
+            part3 = 0.0
+            try:
+                ex3 = math.exp(3.0 * (En(p, mass, **kwargs) + float(a) * mu) / T)
+                ex2 = math.exp(2.0 * (En(p, mass, **kwargs) + float(a) * mu) / T)
+                ex1 = math.exp((En(p, mass, **kwargs) + float(a) * mu) / T)
+                part3 = 1.0 / (ex3 + 3.0 * Phi * ex2 + 3.0 * Phib * ex1 + 1.0)
+            except OverflowError:
+                part3 = 0.0
+            return ((p ** 4) / En(p, mass, **kwargs)) * (part1 + part2 + part3)
+        else:
+            part1 = 0.0
+            try:
+                ex1 = math.exp((En(p, mass, **kwargs) + float(a) * mu) / T)
+                exm1 = math.exp(-(En(p, mass, **kwargs) + float(a) * mu) / T)
+                exm2 = math.exp(-2.0 * (En(p, mass, **kwargs) + float(a) * mu) / T)
+                part1 = Phib / (ex1 + 3.0 * Phi * exm1 - exm2 - 3.0 * Phib)
+            except OverflowError:
+                part1 = 0.0
+            part2 = 0.0
+            try:
+                ex2 = math.exp(2.0 * (En(p, mass, **kwargs) + float(a) * mu) / T)
+                ex1 = math.exp((En(p, mass, **kwargs) + float(a) * mu) / T)
+                exm1 = math.exp(-(En(p, mass, **kwargs) + float(a) * mu) / T)
+                part2 = -2.0 * Phi / (ex2 - 3.0 * Phib * ex1 - exm1 + 3.0 * Phi)
+            except OverflowError:
+                part2 = 0.0
+            part3 = 0.0
+            try:
+                ex3 = math.exp(3.0 * (En(p, mass, **kwargs) + float(a) * mu) / T)
+                ex2 = math.exp(2.0 * (En(p, mass, **kwargs) + float(a) * mu) / T)
+                ex1 = math.exp((En(p, mass, **kwargs) + float(a) * mu) / T)
+                part3 = 1.0 / (ex3 - 3.0 * Phib * ex2 + 3.0 * Phi * ex1 - 1.0)
+            except OverflowError:
+                part3 = 0.0
+            return ((p ** 4) / En(p, mass, **kwargs)) * (part1 + part2 + part3)
