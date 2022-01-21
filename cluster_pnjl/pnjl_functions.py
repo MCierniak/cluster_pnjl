@@ -22,7 +22,7 @@ default_d           = -0.08
 default_kappa       = 0.012
 #defaults from https://arxiv.org/pdf/hep-ph/0506234.pdf (Gs, T0, a0, a1, a2, a3, b3, b4)
 default_Gs          = 10.08e-6
-default_T0          = 190. #this one results in U(T) in agreement with https://arxiv.org/pdf/2012.12894.pdf
+default_T0          = 175. #this one results in U(T) in agreement with https://arxiv.org/pdf/2012.12894.pdf
 #default_T0          = 270.
 default_a0          = 6.75
 default_a1          = -1.95
@@ -882,7 +882,6 @@ def SDensity_cluster(T : float, mu : float, Phi : complex, Phib : complex, bmass
 
 def alt_z_plus(p : float, T : float, mu : float, Phi : complex, Phib : complex, mass : float, a : int, **kwargs) -> complex:
     #positive energy, color charge
-    #check if this is correct!
     if a == 0:
         try:
             ex = math.exp(En(p, mass, **kwargs) / T)
@@ -956,7 +955,6 @@ def alt_z_plus(p : float, T : float, mu : float, Phi : complex, Phib : complex, 
             return ((p ** 4) / En(p, mass, **kwargs)) * (part1 + part2 + part3)
 def alt_z_minus(p : float, T : float, mu : float, Phi : complex, Phib : complex, mass : float, a : int, **kwargs) -> complex:
     #negative energy, color anticharge
-    #check if this is correct!
     if a == 0:
         try:
             ex = math.exp(En(p, mass, **kwargs) / T)
@@ -1028,3 +1026,88 @@ def alt_z_minus(p : float, T : float, mu : float, Phi : complex, Phib : complex,
             except OverflowError:
                 part3 = 0.0
             return ((p ** 4) / En(p, mass, **kwargs)) * (part1 + part2 + part3)
+def alt_Omega_Q_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
+    
+    options = {'Nf' : default_Nf, 'Nc' : default_Nc, 'alt_Omega_Q_real_debug_flag' : False}
+    options.update(kwargs)
+
+    Nf = options['Nf']
+    Nc = options['Nc']
+    debug_flag = options['alt_Omega_Q_real_debug_flag']
+
+    def integrand(p, _T, _mu, _Phi, _Phib, key): 
+        return (alt_z_plus(p, _T, _mu, _Phi, _Phib, M(_T, _mu, **key), 1, **key).real + alt_z_minus(p, _T, _mu, _Phi, _Phib, M(_T, _mu, **key), 1, **key).real)
+
+    integral, error = quad(integrand, 0.0, np.inf, args = (T, mu, Phi, Phib, kwargs))
+
+    if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
+        print("The integration in alt_Omega_Q_real did not succeed!")
+
+    return -2.0 * Nf * Nc * (1.0 / (3.0 * (math.pi ** 2))) * integral / 2.0 #the last part is taken from thin air, need to figure out if I missed any coefficients in the analytics...
+def alt_Omega_Q_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
+    
+    options = {'Nf' : default_Nf, 'Nc' : default_Nc, 'alt_Omega_Q_imag_debug_flag' : False}
+    options.update(kwargs)
+
+    Nf = options['Nf']
+    Nc = options['Nc']
+    debug_flag = options['alt_Omega_Q_imag_debug_flag']
+
+    def integrand(p, _T, _mu, _Phi, _Phib, key): 
+        return (alt_z_plus(p, _T, _mu, _Phi, _Phib, M(_T, _mu, **key), 1, **key).imag + alt_z_minus(p, _T, _mu, _Phi, _Phib, M(_T, _mu, **key), 1, **key).imag)
+
+    integral, error = quad(integrand, 0.0, np.inf, args = (T, mu, Phi, Phib, kwargs))
+
+    if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
+        print("The integration in alt_Omega_Q_imag did not succeed!")
+
+    return -2.0 * Nf * Nc * (1.0 / (3.0 * (math.pi ** 2))) * integral / 2.0 #the last part is taken from thin air, need to figure out if I missed any coefficients in the analytics...
+def alt_Omega_cluster_real(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, **kwargs) -> float:
+    
+    options = {'alt_Omega_cluster_real_debug_flag' : False}
+    options.update(kwargs)
+
+    debug_flag = options['alt_Omega_cluster_real_debug_flag']
+
+    def integrand(p, _T, _mu, _Phi, _Phib, _M, _Mth, _a, key):
+        bound = alt_z_plus(p, _T, _mu, _Phi, _Phib, _M, _a, **key).real + alt_z_minus(p, _T, _mu, _Phi, _Phib, _M, _a, **key).real
+        scattering = alt_z_plus(p, _T, _mu, _Phi, _Phib, _Mth, _a, **key).real + alt_z_minus(p, _T, _mu, _Phi, _Phib, _Mth, _a, **key).real
+        return (bound - scattering) * np.heaviside(_Mth - _M, 0.5)
+
+    integral, error = quad(integrand, 0.0, np.inf, args = (T, mu, Phi, Phib, bmass, thmass, a, kwargs))
+
+    if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
+        print("The integration in alt_Omega_cluster_real did not succeed!")
+
+    if a == 0:
+        return ((-1.0) ** (a + 1)) * (1.0 / (3.0 * (math.pi ** 2))) * integral / 4.0 #the last part is taken from thin air, need to figure out if I missed any coefficients in the analytics...
+    else:
+        return ((-1.0) ** (a + 1)) * (1.0 / (3.0 * (math.pi ** 2))) * integral / 2.0 #the last part is taken from thin air, need to figure out if I missed any coefficients in the analytics...
+def alt_Omega_cluster_imag(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, **kwargs) -> float:
+    
+    options = {'alt_Omega_cluster_imag_debug_flag' : False}
+    options.update(kwargs)
+
+    debug_flag = options['alt_Omega_cluster_imag_debug_flag']
+
+    def integrand(p, _T, _mu, _Phi, _Phib, _M, _Mth, _a, key):
+        bound = alt_z_plus(p, _T, _mu, _Phi, _Phib, _M, _a, **key).imag + alt_z_minus(p, _T, _mu, _Phi, _Phib, _M, _a, **key).imag
+        scattering = alt_z_plus(p, _T, _mu, _Phi, _Phib, _Mth, _a, **key).imag + alt_z_minus(p, _T, _mu, _Phi, _Phib, _Mth, _a, **key).imag
+        return (bound - scattering) * np.heaviside(_Mth - _M, 0.5)
+
+    integral, error = quad(integrand, 0.0, np.inf, args = (T, mu, Phi, Phib, bmass, thmass, a, kwargs))
+
+    if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
+        print("The integration in alt_Omega_cluster_imag did not succeed!")
+
+    if a == 0:
+        return ((-1.0) ** (a + 1)) * (1.0 / (3.0 * (math.pi ** 2))) * integral / 4.0 #the last part is taken from thin air, need to figure out if I missed any coefficients in the analytics...
+    else:
+        return ((-1.0) ** (a + 1)) * (1.0 / (3.0 * (math.pi ** 2))) * integral / 2.0 #the last part is taken from thin air, need to figure out if I missed any coefficients in the analytics...
+
+def alt_Pressure_Q(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
+    #
+    return -alt_Omega_Q_real(T, mu, Phi, Phib, **kwargs)
+def alt_Pressure_cluster(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, dx : int, **kwargs) -> float:
+    #
+    return -float(dx) * alt_Omega_cluster_real(T, mu, Phi, Phib, bmass, thmass, a, **kwargs)
