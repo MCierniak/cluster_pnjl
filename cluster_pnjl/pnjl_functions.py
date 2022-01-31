@@ -1043,7 +1043,7 @@ def alt_Omega_Q_real(T : float, mu : float, Phi : complex, Phib : complex, **kwa
     if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
         print("The integration in alt_Omega_Q_real did not succeed!")
 
-    return -2.0 * Nf * Nc * (1.0 / (3.0 * (math.pi ** 2))) * integral / 2.0 #the last part is taken from thin air, need to figure out if I missed any coefficients in the analytics...
+    return -((Nf * Nc) / (3.0 * (math.pi ** 2))) * integral
 def alt_Omega_Q_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
     
     options = {'Nf' : default_Nf, 'Nc' : default_Nc, 'alt_Omega_Q_imag_debug_flag' : False}
@@ -1061,7 +1061,7 @@ def alt_Omega_Q_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwa
     if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
         print("The integration in alt_Omega_Q_imag did not succeed!")
 
-    return -2.0 * Nf * Nc * (1.0 / (3.0 * (math.pi ** 2))) * integral / 2.0 #the last part is taken from thin air, need to figure out if I missed any coefficients in the analytics...
+    return -((Nf * Nc) / (3.0 * (math.pi ** 2))) * integral
 def alt_Omega_cluster_real(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, **kwargs) -> float:
     
     options = {'alt_Omega_cluster_real_debug_flag' : False}
@@ -1079,10 +1079,7 @@ def alt_Omega_cluster_real(T : float, mu : float, Phi : complex, Phib : complex,
     if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
         print("The integration in alt_Omega_cluster_real did not succeed!")
 
-    if a == 0:
-        return ((-1.0) ** (a + 1)) * (1.0 / (3.0 * (math.pi ** 2))) * integral / 4.0 #the last part is taken from thin air, need to figure out if I missed any coefficients in the analytics...
-    else:
-        return ((-1.0) ** (a + 1)) * (1.0 / (3.0 * (math.pi ** 2))) * integral / 2.0 #the last part is taken from thin air, need to figure out if I missed any coefficients in the analytics...
+    return ((-1.0) ** (a + 1)) * (1.0 / (2.0 * (math.pi ** 2))) * integral
 def alt_Omega_cluster_imag(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, **kwargs) -> float:
     
     options = {'alt_Omega_cluster_imag_debug_flag' : False}
@@ -1100,14 +1097,11 @@ def alt_Omega_cluster_imag(T : float, mu : float, Phi : complex, Phib : complex,
     if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
         print("The integration in alt_Omega_cluster_imag did not succeed!")
 
-    if a == 0:
-        return ((-1.0) ** (a + 1)) * (1.0 / (3.0 * (math.pi ** 2))) * integral / 4.0 #the last part is taken from thin air, need to figure out if I missed any coefficients in the analytics...
-    else:
-        return ((-1.0) ** (a + 1)) * (1.0 / (3.0 * (math.pi ** 2))) * integral / 2.0 #the last part is taken from thin air, need to figure out if I missed any coefficients in the analytics...
+    return ((-1.0) ** (a + 1)) * (1.0 / (2.0 * (math.pi ** 2))) * integral
 
 def alt_Pressure_Q(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
     #
     return -alt_Omega_Q_real(T, mu, Phi, Phib, **kwargs)
-def alt_Pressure_cluster(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, dx : int, **kwargs) -> float:
+def alt_Pressure_cluster(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, dx : float, **kwargs) -> float:
     #
-    return -float(dx) * alt_Omega_cluster_real(T, mu, Phi, Phib, bmass, thmass, a, **kwargs)
+    return -dx * alt_Omega_cluster_real(T, mu, Phi, Phib, bmass, thmass, a, **kwargs)
