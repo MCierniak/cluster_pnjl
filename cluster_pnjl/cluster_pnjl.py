@@ -3,7 +3,7 @@
 #2. add hexa-diquark cluster
 #3. consider d phi / d (mu/T).
 #4. consider a mu dependent chemical potential of https://arxiv.org/abs/1207.4890
-#5. return to sigma/phi derivation using a momentum-dependent quark mass.
+#5. return to sigma/phi derivation using a momentum-dependent quark mass (check Omega_Delta!).
 #6. change the pl potential to this one https://arxiv.org/pdf/1307.5958.pdf
 
 import matplotlib.pyplot as plt
@@ -2694,6 +2694,8 @@ def PNJL_thermodynamics_mu_test():
     recalc_pressure_mu200 = True
     recalc_pressure_mu300 = True
 
+    pl_turned_off = False
+
     pl_mu0_file   = "D:/EoS/BDK/mu_test/pl_mu0.dat"
     pl_mu200_file = "D:/EoS/BDK/mu_test/pl_mu200.dat"
     pl_mu300_file = "D:/EoS/BDK/mu_test/pl_mu300.dat"
@@ -2753,14 +2755,23 @@ def PNJL_thermodynamics_mu_test():
         phi_im_mu300, _ = data_collect(2, 2, pl_mu300_file)
 
     if recalc_pressure_mu0:
-        Pres_Q_mu0 = [alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) + alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu0, phi_re_mu0, phi_im_mu0), desc = "Quark pressure (mu = 0)", total = len(T), ascii = True)]        
         Pres_g_mu0 = [Pressure_g(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) for T_el, phi_re_el, phi_im_el in tqdm(zip(T, phi_re_mu0, phi_im_mu0), desc = "Gluon pressure (mu = 0)", total = len(T), ascii = True)]
-        Pres_pert_mu0 = [Pressure_pert(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu0, phi_re_mu0, phi_im_mu0), desc = "Perturbative pressure (mu = 0)", total = len(T), ascii = True)]        
-        (
-            (Pres_pi_mu0, Pres_rho_mu0, Pres_omega_mu0, Pres_D_mu0, Pres_N_mu0, Pres_T_mu0, Pres_F_mu0, Pres_P_mu0, Pres_Q5_mu0, Pres_H_mu0),
-            (_, _, _, _, _, _, _, _, _, _),
-            (_, _, _, _, _, _, _, _, _, _)
-        ) = clusters(T, mu0, phi_re_mu0, phi_im_mu0)
+        if not pl_turned_off:
+            Pres_Q_mu0 = [alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) + alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu0, phi_re_mu0, phi_im_mu0), desc = "Quark pressure (mu = 0)", total = len(T), ascii = True)]
+            Pres_pert_mu0 = [Pressure_pert(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu0, phi_re_mu0, phi_im_mu0), desc = "Perturbative pressure (mu = 0)", total = len(T), ascii = True)]        
+            (
+                (Pres_pi_mu0, Pres_rho_mu0, Pres_omega_mu0, Pres_D_mu0, Pres_N_mu0, Pres_T_mu0, Pres_F_mu0, Pres_P_mu0, Pres_Q5_mu0, Pres_H_mu0),
+                (_, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _)
+            ) = clusters(T, mu0, phi_re_mu0, phi_im_mu0)
+        else:
+            Pres_Q_mu0 = [alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) + alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu0, [1.0 for el in T], [0.0 for el in T]), desc = "Quark pressure (mu = 0)", total = len(T), ascii = True)]
+            Pres_pert_mu0 = [Pressure_pert(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu0, [1.0 for el in T], [0.0 for el in T]), desc = "Perturbative pressure (mu = 0)", total = len(T), ascii = True)]        
+            (
+                (Pres_pi_mu0, Pres_rho_mu0, Pres_omega_mu0, Pres_D_mu0, Pres_N_mu0, Pres_T_mu0, Pres_F_mu0, Pres_P_mu0, Pres_Q5_mu0, Pres_H_mu0),
+                (_, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _)
+            ) = clusters(T, mu0, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu0_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu0, Pres_g_mu0, Pres_pert_mu0, Pres_pi_mu0, Pres_rho_mu0, Pres_omega_mu0, Pres_D_mu0, Pres_N_mu0, Pres_T_mu0, Pres_F_mu0, Pres_P_mu0, Pres_Q5_mu0, Pres_H_mu0)])
@@ -2774,14 +2785,23 @@ def PNJL_thermodynamics_mu_test():
         Pres_H_mu0, _ = data_collect(12, 12, pressure_mu0_file)
 
     if recalc_pressure_mu200:
-        Pres_Q_mu200 = [alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) + alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu200, phi_re_mu200, phi_im_mu200), desc = "Quark pressure (mu = 200)", total = len(T), ascii = True)]        
         Pres_g_mu200 = [Pressure_g(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) for T_el, phi_re_el, phi_im_el in tqdm(zip(T, phi_re_mu200, phi_im_mu200), desc = "Gluon pressure (mu = 200)", total = len(T), ascii = True)]
-        Pres_pert_mu200 = [Pressure_pert(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu200, phi_re_mu200, phi_im_mu200), desc = "Perturbative pressure (mu = 200)", total = len(T), ascii = True)]        
-        (
-            (Pres_pi_mu200, Pres_rho_mu200, Pres_omega_mu200, Pres_D_mu200, Pres_N_mu200, Pres_T_mu200, Pres_F_mu200, Pres_P_mu200, Pres_Q5_mu200, Pres_H_mu200),
-            (_, _, _, _, _, _, _, _, _, _),
-            (_, _, _, _, _, _, _, _, _, _)
-        ) = clusters(T, mu200, phi_re_mu200, phi_im_mu200)
+        if not pl_turned_off:
+            Pres_Q_mu200 = [alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) + alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu200, phi_re_mu200, phi_im_mu200), desc = "Quark pressure (mu = 200)", total = len(T), ascii = True)]        
+            Pres_pert_mu200 = [Pressure_pert(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu200, phi_re_mu200, phi_im_mu200), desc = "Perturbative pressure (mu = 200)", total = len(T), ascii = True)]        
+            (
+                (Pres_pi_mu200, Pres_rho_mu200, Pres_omega_mu200, Pres_D_mu200, Pres_N_mu200, Pres_T_mu200, Pres_F_mu200, Pres_P_mu200, Pres_Q5_mu200, Pres_H_mu200),
+                (_, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _)
+            ) = clusters(T, mu200, phi_re_mu200, phi_im_mu200)
+        else:
+            Pres_Q_mu200 = [alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) + alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu200, [1.0 for el in T], [0.0 for el in T]), desc = "Quark pressure (mu = 200)", total = len(T), ascii = True)]        
+            Pres_pert_mu200 = [Pressure_pert(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu200, [1.0 for el in T], [0.0 for el in T]), desc = "Perturbative pressure (mu = 200)", total = len(T), ascii = True)]        
+            (
+                (Pres_pi_mu200, Pres_rho_mu200, Pres_omega_mu200, Pres_D_mu200, Pres_N_mu200, Pres_T_mu200, Pres_F_mu200, Pres_P_mu200, Pres_Q5_mu200, Pres_H_mu200),
+                (_, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _)
+            ) = clusters(T, mu200, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu200_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu200, Pres_g_mu200, Pres_pert_mu200, Pres_pi_mu200, Pres_rho_mu200, Pres_omega_mu200, Pres_D_mu200, Pres_N_mu200, Pres_T_mu200, Pres_F_mu200, Pres_P_mu200, Pres_Q5_mu200, Pres_H_mu200)])
@@ -2795,14 +2815,23 @@ def PNJL_thermodynamics_mu_test():
         Pres_H_mu200, _ = data_collect(12, 12, pressure_mu200_file)
     
     if recalc_pressure_mu300:
-        Pres_Q_mu300 = [alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) + alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu300, phi_re_mu300, phi_im_mu300), desc = "Quark pressure (mu = 300)", total = len(T), ascii = True)]        
         Pres_g_mu300 = [Pressure_g(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) for T_el, phi_re_el, phi_im_el in tqdm(zip(T, phi_re_mu300, phi_im_mu300), desc = "Gluon pressure (mu = 300)", total = len(T), ascii = True)]
-        Pres_pert_mu300 = [Pressure_pert(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu300, phi_re_mu300, phi_im_mu300), desc = "Perturbative pressure (mu = 300)", total = len(T), ascii = True)]        
-        (
-            (Pres_pi_mu300, Pres_rho_mu300, Pres_omega_mu300, Pres_D_mu300, Pres_N_mu300, Pres_T_mu300, Pres_F_mu300, Pres_P_mu300, Pres_Q5_mu300, Pres_H_mu300),
-            (_, _, _, _, _, _, _, _, _, _),
-            (_, _, _, _, _, _, _, _, _, _)
-        ) = clusters(T, mu300, phi_re_mu300, phi_im_mu300)
+        if not pl_turned_off:
+            Pres_Q_mu300 = [alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) + alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu300, phi_re_mu300, phi_im_mu300), desc = "Quark pressure (mu = 300)", total = len(T), ascii = True)]        
+            Pres_pert_mu300 = [Pressure_pert(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu300, phi_re_mu300, phi_im_mu300), desc = "Perturbative pressure (mu = 300)", total = len(T), ascii = True)]        
+            (
+                (Pres_pi_mu300, Pres_rho_mu300, Pres_omega_mu300, Pres_D_mu300, Pres_N_mu300, Pres_T_mu300, Pres_F_mu300, Pres_P_mu300, Pres_Q5_mu300, Pres_H_mu300),
+                (_, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _)
+            ) = clusters(T, mu300, phi_re_mu300, phi_im_mu300)
+        else:
+            Pres_Q_mu300 = [alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) + alt_Pressure_Q(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu300, [1.0 for el in T], [0.0 for el in T]), desc = "Quark pressure (mu = 300)", total = len(T), ascii = True)]        
+            Pres_pert_mu300 = [Pressure_pert(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) for T_el, mu_el, phi_re_el, phi_im_el in tqdm(zip(T, mu300, [1.0 for el in T], [0.0 for el in T]), desc = "Perturbative pressure (mu = 300)", total = len(T), ascii = True)]        
+            (
+                (Pres_pi_mu300, Pres_rho_mu300, Pres_omega_mu300, Pres_D_mu300, Pres_N_mu300, Pres_T_mu300, Pres_F_mu300, Pres_P_mu300, Pres_Q5_mu300, Pres_H_mu300),
+                (_, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _)
+            ) = clusters(T, mu300, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu300_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu300, Pres_g_mu300, Pres_pert_mu300, Pres_pi_mu300, Pres_rho_mu300, Pres_omega_mu300, Pres_D_mu300, Pres_N_mu300, Pres_T_mu300, Pres_F_mu300, Pres_P_mu300, Pres_Q5_mu300, Pres_H_mu300)])
@@ -2898,21 +2927,21 @@ def PNJL_thermodynamics_mu_test():
     #ax1.plot(T, contrib_pert_mu0, '-', c = 'pink', label = r'$\mathrm{P_{pert,0}}$')
     ax1.plot(T, contrib_qgp_mu0, '-', c = 'black', label = r'$\mathrm{P_{QGP,0}}$')
     ax1.plot(T, contrib_cluster_mu0, '-', c = 'blue', label = r'$\mathrm{P_{cluster,0}}$')
-    #ax1.plot(T, contrib_cluster_singlet_mu0, '-', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,0}}$')
+    ax1.plot(T, contrib_cluster_singlet_mu0, '-', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,0}}$')
     ax1.plot(T, contrib_cluster_color_mu0, '-', c = 'red', label = r'$\mathrm{P^{(3/\bar{3})}_{cluster,0}}$')
     #ax1.plot(T, contrib_q_mu200, '--', c = 'blue', label = r'$\mathrm{P_{Q,200}}$')
     #ax1.plot(T, contrib_g_mu200, '--', c = 'red', label = r'$\mathrm{P_{g,200}}$')
     #ax1.plot(T, contrib_pert_mu200, '--', c = 'pink', label = r'$\mathrm{P_{pert,200}}$')
     ax1.plot(T, contrib_qgp_mu200, '--', c = 'black', label = r'$\mathrm{P_{QGP,200}}$')
     ax1.plot(T, contrib_cluster_mu200, '--', c = 'blue', label = r'$\mathrm{P_{cluster,200}}$')
-    #ax1.plot(T, contrib_cluster_singlet_mu200, '--', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,200}}$')
+    ax1.plot(T, contrib_cluster_singlet_mu200, '--', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,200}}$')
     ax1.plot(T, contrib_cluster_color_mu200, '--', c = 'red', label = r'$\mathrm{P^{(3/\bar{3})}_{cluster,200}}$')
     #ax1.plot(T, contrib_q_mu300, '-.', c = 'blue', label = r'$\mathrm{P_{Q,300}}$')
     #ax1.plot(T, contrib_g_mu300, '-.', c = 'red', label = r'$\mathrm{P_{g,300}}$')
     #ax1.plot(T, contrib_pert_mu300, '-.', c = 'pink', label = r'$\mathrm{P_{pert,300}}$')
     ax1.plot(T, contrib_qgp_mu300, '-.', c = 'black', label = r'$\mathrm{P_{QGP,300}}$')
     ax1.plot(T, contrib_cluster_mu300, '-.', c = 'blue', label = r'$\mathrm{P_{cluster,300}}$')
-    #ax1.plot(T, contrib_cluster_singlet_mu300, '-.', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,300}}$')
+    ax1.plot(T, contrib_cluster_singlet_mu300, '-.', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,300}}$')
     ax1.plot(T, contrib_cluster_color_mu300, '-.', c = 'red', label = r'$\mathrm{P^{(3/\bar{3})}_{cluster,300}}$')
     #ax1.legend(loc = 2)
     for tick in ax1.xaxis.get_major_ticks():
@@ -2925,6 +2954,9 @@ def PNJL_thermodynamics_mu_test():
     fig2 = plt.figure(num = 2, figsize = (5.9, 5))
     ax2 = fig2.add_subplot(1, 1, 1)
     ax2.axis([0., 450., 0., 1.2])
+    ax2.plot(T, [M(el, 0) / M(0, 0) for el in T], '-', c = 'green')
+    ax2.plot(T, [M(el, 200.0 / 3.0) / M(0, 0) for el in T], '--', c = 'green')
+    ax2.plot(T, [M(el, 300.0 / 3.0) / M(0, 0) for el in T], '-.', c = 'green')
     ax2.plot(T, phi_re_mu0, '-', c = 'blue')
     ax2.plot(T, phi_re_mu200, '--', c = 'blue')
     ax2.plot(T, phi_re_mu300, '-.', c = 'blue')
