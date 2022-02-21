@@ -1,3 +1,4 @@
+import scipy.integrate
 import math
 
 import pnjl.aux_functions
@@ -63,7 +64,7 @@ def V(T : float, mu : float, **kwargs) -> float:
 
 #Grandcanonical potential (Fermi sea part) with hard cutoff regularization
 
-def gcp(T : float, mu : float, **kwargs) -> float:
+def gcp_real(T : float, mu : float, **kwargs) -> float:
     
     options = {'M0' : pnjl.defaults.default_M0, 'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.default_Nc, 'Lambda' : pnjl.defaults.default_Lambda, 'gcp_sea_lattice_debug_flag' : False}
     options.update(kwargs)
@@ -76,9 +77,9 @@ def gcp(T : float, mu : float, **kwargs) -> float:
 
     integrand = lambda p, _T, _mu, key : (p ** 2) * (pnjl.aux_functions.En(p, M(_T, _mu, **key), **key) - pnjl.aux_functions.En(p, M(0.0, 0.0, **key), **key))
 
-    integral, error = quad(integrand, 0.0, Lambda, args = (T, mu, kwargs))
+    integral, error = scipy.integrate.quad(integrand, 0.0, Lambda, args = (T, mu, kwargs))
 
     if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
-        print("The integration in gcp_sea_lattice.gcp did not succeed!")
+        print("The integration in pnjl.thermo.gcp_sea_lattice.gcp did not succeed!")
 
     return V(T, mu, **kwargs) - V(0.0, 0.0, **kwargs) - (Nf / (math.pi ** 2)) * (Nc / 3.0) * integral
