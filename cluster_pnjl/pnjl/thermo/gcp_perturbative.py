@@ -140,3 +140,9 @@ def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> 
     spart = (Ip_full + Im_full) ** 2
 
     return ((4.0 * Nf)/ (3.0 * np.pi)) * alpha_s(T, mu, **kwargs) * (T ** 4) * (Ip_full.imag + Im_full.imag + (3.0 / (2.0 * (np.pi ** 2))) * spart.imag)
+
+#Extensive thermodynamic properties
+
+def pressure(T : float, mu : float, Phi : complex, Phib : complex, **kwargs):
+    #
+    return -gcp_real(T, mu, Phi, Phib, **kwargs)

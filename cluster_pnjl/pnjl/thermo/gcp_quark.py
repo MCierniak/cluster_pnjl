@@ -28,12 +28,11 @@ def gcp_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> 
         return ((p ** 4) / pnjl.aux_functions.En(p, _mass)) * (fp.real + fm.real)
 
     mass = pnjl.thermo.gcp_sea_lattice.M(T, mu, **kwargs)
+    sigma_contrib = pnjl.thermo.gcp_sea_lattice.V(T, mu, **kwargs) - pnjl.thermo.gcp_sea_lattice.V(0.0, 0.0, **kwargs)
+
     integral, error = quad(integrand, 0.0, np.inf, args = (T, mu, Phi, Phib, mass, kwargs))
 
-    if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
-        print("The integration in pnjl.thermo.gcp_quark.qcp_real did not succeed!")
-
-    return -(Nf / (math.pi ** 2)) * (Nc / 3.0) * integral
+    return sigma_contrib - (Nf / (math.pi ** 2)) * (Nc / 3.0) * integral
 def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
     
     options = {'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.default_Nc, 'gcp_quark_debug_flag' : False}
@@ -57,7 +56,10 @@ def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> 
     mass = pnjl.thermo.gcp_sea_lattice.M(T, mu, **kwargs)
     integral, error = quad(integrand, 0.0, np.inf, args = (T, mu, Phi, Phib, mass, kwargs))
 
-    if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
-        print("The integration in pnjl.thermo.gcp_quark.qcp_imag did not succeed!")
-
     return -(Nf / (math.pi ** 2)) * (Nc / 3.0) * integral
+
+#Extensive thermodynamic properties
+
+def pressure(T : float, mu : float, Phi : complex, Phib : complex, **kwargs):
+    #
+    return -gcp_real(T, mu, Phi, Phib, **kwargs)

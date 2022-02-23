@@ -168,19 +168,6 @@ def sigma_minus_imag(p : float, T : float, mu : float, Phi : complex, Phib : com
     #
     return z_minus(p, T, mu, Phi, Phib, mass, a, **kwargs).imag + f_minus(p, T, mu, Phi, Phib, mass, a, **kwargs).imag * (En(p, mass, **kwargs) + float(a) * mu - T * dEn_dT(p, T, mu, mass, deriv_M_T, **kwargs))
 
-def Pressure_Q(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
-    #
-    return -Omega_Q_real(T, mu, Phi, Phib, **kwargs)
-def Pressure_g(T : float, Phi : complex, Phib : complex, **kwargs) -> float:
-    #
-    return -Omega_g_real(T, Phi, Phib, **kwargs)
-def Pressure_pert(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
-    #
-    return -Omega_pert_real(T, mu, Phi, Phib, **kwargs)
-def Pressure_cluster(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, dx : int, **kwargs) -> float:
-    #
-    return -float(dx) * Omega_cluster_real(T, mu, Phi, Phib, bmass, thmass, a, **kwargs)
-
 def BDensity_Q(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
 
     options = {'Nf' : default_Nf, 'Nc' : default_Nc, 'BDensity_Q_debug_flag' : False}
@@ -298,63 +285,4 @@ def SDensity_cluster(T : float, mu : float, Phi : complex, Phib : complex, bmass
         return -(float(dx) / (4.0 * (math.pi ** 2) * T)) * integral
     else:
         return (float(dx) / (2.0 * (math.pi ** 2) * T)) * integral
-
-def alt_Omega_cluster_real(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, Ni : int, Lambda : float, **kwargs) -> float:
-    
-    options = {'alt_Omega_cluster_real_debug_flag' : False}
-    options.update(kwargs)
-
-    debug_flag = options['alt_Omega_cluster_real_debug_flag']
-
-    def bound_continuum_mass_integrand(m2, _p2, _t2, _mu2, _phi2, _phib2, _a2, _k2):
-        return alt_z_plus(_p2, _t2, _mu2, _phi2, _phib2, m2, _a2, **_k2).real + alt_z_minus(_p2, _t2, _mu2, _phi2, _phib2, m2, _a2, **_k2).real
-    def scattering_mass_integrand(m2, _p2, _t2, _mu2, _phi2, _phib2, _a2, _mth2, _ni2, _lam2, _k2):
-        continuum_threshold2 = (_mth2 ** 2) + ((_ni2 * _lam2) ** 2)
-        mass_coef = (continuum_threshold2 - (m2 ** 2)) / ((_ni2 * _lam2) ** 2)
-        return mass_coef * (alt_z_plus(_p2, _t2, _mu2, _phi2, _phib2, m2, _a2, **_k2).real + alt_z_minus(_p2, _t2, _mu2, _phi2, _phib2, m2, _a2, **_k2).real)
-
-    def integrand(p, _T, _mu, _Phi, _Phib, _M, _Mth, _a, _Ni, _Lambda, key):
-        continuum_threshold = math.sqrt((_Mth ** 2) + ((_Ni * _Lambda) ** 2))
-        bound_continuum, _ = quad(bound_continuum_mass_integrand, _M, _Mth, args = (p, _T, _mu, _Phi, _Phib, _a, key))
-        scattering, _ = (0.0, _)#quad(scattering_mass_integrand, _Mth, continuum_threshold, args = (p, _T, _mu, _Phi, _Phib, _a, _Mth, _Ni, _Lambda, key))
-        return bound_continuum + scattering
-
-    integral, error = quad(integrand, 0.0, np.inf, args = (T, mu, Phi, Phib, bmass, thmass, a, Ni, Lambda, kwargs))
-
-    if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
-        print("The integration in alt_Omega_cluster_real did not succeed!")
-
-    return ((-1.0) ** (a + 1)) * (1.0 / (2.0 * (math.pi ** 2))) * integral
-def alt_Omega_cluster_imag(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, Ni : int, Lambda : float, **kwargs) -> float:
-    
-    options = {'alt_Omega_cluster_imag_debug_flag' : False}
-    options.update(kwargs)
-
-    debug_flag = options['alt_Omega_cluster_imag_debug_flag']
-
-    def mass_integrand(m2, _p2, _t2, _mu2, _phi2, _phib2, _a2, _ni2, _lam2, _k2):
-        mass_coef = (2 * m2) / (float(_ni2) * _lam2)
-        distr_coef = alt_z_plus(_p2, _t2, _mu2, _phi2, _phib2, m2, _a2, **_k2).imag + alt_z_minus(_p2, _t2, _mu2, _phi2, _phib2, m2, _a2, **_k2).imag
-        return mass_coef * distr_coef
-
-    def integrand(p, _T, _mu, _Phi, _Phib, _M, _Mth, _a, _Ni, _Lambda, key):
-        scatter_mass = math.sqrt((_Mth ** 2) + ((float(_Ni) * _Lambda) ** 2))
-        bound = alt_z_plus(p, _T, _mu, _Phi, _Phib, _M, _a, **key).imag + alt_z_minus(p, _T, _mu, _Phi, _Phib, _M, _a, **key).imag
-        continuum, _ = quad(mass_integrand, _Mth, scatter_mass, args = (p, _T, _mu, _Phi, _Phib, _a, _Ni, _Lambda, key))
-        scattering = alt_z_plus(p, _T, _mu, _Phi, _Phib, scatter_mass, _a, **key).imag + alt_z_minus(p, _T, _mu, _Phi, _Phib, scatter_mass, _a, **key).imag
-        return (bound - continuum - 2.0 * scattering) * np.heaviside((scatter_mass ** 2) - (_M ** 2), 0.5)
-
-    integral, error = quad(integrand, 0.0, np.inf, args = (T, mu, Phi, Phib, bmass, thmass, a, kwargs))
-
-    if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
-        print("The integration in alt_Omega_cluster_imag did not succeed!")
-
-    return ((-1.0) ** (a + 1)) * (1.0 / (2.0 * (math.pi ** 2))) * integral
-
-def alt_Pressure_Q(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
-    #
-    return -alt_Omega_Q_real(T, mu, Phi, Phib, **kwargs)
-def alt_Pressure_cluster(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, dx : float, Ni : int, Lambda : float, **kwargs) -> float:
-    #
-    return -dx * alt_Omega_cluster_real(T, mu, Phi, Phib, bmass, thmass, a, Ni, Lambda, **kwargs)
 ##### end of replace/remove ########

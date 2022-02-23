@@ -32,3 +32,9 @@ def gcp_real(T : float, Phi : complex, Phib : complex, **kwargs) -> float:
 def gcp_imag(T : float, Phi : complex, Phib : complex, **kwargs) -> float:
     #
     return U(T, Phi, Phib, **kwargs).imag
+
+#Extensive thermodynamic properties
+
+def pressure(T : float, Phi : complex, Phib : complex, **kwargs):
+    #
+    return -gcp_real(T, Phi, Phib, **kwargs)

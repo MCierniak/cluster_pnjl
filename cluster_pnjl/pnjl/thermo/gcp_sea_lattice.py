@@ -79,7 +79,4 @@ def gcp_real(T : float, mu : float, **kwargs) -> float:
 
     integral, error = scipy.integrate.quad(integrand, 0.0, Lambda, args = (T, mu, kwargs))
 
-    if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
-        print("The integration in pnjl.thermo.gcp_sea_lattice.gcp did not succeed!")
-
-    return V(T, mu, **kwargs) - V(0.0, 0.0, **kwargs) - (Nf / (math.pi ** 2)) * (Nc / 3.0) * integral
+    return -(Nf / (math.pi ** 2)) * (Nc / 3.0) * integral
