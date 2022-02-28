@@ -77,6 +77,8 @@ def gcp_real(T : float, mu : float, **kwargs) -> float:
 
     integrand = lambda p, _T, _mu, key : (p ** 2) * (pnjl.aux_functions.En(p, M(_T, _mu, **key), **key) - pnjl.aux_functions.En(p, M(0.0, 0.0, **key), **key))
 
+    sigma_contrib = V(T, mu, **kwargs) - V(0.0, 0.0, **kwargs)
+
     integral, error = scipy.integrate.quad(integrand, 0.0, Lambda, args = (T, mu, kwargs))
 
-    return -(Nf / (math.pi ** 2)) * (Nc / 3.0) * integral
+    return sigma_contrib - (Nf / (math.pi ** 2)) * (Nc / 3.0) * integral

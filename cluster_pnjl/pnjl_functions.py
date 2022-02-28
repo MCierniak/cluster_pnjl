@@ -10,6 +10,50 @@ from scipy.integrate import quad
 import warnings
 warnings.filterwarnings("ignore")
 
+#import matplotlib.pyplot as plt
+#import numpy as np
+#import scipy as sp
+#import time
+#import math
+#import csv
+#
+#import papers.epja_2022
+#
+#from scipy.interpolate import UnivariateSpline, Akima1DInterpolator
+#from scipy.optimize import dual_annealing, basinhopping
+#from scipy.special import binom
+#
+#from scipy.signal import find_peaks
+#
+#from matplotlib.patches import Polygon, FancyArrowPatch
+#
+#from random import uniform, randint
+#
+#from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
+#
+#from joblib import Parallel, delayed
+
+#from pnjl_functions import alt_Omega_Q_real, alt_Omega_Q_imag
+#from pnjl_functions import Omega_pert_real, Omega_pert_imag
+#from pnjl_functions import Omega_g_real, Omega_g_imag
+#from pnjl_functions import alt_Omega_cluster_real, alt_Omega_cluster_imag
+#from pnjl_functions import Omega_Delta
+
+#from pnjl_functions import M, dMdmu, dMdT, Delta_ls, Tc
+#from pnjl_functions import alt_Pressure_Q, BDensity_Q, SDensity_Q 
+#from pnjl_functions import Pressure_g, SDensity_g
+#from pnjl_functions import Pressure_pert, BDensity_pert, SDensity_pert
+#from pnjl_functions import alt_Pressure_cluster, BDensity_cluster, SDensity_cluster
+
+#from pnjl_functions import default_MN, default_MM, default_MD, default_MF, default_MT, default_MP, default_MQ, default_MH
+#from pnjl_functions import default_M0
+
+#from utils import data_collect
+
+#np.seterr(all = 'raise')
+
+#continuum_lambda_basis = math.sqrt(2) * M(0, 0) * 0.0001
+
 #to be replaced/removed
 def J_plus_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
     

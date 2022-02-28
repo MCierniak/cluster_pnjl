@@ -1,4 +1,5 @@
 import scipy.integrate
+import math
 
 import pnjl.thermo.gcp_sea_lattice
 import pnjl.thermo.distributions
@@ -17,7 +18,7 @@ def alpha_s(T : float, mu : float, **kwargs) -> float:
     d = options['d']
 
     r = d * T
-    return ((12.0 * np.pi) / (11 * Nc - 2 * Nf)) * ( (1.0 / (math.log((r ** 2) / (c ** 2)))) - ((c ** 2) / ((r ** 2) - (c ** 2))) )
+    return ((12.0 * math.pi) / (11 * Nc - 2 * Nf)) * ( (1.0 / (math.log((r ** 2) / (c ** 2)))) - ((c ** 2) / ((r ** 2) - (c ** 2))) )
 def dalpha_s_dT(T : float, mu : float, **kwargs) -> float:
     
     options = {'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.default_Nc, 'c' : pnjl.defaults.default_c, 'd' : pnjl.defaults.default_d}
@@ -37,14 +38,17 @@ def I_plus_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) 
     debug_flag = options['gcp_perturbative_debug_flag']
 
     def integrand(x, _mu, _T, _Phi, _Phib, key) :
-        yp1 = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 1.0, **key)
-        yp2 = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 2.0, **key)
-        yp3 = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 3.0, **key)
+        yp1 = {}
+        yp2 = {}
+        yp3 = {}
+        yp1["y_1_val"], yp1["y_1_status"] = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 1.0, **key)
+        yp2["y_2_val"], yp2["y_2_status"] = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 2.0, **key)
+        yp3["y_3_val"], yp3["y_3_status"] = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 3.0, **key)
         fpe = pnjl.thermo.distributions.f_fermion_triplet(_Phi, _Phib, **yp1, **yp2, **yp3)
         return (x / 3.0) * fpe.real
 
     mass = pnjl.thermo.gcp_sea_lattice.M(T, mu, **kwargs)
-    integral, error = scipy.integrate.quad(integrand, mass / T, np.inf, args = (mu, T, Phi, Phib, kwargs))
+    integral, error = scipy.integrate.quad(integrand, mass / T, math.inf, args = (mu, T, Phi, Phib, kwargs))
 
     if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
         print("The integration in pnj.thermo.gcp_perturbative.I_plus_real did not succeed!")
@@ -58,14 +62,17 @@ def I_plus_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) 
     debug_flag = options['gcp_perturbative_debug_flag']
 
     def integrand(x, _mu, _T, _Phi, _Phib, key) :
-        yp1 = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 1.0, **key)
-        yp2 = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 2.0, **key)
-        yp3 = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 3.0, **key)
+        yp1 = {}
+        yp2 = {}
+        yp3 = {}
+        yp1["y_1_val"], yp1["y_1_status"] = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 1.0, **key)
+        yp2["y_2_val"], yp2["y_2_status"] = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 2.0, **key)
+        yp3["y_3_val"], yp3["y_3_status"] = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 3.0, **key)
         fpe = pnjl.thermo.distributions.f_fermion_triplet(_Phi, _Phib, **yp1, **yp2, **yp3)
         return (x / 3.0) * fpe.imag
 
     mass = pnjl.thermo.gcp_sea_lattice.M(T, mu, **kwargs)
-    integral, error = scipy.integrate.quad(integrand, mass / T, np.inf, args = (mu, T, Phi, Phib, kwargs))
+    integral, error = scipy.integrate.quad(integrand, mass / T, math.inf, args = (mu, T, Phi, Phib, kwargs))
 
     if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
         print("The integration in pnj.thermo.gcp_perturbative.I_plus_imag did not succeed!")
@@ -79,14 +86,17 @@ def I_minus_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs)
     debug_flag = options['gcp_perturbative_debug_flag']
 
     def integrand(x, _mu, _T, _Phi, _Phib, key) :
-        yp1 = pnjl.aux_functions.y_minus(x * _T, _T, _mu, 0.0, 1.0, 1.0, **key)
-        yp2 = pnjl.aux_functions.y_minus(x * _T, _T, _mu, 0.0, 1.0, 2.0, **key)
-        yp3 = pnjl.aux_functions.y_minus(x * _T, _T, _mu, 0.0, 1.0, 3.0, **key)
+        yp1 = {}
+        yp2 = {}
+        yp3 = {}
+        yp1["y_1_val"], yp1["y_1_status"] = pnjl.aux_functions.y_minus(x * _T, _T, _mu, 0.0, 1.0, 1.0, **key)
+        yp2["y_2_val"], yp2["y_2_status"] = pnjl.aux_functions.y_minus(x * _T, _T, _mu, 0.0, 1.0, 2.0, **key)
+        yp3["y_3_val"], yp3["y_3_status"] = pnjl.aux_functions.y_minus(x * _T, _T, _mu, 0.0, 1.0, 3.0, **key)
         fpe = pnjl.thermo.distributions.f_fermion_antitriplet(_Phi, _Phib, **yp1, **yp2, **yp3)
         return (x / 3.0) * fpe.real
 
     mass = pnjl.thermo.gcp_sea_lattice.M(T, mu, **kwargs)
-    integral, error = scipy.integrate.quad(integrand, mass / T, np.inf, args = (mu, T, Phi, Phib, kwargs))
+    integral, error = scipy.integrate.quad(integrand, mass / T, math.inf, args = (mu, T, Phi, Phib, kwargs))
 
     if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
         print("The integration in pnj.thermo.gcp_perturbative.I_minus_real did not succeed!")
@@ -100,14 +110,17 @@ def I_minus_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs)
     debug_flag = options['gcp_perturbative_debug_flag']
 
     def integrand(x, _mu, _T, _Phi, _Phib, key) :
-        yp1 = pnjl.aux_functions.y_minus(x * _T, _T, _mu, 0.0, 1.0, 1.0, **key)
-        yp2 = pnjl.aux_functions.y_minus(x * _T, _T, _mu, 0.0, 1.0, 2.0, **key)
-        yp3 = pnjl.aux_functions.y_minus(x * _T, _T, _mu, 0.0, 1.0, 3.0, **key)
+        yp1 = {}
+        yp2 = {}
+        yp3 = {}
+        yp1["y_1_val"], yp1["y_1_status"] = pnjl.aux_functions.y_minus(x * _T, _T, _mu, 0.0, 1.0, 1.0, **key)
+        yp2["y_2_val"], yp2["y_2_status"] = pnjl.aux_functions.y_minus(x * _T, _T, _mu, 0.0, 1.0, 2.0, **key)
+        yp3["y_3_val"], yp3["y_3_status"] = pnjl.aux_functions.y_minus(x * _T, _T, _mu, 0.0, 1.0, 3.0, **key)
         fpe = pnjl.thermo.distributions.f_fermion_antitriplet(_Phi, _Phib, **yp1, **yp2, **yp3)
         return (x / 3.0) * fpe.imag
 
     mass = pnjl.thermo.gcp_sea_lattice.M(T, mu, **kwargs)
-    integral, error = scipy.integrate.quad(integrand, mass / T, np.inf, args = (mu, T, Phi, Phib, kwargs))
+    integral, error = scipy.integrate.quad(integrand, mass / T, math.inf, args = (mu, T, Phi, Phib, kwargs))
 
     if ((abs(integral) > 1e-5 and abs(error / integral) > 0.01) or (abs(integral) <= 1e-5 and abs(error) > 0.01)) and debug_flag :
         print("The integration in pnj.thermo.gcp_perturbative.I_minus_imag did not succeed!")
@@ -127,7 +140,7 @@ def gcp_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> 
     Im_full = complex(I_minus_real(T, mu, Phi, Phib, **kwargs), I_minus_imag(T, mu, Phi, Phib, **kwargs))
     spart = (Ip_full + Im_full) ** 2
 
-    return ((4.0 * Nf) / (3.0 * np.pi)) * alpha_s(T, mu, **kwargs) * (T ** 4) * (Ip_full.real + Im_full.real + (3.0 / (2.0 * (np.pi ** 2))) * spart.real)
+    return ((4.0 * Nf) / (3.0 * math.pi)) * alpha_s(T, mu, **kwargs) * (T ** 4) * (Ip_full.real + Im_full.real + (3.0 / (2.0 * (math.pi ** 2))) * spart.real)
 def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
     
     options = {'Nf' : pnjl.defaults.default_Nf}
@@ -139,7 +152,7 @@ def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> 
     Im_full = complex(I_minus_real(T, mu, Phi, Phib, **kwargs), I_minus_imag(T, mu, Phi, Phib, **kwargs))
     spart = (Ip_full + Im_full) ** 2
 
-    return ((4.0 * Nf)/ (3.0 * np.pi)) * alpha_s(T, mu, **kwargs) * (T ** 4) * (Ip_full.imag + Im_full.imag + (3.0 / (2.0 * (np.pi ** 2))) * spart.imag)
+    return ((4.0 * Nf)/ (3.0 * math.pi)) * alpha_s(T, mu, **kwargs) * (T ** 4) * (Ip_full.imag + Im_full.imag + (3.0 / (2.0 * (math.pi ** 2))) * spart.imag)
 
 #Extensive thermodynamic properties
 
