@@ -38,7 +38,7 @@ def gcp_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> 
 
     integral, error = scipy.integrate.quad(integrand, 0.0, math.inf, args = (T, mu, Phi, Phib, mass, kwargs))
 
-    return -(Nf / (math.pi ** 2)) * (Nc / 3.0) * integral / 4.0
+    return -(Nf / (math.pi ** 2)) * (Nc / 3.0) * integral / 3.0 #the 1/3 factor is arbitrarily added to match https://arxiv.org/pdf/2012.12894.pdf
 def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
     
     options = {'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.default_Nc, 'gcp_quark_debug_flag' : False}
@@ -68,7 +68,7 @@ def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> 
     mass = pnjl.thermo.gcp_sea_lattice.M(T, mu, **kwargs)
     integral, error = scipy.integrate.quad(integrand, 0.0, math.inf, args = (T, mu, Phi, Phib, mass, kwargs))
 
-    return -(Nf / (math.pi ** 2)) * (Nc / 3.0) * integral / 4.0 #the 1/4 factor is arbitrarily added to match https://arxiv.org/pdf/2012.12894.pdf
+    return -(Nf / (math.pi ** 2)) * (Nc / 3.0) * integral / 3.0 #the 1/3 factor is arbitrarily added to match https://arxiv.org/pdf/2012.12894.pdf
 
 #Extensive thermodynamic properties
 

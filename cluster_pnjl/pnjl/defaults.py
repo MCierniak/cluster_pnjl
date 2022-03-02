@@ -14,7 +14,7 @@ default_kappa       = 0.012
 #defaults from https://arxiv.org/pdf/hep-ph/0506234.pdf (Gs, T0, a0, a1, a2, a3, b3, b4)
 
 default_Gs          = 10.08e-6
-default_T0          = 160. #this one results in U(T) in agreement with https://arxiv.org/pdf/2012.12894.pdf
+default_T0          = 174. #this one results in U(T) in agreement with https://arxiv.org/pdf/2012.12894.pdf
 #default_T0          = 270.
 default_a0          = 6.75
 default_a1          = -1.95

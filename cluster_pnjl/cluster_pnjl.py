@@ -307,9 +307,9 @@ def PNJL_thermodynamics_mu_test():
     mu200 = [200.0 / 3.0 for el in T]
     mu300 = [300.0 / 3.0 for el in T]
     
-    recalc_pl_mu0         = False
-    recalc_pl_mu200       = False
-    recalc_pl_mu300       = False
+    recalc_pl_mu0         = True
+    recalc_pl_mu200       = True
+    recalc_pl_mu300       = True
     recalc_pressure_mu0   = True
     recalc_pressure_mu200 = True
     recalc_pressure_mu300 = True
