@@ -146,7 +146,7 @@ def clusters(T, mu, phi_re, phi_im):
     dMth_N_dmu  = [3. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
     dMth_N_dT   = [3. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
     #(N(Dq): spin * isospin * color)
-    dN = (2.0 * 2.0 * (1.0 / 3.0))
+    dN = (2.0 * 2.0 * 1.0)
     Pres_N, BDen_N, SDen_N = cluster_thermo(T, mu, phi_re, phi_im, M_N, Mth_N, dM_N_dmu, dMth_N_dmu, dM_N_dT, dMth_N_dT, 3, dN)
 
     print("Calculating pentaquark thermo..")
@@ -157,7 +157,7 @@ def clusters(T, mu, phi_re, phi_im):
     dMth_P_dmu  = [5. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
     dMth_P_dT   = [5. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
     #P(NM) + P(NM)
-    dP = (4.0 * 2.0 * (1.0 / 3.0)) + (2.0 * 4.0 * (1.0 / 3.0))
+    dP = (4.0 * 2.0 * 1.0) + (2.0 * 4.0 * 1.0)
     Pres_P, BDen_P, SDen_P = cluster_thermo(T, mu, phi_re, phi_im, M_P, Mth_P, dM_P_dmu, dMth_P_dmu, dM_P_dT, dMth_P_dT, 3, dP)
 
     print("Calculating hexaquark thermo..")
@@ -168,7 +168,7 @@ def clusters(T, mu, phi_re, phi_im):
     dMth_H_dmu  = [6. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
     dMth_H_dT   = [6. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
     #H(Qq) / H(FD) / H(NN) + H(Qq) / H(NN)
-    dH = (1.0 * 3.0 * (1.0 / 3.0)) + (3.0 * 1.0 * (1.0 / 3.0))
+    dH = (1.0 * 3.0 * 1.0) + (3.0 * 1.0 * 1.0)
     Pres_H, BDen_H, SDen_H = cluster_thermo(T, mu, phi_re, phi_im, M_H, Mth_H, dM_H_dmu, dMth_H_dmu, dM_H_dT, dMth_H_dT, 6, dH)
 
     print("Calculating pi meson thermo..")
@@ -179,7 +179,7 @@ def clusters(T, mu, phi_re, phi_im):
     dMth_pi_dmu  = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
     dMth_pi_dT   = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
     #pi(q aq)
-    dpi = ((1.0 / 2.0) * 3.0 * (1.0 / 3.0))
+    dpi = (1.0 * 3.0 * 1.0)
     Pres_pi, BDen_pi, SDen_pi = cluster_thermo(T, mu, phi_re, phi_im, M_pi, Mth_pi, dM_pi_dmu, dMth_pi_dmu, dM_pi_dT, dMth_pi_dT, 0, dpi)
 
     print("Calculating rho meson thermo..")
@@ -190,7 +190,7 @@ def clusters(T, mu, phi_re, phi_im):
     dMth_rho_dmu = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
     dMth_rho_dT  = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
     #rho(q aq)
-    drho = ((3.0 / 2.0) * 3.0 * (1.0 / 3.0)) #should this have the 1/2 factor?
+    drho = (3.0 * 3.0 * 1.0)
     Pres_rho, BDen_rho, SDen_rho = cluster_thermo(T, mu, phi_re, phi_im, M_rho, Mth_rho, dM_rho_dmu, dMth_rho_dmu, dM_rho_dT, dMth_rho_dT, 0, drho)
 
     print("Calculating omega meson thermo..")
@@ -201,7 +201,7 @@ def clusters(T, mu, phi_re, phi_im):
     dMth_omega_dmu = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
     dMth_omega_dT  = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
     #omega(q aq)
-    domega = ((3.0 / 2.0) * 1.0 * (1.0 / 3.0)) #should this have the 1/2 factor?
+    domega = (3.0 * 1.0 * 1.0) #should this have the 1/2 factor?
     Pres_omega, BDen_omega, SDen_omega = cluster_thermo(T, mu, phi_re, phi_im, M_omega, Mth_omega, dM_omega_dmu, dMth_omega_dmu, dM_omega_dT, dMth_omega_dT, 0, domega)
 
     print("Calculating tetraquark thermo..")
@@ -212,7 +212,7 @@ def clusters(T, mu, phi_re, phi_im):
     dMth_T_dmu = [4. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
     dMth_T_dT  = [4. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
     #T(MM) + T(MM) + T(MM)
-    dT = ((1.0 / 2.0) * 5.0 * (1.0 / 3.0)) + ((5.0 / 2.0) * 1.0 * (1.0 / 3.0)) + ((3.0 / 2.0) * 3.0 * (1.0 / 3.0))
+    dT = (1.0 * 5.0 * 1.0) + (5.0 * 1.0 * 1.0) + (3.0 * 3.0 * 1.0)
     Pres_T, BDen_T, SDen_T = cluster_thermo(T, mu, phi_re, phi_im, M_T, Mth_T, dM_T_dmu, dMth_T_dmu, dM_T_dT, dMth_T_dT, 0, dT)
 
     print("Calculating diquark thermo..")
@@ -307,9 +307,9 @@ def PNJL_thermodynamics_mu_test():
     mu200 = [200.0 / 3.0 for el in T]
     mu300 = [300.0 / 3.0 for el in T]
     
-    recalc_pl_mu0         = True
-    recalc_pl_mu200       = True
-    recalc_pl_mu300       = True
+    recalc_pl_mu0         = False
+    recalc_pl_mu200       = False
+    recalc_pl_mu300       = False
     recalc_pressure_mu0   = True
     recalc_pressure_mu200 = True
     recalc_pressure_mu300 = True
@@ -663,7 +663,9 @@ def PNJL_thermodynamics_mu_test():
         borsanyi_1204_6710v2_mu300.append(numpy.array([x_el, y_el]))
     borsanyi_1204_6710v2_mu300 = numpy.array(borsanyi_1204_6710v2_mu300)
 
-    print(contrib_q_mu0)
+    print(contrib_D_mu0)
+    print(contrib_F_mu0)
+    print(contrib_Q5_mu0)
 
     fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
     ax1 = fig1.add_subplot(1, 1, 1)
@@ -674,21 +676,21 @@ def PNJL_thermodynamics_mu_test():
     ax1.plot(T, contrib_q_mu0, '-', c = 'blue', label = r'$\mathrm{P_{Q,0}}$')
     ax1.plot(T, contrib_g_mu0, '-', c = 'red', label = r'$\mathrm{P_{g,0}}$')
     ax1.plot(T, contrib_pert_mu0, '-', c = 'pink', label = r'$\mathrm{P_{pert,0}}$')
-    #ax1.plot(T, contrib_qgp_mu0, '-', c = 'black', label = r'$\mathrm{P_{QGP,0}}$')
+    ax1.plot(T, contrib_qgp_mu0, '-', c = 'black', label = r'$\mathrm{P_{QGP,0}}$')
     #ax1.plot(T, contrib_cluster_mu0, '-', c = 'blue', label = r'$\mathrm{P_{cluster,0}}$')
     #ax1.plot(T, contrib_cluster_singlet_mu0, '-', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,0}}$')
     #ax1.plot(T, contrib_cluster_color_mu0, '-', c = 'red', label = r'$\mathrm{P^{(3/\bar{3})}_{cluster,0}}$')
     ax1.plot(T, contrib_q_mu200, '--', c = 'blue', label = r'$\mathrm{P_{Q,200}}$')
     ax1.plot(T, contrib_g_mu200, '--', c = 'red', label = r'$\mathrm{P_{g,200}}$')
     ax1.plot(T, contrib_pert_mu200, '--', c = 'pink', label = r'$\mathrm{P_{pert,200}}$')
-    #ax1.plot(T, contrib_qgp_mu200, '--', c = 'black', label = r'$\mathrm{P_{QGP,200}}$')
+    ax1.plot(T, contrib_qgp_mu200, '--', c = 'black', label = r'$\mathrm{P_{QGP,200}}$')
     #ax1.plot(T, contrib_cluster_mu200, '--', c = 'blue', label = r'$\mathrm{P_{cluster,200}}$')
     #ax1.plot(T, contrib_cluster_singlet_mu200, '--', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,200}}$')
     #ax1.plot(T, contrib_cluster_color_mu200, '--', c = 'red', label = r'$\mathrm{P^{(3/\bar{3})}_{cluster,200}}$')
     ax1.plot(T, contrib_q_mu300, '-.', c = 'blue', label = r'$\mathrm{P_{Q,300}}$')
     ax1.plot(T, contrib_g_mu300, '-.', c = 'red', label = r'$\mathrm{P_{g,300}}$')
     ax1.plot(T, contrib_pert_mu300, '-.', c = 'pink', label = r'$\mathrm{P_{pert,300}}$')
-    #ax1.plot(T, contrib_qgp_mu300, '-.', c = 'black', label = r'$\mathrm{P_{QGP,300}}$')
+    ax1.plot(T, contrib_qgp_mu300, '-.', c = 'black', label = r'$\mathrm{P_{QGP,300}}$')
     #ax1.plot(T, contrib_cluster_mu300, '-.', c = 'blue', label = r'$\mathrm{P_{cluster,300}}$')
     #ax1.plot(T, contrib_cluster_singlet_mu300, '-.', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,300}}$')
     #ax1.plot(T, contrib_cluster_color_mu300, '-.', c = 'red', label = r'$\mathrm{P^{(3/\bar{3})}_{cluster,300}}$')

@@ -26,26 +26,25 @@ def f_fermion_triplet(
     y_m1_val = 1.0 / y_1_val if not y_1_status == 1 else math.inf
     y_m2_val = 1.0 / y_2_val if not y_2_status == 1 else math.inf
 
-    den1 = y_1_val + 3.0 * Phib + 3.0 * Phi * y_m1_val + y_m2_val
-    den2 = y_2_val + 3.0 * Phib * y_1_val + 3.0 * Phi + y_m1_val
-    den3 = y_3_val + 3.0 * Phib * y_2_val + 3.0 * Phi * y_1_val + 1.0
+    Phi_m1_real = 3.0 * Phi.real * y_m1_val if not Phi.real == 0.0 and not y_m1_val == 0.0 else 0.0
+    Phi_m1_imag = 3.0 * Phi.imag * y_m1_val if not Phi.imag == 0.0 and not y_m1_val == 0.0 else 0.0
 
-    part1 = 3.0 * Phib / den1 if not math.fabs(den1.real) == math.fabs(math.inf) and not math.fabs(den1.imag) == math.fabs(math.inf) else complex(0.0, 0.0)
-    part2 = 6.0 * Phi / den2 if not math.fabs(den2.real) == math.fabs(math.inf) and not math.fabs(den2.imag) == math.fabs(math.inf) else complex(0.0, 0.0)
-    part3 = 3.0 / den3 if not math.fabs(den3.real) == math.fabs(math.inf) and not math.fabs(den3.imag) == math.fabs(math.inf) else complex(0.0, 0.0)
+    Phib_1_real = 3.0 * Phib.real * y_1_val if not Phib.real == 0.0 and not y_1_val == 0.0 else 0.0
+    Phib_1_imag = 3.0 * Phib.imag * y_1_val if not Phib.imag == 0.0 and not y_1_val == 0.0 else 0.0
 
-    #print("y_1_val", y_1_val)
-    #print("y_2_val", y_2_val)
-    #print("y_3_val", y_3_val)
-    #print("y_m1_val", y_m1_val)
-    #print("y_m2_val", y_m2_val)
-    #print("den1", den1)
-    #print("den2", den2)
-    #print("den3", den3)
-    #print("part1", part1)
-    #print("part2", part2)
-    #print("part3", part3)
-    #input()
+    Phib_2_real = 3.0 * Phib.real * y_2_val if not Phib.real == 0.0 and not y_2_val == 0.0 else 0.0
+    Phib_2_imag = 3.0 * Phib.imag * y_2_val if not Phib.imag == 0.0 and not y_2_val == 0.0 else 0.0
+
+    Phi_1_real = 3.0 * Phi.real * y_1_val if not Phi.real == 0.0 and not y_1_val == 0.0 else 0.0
+    Phi_1_imag = 3.0 * Phi.imag * y_1_val if not Phi.imag == 0.0 and not y_1_val == 0.0 else 0.0
+
+    den1 = y_1_val + 3.0 * Phib + complex(Phi_m1_real, Phi_m1_imag) + y_m2_val
+    den2 = y_2_val + complex(Phib_1_real, Phib_1_imag) + 3.0 * Phi + y_m1_val
+    den3 = y_3_val + complex(Phib_2_real, Phib_2_imag) + complex(Phi_1_real, Phi_1_imag) + 1.0
+
+    part1 = 3.0 * Phib / den1 if not math.fabs(den1.real) == math.inf and not math.fabs(den1.imag) == math.inf else complex(0.0, 0.0)
+    part2 = 6.0 * Phi / den2 if not math.fabs(den2.real) == math.inf and not math.fabs(den2.imag) == math.inf else complex(0.0, 0.0)
+    part3 = 3.0 / den3 if not math.fabs(den3.real) == math.inf and not math.fabs(den3.imag) == math.inf else complex(0.0, 0.0)
 
     return part1 + part2 + part3
 
@@ -72,13 +71,35 @@ def f_baryon_triplet(
     y_m1_val = 1.0 / y_1_val if not y_1_status == 1 else math.inf
     y_m2_val = 1.0 / y_2_val if not y_2_status == 1 else math.inf
 
-    den1 = y_1_val - 3.0 * Phib + 3.0 * Phi * (1.0 / y_1_val) - (1.0 / y_2_val)
-    den2 = y_2_val - 3.0 * Phib * y_1_val + 3.0 * Phi - (1.0 / y_1_val)
-    den3 = y_3_val - 3.0 * Phib * y_2_val + 3.0 * Phi * y_1_val - 1.0
+    Phi_m1_real = 3.0 * Phi.real * y_m1_val if not Phi.real == 0.0 and not y_m1_val == 0.0 else 0.0
+    Phi_m1_imag = 3.0 * Phi.imag * y_m1_val if not Phi.imag == 0.0 and not y_m1_val == 0.0 else 0.0
+
+    Phi_1_real = 3.0 * Phi.real * y_1_val if not Phi.real == 0.0 and not y_1_val == 0.0 else 0.0
+    Phi_1_imag = 3.0 * Phi.imag * y_1_val if not Phi.imag == 0.0 and not y_1_val == 0.0 else 0.0
+
+    Phib_1_real = 3.0 * Phib.real * y_1_val if not Phib.real == 0.0 and not y_1_val == 0.0 else 0.0
+    Phib_1_imag = 3.0 * Phib.imag * y_1_val if not Phib.imag == 0.0 and not y_1_val == 0.0 else 0.0
+
+    Phib_2_real = 3.0 * Phib.real * y_2_val if not Phib.real == 0.0 and not y_2_val == 0.0 else 0.0
+    Phib_2_imag = 3.0 * Phib.imag * y_2_val if not Phib.imag == 0.0 and not y_2_val == 0.0 else 0.0
+
+    den1_sub2_real = Phi_m1_real - y_m2_val if not (math.fabs(Phi_m1_real) == math.inf and math.fabs(y_m2_val) == math.inf) else -math.inf
+    den1_sub2_imag = Phi_m1_imag
+
+    den2_sub1_real = y_2_val - Phib_1_real if not (math.fabs(y_2_val) == math.inf and math.fabs(Phib_1_real) == math.inf) else math.inf
+    den2_sub1_imag = -Phib_1_imag
+
+    den3_sub1_real = y_3_val - Phib_2_real if not (math.fabs(y_3_val) == math.inf and math.fabs(Phib_2_real) == math.inf) else math.inf
+    den3_sub1_imag = -Phib_2_imag
+
+    den1 = y_1_val - 3.0 * Phib + complex(den1_sub2_real, den1_sub2_imag)
+    den2 = complex(den2_sub1_real, den2_sub1_imag) + 3.0 * Phi - y_m1_val
+    den3 = complex(den3_sub1_real, den3_sub1_imag) + complex(Phi_1_real, Phi_1_imag) - 1.0
 
     part1 = 3.0 * Phib / den1 if not math.fabs(den1.real) == math.fabs(math.inf) and not math.fabs(den1.imag) == math.fabs(math.inf) else complex(0.0, 0.0)
     part2 = -6.0 * Phi / den2 if not math.fabs(den2.real) == math.fabs(math.inf) and not math.fabs(den2.imag) == math.fabs(math.inf) else complex(0.0, 0.0)
     part3 = 3.0 / den3 if not math.fabs(den3.real) == math.fabs(math.inf) and not math.fabs(den3.imag) == math.fabs(math.inf) else complex(0.0, 0.0)
+
     return part1 + part2 + part3
 
 def f_baryon_antitriplet(
