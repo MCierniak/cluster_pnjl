@@ -116,7 +116,7 @@ def gcp_real_a3(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
     if thmass > bmass:
         integral, _ = scipy.integrate.quad(integrand, 0.0, math.inf, args = (T, mu, bmass, thmass, kwargs))
 
-    return (d / (2.0 * (math.pi ** 2))) * integral
+    return -(d / (2.0 * (math.pi ** 2))) * integral
 def gcp_imag_a3(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, d : float, **kwargs):
     #
     return 0.0
@@ -216,7 +216,7 @@ def gcp_real_a5(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
     if thmass > bmass:
         integral, _ = scipy.integrate.quad(integrand, 0.0, math.inf, args = (T, mu, Phi, Phib, bmass, thmass, kwargs))
 
-    return (d / (2.0 * (math.pi ** 2))) * integral
+    return -(d / (2.0 * (math.pi ** 2))) * integral
 def gcp_imag_a5(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, d : float, **kwargs):
 
     options = {'gcp_cluster_debug_flag' : False}
@@ -248,7 +248,7 @@ def gcp_imag_a5(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
     if thmass > bmass:
         integral, _ = scipy.integrate.quad(integrand, 0.0, math.inf, args = (T, mu, Phi, Phib, bmass, thmass, kwargs))
 
-    return (d / (2.0 * (math.pi ** 2))) * integral
+    return -(d / (2.0 * (math.pi ** 2))) * integral
 def gcp_real_a6(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, d : float, **kwargs):
 
     options = {'gcp_cluster_debug_flag' : False}

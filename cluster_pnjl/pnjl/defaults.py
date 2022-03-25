@@ -44,3 +44,7 @@ default_MF          = 4 * (default_M0 + default_ml) - 3 * default_B
 default_MP          = 5 * (default_M0 + default_ml) - 4 * default_B
 default_MQ          = 5 * (default_M0 + default_ml) - 4 * default_B
 default_MH          = 6 * (default_M0 + default_ml) - 5 * default_B
+
+#default cluster continuum energy scale
+
+default_L           = 100.0
