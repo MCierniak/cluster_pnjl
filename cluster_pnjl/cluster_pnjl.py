@@ -1,9 +1,8 @@
 #TODO:
-#0. make the solver minimize for gcp_img = 0...
-#1. make alt_BDensity and alt_SDensity routines.
+#1. make BDensity and SDensity routines.
 #2. add hexa-diquark cluster
 #3. consider d phi / d (mu/T).
-#4. consider a mu dependent chemical potential of https://arxiv.org/abs/1207.4890
+#4. consider a mu dependent PL potential of https://arxiv.org/abs/1207.4890
 #5. return to sigma/phi derivation using a momentum-dependent quark mass (check Omega_Delta!).
 #6. change the pl potential to this one https://arxiv.org/pdf/1307.5958.pdf
 
@@ -629,7 +628,7 @@ def PNJL_thermodynamics_mu_test():
                     ascii = True
                     )]
             Pres_pert_mu0 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
                     zip(T, mu0, phi_re_mu0, phi_im_mu0), 
@@ -654,7 +653,7 @@ def PNJL_thermodynamics_mu_test():
                     ascii = True
                     )]
             Pres_pert_mu0 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
                     zip(T, mu0, [1.0 for el in T], [0.0 for el in T]), 
@@ -701,7 +700,7 @@ def PNJL_thermodynamics_mu_test():
                     ascii = True
                     )]        
             Pres_pert_mu200 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
                     zip(T, mu200, phi_re_mu200, phi_im_mu200), 
@@ -726,7 +725,7 @@ def PNJL_thermodynamics_mu_test():
                     ascii = True
                     )]
             Pres_pert_mu200 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
                     zip(T, mu200, [1.0 for el in T], [0.0 for el in T]), 
@@ -773,7 +772,7 @@ def PNJL_thermodynamics_mu_test():
                     ascii = True
                     )]
             Pres_pert_mu300 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
                     zip(T, mu300, phi_re_mu300, phi_im_mu300), 
@@ -798,7 +797,7 @@ def PNJL_thermodynamics_mu_test():
                     ascii = True
                     )]
             Pres_pert_mu300 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
                     zip(T, mu300, [1.0 for el in T], [0.0 for el in T]), 
@@ -986,26 +985,31 @@ def PNJL_thermodynamics_continuum_test():
     Pres_Q5_c_mu0, Pres_Q5_c_mu200, Pres_Q5_c_mu300, Pres_Q5_c_mu400, Pres_Q5_c_mu500 = [], [], [], [], []
     Pres_H_c_mu0, Pres_H_c_mu200, Pres_H_c_mu300, Pres_H_c_mu400, Pres_H_c_mu500 = [], [], [], [], []
     
-    T = numpy.linspace(1.0, 450.0, 200)
-    mu0   = [0.0 for el in T]
-    mu200 = [200.0 / 3.0 for el in T]
-    mu300 = [300.0 / 3.0 for el in T]
-    mu400 = [400.0 / 3.0 for el in T]
-    mu500 = [500.0 / 3.0 for el in T]
+    #T = numpy.linspace(1.0, 450.0, 200)
+    T_mu0 = numpy.linspace(1.0, 2000.0, 200)
+    T_mu200 = numpy.linspace(1.0, 2000.0, 200)
+    T_mu300 = numpy.linspace(1.0, 2000.0, 200)
+    T_mu400 = numpy.linspace(1.0, 2000.0, 200)
+    T_mu500 = numpy.linspace(1.0, 2000.0, 200)
+    mu0   = [0.0 for el in T_mu0]
+    mu200 = [200.0 / 3.0 for el in T_mu200]
+    mu300 = [300.0 / 3.0 for el in T_mu300]
+    mu400 = [400.0 / 3.0 for el in T_mu400]
+    mu500 = [500.0 / 3.0 for el in T_mu500]
     
-    recalc_pl_mu0           = True
+    recalc_pl_mu0           = False
     recalc_pl_mu200         = False
     recalc_pl_mu300         = False
     recalc_pl_mu400         = False
     recalc_pl_mu500         = False
 
-    recalc_pressure_mu0     = True
+    recalc_pressure_mu0     = False
     recalc_pressure_mu200   = False
     recalc_pressure_mu300   = False
     recalc_pressure_mu400   = False
     recalc_pressure_mu500   = False
 
-    recalc_pressure_mu0_c   = True
+    recalc_pressure_mu0_c   = False
     recalc_pressure_mu200_c = False
     recalc_pressure_mu300_c = False
     recalc_pressure_mu400_c = False
@@ -1033,8 +1037,8 @@ def PNJL_thermodynamics_continuum_test():
     if recalc_pl_mu0:
         phi_re_mu0.append(1e-15)
         phi_im_mu0.append(2e-15)
-        lT = len(T)
-        for T_el, mu_el in tqdm.tqdm(zip(T, mu0), desc = "Traced Polyakov loop (mu = 0)", total = len(T), ascii = True):
+        lT = len(T_mu0)
+        for T_el, mu_el in tqdm.tqdm(zip(T_mu0, mu0), desc = "Traced Polyakov loop (mu = 0)", total = len(T_mu0), ascii = True):
             temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_mu0[-1], phi_im_mu0[-1], with_clusters = cluster_backreaction)
             phi_re_mu0.append(temp_phi_re)
             phi_im_mu0.append(temp_phi_im)
@@ -1042,16 +1046,16 @@ def PNJL_thermodynamics_continuum_test():
         phi_im_mu0 = phi_im_mu0[1:]
         with open(pl_mu0_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
-            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T, phi_re_mu0, phi_im_mu0)])
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T_mu0, phi_re_mu0, phi_im_mu0)])
     else:
-        T, phi_re_mu0 = utils.data_collect(0, 1, pl_mu0_file)
+        T_mu0, phi_re_mu0 = utils.data_collect(0, 1, pl_mu0_file)
         phi_im_mu0, _ = utils.data_collect(2, 2, pl_mu0_file)
 
     if recalc_pl_mu200:
         phi_re_mu200.append(1e-15)
         phi_im_mu200.append(2e-15)
-        lT = len(T)
-        for T_el, mu_el in tqdm.tqdm(zip(T, mu200), desc = "Traced Polyakov loop (mu = 200)", total = len(T), ascii = True):
+        lT = len(T_mu200)
+        for T_el, mu_el in tqdm.tqdm(zip(T_mu200, mu200), desc = "Traced Polyakov loop (mu = 200)", total = len(T_mu200), ascii = True):
             temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_mu200[-1], phi_im_mu200[-1], with_clusters = cluster_backreaction)
             phi_re_mu200.append(temp_phi_re)
             phi_im_mu200.append(temp_phi_im)
@@ -1059,16 +1063,16 @@ def PNJL_thermodynamics_continuum_test():
         phi_im_mu200 = phi_im_mu200[1:]
         with open(pl_mu200_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
-            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T, phi_re_mu200, phi_im_mu200)])
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T_mu200, phi_re_mu200, phi_im_mu200)])
     else:
-        T, phi_re_mu200 = utils.data_collect(0, 1, pl_mu200_file)
+        T_mu200, phi_re_mu200 = utils.data_collect(0, 1, pl_mu200_file)
         phi_im_mu200, _ = utils.data_collect(2, 2, pl_mu200_file)
     
     if recalc_pl_mu300:
         phi_re_mu300.append(1e-15)
         phi_im_mu300.append(2e-15)
-        lT = len(T)
-        for T_el, mu_el in tqdm.tqdm(zip(T, mu300), desc = "Traced Polyakov loop (mu = 300)", total = len(T), ascii = True):
+        lT = len(T_mu300)
+        for T_el, mu_el in tqdm.tqdm(zip(T_mu300, mu300), desc = "Traced Polyakov loop (mu = 300)", total = len(T_mu300), ascii = True):
             temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_mu300[-1], phi_im_mu300[-1], with_clusters = cluster_backreaction)
             phi_re_mu300.append(temp_phi_re)
             phi_im_mu300.append(temp_phi_im)
@@ -1076,16 +1080,16 @@ def PNJL_thermodynamics_continuum_test():
         phi_im_mu300 = phi_im_mu300[1:]
         with open(pl_mu300_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
-            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T, phi_re_mu300, phi_im_mu300)])
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T_mu300, phi_re_mu300, phi_im_mu300)])
     else:
-        T, phi_re_mu300 = utils.data_collect(0, 1, pl_mu300_file)
+        T_mu300, phi_re_mu300 = utils.data_collect(0, 1, pl_mu300_file)
         phi_im_mu300, _ = utils.data_collect(2, 2, pl_mu300_file)
 
     if recalc_pl_mu400:
         phi_re_mu400.append(1e-15)
         phi_im_mu400.append(2e-15)
-        lT = len(T)
-        for T_el, mu_el in tqdm.tqdm(zip(T, mu400), desc = "Traced Polyakov loop (mu = 400)", total = len(T), ascii = True):
+        lT = len(T_mu400)
+        for T_el, mu_el in tqdm.tqdm(zip(T_mu400, mu400), desc = "Traced Polyakov loop (mu = 400)", total = len(T_mu400), ascii = True):
             temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_mu400[-1], phi_im_mu400[-1], with_clusters = cluster_backreaction)
             phi_re_mu400.append(temp_phi_re)
             phi_im_mu400.append(temp_phi_im)
@@ -1093,16 +1097,16 @@ def PNJL_thermodynamics_continuum_test():
         phi_im_mu400 = phi_im_mu400[1:]
         with open(pl_mu400_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
-            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T, phi_re_mu400, phi_im_mu400)])
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T_mu400, phi_re_mu400, phi_im_mu400)])
     else:
-        T, phi_re_mu400 = utils.data_collect(0, 1, pl_mu400_file)
+        T_mu400, phi_re_mu400 = utils.data_collect(0, 1, pl_mu400_file)
         phi_im_mu400, _ = utils.data_collect(2, 2, pl_mu400_file)
 
     if recalc_pl_mu500:
         phi_re_mu500.append(1e-15)
         phi_im_mu500.append(2e-15)
-        lT = len(T)
-        for T_el, mu_el in tqdm.tqdm(zip(T, mu500), desc = "Traced Polyakov loop (mu = 500)", total = len(T), ascii = True):
+        lT = len(T_mu500)
+        for T_el, mu_el in tqdm.tqdm(zip(T_mu500, mu500), desc = "Traced Polyakov loop (mu = 500)", total = len(T_mu500), ascii = True):
             temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_mu500[-1], phi_im_mu500[-1], with_clusters = cluster_backreaction)
             phi_re_mu500.append(temp_phi_re)
             phi_im_mu500.append(temp_phi_im)
@@ -1110,9 +1114,9 @@ def PNJL_thermodynamics_continuum_test():
         phi_im_mu500 = phi_im_mu500[1:]
         with open(pl_mu500_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
-            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T, phi_re_mu500, phi_im_mu500)])
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T_mu500, phi_re_mu500, phi_im_mu500)])
     else:
-        T, phi_re_mu500 = utils.data_collect(0, 1, pl_mu500_file)
+        T_mu500, phi_re_mu500 = utils.data_collect(0, 1, pl_mu500_file)
         phi_im_mu500, _ = utils.data_collect(2, 2, pl_mu500_file)
 
     if recalc_pressure_mu0:
@@ -1120,9 +1124,9 @@ def PNJL_thermodynamics_continuum_test():
             pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
             for T_el, phi_re_el, phi_im_el 
             in tqdm.tqdm(
-                zip(T, phi_re_mu0, phi_im_mu0), 
+                zip(T_mu0, phi_re_mu0, phi_im_mu0), 
                 desc = "Gluon pressure (mu = 0)", 
-                total = len(T), 
+                total = len(T_mu0),
                 ascii = True
                 )]
         if not pl_turned_off:
@@ -1131,50 +1135,50 @@ def PNJL_thermodynamics_continuum_test():
                 + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu0, phi_re_mu0, phi_im_mu0), 
+                    zip(T_mu0, mu0, phi_re_mu0, phi_im_mu0), 
                     desc = "Quark pressure (mu = 0)", 
-                    total = len(T), 
+                    total = len(T_mu0), 
                     ascii = True
                     )]
             Pres_pert_mu0 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu0, phi_re_mu0, phi_im_mu0), 
+                    zip(T_mu0, mu0, phi_re_mu0, phi_im_mu0), 
                     desc = "Perturbative pressure (mu = 0)", 
-                    total = len(T), 
+                    total = len(T_mu0), 
                     ascii = True
                     )]        
             (
                 (Pres_pi_step_mu0, Pres_rho_step_mu0, Pres_omega_step_mu0, Pres_D_step_mu0, Pres_N_step_mu0, Pres_T_step_mu0, Pres_F_step_mu0, Pres_P_step_mu0, Pres_Q5_step_mu0, Pres_H_step_mu0),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters(T, mu0, phi_re_mu0, phi_im_mu0)
+            ) = clusters(T_mu0, mu0, phi_re_mu0, phi_im_mu0)
         else:
             Pres_Q_mu0 = [
                 pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
                 + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu0, [1.0 for el in T], [0.0 for el in T]), 
+                    zip(T_mu0, mu0, [1.0 for el in T], [0.0 for el in T]), 
                     desc = "Quark pressure (mu = 0)", 
-                    total = len(T), 
+                    total = len(T_mu0), 
                     ascii = True
                     )]
             Pres_pert_mu0 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu0, [1.0 for el in T], [0.0 for el in T]), 
+                    zip(T_mu0, mu0, [1.0 for el in T], [0.0 for el in T]), 
                     desc = "Perturbative pressure (mu = 0)", 
-                    total = len(T), 
+                    total = len(T_mu0), 
                     ascii = True
                     )]        
             (
                 (Pres_pi_step_mu0, Pres_rho_step_mu0, Pres_omega_step_mu0, Pres_D_step_mu0, Pres_N_step_mu0, Pres_T_step_mu0, Pres_F_step_mu0, Pres_P_step_mu0, Pres_Q5_step_mu0, Pres_H_step_mu0),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters(T, mu0, [1.0 for el in T], [0.0 for el in T])
+            ) = clusters(T_mu0, mu0, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu0_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu0, Pres_g_mu0, Pres_pert_mu0, Pres_pi_step_mu0, Pres_rho_step_mu0, Pres_omega_step_mu0, Pres_D_step_mu0, Pres_N_step_mu0, Pres_T_step_mu0, Pres_F_step_mu0, Pres_P_step_mu0, Pres_Q5_step_mu0, Pres_H_step_mu0)])
@@ -1193,13 +1197,13 @@ def PNJL_thermodynamics_continuum_test():
                 (Pres_pi_c_mu0, Pres_rho_c_mu0, Pres_omega_c_mu0, Pres_D_c_mu0, Pres_N_c_mu0, Pres_T_c_mu0, Pres_F_c_mu0, Pres_P_c_mu0, Pres_Q5_c_mu0, Pres_H_c_mu0),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters_c(T, mu0, phi_re_mu0, phi_im_mu0)
+            ) = clusters_c(T_mu0, mu0, phi_re_mu0, phi_im_mu0)
         else:
             (
                 (Pres_pi_c_mu0, Pres_rho_c_mu0, Pres_omega_c_mu0, Pres_D_c_mu0, Pres_N_c_mu0, Pres_T_c_mu0, Pres_F_c_mu0, Pres_P_c_mu0, Pres_Q5_c_mu0, Pres_H_c_mu0),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters_c(T, mu0, [1.0 for el in T], [0.0 for el in T])
+            ) = clusters_c(T_mu0, mu0, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu0_c_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu0, Pres_g_mu0, Pres_pert_mu0, Pres_pi_c_mu0, Pres_rho_c_mu0, Pres_omega_c_mu0, Pres_D_c_mu0, Pres_N_c_mu0, Pres_T_c_mu0, Pres_F_c_mu0, Pres_P_c_mu0, Pres_Q5_c_mu0, Pres_H_c_mu0)])
@@ -1217,9 +1221,9 @@ def PNJL_thermodynamics_continuum_test():
             pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
             for T_el, phi_re_el, phi_im_el 
             in tqdm.tqdm(
-                zip(T, phi_re_mu200, phi_im_mu200), 
+                zip(T_mu200, phi_re_mu200, phi_im_mu200), 
                 desc = "Gluon pressure (mu = 200)", 
-                total = len(T), 
+                total = len(T_mu200), 
                 ascii = True
                 )]
         if not pl_turned_off:
@@ -1228,50 +1232,50 @@ def PNJL_thermodynamics_continuum_test():
                 + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu200, phi_re_mu200, phi_im_mu200), 
+                    zip(T_mu200, mu200, phi_re_mu200, phi_im_mu200), 
                     desc = "Quark pressure (mu = 200)", 
-                    total = len(T), 
+                    total = len(T_mu200), 
                     ascii = True
                     )]        
             Pres_pert_mu200 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu200, phi_re_mu200, phi_im_mu200), 
+                    zip(T_mu200, mu200, phi_re_mu200, phi_im_mu200), 
                     desc = "Perturbative pressure (mu = 200)", 
-                    total = len(T), 
+                    total = len(T_mu200), 
                     ascii = True
                     )]        
             (
                 (Pres_pi_step_mu200, Pres_rho_step_mu200, Pres_omega_step_mu200, Pres_D_step_mu200, Pres_N_step_mu200, Pres_T_step_mu200, Pres_F_step_mu200, Pres_P_step_mu200, Pres_Q5_step_mu200, Pres_H_step_mu200),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters(T, mu200, phi_re_mu200, phi_im_mu200)
+            ) = clusters(T_mu200, mu200, phi_re_mu200, phi_im_mu200)
         else:
             Pres_Q_mu200 = [
                 pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
                 + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu200, [1.0 for el in T], [0.0 for el in T]), 
+                    zip(T_mu200, mu200, [1.0 for el in T], [0.0 for el in T]), 
                     desc = "Quark pressure (mu = 200)", 
-                    total = len(T), 
+                    total = len(T_mu200), 
                     ascii = True
                     )]
             Pres_pert_mu200 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu200, [1.0 for el in T], [0.0 for el in T]), 
+                    zip(T_mu200, mu200, [1.0 for el in T], [0.0 for el in T]), 
                     desc = "Perturbative pressure (mu = 200)", 
-                    total = len(T), 
+                    total = len(T_mu200), 
                     ascii = True
                     )]        
             (
                 (Pres_pi_step_mu200, Pres_rho_step_mu200, Pres_omega_step_mu200, Pres_D_step_mu200, Pres_N_step_mu200, Pres_T_step_mu200, Pres_F_step_mu200, Pres_P_step_mu200, Pres_Q5_step_mu200, Pres_H_step_mu200),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters(T, mu200, [1.0 for el in T], [0.0 for el in T])
+            ) = clusters(T_mu200, mu200, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu200_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu200, Pres_g_mu200, Pres_pert_mu200, Pres_pi_step_mu200, Pres_rho_step_mu200, Pres_omega_step_mu200, Pres_D_step_mu200, Pres_N_step_mu200, Pres_T_step_mu200, Pres_F_step_mu200, Pres_P_step_mu200, Pres_Q5_step_mu200, Pres_H_step_mu200)])
@@ -1290,13 +1294,13 @@ def PNJL_thermodynamics_continuum_test():
                 (Pres_pi_c_mu200, Pres_rho_c_mu200, Pres_omega_c_mu200, Pres_D_c_mu200, Pres_N_c_mu200, Pres_T_c_mu200, Pres_F_c_mu200, Pres_P_c_mu200, Pres_Q5_c_mu200, Pres_H_c_mu200),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters_c(T, mu200, phi_re_mu200, phi_im_mu200)
+            ) = clusters_c(T_mu200, mu200, phi_re_mu200, phi_im_mu200)
         else:
             (
                 (Pres_pi_c_mu200, Pres_rho_c_mu200, Pres_omega_c_mu200, Pres_D_c_mu200, Pres_N_c_mu200, Pres_T_c_mu200, Pres_F_c_mu200, Pres_P_c_mu200, Pres_Q5_c_mu200, Pres_H_c_mu200),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters_c(T, mu200, [1.0 for el in T], [0.0 for el in T])
+            ) = clusters_c(T_mu200, mu200, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu200_c_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu200, Pres_g_mu200, Pres_pert_mu200, Pres_pi_c_mu200, Pres_rho_c_mu200, Pres_omega_c_mu200, Pres_D_c_mu200, Pres_N_c_mu200, Pres_T_c_mu200, Pres_F_c_mu200, Pres_P_c_mu200, Pres_Q5_c_mu200, Pres_H_c_mu200)])
@@ -1314,9 +1318,9 @@ def PNJL_thermodynamics_continuum_test():
             pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
             for T_el, phi_re_el, phi_im_el 
             in tqdm.tqdm(
-                zip(T, phi_re_mu300, phi_im_mu300), 
+                zip(T_mu300, phi_re_mu300, phi_im_mu300), 
                 desc = "Gluon pressure (mu = 300)", 
-                total = len(T), 
+                total = len(T_mu300), 
                 ascii = True
                 )]
         if not pl_turned_off:
@@ -1325,50 +1329,50 @@ def PNJL_thermodynamics_continuum_test():
                 + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu300, phi_re_mu300, phi_im_mu300), 
+                    zip(T_mu300, mu300, phi_re_mu300, phi_im_mu300), 
                     desc = "Quark pressure (mu = 300)", 
-                    total = len(T), 
+                    total = len(T_mu300), 
                     ascii = True
                     )]
             Pres_pert_mu300 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu300, phi_re_mu300, phi_im_mu300), 
+                    zip(T_mu300, mu300, phi_re_mu300, phi_im_mu300), 
                     desc = "Perturbative pressure (mu = 300)", 
-                    total = len(T), 
+                    total = len(T_mu300), 
                     ascii = True
                     )]        
             (
                 (Pres_pi_step_mu300, Pres_rho_step_mu300, Pres_omega_step_mu300, Pres_D_step_mu300, Pres_N_step_mu300, Pres_T_step_mu300, Pres_F_step_mu300, Pres_P_step_mu300, Pres_Q5_step_mu300, Pres_H_step_mu300),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters(T, mu300, phi_re_mu300, phi_im_mu300)
+            ) = clusters(T_mu300, mu300, phi_re_mu300, phi_im_mu300)
         else:
             Pres_Q_mu300 = [
                 pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
                 + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el in 
                 tqdm.tqdm(
-                    zip(T, mu300, [1.0 for el in T], [0.0 for el in T]), 
+                    zip(T_mu300, mu300, [1.0 for el in T], [0.0 for el in T]), 
                     desc = "Quark pressure (mu = 300)", 
-                    total = len(T), 
+                    total = len(T_mu300), 
                     ascii = True
                     )]
             Pres_pert_mu300 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu300, [1.0 for el in T], [0.0 for el in T]), 
+                    zip(T_mu300, mu300, [1.0 for el in T], [0.0 for el in T]), 
                     desc = "Perturbative pressure (mu = 300)", 
-                    total = len(T), 
+                    total = len(T_mu300), 
                     ascii = True
                     )]
             (
                 (Pres_pi_step_mu300, Pres_rho_step_mu300, Pres_omega_step_mu300, Pres_D_step_mu300, Pres_N_step_mu300, Pres_T_step_mu300, Pres_F_step_mu300, Pres_P_step_mu300, Pres_Q5_step_mu300, Pres_H_step_mu300),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters(T, mu300, [1.0 for el in T], [0.0 for el in T])
+            ) = clusters(T_mu300, mu300, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu300_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu300, Pres_g_mu300, Pres_pert_mu300, Pres_pi_step_mu300, Pres_rho_step_mu300, Pres_omega_step_mu300, Pres_D_step_mu300, Pres_N_step_mu300, Pres_T_step_mu300, Pres_F_step_mu300, Pres_P_step_mu300, Pres_Q5_step_mu300, Pres_H_step_mu300)])
@@ -1387,13 +1391,13 @@ def PNJL_thermodynamics_continuum_test():
                 (Pres_pi_c_mu300, Pres_rho_c_mu300, Pres_omega_c_mu300, Pres_D_c_mu300, Pres_N_c_mu300, Pres_T_c_mu300, Pres_F_c_mu300, Pres_P_c_mu300, Pres_Q5_c_mu300, Pres_H_c_mu300),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters_c(T, mu300, phi_re_mu300, phi_im_mu300)
+            ) = clusters_c(T_mu300, mu300, phi_re_mu300, phi_im_mu300)
         else:
             (
                 (Pres_pi_c_mu300, Pres_rho_c_mu300, Pres_omega_c_mu300, Pres_D_c_mu300, Pres_N_c_mu300, Pres_T_c_mu300, Pres_F_c_mu300, Pres_P_c_mu300, Pres_Q5_c_mu300, Pres_H_c_mu300),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters_c(T, mu300, [1.0 for el in T], [0.0 for el in T])
+            ) = clusters_c(T_mu300, mu300, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu300_c_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu300, Pres_g_mu300, Pres_pert_mu300, Pres_pi_c_mu300, Pres_rho_c_mu300, Pres_omega_c_mu300, Pres_D_c_mu300, Pres_N_c_mu300, Pres_T_c_mu300, Pres_F_c_mu300, Pres_P_c_mu300, Pres_Q5_c_mu300, Pres_H_c_mu300)])
@@ -1411,9 +1415,9 @@ def PNJL_thermodynamics_continuum_test():
             pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
             for T_el, phi_re_el, phi_im_el 
             in tqdm.tqdm(
-                zip(T, phi_re_mu400, phi_im_mu400), 
+                zip(T_mu400, phi_re_mu400, phi_im_mu400), 
                 desc = "Gluon pressure (mu = 400)", 
-                total = len(T), 
+                total = len(T_mu400), 
                 ascii = True
                 )]
         if not pl_turned_off:
@@ -1422,50 +1426,50 @@ def PNJL_thermodynamics_continuum_test():
                 + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu400, phi_re_mu400, phi_im_mu400), 
+                    zip(T_mu400, mu400, phi_re_mu400, phi_im_mu400), 
                     desc = "Quark pressure (mu = 400)", 
-                    total = len(T), 
+                    total = len(T_mu400), 
                     ascii = True
                     )]
             Pres_pert_mu400 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu400, phi_re_mu400, phi_im_mu400), 
+                    zip(T_mu400, mu400, phi_re_mu400, phi_im_mu400), 
                     desc = "Perturbative pressure (mu = 400)", 
-                    total = len(T), 
+                    total = len(T_mu400), 
                     ascii = True
                     )]        
             (
                 (Pres_pi_step_mu400, Pres_rho_step_mu400, Pres_omega_step_mu400, Pres_D_step_mu400, Pres_N_step_mu400, Pres_T_step_mu400, Pres_F_step_mu400, Pres_P_step_mu400, Pres_Q5_step_mu400, Pres_H_step_mu400),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters(T, mu400, phi_re_mu400, phi_im_mu400)
+            ) = clusters(T_mu400, mu400, phi_re_mu400, phi_im_mu400)
         else:
             Pres_Q_mu400 = [
                 pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
                 + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el in 
                 tqdm.tqdm(
-                    zip(T, mu400, [1.0 for el in T], [0.0 for el in T]), 
+                    zip(T_mu400, mu400, [1.0 for el in T], [0.0 for el in T]), 
                     desc = "Quark pressure (mu = 400)", 
-                    total = len(T), 
+                    total = len(T_mu400), 
                     ascii = True
                     )]
             Pres_pert_mu400 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu400, [1.0 for el in T], [0.0 for el in T]), 
+                    zip(T_mu400, mu400, [1.0 for el in T], [0.0 for el in T]), 
                     desc = "Perturbative pressure (mu = 400)", 
-                    total = len(T), 
+                    total = len(T_mu400), 
                     ascii = True
                     )]
             (
                 (Pres_pi_step_mu400, Pres_rho_step_mu400, Pres_omega_step_mu400, Pres_D_step_mu400, Pres_N_step_mu400, Pres_T_step_mu400, Pres_F_step_mu400, Pres_P_step_mu400, Pres_Q5_step_mu400, Pres_H_step_mu400),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters(T, mu400, [1.0 for el in T], [0.0 for el in T])
+            ) = clusters(T_mu400, mu400, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu400_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu400, Pres_g_mu400, Pres_pert_mu400, Pres_pi_step_mu400, Pres_rho_step_mu400, Pres_omega_step_mu400, Pres_D_step_mu400, Pres_N_step_mu400, Pres_T_step_mu400, Pres_F_step_mu400, Pres_P_step_mu400, Pres_Q5_step_mu400, Pres_H_step_mu400)])
@@ -1484,13 +1488,13 @@ def PNJL_thermodynamics_continuum_test():
                 (Pres_pi_c_mu400, Pres_rho_c_mu400, Pres_omega_c_mu400, Pres_D_c_mu400, Pres_N_c_mu400, Pres_T_c_mu400, Pres_F_c_mu400, Pres_P_c_mu400, Pres_Q5_c_mu400, Pres_H_c_mu400),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters_c(T, mu400, phi_re_mu400, phi_im_mu400)
+            ) = clusters_c(T_mu400, mu400, phi_re_mu400, phi_im_mu400)
         else:
             (
                 (Pres_pi_c_mu400, Pres_rho_c_mu400, Pres_omega_c_mu400, Pres_D_c_mu400, Pres_N_c_mu400, Pres_T_c_mu400, Pres_F_c_mu400, Pres_P_c_mu400, Pres_Q5_c_mu400, Pres_H_c_mu400),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters_c(T, mu400, [1.0 for el in T], [0.0 for el in T])
+            ) = clusters_c(T_mu400, mu400, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu400_c_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu400, Pres_g_mu400, Pres_pert_mu400, Pres_pi_c_mu400, Pres_rho_c_mu400, Pres_omega_c_mu400, Pres_D_c_mu400, Pres_N_c_mu400, Pres_T_c_mu400, Pres_F_c_mu400, Pres_P_c_mu400, Pres_Q5_c_mu400, Pres_H_c_mu400)])
@@ -1508,9 +1512,9 @@ def PNJL_thermodynamics_continuum_test():
             pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
             for T_el, phi_re_el, phi_im_el 
             in tqdm.tqdm(
-                zip(T, phi_re_mu500, phi_im_mu500), 
+                zip(T_mu500, phi_re_mu500, phi_im_mu500), 
                 desc = "Gluon pressure (mu = 500)", 
-                total = len(T), 
+                total = len(T_mu500), 
                 ascii = True
                 )]
         if not pl_turned_off:
@@ -1519,50 +1523,50 @@ def PNJL_thermodynamics_continuum_test():
                 + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu500, phi_re_mu500, phi_im_mu500), 
+                    zip(T_mu500, mu500, phi_re_mu500, phi_im_mu500), 
                     desc = "Quark pressure (mu = 500)", 
-                    total = len(T), 
+                    total = len(T_mu500), 
                     ascii = True
                     )]
             Pres_pert_mu500 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu500, phi_re_mu500, phi_im_mu500), 
+                    zip(T_mu500, mu500, phi_re_mu500, phi_im_mu500), 
                     desc = "Perturbative pressure (mu = 500)", 
-                    total = len(T), 
+                    total = len(T_mu500), 
                     ascii = True
                     )]        
             (
                 (Pres_pi_step_mu500, Pres_rho_step_mu500, Pres_omega_step_mu500, Pres_D_step_mu500, Pres_N_step_mu500, Pres_T_step_mu500, Pres_F_step_mu500, Pres_P_step_mu500, Pres_Q5_step_mu500, Pres_H_step_mu500),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters(T, mu500, phi_re_mu500, phi_im_mu500)
+            ) = clusters(T_mu500, mu500, phi_re_mu500, phi_im_mu500)
         else:
             Pres_Q_mu500 = [
                 pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
                 + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = 100.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el in 
                 tqdm.tqdm(
-                    zip(T, mu500, [1.0 for el in T], [0.0 for el in T]), 
+                    zip(T_mu500, mu500, [1.0 for el in T], [0.0 for el in T]), 
                     desc = "Quark pressure (mu = 500)", 
-                    total = len(T), 
+                    total = len(T_mu500), 
                     ascii = True
                     )]
             Pres_pert_mu500 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 2.0) 
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
                 for T_el, mu_el, phi_re_el, phi_im_el 
                 in tqdm.tqdm(
-                    zip(T, mu500, [1.0 for el in T], [0.0 for el in T]), 
+                    zip(T_mu500, mu500, [1.0 for el in T], [0.0 for el in T]), 
                     desc = "Perturbative pressure (mu = 500)", 
-                    total = len(T), 
+                    total = len(T_mu500), 
                     ascii = True
                     )]
             (
                 (Pres_pi_step_mu500, Pres_rho_step_mu500, Pres_omega_step_mu500, Pres_D_step_mu500, Pres_N_step_mu500, Pres_T_step_mu500, Pres_F_step_mu500, Pres_P_step_mu500, Pres_Q5_step_mu500, Pres_H_step_mu500),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters(T, mu500, [1.0 for el in T], [0.0 for el in T])
+            ) = clusters(T_mu500, mu500, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu500_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu500, Pres_g_mu500, Pres_pert_mu500, Pres_pi_step_mu500, Pres_rho_step_mu500, Pres_omega_step_mu500, Pres_D_step_mu500, Pres_N_step_mu500, Pres_T_step_mu500, Pres_F_step_mu500, Pres_P_step_mu500, Pres_Q5_step_mu500, Pres_H_step_mu500)])
@@ -1581,13 +1585,13 @@ def PNJL_thermodynamics_continuum_test():
                 (Pres_pi_c_mu500, Pres_rho_c_mu500, Pres_omega_c_mu500, Pres_D_c_mu500, Pres_N_c_mu500, Pres_T_c_mu500, Pres_F_c_mu500, Pres_P_c_mu500, Pres_Q5_c_mu500, Pres_H_c_mu500),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters_c(T, mu500, phi_re_mu500, phi_im_mu500)
+            ) = clusters_c(T_mu500, mu500, phi_re_mu500, phi_im_mu500)
         else:
             (
                 (Pres_pi_c_mu500, Pres_rho_c_mu500, Pres_omega_c_mu500, Pres_D_c_mu500, Pres_N_c_mu500, Pres_T_c_mu500, Pres_F_c_mu500, Pres_P_c_mu500, Pres_Q5_c_mu500, Pres_H_c_mu500),
                 (_, _, _, _, _, _, _, _, _, _),
                 (_, _, _, _, _, _, _, _, _, _)
-            ) = clusters_c(T, mu500, [1.0 for el in T], [0.0 for el in T])
+            ) = clusters_c(T_mu500, mu500, [1.0 for el in T], [0.0 for el in T])
         with open(pressure_mu500_c_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el] for q_el, g_el, pert_el, pi_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el in zip(Pres_Q_mu500, Pres_g_mu500, Pres_pert_mu500, Pres_pi_c_mu500, Pres_rho_c_mu500, Pres_omega_c_mu500, Pres_D_c_mu500, Pres_N_c_mu500, Pres_T_c_mu500, Pres_F_c_mu500, Pres_P_c_mu500, Pres_Q5_c_mu500, Pres_H_c_mu500)])
@@ -1600,160 +1604,160 @@ def PNJL_thermodynamics_continuum_test():
         Pres_P_c_mu500, Pres_Q5_c_mu500      = utils.data_collect(10, 11, pressure_mu500_c_file)
         Pres_H_c_mu500, _                  = utils.data_collect(12, 12, pressure_mu500_c_file)
 
-    contrib_q_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q_mu0   )]
-    contrib_g_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_g_mu0   )]
-    #contrib_pert_mu0                = [0.0 for T_el, p_el in zip(T, Pres_pert_mu0)]
-    contrib_pert_mu0                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pert_mu0)]
+    contrib_q_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_Q_mu0   )]
+    contrib_g_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_g_mu0   )]
+    #contrib_pert_mu0                = [0.0 for T_el, p_el in zip(T_mu0, Pres_pert_mu0)]
+    contrib_pert_mu0                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_pert_mu0)]
     contrib_qgp_mu0                 = [sum(el) for el in zip(contrib_q_mu0, contrib_g_mu0, contrib_pert_mu0)]
-    contrib_q_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q_mu200   )]
-    contrib_g_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_g_mu200   )]
-    #contrib_pert_mu200              = [0.0 for T_el, p_el in zip(T, Pres_pert_mu0)]
-    contrib_pert_mu200              = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pert_mu200)]
+    contrib_q_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_Q_mu200   )]
+    contrib_g_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_g_mu200   )]
+    #contrib_pert_mu200              = [0.0 for T_el, p_el in zip(T_mu200, Pres_pert_mu0)]
+    contrib_pert_mu200              = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_pert_mu200)]
     contrib_qgp_mu200               = [sum(el) for el in zip(contrib_q_mu200, contrib_g_mu200, contrib_pert_mu200)]
-    contrib_q_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q_mu300   )]
-    contrib_g_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_g_mu300   )]
-    #contrib_pert_mu300              = [0.0 for T_el, p_el in zip(T, Pres_pert_mu0)]
-    contrib_pert_mu300              = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pert_mu300)]
+    contrib_q_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_Q_mu300   )]
+    contrib_g_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_g_mu300   )]
+    #contrib_pert_mu300              = [0.0 for T_el, p_el in zip(T_mu300, Pres_pert_mu0)]
+    contrib_pert_mu300              = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_pert_mu300)]
     contrib_qgp_mu300               = [sum(el) for el in zip(contrib_q_mu300, contrib_g_mu300, contrib_pert_mu300)]
-    contrib_q_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q_mu400   )]
-    contrib_g_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_g_mu400   )]
-    #contrib_pert_mu400              = [0.0 for T_el, p_el in zip(T, Pres_pert_mu0)]
-    contrib_pert_mu400              = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pert_mu400)]
+    contrib_q_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_Q_mu400   )]
+    contrib_g_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_g_mu400   )]
+    #contrib_pert_mu400              = [0.0 for T_el, p_el in zip(T_mu400, Pres_pert_mu0)]
+    contrib_pert_mu400              = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_pert_mu400)]
     contrib_qgp_mu400               = [sum(el) for el in zip(contrib_q_mu400, contrib_g_mu400, contrib_pert_mu400)]
-    contrib_q_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q_mu500   )]
-    contrib_g_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_g_mu500   )]
-    #contrib_pert_mu500              = [0.0 for T_el, p_el in zip(T, Pres_pert_mu0)]
-    contrib_pert_mu500              = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pert_mu500)]
+    contrib_q_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_Q_mu500   )]
+    contrib_g_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_g_mu500   )]
+    #contrib_pert_mu500              = [0.0 for T_el, p_el in zip(T_mu500, Pres_pert_mu0)]
+    contrib_pert_mu500              = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_pert_mu500)]
     contrib_qgp_mu500               = [sum(el) for el in zip(contrib_q_mu500, contrib_g_mu500, contrib_pert_mu500)]
 
-    contrib_pi_step_mu0                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pi_step_mu0)]
-    contrib_rho_step_mu0                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_rho_step_mu0)]
-    contrib_omega_step_mu0               = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_omega_step_mu0)]
-    contrib_D_step_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_D_step_mu0)]
-    contrib_N_step_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_N_step_mu0)]
-    contrib_T_step_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_T_step_mu0)]
-    contrib_F_step_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_F_step_mu0)]
-    contrib_P_step_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_P_step_mu0)]
-    contrib_Q5_step_mu0                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q5_step_mu0)]
-    contrib_H_step_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_H_step_mu0)]
+    contrib_pi_step_mu0                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_pi_step_mu0)]
+    contrib_rho_step_mu0                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_rho_step_mu0)]
+    contrib_omega_step_mu0               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_omega_step_mu0)]
+    contrib_D_step_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_D_step_mu0)]
+    contrib_N_step_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_N_step_mu0)]
+    contrib_T_step_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_T_step_mu0)]
+    contrib_F_step_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_F_step_mu0)]
+    contrib_P_step_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_P_step_mu0)]
+    contrib_Q5_step_mu0                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_Q5_step_mu0)]
+    contrib_H_step_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_H_step_mu0)]
     contrib_cluster_step_mu0             = [sum(el) for el in zip(contrib_pi_step_mu0, contrib_rho_step_mu0, contrib_omega_step_mu0, contrib_D_step_mu0, contrib_N_step_mu0, contrib_T_step_mu0, contrib_F_step_mu0, contrib_P_step_mu0, contrib_Q5_step_mu0, contrib_H_step_mu0)]
     contrib_cluster_singlet_step_mu0     = [sum(el) for el in zip(contrib_pi_step_mu0, contrib_rho_step_mu0, contrib_omega_step_mu0, contrib_N_step_mu0, contrib_T_step_mu0, contrib_P_step_mu0, contrib_H_step_mu0)]
     contrib_cluster_color_step_mu0       = [sum(el) for el in zip(contrib_D_step_mu0, contrib_F_step_mu0, contrib_Q5_step_mu0)]
-    contrib_pi_step_mu200                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pi_step_mu200)]
-    contrib_rho_step_mu200               = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_rho_step_mu200)]
-    contrib_omega_step_mu200             = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_omega_step_mu200)]
-    contrib_D_step_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_D_step_mu200)]
-    contrib_N_step_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_N_step_mu200)]
-    contrib_T_step_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_T_step_mu200)]
-    contrib_F_step_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_F_step_mu200)]
-    contrib_P_step_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_P_step_mu200)]
-    contrib_Q5_step_mu200                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q5_step_mu200)]
-    contrib_H_step_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_H_step_mu200)]
+    contrib_pi_step_mu200                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_pi_step_mu200)]
+    contrib_rho_step_mu200               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_rho_step_mu200)]
+    contrib_omega_step_mu200             = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_omega_step_mu200)]
+    contrib_D_step_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_D_step_mu200)]
+    contrib_N_step_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_N_step_mu200)]
+    contrib_T_step_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_T_step_mu200)]
+    contrib_F_step_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_F_step_mu200)]
+    contrib_P_step_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_P_step_mu200)]
+    contrib_Q5_step_mu200                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_Q5_step_mu200)]
+    contrib_H_step_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_H_step_mu200)]
     contrib_cluster_step_mu200           = [sum(el) for el in zip(contrib_pi_step_mu200, contrib_rho_step_mu200, contrib_omega_step_mu200, contrib_D_step_mu200, contrib_N_step_mu200, contrib_T_step_mu200, contrib_F_step_mu200, contrib_P_step_mu200, contrib_Q5_step_mu200, contrib_H_step_mu200)]
     contrib_cluster_singlet_step_mu200   = [sum(el) for el in zip(contrib_pi_step_mu200, contrib_rho_step_mu200, contrib_omega_step_mu200, contrib_N_step_mu200, contrib_T_step_mu200, contrib_P_step_mu200, contrib_H_step_mu200)]
     contrib_cluster_color_step_mu200     = [sum(el) for el in zip(contrib_D_step_mu200, contrib_F_step_mu200, contrib_Q5_step_mu200)]
-    contrib_pi_step_mu300                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pi_step_mu300)]
-    contrib_rho_step_mu300               = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_rho_step_mu300)]
-    contrib_omega_step_mu300             = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_omega_step_mu300)]
-    contrib_D_step_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_D_step_mu300)]
-    contrib_N_step_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_N_step_mu300)]
-    contrib_T_step_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_T_step_mu300)]
-    contrib_F_step_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_F_step_mu300)]
-    contrib_P_step_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_P_step_mu300)]
-    contrib_Q5_step_mu300                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q5_step_mu300)]
-    contrib_H_step_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_H_step_mu300)]
+    contrib_pi_step_mu300                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_pi_step_mu300)]
+    contrib_rho_step_mu300               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_rho_step_mu300)]
+    contrib_omega_step_mu300             = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_omega_step_mu300)]
+    contrib_D_step_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_D_step_mu300)]
+    contrib_N_step_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_N_step_mu300)]
+    contrib_T_step_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_T_step_mu300)]
+    contrib_F_step_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_F_step_mu300)]
+    contrib_P_step_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_P_step_mu300)]
+    contrib_Q5_step_mu300                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_Q5_step_mu300)]
+    contrib_H_step_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_H_step_mu300)]
     contrib_cluster_step_mu300           = [sum(el) for el in zip(contrib_pi_step_mu300, contrib_rho_step_mu300, contrib_omega_step_mu300, contrib_D_step_mu300, contrib_N_step_mu300, contrib_T_step_mu300, contrib_F_step_mu300, contrib_P_step_mu300, contrib_Q5_step_mu300, contrib_H_step_mu300)]
     contrib_cluster_singlet_step_mu300   = [sum(el) for el in zip(contrib_pi_step_mu300, contrib_rho_step_mu300, contrib_omega_step_mu300, contrib_N_step_mu300, contrib_T_step_mu300, contrib_P_step_mu300, contrib_H_step_mu300)]
     contrib_cluster_color_step_mu300     = [sum(el) for el in zip(contrib_D_step_mu300, contrib_F_step_mu300, contrib_Q5_step_mu300)]
-    contrib_pi_step_mu400                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pi_step_mu400)]
-    contrib_rho_step_mu400               = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_rho_step_mu400)]
-    contrib_omega_step_mu400             = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_omega_step_mu400)]
-    contrib_D_step_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_D_step_mu400)]
-    contrib_N_step_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_N_step_mu400)]
-    contrib_T_step_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_T_step_mu400)]
-    contrib_F_step_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_F_step_mu400)]
-    contrib_P_step_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_P_step_mu400)]
-    contrib_Q5_step_mu400                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q5_step_mu400)]
-    contrib_H_step_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_H_step_mu400)]
+    contrib_pi_step_mu400                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_pi_step_mu400)]
+    contrib_rho_step_mu400               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_rho_step_mu400)]
+    contrib_omega_step_mu400             = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_omega_step_mu400)]
+    contrib_D_step_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_D_step_mu400)]
+    contrib_N_step_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_N_step_mu400)]
+    contrib_T_step_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_T_step_mu400)]
+    contrib_F_step_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_F_step_mu400)]
+    contrib_P_step_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_P_step_mu400)]
+    contrib_Q5_step_mu400                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_Q5_step_mu400)]
+    contrib_H_step_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_H_step_mu400)]
     contrib_cluster_step_mu400           = [sum(el) for el in zip(contrib_pi_step_mu400, contrib_rho_step_mu400, contrib_omega_step_mu400, contrib_D_step_mu400, contrib_N_step_mu400, contrib_T_step_mu400, contrib_F_step_mu400, contrib_P_step_mu400, contrib_Q5_step_mu400, contrib_H_step_mu400)]
     contrib_cluster_singlet_step_mu400   = [sum(el) for el in zip(contrib_pi_step_mu400, contrib_rho_step_mu400, contrib_omega_step_mu400, contrib_N_step_mu400, contrib_T_step_mu400, contrib_P_step_mu400, contrib_H_step_mu400)]
     contrib_cluster_color_step_mu400     = [sum(el) for el in zip(contrib_D_step_mu400, contrib_F_step_mu400, contrib_Q5_step_mu400)]
-    contrib_pi_step_mu500                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pi_step_mu500)]
-    contrib_rho_step_mu500               = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_rho_step_mu500)]
-    contrib_omega_step_mu500             = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_omega_step_mu500)]
-    contrib_D_step_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_D_step_mu500)]
-    contrib_N_step_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_N_step_mu500)]
-    contrib_T_step_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_T_step_mu500)]
-    contrib_F_step_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_F_step_mu500)]
-    contrib_P_step_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_P_step_mu500)]
-    contrib_Q5_step_mu500                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q5_step_mu500)]
-    contrib_H_step_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_H_step_mu500)]
+    contrib_pi_step_mu500                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_pi_step_mu500)]
+    contrib_rho_step_mu500               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_rho_step_mu500)]
+    contrib_omega_step_mu500             = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_omega_step_mu500)]
+    contrib_D_step_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_D_step_mu500)]
+    contrib_N_step_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_N_step_mu500)]
+    contrib_T_step_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_T_step_mu500)]
+    contrib_F_step_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_F_step_mu500)]
+    contrib_P_step_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_P_step_mu500)]
+    contrib_Q5_step_mu500                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_Q5_step_mu500)]
+    contrib_H_step_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_H_step_mu500)]
     contrib_cluster_step_mu500           = [sum(el) for el in zip(contrib_pi_step_mu500, contrib_rho_step_mu500, contrib_omega_step_mu500, contrib_D_step_mu500, contrib_N_step_mu500, contrib_T_step_mu500, contrib_F_step_mu500, contrib_P_step_mu500, contrib_Q5_step_mu500, contrib_H_step_mu500)]
     contrib_cluster_singlet_step_mu500   = [sum(el) for el in zip(contrib_pi_step_mu500, contrib_rho_step_mu500, contrib_omega_step_mu500, contrib_N_step_mu500, contrib_T_step_mu500, contrib_P_step_mu500, contrib_H_step_mu500)]
     contrib_cluster_color_step_mu500     = [sum(el) for el in zip(contrib_D_step_mu500, contrib_F_step_mu500, contrib_Q5_step_mu500)]
 
-    contrib_pi_c_mu0                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pi_c_mu0)]
-    contrib_rho_c_mu0                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_rho_c_mu0)]
-    contrib_omega_c_mu0               = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_omega_c_mu0)]
-    contrib_D_c_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_D_c_mu0)]
-    contrib_N_c_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_N_c_mu0)]
-    contrib_T_c_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_T_c_mu0)]
-    contrib_F_c_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_F_c_mu0)]
-    contrib_P_c_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_P_c_mu0)]
-    contrib_Q5_c_mu0                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q5_c_mu0)]
-    contrib_H_c_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_H_c_mu0)]
+    contrib_pi_c_mu0                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_pi_c_mu0)]
+    contrib_rho_c_mu0                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_rho_c_mu0)]
+    contrib_omega_c_mu0               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_omega_c_mu0)]
+    contrib_D_c_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_D_c_mu0)]
+    contrib_N_c_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_N_c_mu0)]
+    contrib_T_c_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_T_c_mu0)]
+    contrib_F_c_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_F_c_mu0)]
+    contrib_P_c_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_P_c_mu0)]
+    contrib_Q5_c_mu0                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_Q5_c_mu0)]
+    contrib_H_c_mu0                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu0, Pres_H_c_mu0)]
     contrib_cluster_c_mu0             = [sum(el) for el in zip(contrib_pi_c_mu0, contrib_rho_c_mu0, contrib_omega_c_mu0, contrib_D_c_mu0, contrib_N_c_mu0, contrib_T_c_mu0, contrib_F_c_mu0, contrib_P_c_mu0, contrib_Q5_c_mu0, contrib_H_c_mu0)]
     contrib_cluster_singlet_c_mu0     = [sum(el) for el in zip(contrib_pi_c_mu0, contrib_rho_c_mu0, contrib_omega_c_mu0, contrib_N_c_mu0, contrib_T_c_mu0, contrib_P_c_mu0, contrib_H_c_mu0)]
     contrib_cluster_color_c_mu0       = [sum(el) for el in zip(contrib_D_c_mu0, contrib_F_c_mu0, contrib_Q5_c_mu0)]
-    contrib_pi_c_mu200                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pi_c_mu200)]
-    contrib_rho_c_mu200               = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_rho_c_mu200)]
-    contrib_omega_c_mu200             = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_omega_c_mu200)]
-    contrib_D_c_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_D_c_mu200)]
-    contrib_N_c_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_N_c_mu200)]
-    contrib_T_c_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_T_c_mu200)]
-    contrib_F_c_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_F_c_mu200)]
-    contrib_P_c_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_P_c_mu200)]
-    contrib_Q5_c_mu200                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q5_c_mu200)]
-    contrib_H_c_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_H_c_mu200)]
+    contrib_pi_c_mu200                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_pi_c_mu200)]
+    contrib_rho_c_mu200               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_rho_c_mu200)]
+    contrib_omega_c_mu200             = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_omega_c_mu200)]
+    contrib_D_c_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_D_c_mu200)]
+    contrib_N_c_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_N_c_mu200)]
+    contrib_T_c_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_T_c_mu200)]
+    contrib_F_c_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_F_c_mu200)]
+    contrib_P_c_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_P_c_mu200)]
+    contrib_Q5_c_mu200                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_Q5_c_mu200)]
+    contrib_H_c_mu200                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu200, Pres_H_c_mu200)]
     contrib_cluster_c_mu200           = [sum(el) for el in zip(contrib_pi_c_mu200, contrib_rho_c_mu200, contrib_omega_c_mu200, contrib_D_c_mu200, contrib_N_c_mu200, contrib_T_c_mu200, contrib_F_c_mu200, contrib_P_c_mu200, contrib_Q5_c_mu200, contrib_H_c_mu200)]
     contrib_cluster_singlet_c_mu200   = [sum(el) for el in zip(contrib_pi_c_mu200, contrib_rho_c_mu200, contrib_omega_c_mu200, contrib_N_c_mu200, contrib_T_c_mu200, contrib_P_c_mu200, contrib_H_c_mu200)]
     contrib_cluster_color_c_mu200     = [sum(el) for el in zip(contrib_D_c_mu200, contrib_F_c_mu200, contrib_Q5_c_mu200)]
-    contrib_pi_c_mu300                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pi_c_mu300)]
-    contrib_rho_c_mu300               = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_rho_c_mu300)]
-    contrib_omega_c_mu300             = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_omega_c_mu300)]
-    contrib_D_c_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_D_c_mu300)]
-    contrib_N_c_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_N_c_mu300)]
-    contrib_T_c_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_T_c_mu300)]
-    contrib_F_c_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_F_c_mu300)]
-    contrib_P_c_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_P_c_mu300)]
-    contrib_Q5_c_mu300                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q5_c_mu300)]
-    contrib_H_c_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_H_c_mu300)]
+    contrib_pi_c_mu300                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_pi_c_mu300)]
+    contrib_rho_c_mu300               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_rho_c_mu300)]
+    contrib_omega_c_mu300             = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_omega_c_mu300)]
+    contrib_D_c_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_D_c_mu300)]
+    contrib_N_c_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_N_c_mu300)]
+    contrib_T_c_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_T_c_mu300)]
+    contrib_F_c_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_F_c_mu300)]
+    contrib_P_c_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_P_c_mu300)]
+    contrib_Q5_c_mu300                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_Q5_c_mu300)]
+    contrib_H_c_mu300                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu300, Pres_H_c_mu300)]
     contrib_cluster_c_mu300           = [sum(el) for el in zip(contrib_pi_c_mu300, contrib_rho_c_mu300, contrib_omega_c_mu300, contrib_D_c_mu300, contrib_N_c_mu300, contrib_T_c_mu300, contrib_F_c_mu300, contrib_P_c_mu300, contrib_Q5_c_mu300, contrib_H_c_mu300)]
     contrib_cluster_singlet_c_mu300   = [sum(el) for el in zip(contrib_pi_c_mu300, contrib_rho_c_mu300, contrib_omega_c_mu300, contrib_N_c_mu300, contrib_T_c_mu300, contrib_P_c_mu300, contrib_H_c_mu300)]
     contrib_cluster_color_c_mu300     = [sum(el) for el in zip(contrib_D_c_mu300, contrib_F_c_mu300, contrib_Q5_c_mu300)]
-    contrib_pi_c_mu400                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pi_c_mu400)]
-    contrib_rho_c_mu400               = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_rho_c_mu400)]
-    contrib_omega_c_mu400             = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_omega_c_mu400)]
-    contrib_D_c_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_D_c_mu400)]
-    contrib_N_c_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_N_c_mu400)]
-    contrib_T_c_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_T_c_mu400)]
-    contrib_F_c_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_F_c_mu400)]
-    contrib_P_c_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_P_c_mu400)]
-    contrib_Q5_c_mu400                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q5_c_mu400)]
-    contrib_H_c_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_H_c_mu400)]
+    contrib_pi_c_mu400                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_pi_c_mu400)]
+    contrib_rho_c_mu400               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_rho_c_mu400)]
+    contrib_omega_c_mu400             = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_omega_c_mu400)]
+    contrib_D_c_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_D_c_mu400)]
+    contrib_N_c_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_N_c_mu400)]
+    contrib_T_c_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_T_c_mu400)]
+    contrib_F_c_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_F_c_mu400)]
+    contrib_P_c_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_P_c_mu400)]
+    contrib_Q5_c_mu400                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_Q5_c_mu400)]
+    contrib_H_c_mu400                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu400, Pres_H_c_mu400)]
     contrib_cluster_c_mu400           = [sum(el) for el in zip(contrib_pi_c_mu400, contrib_rho_c_mu400, contrib_omega_c_mu400, contrib_D_c_mu400, contrib_N_c_mu400, contrib_T_c_mu400, contrib_F_c_mu400, contrib_P_c_mu400, contrib_Q5_c_mu400, contrib_H_c_mu400)]
     contrib_cluster_singlet_c_mu400   = [sum(el) for el in zip(contrib_pi_c_mu400, contrib_rho_c_mu400, contrib_omega_c_mu400, contrib_N_c_mu400, contrib_T_c_mu400, contrib_P_c_mu400, contrib_H_c_mu400)]
     contrib_cluster_color_c_mu400     = [sum(el) for el in zip(contrib_D_c_mu400, contrib_F_c_mu400, contrib_Q5_c_mu400)]
-    contrib_pi_c_mu500                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_pi_c_mu500)]
-    contrib_rho_c_mu500               = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_rho_c_mu500)]
-    contrib_omega_c_mu500             = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_omega_c_mu500)]
-    contrib_D_c_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_D_c_mu500)]
-    contrib_N_c_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_N_c_mu500)]
-    contrib_T_c_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_T_c_mu500)]
-    contrib_F_c_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_F_c_mu500)]
-    contrib_P_c_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_P_c_mu500)]
-    contrib_Q5_c_mu500                = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_Q5_c_mu500)]
-    contrib_H_c_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T, Pres_H_c_mu500)]
+    contrib_pi_c_mu500                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_pi_c_mu500)]
+    contrib_rho_c_mu500               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_rho_c_mu500)]
+    contrib_omega_c_mu500             = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_omega_c_mu500)]
+    contrib_D_c_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_D_c_mu500)]
+    contrib_N_c_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_N_c_mu500)]
+    contrib_T_c_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_T_c_mu500)]
+    contrib_F_c_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_F_c_mu500)]
+    contrib_P_c_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_P_c_mu500)]
+    contrib_Q5_c_mu500                = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_Q5_c_mu500)]
+    contrib_H_c_mu500                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_mu500, Pres_H_c_mu500)]
     contrib_cluster_c_mu500           = [sum(el) for el in zip(contrib_pi_c_mu500, contrib_rho_c_mu500, contrib_omega_c_mu500, contrib_D_c_mu500, contrib_N_c_mu500, contrib_T_c_mu500, contrib_F_c_mu500, contrib_P_c_mu500, contrib_Q5_c_mu500, contrib_H_c_mu500)]
     contrib_cluster_singlet_c_mu500   = [sum(el) for el in zip(contrib_pi_c_mu500, contrib_rho_c_mu500, contrib_omega_c_mu500, contrib_N_c_mu500, contrib_T_c_mu500, contrib_P_c_mu500, contrib_H_c_mu500)]
     contrib_cluster_color_c_mu500     = [sum(el) for el in zip(contrib_D_c_mu500, contrib_F_c_mu500, contrib_Q5_c_mu500)]
@@ -1764,12 +1768,14 @@ def PNJL_thermodynamics_continuum_test():
     (high_1204_6710v2_mu200_x, high_1204_6710v2_mu200_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu200_high.dat")
     (low_1204_6710v2_mu300_x, low_1204_6710v2_mu300_y)   = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu300_low.dat")
     (high_1204_6710v2_mu300_x, high_1204_6710v2_mu300_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu300_high.dat")
-    (high_1407_6387_mu0_x, high_1407_6387_mu0_y) = utils.data_collect(0, 3, "D:/EoS/archive/BDK/lattice_data/const_mu/1407_6387_table1_pressure_mu0.dat")
-    (low_1407_6387_mu0_x, low_1407_6387_mu0_y) = utils.data_collect(0, 2, "D:/EoS/archive/BDK/lattice_data/const_mu/1407_6387_table1_pressure_mu0.dat")
-    (high_1309_5258_mu0_x, high_1309_5258_mu0_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1309_5258_figure6_pressure_mu0_high.dat")
-    (low_1309_5258_mu0_x, low_1309_5258_mu0_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1309_5258_figure6_pressure_mu0_low.dat")
-    (high_1710_05024_mu0_x, high_1710_05024_mu0_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1710_05024_figure8_pressure_mu0_high.dat")
-    (low_1710_05024_mu0_x, low_1710_05024_mu0_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1710_05024_figure8_pressure_mu0_low.dat")
+    (low_1204_6710v2_mu400_x, low_1204_6710v2_mu400_y)   = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu400_low.dat")
+    (high_1204_6710v2_mu400_x, high_1204_6710v2_mu400_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu400_high.dat")
+    (high_1407_6387_mu0_x, high_1407_6387_mu0_y)         = utils.data_collect(0, 3, "D:/EoS/archive/BDK/lattice_data/const_mu/1407_6387_table1_pressure_mu0.dat")
+    (low_1407_6387_mu0_x, low_1407_6387_mu0_y)           = utils.data_collect(0, 2, "D:/EoS/archive/BDK/lattice_data/const_mu/1407_6387_table1_pressure_mu0.dat")
+    (high_1309_5258_mu0_x, high_1309_5258_mu0_y)         = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1309_5258_figure6_pressure_mu0_high.dat")
+    (low_1309_5258_mu0_x, low_1309_5258_mu0_y)           = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1309_5258_figure6_pressure_mu0_low.dat")
+    (high_1710_05024_mu0_x, high_1710_05024_mu0_y)       = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1710_05024_figure8_pressure_mu0_high.dat")
+    (low_1710_05024_mu0_x, low_1710_05024_mu0_y)         = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1710_05024_figure8_pressure_mu0_low.dat")
 
     borsanyi_1204_6710v2_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y)]
     for x_el, y_el in zip(low_1204_6710v2_mu0_x[::-1], low_1204_6710v2_mu0_y[::-1]):
@@ -1783,6 +1789,10 @@ def PNJL_thermodynamics_continuum_test():
     for x_el, y_el in zip(low_1204_6710v2_mu300_x[::-1], low_1204_6710v2_mu300_y[::-1]):
         borsanyi_1204_6710v2_mu300.append(numpy.array([x_el, y_el]))
     borsanyi_1204_6710v2_mu300 = numpy.array(borsanyi_1204_6710v2_mu300)
+    borsanyi_1204_6710v2_mu400 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu400_x, high_1204_6710v2_mu400_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu400_x[::-1], low_1204_6710v2_mu400_y[::-1]):
+        borsanyi_1204_6710v2_mu400.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu400 = numpy.array(borsanyi_1204_6710v2_mu400)
     bazavov_1407_6387_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1407_6387_mu0_x, high_1407_6387_mu0_y)]
     for x_el, y_el in zip(low_1407_6387_mu0_x[::-1], low_1407_6387_mu0_y[::-1]):
         bazavov_1407_6387_mu0.append(numpy.array([x_el, y_el]))
@@ -1805,16 +1815,16 @@ def PNJL_thermodynamics_continuum_test():
     #ax1.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu0, closed = True, fill = True, color = 'green', alpha = 0.5, label = r'Borsanyi et al. (2012), $\mathrm{\mu=0}$'))
     #ax1.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu200, closed = True, fill = True, color = 'red', alpha = 0.5, label = r'Borsanyi et al. (2012), $\mathrm{\mu=200}$ MeV'))
     #ax1.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu300, closed = True, fill = True, color = 'yellow', alpha = 0.5, label = r'Borsanyi et al. (2012), $\mathrm{\mu=300}$ MeV'))
-    ax1.plot(T, contrib_q_mu0, '-', c = 'blue', label = r'$\mathrm{P_{Q,0}}$')
-    ax1.plot(T, contrib_g_mu0, '-', c = 'red', label = r'$\mathrm{P_{g,0}}$')
-    ax1.plot(T, contrib_pert_mu0, '-', c = 'pink', label = r'$\mathrm{P_{pert,0}}$')
-    ax1.plot(T, contrib_qgp_mu0, '-', c = 'black', label = r'$\mathrm{P_{QGP,0}}$')
-    #ax1.plot(T, contrib_cluster_step_mu0, '-', c = 'blue', label = r'$\mathrm{P_{cluster,0}}$')
-    #ax1.plot(T, contrib_cluster_singlet_step_mu0, '-', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,0}}$')
-    #ax1.plot(T, contrib_cluster_color_step_mu0, '-', c = 'red', label = r'$\mathrm{P^{(3/\bar{3})}_{cluster,0}}$')
-    #ax1.plot(T, contrib_cluster_c_mu0, '-.', c = 'blue', label = r'$\mathrm{P_{cluster,0}}$')
-    #ax1.plot(T, contrib_cluster_singlet_c_mu0, '-.', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,0}}$')
-    #ax1.plot(T, contrib_cluster_color_c_mu0, '-.', c = 'red', label = r'$\mathrm{P^{(3/\bar{3})}_{cluster,0}}$')
+    ax1.plot(T_mu0, contrib_q_mu0, '-', c = 'blue', label = r'$\mathrm{P_{Q,0}}$')
+    ax1.plot(T_mu0, contrib_g_mu0, '-', c = 'red', label = r'$\mathrm{P_{g,0}}$')
+    ax1.plot(T_mu0, contrib_pert_mu0, '-', c = 'pink', label = r'$\mathrm{P_{pert,0}}$')
+    ax1.plot(T_mu0, contrib_qgp_mu0, '-', c = 'black', label = r'$\mathrm{P_{QGP,0}}$')
+    #ax1.plot(T_mu0, contrib_cluster_step_mu0, '-', c = 'blue', label = r'$\mathrm{P_{cluster,0}}$')
+    #ax1.plot(T_mu0, contrib_cluster_singlet_step_mu0, '-', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,0}}$')
+    #ax1.plot(T_mu0, contrib_cluster_color_step_mu0, '-', c = 'red', label = r'$\mathrm{P^{(3/\bar{3})}_{cluster,0}}$')
+    #ax1.plot(T_mu0, contrib_cluster_c_mu0, '-.', c = 'blue', label = r'$\mathrm{P_{cluster,0}}$')
+    #ax1.plot(T_mu0, contrib_cluster_singlet_c_mu0, '-.', c = 'green', label = r'$\mathrm{P^{(1)}_{cluster,0}}$')
+    #ax1.plot(T_mu0, contrib_cluster_color_c_mu0, '-.', c = 'red', label = r'$\mathrm{P^{(3/\bar{3})}_{cluster,0}}$')
     #ax1.legend(loc = 2)
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -1825,27 +1835,26 @@ def PNJL_thermodynamics_continuum_test():
 
     fig3 = matplotlib.pyplot.figure(num = 3, figsize = (5.9, 5))
     ax3 = fig3.add_subplot(1, 1, 1)
-    #ax3.axis([0., 450., 0., 4.5])
-    #ax3.axis([100., 200., 0., 1.0])
-    #ax3.axis([100., 200., 0., 1.8])
-    ax3.axis([0., 350., 0., 3.5])
-    ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu0, closed = True, fill = True, color = 'blue', alpha = 0.5, label = r'Borsanyi et al. (2012), $\mathrm{\mu=0}$'))
-    ax3.add_patch(matplotlib.patches.Polygon(bazavov_1407_6387_mu0, closed = True, fill = True, color = 'red', alpha = 0.5, label = r'Bazavov et al. (2014), $\mathrm{\mu=0}$'))
-    ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1309_5258_mu0, closed = True, fill = True, color = 'green', alpha = 0.5, label = r'Borsanyi et al. (2014), $\mathrm{\mu=0}$'))
-    ax3.add_patch(matplotlib.patches.Polygon(bazavov_1710_05024_mu0, closed = True, fill = True, color = 'magenta', alpha = 0.5, label = r'Bazavov et al. (2018), $\mathrm{\mu=0}$'))
-    #ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu200, closed = True, fill = True, color = 'red', alpha = 0.5, label = r'Borsanyi et al. (2012), $\mathrm{\mu=200}$ MeV'))
-    #ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu300, closed = True, fill = True, color = 'green', alpha = 0.5, label = r'Borsanyi et al. (2012), $\mathrm{\mu=300}$ MeV'))
-    ax3.plot(T, [sum(el) for el in zip(contrib_qgp_mu0, contrib_cluster_step_mu0)], '-.', c = 'blue')
-    ax3.plot(T, [sum(el) for el in zip(contrib_qgp_mu0, contrib_cluster_c_mu0)], '-', c = 'blue', label = r'$\mathrm{\mu=0}$')
-    #ax3.plot(T, [sum(el) for el in zip(contrib_qgp_mu200, contrib_cluster_step_mu200)], '-', c = 'red', label = r'$\mathrm{\mu=200}$ MeV')
-    #ax3.plot(T, [sum(el) for el in zip(contrib_qgp_mu200, contrib_cluster_c_mu200)], '-.', c = 'red')
-    #ax3.plot(T, [sum(el) for el in zip(contrib_qgp_mu300, contrib_cluster_step_mu300)], '-', c = 'green', label = r'$\mathrm{\mu=300}$ MeV')
-    #ax3.plot(T, [sum(el) for el in zip(contrib_qgp_mu300, contrib_cluster_c_mu300)], '-.', c = 'green')
-    #ax3.plot(T, [sum(el) for el in zip(contrib_qgp_mu400, contrib_cluster_step_mu400)], '-', c = 'cyan', label = r'$\mathrm{\mu=400}$ MeV')
-    #ax3.plot(T, [sum(el) for el in zip(contrib_qgp_mu400, contrib_cluster_c_mu400)], '-.', c = 'cyan')
-    #ax3.plot(T, [sum(el) for el in zip(contrib_qgp_mu500, contrib_cluster_step_mu500)], '-', c = 'magenta', label = r'$\mathrm{\mu=500}$ MeV')
-    #ax3.plot(T, [sum(el) for el in zip(contrib_qgp_mu500, contrib_cluster_c_mu500)], '-.', c = 'magenta')
-    ax3.legend()
+    ax3.axis([0., 2000., 0., 5.])
+    #ax3.axis([100., 200., 0., 2.])
+    ax3.add_patch(matplotlib.patches.Polygon(bazavov_1407_6387_mu0, closed = True, fill = True, color = 'red', alpha = 0.3, label = r'Bazavov et al. (2014), $\mathrm{\mu=0}$'))
+    ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1309_5258_mu0, closed = True, fill = True, color = 'green', alpha = 0.3, label = r'Borsanyi et al. (2014), $\mathrm{\mu=0}$'))
+    ax3.add_patch(matplotlib.patches.Polygon(bazavov_1710_05024_mu0, closed = True, fill = True, color = 'magenta', alpha = 0.3, label = r'Bazavov et al. (2018), $\mathrm{\mu=0}$'))
+    ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu0, closed = True, fill = True, color = 'blue', alpha = 0.3, label = r'Borsanyi et al. (2012), $\mathrm{\mu=0}$'))
+    #ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu200, closed = True, fill = True, color = 'red', alpha = 0.3, label = r'Borsanyi et al. (2012), $\mathrm{\mu=200}$ MeV'))
+    #ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu300, closed = True, fill = True, color = 'green', alpha = 0.3, label = r'Borsanyi et al. (2012), $\mathrm{\mu=300}$ MeV'))
+    #ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu400, closed = True, fill = True, color = 'cyan', alpha = 0.3, label = r'Borsanyi et al. (2012), $\mathrm{\mu=400}$ MeV'))
+    ax3.plot(T_mu0, [sum(el) for el in zip(contrib_qgp_mu0, contrib_cluster_step_mu0)], '-.', c = 'blue', label = r'step--up step--down $\mathrm{\mu=0}$')
+    ax3.plot(T_mu0, [sum(el) for el in zip(contrib_qgp_mu0, contrib_cluster_c_mu0)], '-', c = 'blue', label = r'extended continuum $\mathrm{\mu=0}$')
+    #ax3.plot(T_mu200, [sum(el) for el in zip(contrib_qgp_mu200, contrib_cluster_step_mu200)], '-.', c = 'red', label = r'step--up step--down $\mathrm{\mu=200}$')
+    #ax3.plot(T_mu200, [sum(el) for el in zip(contrib_qgp_mu200, contrib_cluster_c_mu200)], '-', c = 'red', label = r'extended continuum $\mathrm{\mu=200}$')
+    #ax3.plot(T_mu300, [sum(el) for el in zip(contrib_qgp_mu300, contrib_cluster_step_mu300)], '-.', c = 'green', label = r'step--up step--down $\mathrm{\mu=300}$')
+    #ax3.plot(T_mu300, [sum(el) for el in zip(contrib_qgp_mu300, contrib_cluster_c_mu300)], '-', c = 'green', label = r'extended continuum $\mathrm{\mu=300}$')
+    #ax3.plot(T_mu400, [sum(el) for el in zip(contrib_qgp_mu400, contrib_cluster_step_mu400)], '-.', c = 'cyan', label = r'step--up step--down $\mathrm{\mu=400}$')
+    #ax3.plot(T_mu400, [sum(el) for el in zip(contrib_qgp_mu400, contrib_cluster_c_mu400)], '-', c = 'cyan', label = r'extended continuum $\mathrm{\mu=400}$')
+    #ax3.plot(T_mu500, [sum(el) for el in zip(contrib_qgp_mu500, contrib_cluster_step_mu500)], '-.', c = 'magenta', label = r'step--up step--down $\mathrm{\mu=500}$')
+    #ax3.plot(T_mu500, [sum(el) for el in zip(contrib_qgp_mu500, contrib_cluster_c_mu500)], '-', c = 'magenta', label = r'extended continuum $\mathrm{\mu=500}$')
+    #ax3.legend()
     for tick in ax3.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
     for tick in ax3.yaxis.get_major_ticks():
@@ -1856,21 +1865,21 @@ def PNJL_thermodynamics_continuum_test():
     fig2 = matplotlib.pyplot.figure(num = 2, figsize = (5.9, 5))
     ax2 = fig2.add_subplot(1, 1, 1)
     ax2.axis([0., 450., 0., 1.2])
-    ax2.plot(T, [pnjl.thermo.gcp_sea_lattice.M(el, 0) / pnjl.thermo.gcp_sea_lattice.M(0, 0) for el in T], '-', c = 'green')
-    ax2.plot(T, [pnjl.thermo.gcp_sea_lattice.M(el, 200.0 / 3.0) / pnjl.thermo.gcp_sea_lattice.M(0, 0) for el in T], '--', c = 'green')
-    ax2.plot(T, [pnjl.thermo.gcp_sea_lattice.M(el, 300.0 / 3.0) / pnjl.thermo.gcp_sea_lattice.M(0, 0) for el in T], '-.', c = 'green')
-    ax2.plot(T, [pnjl.thermo.gcp_sea_lattice.M(el, 400.0 / 3.0) / pnjl.thermo.gcp_sea_lattice.M(0, 0) for el in T], ':', c = 'green')
-    ax2.scatter(T, [pnjl.thermo.gcp_sea_lattice.M(el, 500.0 / 3.0) / pnjl.thermo.gcp_sea_lattice.M(0, 0) for el in T], marker = 'o', c = 'green')
-    ax2.plot(T, phi_re_mu0, '-', c = 'blue')
-    ax2.plot(T, phi_re_mu200, '--', c = 'blue')
-    ax2.plot(T, phi_re_mu300, '-.', c = 'blue')
-    ax2.plot(T, phi_re_mu400, ':', c = 'blue')
-    ax2.scatter(T, phi_re_mu500, marker = 'o', c = 'blue')
-    ax2.plot(T, phi_im_mu0, '-', c = 'red')
-    ax2.plot(T, phi_im_mu200, '--', c = 'red')
-    ax2.plot(T, phi_im_mu300, '-.', c = 'red')
-    ax2.plot(T, phi_im_mu400, ':', c = 'red')
-    ax2.scatter(T, phi_im_mu500, marker = 'o', c = 'red')
+    ax2.plot(T_mu0, [pnjl.thermo.gcp_sea_lattice.M(el, 0) / pnjl.thermo.gcp_sea_lattice.M(0, 0) for el in T_mu0], '-', c = 'green')
+    ax2.plot(T_mu200, [pnjl.thermo.gcp_sea_lattice.M(el, 200.0 / 3.0) / pnjl.thermo.gcp_sea_lattice.M(0, 0) for el in T_mu200], '--', c = 'green')
+    ax2.plot(T_mu300, [pnjl.thermo.gcp_sea_lattice.M(el, 300.0 / 3.0) / pnjl.thermo.gcp_sea_lattice.M(0, 0) for el in T_mu300], '-.', c = 'green')
+    ax2.plot(T_mu400, [pnjl.thermo.gcp_sea_lattice.M(el, 400.0 / 3.0) / pnjl.thermo.gcp_sea_lattice.M(0, 0) for el in T_mu400], ':', c = 'green')
+    ax2.scatter(T_mu500, [pnjl.thermo.gcp_sea_lattice.M(el, 500.0 / 3.0) / pnjl.thermo.gcp_sea_lattice.M(0, 0) for el in T_mu500], marker = 'o', c = 'green')
+    ax2.plot(T_mu0, phi_re_mu0, '-', c = 'blue')
+    ax2.plot(T_mu200, phi_re_mu200, '--', c = 'blue')
+    ax2.plot(T_mu300, phi_re_mu300, '-.', c = 'blue')
+    ax2.plot(T_mu400, phi_re_mu400, ':', c = 'blue')
+    ax2.scatter(T_mu500, phi_re_mu500, marker = 'o', c = 'blue')
+    ax2.plot(T_mu0, phi_im_mu0, '-', c = 'red')
+    ax2.plot(T_mu200, phi_im_mu200, '--', c = 'red')
+    ax2.plot(T_mu300, phi_im_mu300, '-.', c = 'red')
+    ax2.plot(T_mu400, phi_im_mu400, ':', c = 'red')
+    ax2.scatter(T_mu500, phi_im_mu500, marker = 'o', c = 'red')
     for tick in ax2.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
     for tick in ax2.yaxis.get_major_ticks():
