@@ -29,6 +29,31 @@ def gcp_real_a0(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
 def gcp_imag_a0(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, d : float, **kwargs):
     #
     return 0.0
+
+def gcp_real_a1_bm1(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, d : float, **kwargs):
+    
+    options = {'gcp_cluster_debug_flag' : False}
+    options.update(kwargs)
+
+    debug_flag = options['gcp_cluster_debug_flag']
+
+    def mass_integrand(_m, _p, _T2, _mu2, key2):
+        yp = {}
+        yp["y_val"], yp["y_status"] = pnjl.aux_functions.y_plus(_p, _T2, _mu2, _m, 1.0, 1.0, **key2)
+        return (_m / pnjl.aux_functions.En(_p, _m)) * pnjl.thermo.distributions.f_baryon_singlet(**yp)
+    def integrand(p, _T, _mu, _M, _Mth, key):
+        inner_int, _ = scipy.integrate.quad(mass_integrand, _M, _Mth, args = (p, _T, _mu, key))
+        return (p ** 2) * inner_int
+
+    integral = 0.0
+    if thmass > bmass:
+        integral, _ = scipy.integrate.quad(integrand, 0.0, math.inf, args = (T, mu, bmass, thmass, kwargs))
+
+    return -(d / (2.0 * (math.pi ** 2))) * integral
+def gcp_imag_a1_bm1(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, d : float, **kwargs):
+    #
+    return 0.0
+
 def gcp_real_a2(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, d : float, **kwargs):
 
     options = {'gcp_cluster_debug_flag' : False}
@@ -279,15 +304,15 @@ def gcp_imag_a6(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
 
 #Grandcanonical potential (MHRG Beth-Uhlenbeck part)
 
-def gcp_real(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, d : float, **kwargs) -> float:
+def gcp_real(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, b : int, d : float, **kwargs) -> float:
     #
-    return {0 : gcp_real_a0, 2 : gcp_real_a2, 3 : gcp_real_a3, 4 : gcp_real_a4, 5 : gcp_real_a5, 6 : gcp_real_a6}[a](T, mu, Phi, Phib, bmass, thmass, d)
-def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, d : float, **kwargs) -> float:
+    return {(0, 0) : gcp_real_a0, (2, 0) : gcp_real_a2, (3, 0) : gcp_real_a3, (4, 0) : gcp_real_a4, (5, 0) : gcp_real_a5, (6, 0) : gcp_real_a6, (1, -1) : gcp_real_a1_bm1}[a, b](T, mu, Phi, Phib, bmass, thmass, d)
+def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, b : int, d : float, **kwargs) -> float:
     #
-    return {0 : gcp_imag_a0, 2 : gcp_imag_a2, 3 : gcp_imag_a3, 4 : gcp_imag_a4, 5 : gcp_imag_a5, 6 : gcp_imag_a6}[a](T, mu, Phi, Phib, bmass, thmass, d)
+    return {(0, 0) : gcp_imag_a0, (2, 0) : gcp_imag_a2, (3, 0) : gcp_imag_a3, (4, 0) : gcp_imag_a4, (5, 0) : gcp_imag_a5, (6, 0) : gcp_imag_a6, (1, -1) : gcp_imag_a1_bm1}[a, b](T, mu, Phi, Phib, bmass, thmass, d)
 
 #Extensive thermodynamic properties
 
-def pressure(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, d : float, **kwargs):
+def pressure(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, a : int, b : int, d : float, **kwargs):
     #
-    return -gcp_real(T, mu, Phi, Phib, bmass, thmass, a, d, **kwargs)
+    return -gcp_real(T, mu, Phi, Phib, bmass, thmass, a, b, d, **kwargs)

@@ -140,7 +140,19 @@ def gcp_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> 
     Im_full = complex(I_minus_real(T, mu, Phi, Phib, **kwargs), I_minus_imag(T, mu, Phi, Phib, **kwargs))
     spart = (Ip_full + Im_full) ** 2
 
-    return ((4.0 * Nf) / (3.0 * math.pi)) * alpha_s(T, mu, **kwargs) * (T ** 4) * (Ip_full.real + Im_full.real + (3.0 / (2.0 * (math.pi ** 2))) * spart.real)
+    ms_kwargs = {}
+    for key in kwargs:
+        ms_kwargs[key] = kwargs[key]
+    ms_kwargs['ml'] = 100.0
+
+    s_Ip_full = complex(I_plus_real(T, mu, Phi, Phib, **ms_kwargs), I_plus_imag(T, mu, Phi, Phib, **ms_kwargs))
+    s_Im_full = complex(I_minus_real(T, mu, Phi, Phib, **ms_kwargs), I_minus_imag(T, mu, Phi, Phib, **ms_kwargs))
+    s_spart = (Ip_full + Im_full) ** 2
+
+    l_part = (8.0 / (3.0 * math.pi)) * (Ip_full.real + Im_full.real + (3.0 / (2.0 * (math.pi ** 2))) * spart.real)
+    s_part = (4.0 / (3.0 * math.pi)) * (s_Ip_full.real + s_Im_full.real + (3.0 / (2.0 * (math.pi ** 2))) * s_spart.real)
+
+    return alpha_s(T, mu, **kwargs) * (T ** 4) * (l_part + s_part)
 def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
     
     options = {'Nf' : pnjl.defaults.default_Nf}
@@ -152,7 +164,19 @@ def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> 
     Im_full = complex(I_minus_real(T, mu, Phi, Phib, **kwargs), I_minus_imag(T, mu, Phi, Phib, **kwargs))
     spart = (Ip_full + Im_full) ** 2
 
-    return ((4.0 * Nf)/ (3.0 * math.pi)) * alpha_s(T, mu, **kwargs) * (T ** 4) * (Ip_full.imag + Im_full.imag + (3.0 / (2.0 * (math.pi ** 2))) * spart.imag)
+    ms_kwargs = {}
+    for key in kwargs:
+        ms_kwargs[key] = kwargs[key]
+    ms_kwargs['ml'] = 100.0
+
+    s_Ip_full = complex(I_plus_real(T, mu, Phi, Phib, **ms_kwargs), I_plus_imag(T, mu, Phi, Phib, **ms_kwargs))
+    s_Im_full = complex(I_minus_real(T, mu, Phi, Phib, **ms_kwargs), I_minus_imag(T, mu, Phi, Phib, **ms_kwargs))
+    s_spart = (Ip_full + Im_full) ** 2
+
+    l_part = (8.0 / (3.0 * math.pi)) * (Ip_full.imag + Im_full.imag + (3.0 / (2.0 * (math.pi ** 2))) * spart.imag)
+    s_part = (4.0 / (3.0 * math.pi)) * (s_Ip_full.imag + s_Im_full.imag + (3.0 / (2.0 * (math.pi ** 2))) * s_spart.imag)
+
+    return alpha_s(T, mu, **kwargs) * (T ** 4) * (l_part + s_part)
 
 #Extensive thermodynamic properties
 
