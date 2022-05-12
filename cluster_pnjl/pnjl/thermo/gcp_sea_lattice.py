@@ -60,12 +60,12 @@ def V(T : float, mu : float, **kwargs) -> float:
     M0 = options['M0']
     Gs = options['Gs']
 
-    return ((M0 ** 2) * (Delta_ls(T, mu, **kwargs) ** 2)) / (4.0 * Gs)
+    return (Delta_ls(T, mu, **kwargs) ** 2) / (4.0 * Gs)
 
 #Grandcanonical potential (Fermi sea part) with hard cutoff regularization
 
 def gcp_real(T : float, mu : float, **kwargs) -> float:
-    
+
     options = {'M0' : pnjl.defaults.default_M0, 'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.default_Nc, 'Lambda' : pnjl.defaults.default_Lambda, 'gcp_sea_lattice_debug_flag' : False}
     options.update(kwargs)
 
@@ -78,6 +78,9 @@ def gcp_real(T : float, mu : float, **kwargs) -> float:
     #integrand = lambda p, _T, _mu, key : (p ** 2) * (pnjl.aux_functions.En(p, M(_T, _mu, **key), **key) - pnjl.aux_functions.En(p, M(0.0, 0.0, **key), **key))
 
     #sigma_contrib = V(T, mu, **kwargs) - V(0.0, 0.0, **kwargs)
+
+    #print(T, mu, sigma_contrib)
+    #input()
 
     #integral, error = scipy.integrate.quad(integrand, 0.0, Lambda, args = (T, mu, kwargs))
 
