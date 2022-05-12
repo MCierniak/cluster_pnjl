@@ -1,4 +1,5 @@
 import scipy.integrate
+import numpy
 import math
 
 import pnjl.thermo.gcp_sea_lattice
@@ -75,3 +76,40 @@ def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> 
 def pressure(T : float, mu : float, Phi : complex, Phib : complex, **kwargs):
     #
     return -gcp_real(T, mu, Phi, Phib, **kwargs)
+
+#correct form of the mu vector would be mu_vec = [mu + 2 * h, mu + h, mu - h, mu - 2 * h] with some interval h
+#or if mu = 0 then mu_vec = [h, 0.0]
+#Phi/Phib vectors should correspond to Phi/Phib at the appropriate values of mu!
+def bdensity(T : float, mu_vec : list, Phi_vec : list, Phib_vec : list, **kwargs):
+    
+    if len(mu_vec) == len(Phi_vec) and len(mu_vec) == len(Phib_vec):
+        if len(mu_vec) == 4 and numpy.all(mu_vec[i] > mu_vec[i + 1] for i, el in enumerate(mu_vec[:-1])):
+            h = mu_vec[0] - mu_vec[1]
+            p_vec = [pressure(T, mu_el, Phi_el, Phib_el, **kwargs) for mu_el, Phi_el, Phib_el in zip(mu_vec, Phi_vec, Phib_vec)]
+            return (1.0 / 3.0) * (p_vec[3] - 8.0 * p_vec[2] + 8.0 * p_vec[1] - p_vec[0]) / (12.0 * h)
+        elif len(mu_vec) == 2 and mu_vec[0] > mu_vec[1]:
+            h = mu_vec[0]
+            p_vec = [pressure(T, mu_el, Phi_el, Phib_el, **kwargs) for mu_el, Phi_el, Phib_el in zip(mu_vec, Phi_vec, Phib_vec)]
+            return (1.0 / 3.0) * (p_vec[0] - p_vec[1]) / h
+        else:
+            raise RuntimeError("Vectors have wrong size or are not strictly decreasing!")
+    else:
+        raise RuntimeError("Value vectors don't match!")
+
+#correct form of the T vector would be T_vec = [T + 2 * h, T + h, T - h, T - 2 * h] with some interval h
+#Phi/Phib vectors should correspond to Phi/Phib at the appropriate values of T!
+def sdensity(T_vec : list, mu : float, Phi_vec : list, Phib_vec : list, **kwargs):
+    
+    if len(T_vec) == len(Phi_vec) and len(T_vec) == len(Phib_vec):
+        if len(T_vec) == 4 and numpy.all(T_vec[i] > T_vec[i + 1] for i, el in enumerate(T_vec[:-1])):
+            h = T_vec[0] - T_vec[1]
+            p_vec = [pressure(T_el, mu, Phi_el, Phib_el, **kwargs) for T_el, Phi_el, Phib_el in zip(T_vec, Phi_vec, Phib_vec)]
+            return (1.0 / 3.0) * (p_vec[3] - 8.0 * p_vec[2] + 8.0 * p_vec[1] - p_vec[0]) / (12.0 * h)
+        elif len(T_vec) == 2 and T_vec[0] > T_vec[1]:
+            h = T_vec[0]
+            p_vec = [pressure(T_el, mu, Phi_el, Phib_el, **kwargs) for T_el, Phi_el, Phib_el in zip(T_vec, Phi_vec, Phib_vec)]
+            return (1.0 / 3.0) * (p_vec[0] - p_vec[1]) / h
+        else:
+            raise RuntimeError("Vectors have wrong size or are not strictly decreasing!")
+    else:
+        raise RuntimeError("Value vectors don't match!")

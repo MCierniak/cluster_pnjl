@@ -46,24 +46,78 @@ def cluster_thermo(T, mu, phi_re, phi_im, M, Mth, dMdmu, dMthdmu, dMdT, dMthdT, 
     SDen = [0.0 for T_el, mu_el, phi_re_el, phi_im_el, M_el, Mth_el, dM_el, dMth_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im, M, Mth, dMdT, dMthdT), desc = "SDen", total = len(T), ascii = True)]
     return Pres, BDen, SDen
 
-def cluster_c_thermo(T, mu, phi_re, phi_im, M, Mth, dMdmu, dMthdmu, dMdT, dMthdT, a, b, dx, Ni, L):
+def cluster_c_thermo(T, mu, phi_re, phi_im, M, a, b, dx, Ni, L, strangeness):    
     Pres = [
         cluster.pressure(
-            T_el,                               #temperature
-            mu_el,                              #baryochemical potential
-            complex(phi_re_el, phi_im_el),      #traced PL
-            complex(phi_re_el, -phi_im_el),     #traced PL c.c.
-            M_el,                               #bound state mass
-            Mth_el,                             #threshold mass
-            a,                                  #nr of valence quarks - nr of valence antiquarks
-            b,                                  #nr of valence s quarks - nr of valence anti s quarks
-            dx,                                 #degeneracy factor
-            Ni,                                 #total number of valence d.o.f.'s
-            L                                   #continuum energy scale
+            T_el,                                                           #temperature
+            mu_el,                                                          #baryochemical potential
+            complex(phi_re_el, phi_im_el),                                  #traced PL
+            complex(phi_re_el, -phi_im_el),                                 #traced PL c.c.
+            M,                                                              #bound state mass
+            math.sqrt(2) * ((Ni - strangeness) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el) + strangeness * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el, ml = pnjl.defaults.default_ms)), #threshold mass
+            a,                                                              #nr of valence quarks - nr of valence antiquarks
+            b,                                                              #nr of valence s quarks - nr of valence anti s quarks
+            dx,                                                             #degeneracy factor
+            Ni,                                                             #total number of valence d.o.f.'s
+            L                                                               #continuum energy scale
             ) 
-        for T_el, mu_el, phi_re_el, phi_im_el, M_el, Mth_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im, M, Mth), desc = "Pres", total = len(T), ascii = True)]
-    BDen = [0.0 for T_el, mu_el, phi_re_el, phi_im_el, M_el, Mth_el, dM_el, dMth_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im, M, Mth, dMdmu, dMthdmu), desc = "BDen", total = len(T), ascii = True)]
-    SDen = [0.0 for T_el, mu_el, phi_re_el, phi_im_el, M_el, Mth_el, dM_el, dMth_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im, M, Mth, dMdT, dMthdT), desc = "SDen", total = len(T), ascii = True)]
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im), desc = "Pres", total = len(T), ascii = True)]
+    BDen = []
+    for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im), desc = "BDen", total = len(T), ascii = True):
+        h = 1e-2
+        mu_vec = []
+        Phi_vec = []
+        Phib_vec = []
+        if mu_el > 0.0:
+            mu_vec = [mu_el + 2 * h, mu_el + h, mu_el - h, mu_el - 2 * h]
+        else:
+            mu_vec = [h, 0.0]
+        Phi_vec = [complex(phi_re_el, phi_im_el) for el in mu_vec]
+        Phib_vec = [complex(phi_re_el, -phi_im_el) for el in mu_vec]
+        Mth_vec = [math.sqrt(2) * ((Ni - strangeness) * pnjl.thermo.gcp_sea_lattice.M(T_el, el) + strangeness * pnjl.thermo.gcp_sea_lattice.M(T_el, el, ml = pnjl.defaults.default_ms)) for el in mu_vec]
+        BDen.append(
+            cluster.bdensity(
+                T_el, 
+                mu_vec, 
+                Phi_vec, 
+                Phib_vec,
+                M, 
+                Mth_vec,
+                a, 
+                b, 
+                dx, 
+                Ni, 
+                L
+                )
+            )
+    SDen = []
+    for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im), desc = "SDen", total = len(T), ascii = True):
+        h = 1e-2
+        T_vec = []
+        Phi_vec = []
+        Phib_vec = []
+        if T_el > 0.0:
+            T_vec = [T_el + 2 * h, T_el + h, T_el - h, T_el - 2 * h]
+        else:
+            T_vec = [h, 0.0]
+        Phi_vec = [complex(phi_re_el, phi_im_el) for el in T_vec]
+        Phib_vec = [complex(phi_re_el, -phi_im_el) for el in T_vec]
+        Mth_vec = [math.sqrt(2) * ((Ni - strangeness) * pnjl.thermo.gcp_sea_lattice.M(el, mu_el) + strangeness * pnjl.thermo.gcp_sea_lattice.M(el, mu_el, ml = pnjl.defaults.default_ms)) for el in T_vec]
+        SDen.append(
+            cluster.sdensity(
+                T_vec, 
+                mu_el, 
+                Phi_vec, 
+                Phib_vec,
+                M, 
+                Mth_vec,
+                a, 
+                b, 
+                dx, 
+                Ni, 
+                L
+                )
+            )    
     return Pres, BDen, SDen
 
 def calc_PL(
@@ -92,6 +146,7 @@ def calc_PL(
         _fquark_bmass, _fquark_thmass, _d_fquark, 
         _qquark_bmass, _qquark_thmass, _d_qquark, 
         _s_kwargs, _q_kwargs, _pert_kwargs, _g_kwargs):
+        sea = pnjl.thermo.gcp_sea_lattice.gcp_real(_T, _mu)
         sq = pnjl.thermo.gcp_quark.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), **_s_kwargs)
         lq = pnjl.thermo.gcp_quark.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), **_q_kwargs)
         per = pnjl.thermo.gcp_perturbative.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), **_pert_kwargs)
@@ -100,15 +155,16 @@ def calc_PL(
         fquark = pnjl.thermo.gcp_cluster.bound_step_continuum_step.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), _fquark_bmass, _fquark_thmass, 4, 0, _d_fquark)
         qquark = pnjl.thermo.gcp_cluster.bound_step_continuum_step.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), _qquark_bmass, _qquark_thmass, 5, 0, _d_qquark)
 
-        return sq + lq + per + glue + diquark + fquark + qquark
+        return sea + sq + lq + per + glue + diquark + fquark + qquark
 
     def thermodynamic_potential(x, _T, _mu, _s_kwargs, _q_kwargs, _pert_kwargs, _g_kwargs):
+        sea = pnjl.thermo.gcp_sea_lattice.gcp_real(_T, _mu)
         sq = pnjl.thermo.gcp_quark.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), **_s_kwargs)
         lq = pnjl.thermo.gcp_quark.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), **_q_kwargs)
         per = pnjl.thermo.gcp_perturbative.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), **_pert_kwargs)
         glue = pnjl.thermo.gcp_pl_polynomial.gcp_real(_T, complex(x[0], x[1]), complex(x[0], -x[1]), **_g_kwargs)
 
-        return sq + lq + per + glue
+        return sea + sq + lq + per + glue
 
     omega_result = None
     if with_clusters:
@@ -173,6 +229,7 @@ def calc_PL_c(
         _fquark_bmass, _fquark_thmass, _d_fquark, _ni_fquark, _l_fquark,
         _qquark_bmass, _qquark_thmass, _d_qquark, _ni_qquark, _l_qquark,
         _s_kwargs, _q_kwargs, _pert_kwargs, _g_kwargs):
+        sea = pnjl.thermo.gcp_sea_lattice.gcp_real(_T, _mu)
         sq = pnjl.thermo.gcp_quark.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), **_s_kwargs)
         lq = pnjl.thermo.gcp_quark.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), **_q_kwargs)
         per = pnjl.thermo.gcp_perturbative.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), **_pert_kwargs)
@@ -182,15 +239,16 @@ def calc_PL_c(
         fquark  = cluster.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), _fquark_bmass , _fquark_thmass , 4, 0, _d_fquark , _ni_fquark , _l_fquark)
         qquark  = cluster.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), _qquark_bmass , _qquark_thmass , 5, 0, _d_qquark , _ni_qquark , _l_qquark)
 
-        return sq + lq + per + glue + diquark + fquark + qquark
+        return sea + sq + lq + per + glue + diquark + fquark + qquark
 
     def thermodynamic_potential(x, _T, _mu, _s_kwargs, _q_kwargs, _pert_kwargs, _g_kwargs):
+        sea = pnjl.thermo.gcp_sea_lattice.gcp_real(_T, _mu)
         sq = pnjl.thermo.gcp_quark.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), **_s_kwargs)
         lq = pnjl.thermo.gcp_quark.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), **_q_kwargs)
         per = pnjl.thermo.gcp_perturbative.gcp_real(_T, _mu, complex(x[0], x[1]), complex(x[0], -x[1]), **_pert_kwargs)
         glue = pnjl.thermo.gcp_pl_polynomial.gcp_real(_T, complex(x[0], x[1]), complex(x[0], -x[1]), **_g_kwargs)
 
-        return sq + lq + per + glue
+        return sea + sq + lq + per + glue
 
     omega_result = None
     if with_clusters:
@@ -371,153 +429,92 @@ def clusters(T, mu, phi_re, phi_im):
 
 def clusters_c(T, mu, phi_re, phi_im):
     print("Calculating nucleon thermo..")
-    M_N         = [pnjl.defaults.default_MN                                           for T_el, mu_el in zip(T, mu)]
-    dM_N_dmu    = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    dM_N_dT     = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    Mth_N       = [3. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el)     for T_el, mu_el in zip(T, mu)]
-    dMth_N_dmu  = [3. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
-    dMth_N_dT   = [3. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
+    M_N = pnjl.defaults.default_MN
     #(N(Dq): spin * isospin * color)
     dN = (2.0 * 2.0 * 1.0)
     NN = 3.0
     LN = pnjl.defaults.default_L
-    Pres_N, BDen_N, SDen_N = cluster_c_thermo(T, mu, phi_re, phi_im, M_N, Mth_N, dM_N_dmu, dMth_N_dmu, dM_N_dT, dMth_N_dT, 3, 0, dN, NN, LN)
+    Pres_N, BDen_N, SDen_N = cluster_c_thermo(T, mu, phi_re, phi_im, M_N, 3, 0, dN, NN, LN, 0)
 
     print("Calculating pentaquark thermo..")
-    M_P         = [pnjl.defaults.default_MP                                            for T_el, mu_el in zip(T, mu)]
-    dM_P_dmu    = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    dM_P_dT     = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    Mth_P       = [5. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el)     for T_el, mu_el in zip(T, mu)]
-    dMth_P_dmu  = [5. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
-    dMth_P_dT   = [5. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
+    M_P = pnjl.defaults.default_MP
     #P(NM) + P(NM)
     dP = (4.0 * 2.0 * 1.0) + (2.0 * 4.0 * 1.0)
     NP = 5.0
     LP = pnjl.defaults.default_L
-    Pres_P, BDen_P, SDen_P = cluster_c_thermo(T, mu, phi_re, phi_im, M_P, Mth_P, dM_P_dmu, dMth_P_dmu, dM_P_dT, dMth_P_dT, 3, 0, dP, NP, LP)
+    Pres_P, BDen_P, SDen_P = cluster_c_thermo(T, mu, phi_re, phi_im, M_P, 3, 0, dP, NP, LP, 0)
 
     print("Calculating hexaquark thermo..")
-    M_H         = [pnjl.defaults.default_MH                                           for T_el, mu_el in zip(T, mu)]
-    dM_H_dmu    = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    dM_H_dT     = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    Mth_H       = [6. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el)     for T_el, mu_el in zip(T, mu)]
-    dMth_H_dmu  = [6. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
-    dMth_H_dT   = [6. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
+    M_H = pnjl.defaults.default_MH
     #H(Qq) / H(FD) / H(NN) + H(Qq) / H(NN)
     dH = (1.0 * 3.0 * 1.0) + (3.0 * 1.0 * 1.0)
     NH = 6.0
     LH = pnjl.defaults.default_L
-    Pres_H, BDen_H, SDen_H = cluster_c_thermo(T, mu, phi_re, phi_im, M_H, Mth_H, dM_H_dmu, dMth_H_dmu, dM_H_dT, dMth_H_dT, 6, 0, dH, NH, LH)
+    Pres_H, BDen_H, SDen_H = cluster_c_thermo(T, mu, phi_re, phi_im, M_H, 6, 0, dH, NH, LH, 0)
 
     print("Calculating pi meson thermo..")
-    M_pi         = [pnjl.defaults.default_Mpi                                          for T_el, mu_el in zip(T, mu)]
-    dM_pi_dmu    = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    dM_pi_dT     = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    Mth_pi       = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el)     for T_el, mu_el in zip(T, mu)]
-    dMth_pi_dmu  = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
-    dMth_pi_dT   = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
+    M_pi = pnjl.defaults.default_Mpi
     #pi(q aq)
     dpi = (1.0 * 3.0 * 1.0)
     Npi = 2.0
     Lpi = pnjl.defaults.default_L
-    Pres_pi, BDen_pi, SDen_pi = cluster_c_thermo(T, mu, phi_re, phi_im, M_pi, Mth_pi, dM_pi_dmu, dMth_pi_dmu, dM_pi_dT, dMth_pi_dT, 0, 0, dpi, Npi, Lpi)
+    Pres_pi, BDen_pi, SDen_pi = cluster_c_thermo(T, mu, phi_re, phi_im, M_pi, 0, 0, dpi, Npi, Lpi, 0)
 
     print("Calculating K meson thermo..")
-    M_K         = [pnjl.defaults.default_MK                                           for T_el, mu_el in zip(T, mu)]
-    dM_K_dmu    = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    dM_K_dT     = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    Mth_K       = [math.sqrt(2) * (pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el) 
-                                   + pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el, ml = pnjl.defaults.default_ms))
-                                                                                      for T_el, mu_el in zip(T, mu)]
-    dMth_K_dmu  = [math.sqrt(2) * (pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) 
-                                   + pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el, ml = pnjl.defaults.default_ms))
-                                                                                      for T_el, mu_el in zip(T, mu)]
-    dMth_K_dT   = [math.sqrt(2) * (pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el) 
-                                   + pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el, ml = pnjl.defaults.default_ms))
-                                                                                      for T_el, mu_el in zip(T, mu)]
+    M_K = pnjl.defaults.default_MK
     #K(q aq)
     dK = (1.0 * 4.0 * 1.0)
     NK = 2.0
     LK = pnjl.defaults.default_L
-    Pres_K, BDen_K, SDen_K = cluster_c_thermo(T, mu, phi_re, phi_im, M_K, Mth_K, dM_K_dmu, dMth_K_dmu, dM_K_dT, dMth_K_dT, 0, 0, dK, NK, LK)
+    Pres_K, BDen_K, SDen_K = cluster_c_thermo(T, mu, phi_re, phi_im, M_K, 0, 0, dK, NK, LK, 1)
 
     print("Calculating rho meson thermo..")
-    M_rho        = [pnjl.defaults.default_MM                                           for T_el, mu_el in zip(T, mu)]
-    dM_rho_dmu   = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    dM_rho_dT    = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    Mth_rho      = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el)     for T_el, mu_el in zip(T, mu)]
-    dMth_rho_dmu = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
-    dMth_rho_dT  = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
+    M_rho = pnjl.defaults.default_MM
     #rho(q aq)
     drho = (3.0 * 3.0 * 1.0)
     Nrho = 2.0
     Lrho = pnjl.defaults.default_L
-    Pres_rho, BDen_rho, SDen_rho = cluster_c_thermo(T, mu, phi_re, phi_im, M_rho, Mth_rho, dM_rho_dmu, dMth_rho_dmu, dM_rho_dT, dMth_rho_dT, 0, 0, drho, Nrho, Lrho)
+    Pres_rho, BDen_rho, SDen_rho = cluster_c_thermo(T, mu, phi_re, phi_im, M_rho, 0, 0, drho, Nrho, Lrho, 0)
 
     print("Calculating omega meson thermo..")
-    M_omega        = [pnjl.defaults.default_MM                                           for T_el, mu_el in zip(T, mu)]
-    dM_omega_dmu   = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    dM_omega_dT    = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    Mth_omega      = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el)     for T_el, mu_el in zip(T, mu)]
-    dMth_omega_dmu = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
-    dMth_omega_dT  = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
+    M_omega = pnjl.defaults.default_MM
     #omega(q aq)
     domega = (3.0 * 1.0 * 1.0)
     Nomega = 2.0
     Lomega = pnjl.defaults.default_L
-    Pres_omega, BDen_omega, SDen_omega = cluster_c_thermo(T, mu, phi_re, phi_im, M_omega, Mth_omega, dM_omega_dmu, dMth_omega_dmu, dM_omega_dT, dMth_omega_dT, 0, 0, domega, Nomega, Lomega)
+    Pres_omega, BDen_omega, SDen_omega = cluster_c_thermo(T, mu, phi_re, phi_im, M_omega, 0, 0, domega, Nomega, Lomega, 0)
 
     print("Calculating tetraquark thermo..")
-    M_T        = [pnjl.defaults.default_MT                                           for T_el, mu_el in zip(T, mu)]
-    dM_T_dmu   = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    dM_T_dT    = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    Mth_T      = [4. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el)     for T_el, mu_el in zip(T, mu)]
-    dMth_T_dmu = [4. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
-    dMth_T_dT  = [4. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
+    M_T = pnjl.defaults.default_MT
     #T(MM) + T(MM) + T(MM)
     dT = (1.0 * 5.0 * 1.0) + (5.0 * 1.0 * 1.0) + (3.0 * 3.0 * 1.0)
     NT = 4.0
     LT = pnjl.defaults.default_L
-    Pres_T, BDen_T, SDen_T = cluster_c_thermo(T, mu, phi_re, phi_im, M_T, Mth_T, dM_T_dmu, dMth_T_dmu, dM_T_dT, dMth_T_dT, 0, 0, dT, NT, LT)
+    Pres_T, BDen_T, SDen_T = cluster_c_thermo(T, mu, phi_re, phi_im, M_T, 0, 0, dT, NT, LT, 0)
 
     print("Calculating diquark thermo..")
-    M_D        = [pnjl.defaults.default_MD                                           for T_el, mu_el in zip(T, mu)]
-    dM_D_dmu   = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    dM_D_dT    = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    Mth_D      = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el)     for T_el, mu_el in zip(T, mu)]
-    dMth_D_dmu = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
-    dMth_D_dT  = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
+    M_D = pnjl.defaults.default_MD
     #D(qq)
     dD = (1.0 * 1.0 * 3.0)
     ND = 2.0
     LD = pnjl.defaults.default_L
-    Pres_D, BDen_D, SDen_D = cluster_c_thermo(T, mu, phi_re, [-el for el in phi_im], M_D, Mth_D, dM_D_dmu, dMth_D_dmu, dM_D_dT, dMth_D_dT, 2, 0, dD, ND, LD)
+    Pres_D, BDen_D, SDen_D = cluster_c_thermo(T, mu, phi_re, [-el for el in phi_im], M_D, 2, 0, dD, ND, LD, 0)
 
     print("Calculating 4-quark thermo..")
-    M_F        = [pnjl.defaults.default_MF                                           for T_el, mu_el in zip(T, mu)]
-    dM_F_dmu   = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    dM_F_dT    = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    Mth_F      = [4. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el)     for T_el, mu_el in zip(T, mu)]
-    dMth_F_dmu = [4. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
-    dMth_F_dT  = [4. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
+    M_F = pnjl.defaults.default_MF
     #F(Nq)
     dF = (1.0 * 1.0 * 3.0)
     NF = 4.0
     LF = pnjl.defaults.default_L
-    Pres_F, BDen_F, SDen_F = cluster_c_thermo(T, mu, phi_re, phi_im, M_F, Mth_F, dM_F_dmu, dMth_F_dmu, dM_F_dT, dMth_F_dT, 4, 0, dF, NF, LF)
+    Pres_F, BDen_F, SDen_F = cluster_c_thermo(T, mu, phi_re, phi_im, M_F, 4, 0, dF, NF, LF, 0)
 
     print("Calculating 5-quark thermo..")
-    M_Q5        = [pnjl.defaults.default_MQ                                           for T_el, mu_el in zip(T, mu)]
-    dM_Q5_dmu   = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    dM_Q5_dT    = [0.                                                                 for T_el, mu_el in zip(T, mu)]
-    Mth_Q5      = [5. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el)     for T_el, mu_el in zip(T, mu)]
-    dMth_Q5_dmu = [5. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdmu(T_el, mu_el) for T_el, mu_el in zip(T, mu)]
-    dMth_Q5_dT  = [5. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.dMdT(T_el, mu_el)  for T_el, mu_el in zip(T, mu)]
+    M_Q5 = pnjl.defaults.default_MQ
     #Q5(F(Nq)q) / Q5(F(DD)q) / Q5(ND)
     dQ5 = (2.0 * 2.0 * 3.0)
     NQ5 = 5.0
     LQ5 = pnjl.defaults.default_L
-    Pres_Q5, BDen_Q5, SDen_Q5 = cluster_c_thermo(T, mu, phi_re, [-el for el in phi_im], M_Q5, Mth_Q5, dM_Q5_dmu, dMth_Q5_dmu, dM_Q5_dT, dMth_Q5_dT, 5, 0, dQ5, NQ5, LQ5)
+    Pres_Q5, BDen_Q5, SDen_Q5 = cluster_c_thermo(T, mu, phi_re, [-el for el in phi_im], M_Q5, 5, 0, dQ5, NQ5, LQ5, 0)
 
     return (
         (Pres_pi, Pres_rho, Pres_omega, Pres_K, Pres_D, Pres_N, Pres_T, Pres_F, Pres_P, Pres_Q5, Pres_H),
@@ -2071,7 +2068,7 @@ def PNJL_perturbative_fit():
     Pres_Q_5, Pres_g_5, Pres_pert_5, Pres_sea_5  = [], [], [], []
     Pres_Q_6, Pres_g_6, Pres_pert_6, Pres_sea_6  = [], [], [], []
 
-    Pres_pi_1, Pres_K_1, Pres_rho_1  = [], [], [] 
+    Pres_pi_1, Pres_K_1, Pres_rho_1  = [], [], []
     Pres_omega_1, Pres_D_1, Pres_N_1 = [], [], []
     Pres_T_1, Pres_F_1, Pres_P_1     = [], [], []
     Pres_Q5_1, Pres_H_1              = [], []
@@ -2116,11 +2113,11 @@ def PNJL_perturbative_fit():
     mu_6   = [300.0 / 3.0 for el in T_3]
 
     calc_1                  = False
-    calc_2                  = True
-    calc_3                  = True
-    calc_4                  = True
-    calc_5                  = True
-    calc_6                  = True
+    calc_2                  = False
+    calc_3                  = False
+    calc_4                  = False
+    calc_5                  = False
+    calc_6                  = False
 
     cluster_backreaction    = False
     pl_turned_off           = False
@@ -2974,22 +2971,61 @@ def PNJL_perturbative_fit():
     matplotlib.pyplot.show()
     matplotlib.pyplot.close()
 
-def deriv_test():
-    T = 10.0
+def deriv_test_bdensity():
+    T = 1.0
     mu = numpy.linspace(0.0, 2000.0, num = 200)
-    p_vec = [pnjl.thermo.gcp_sea_lattice.pressure(T, el) for el in mu]
-    b_vec = [pnjl.thermo.gcp_sea_lattice.bdensity(T, el) for el in mu]
-    bt_vec = [pnjl.thermo.gcp_sea_lattice.bdensity_true(T, el) for el in mu]
+    phi_re = []
+    phi_im = []
+    p_vec = []
+    b_vec_alt = []
 
-    print("Total error = ", sum([math.fabs(el1 - el2) for el1, el2 in zip(b_vec, bt_vec)]))
+    calc = False
+
+    pl_file       = "D:/EoS/BDK/deriv_test/pl_mu.dat"
+
+    lmu = len(mu)
+    if calc:
+        phi_re.append(1e-15)
+        phi_im.append(2e-15)
+        for mu_el in tqdm.tqdm(mu, desc = "Traced Polyakov loop (calc f(mu))", total = lmu, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T, mu_el, phi_re[-1], phi_im[-1], with_clusters = False)
+            phi_re.append(temp_phi_re)
+            phi_im.append(temp_phi_im)
+        phi_re = phi_re[1:]
+        phi_im = phi_im[1:]
+        with open(pl_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[mu_el, phi_re_el, phi_im_el] for mu_el, phi_re_el, phi_im_el in zip(mu, phi_re, phi_im)])
+    else:
+        _, mu           = utils.data_collect(0, 0, pl_file)
+        phi_re, phi_im  = utils.data_collect(1, 2, pl_file)
+
+    p_vec = [pnjl.thermo.gcp_cluster.bound_step_continuum_arccos_cos.pressure(
+        T, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el),
+        pnjl.defaults.default_Mpi, 2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T, mu_el),
+        0, 0, 3.0, 2.0, pnjl.defaults.default_L) for mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(mu, phi_re, phi_im), desc = "Pressure (calc f(mu))", total = lmu, ascii = True)]
+    for mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(mu, phi_re, phi_im), desc = "Baryon density without phi (calc f(mu))", total = lmu, ascii = True):
+        h = 1e-2
+        mu_vec = []
+        Phi_vec = []
+        Phib_vec = []
+        if mu_el > 0.0:
+            mu_vec = [mu_el + 2 * h, mu_el + h, mu_el - h, mu_el - 2 * h]
+        else:
+            mu_vec = [h, 0.0]
+        Phi_vec = [complex(phi_re_el, phi_im_el) for el in mu_vec]
+        Phib_vec = [complex(phi_re_el, -phi_im_el) for el in mu_vec]
+        Mth_vec = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T, el) for el in mu_vec]
+        b_vec_alt.append(pnjl.thermo.gcp_cluster.bound_step_continuum_arccos_cos.bdensity(
+            T, mu_vec, Phi_vec, Phib_vec,
+            pnjl.defaults.default_Mpi, Mth_vec, 0, 0, 3.0, 2.0, pnjl.defaults.default_L))
 
     fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
     ax1 = fig1.add_subplot(1, 1, 1)
     ax1.axis([0.0, 2000., min(p_vec), max(p_vec)])
 
     ax1.plot(mu, p_vec, '-', c = 'blue', label = r'pressure')
-    ax1.plot(mu, b_vec, '-', c = 'red', label = r'baryon density nuemric')
-    #ax1.plot(mu, bt_vec, '-', c = 'green', label = r'baryon density analytic')
+    ax1.plot(mu, b_vec_alt, '-', c = 'red', label = r'baryon density numeric')
 
     ax1.legend()
     for tick in ax1.xaxis.get_major_ticks():
@@ -3003,8 +3039,556 @@ def deriv_test():
     matplotlib.pyplot.show()
     matplotlib.pyplot.close()
 
+def deriv_test_sdensity():
+    T = numpy.linspace(1.0, 2000.0, num = 200)
+    mu = 0.0
+    phi_re = []
+    phi_im = []
+    p_vec = []
+    s_vec_alt = []
+
+    calc = False
+
+    pl_file       = "D:/EoS/BDK/deriv_test/pl_T.dat"
+
+    lT = len(T)
+    if calc:
+        phi_re.append(1e-15)
+        phi_im.append(2e-15)
+        for T_el in tqdm.tqdm(T, desc = "Traced Polyakov loop (calc f(T))", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu, phi_re[-1], phi_im[-1], with_clusters = False)
+            phi_re.append(temp_phi_re)
+            phi_im.append(temp_phi_im)
+        phi_re = phi_re[1:]
+        phi_im = phi_im[1:]
+        with open(pl_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T, phi_re, phi_im)])
+    else:
+        _, T           = utils.data_collect(0, 0, pl_file)
+        phi_re, phi_im  = utils.data_collect(1, 2, pl_file)
+
+    p_vec = [pnjl.thermo.gcp_cluster.bound_step_continuum_arccos_cos.pressure(
+        T_el, mu, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el),
+        pnjl.defaults.default_Mpi, 2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu),
+        0, 0, 3.0, 2.0, pnjl.defaults.default_L) for T_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, phi_re, phi_im), desc = "Pressure (calc f(mu))", total = lT, ascii = True)]
+    for T_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, phi_re, phi_im), desc = "Entropy density without phi (calc f(T))", total = lT, ascii = True):
+        h = 1e-2
+        T_vec = []
+        Phi_vec = []
+        Phib_vec = []
+        if T_el > 0.0:
+            T_vec = [T_el + 2 * h, T_el + h, T_el - h, T_el - 2 * h]
+        else:
+            T_vec = [h, 0.0]
+        Phi_vec = [complex(phi_re_el, phi_im_el) for el in T_vec]
+        Phib_vec = [complex(phi_re_el, -phi_im_el) for el in T_vec]
+        Mth_vec = [2. * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(el, mu) for el in T_vec]
+        s_vec_alt.append(pnjl.thermo.gcp_cluster.bound_step_continuum_arccos_cos.sdensity(
+            T_vec, mu, Phi_vec, Phib_vec,
+            pnjl.defaults.default_Mpi, Mth_vec, 0, 0, 3.0, 2.0, pnjl.defaults.default_L))
+
+    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax1 = fig1.add_subplot(1, 1, 1)
+    ax1.axis([0.0, 2000., min(p_vec), max(p_vec)])
+
+    ax1.plot(T, p_vec, '-', c = 'blue', label = r'pressure')
+    ax1.plot(T, s_vec_alt, '-', c = 'red', label = r'entropy density numeric')
+
+    ax1.legend()
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax1.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax1.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax1.set_ylabel(r'p or s', fontsize = 16)
+
+    fig1.tight_layout(pad = 0.1)
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+def PNJL_mu_over_T():
+
+    phi_re, phi_im               = [], []
+
+    Pres_Q, Pres_g, Pres_pert, Pres_sea  = [], [], [], []
+    BDen_Q, BDen_g, BDen_pert, BDen_sea  = [], [], [], []
+    SDen_Q, SDen_g, SDen_pert, SDen_sea  = [], [], [], []
+
+    Pres_pi, Pres_K, Pres_rho  = [], [], []
+    Pres_omega, Pres_D, Pres_N = [], [], []
+    Pres_T, Pres_F, Pres_P     = [], [], []
+    Pres_Q5, Pres_H            = [], []
+
+    BDen_pi, BDen_K, BDen_rho  = [], [], []
+    BDen_omega, BDen_D, BDen_N = [], [], []
+    BDen_T, BDen_F, BDen_P     = [], [], []
+    BDen_Q5, BDen_H            = [], []
+
+    SDen_pi, SDen_K, SDen_rho  = [], [], []
+    SDen_omega, SDen_D, SDen_N = [], [], []
+    SDen_T, SDen_F, SDen_P     = [], [], []
+    SDen_Q5, SDen_H            = [], []
+
+    Pres_tot, BDen_tot, SDen_tot = [], [], []
+
+    mu_over_T = 1.0
+    T = numpy.linspace(1.0, 2000.0, num = 200)
+    mu = [(mu_over_T * el) / 3.0 for el in T]
+
+    calc_pl     = False
+    calc_thermo = False
+
+    cluster_backreaction    = False
+    pl_turned_off           = False
+
+    pl_file     = "D:/EoS/BDK/mu_over_t/pl_1.dat"
+    pressure_file = "D:/EoS/BDK/mu_over_t/pressure_1.dat"
+    baryon_file = "D:/EoS/BDK/mu_over_t/bdensity_1.dat"
+    entropy_file = "D:/EoS/BDK/mu_over_t/entropy_1.dat"
+
+    if calc_pl:
+        phi_re.append(1e-15)
+        phi_im.append(2e-15)
+        lT = len(T)
+        for T_el, mu_el in tqdm.tqdm(zip(T, mu), desc = "Traced Polyakov loop", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re[-1], phi_im[-1], with_clusters = cluster_backreaction)
+            phi_re.append(temp_phi_re)
+            phi_im.append(temp_phi_im)
+        phi_re = phi_re[1:]
+        phi_im = phi_im[1:]
+        with open(pl_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T, mu, phi_re, phi_im)])
+    else:
+        T, mu = utils.data_collect(0, 1, pl_file)
+        phi_re, phi_im = utils.data_collect(2, 3, pl_file)
+
+    if calc_thermo:
+        Pres_g = [
+            pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            for T_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T, phi_re, phi_im), 
+                desc = "Gluon pressure", 
+                total = len(T),
+                ascii = True
+                )]
+        BDen_g = [0.0 for T_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, phi_re, phi_im), desc = "Gluon baryon density", total = len(T), ascii = True)]
+        for T_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, phi_re, phi_im), desc = "Gluon entropy density", total = len(T), ascii = True):
+            h = 1e-2
+            T_vec = []
+            Phi_vec = []
+            Phib_vec = []
+            if T_el > 0.0:
+                T_vec = [T_el + 2 * h, T_el + h, T_el - h, T_el - 2 * h]
+            else:
+                T_vec = [h, 0.0]
+            Phi_vec = [complex(phi_re_el, phi_im_el) for el in T_vec]
+            Phib_vec = [complex(phi_re_el, -phi_im_el) for el in T_vec]
+            SDen_g.append(pnjl.thermo.gcp_pl_polynomial.sdensity(T_vec, Phi_vec, Phib_vec))
+        Pres_sea = [0.0 for T_el, mu_el in tqdm.tqdm(zip(T, mu), desc = "Sigma mf pressure", total = len(T), ascii = True)]
+        BDen_sea = [0.0 for T_el, mu_el in tqdm.tqdm(zip(T, mu), desc = "Sigma mf baryon density", total = len(T), ascii = True)]
+        SDen_sea = [0.0 for T_el, mu_el in tqdm.tqdm(zip(T, mu), desc = "Sigma mf entropy density", total = len(T), ascii = True)]
+        if not pl_turned_off:
+            Pres_Q = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T, mu, phi_re, phi_im), 
+                    desc = "Quark pressure", 
+                    total = len(T), 
+                    ascii = True
+                    )]
+            Pres_pert = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T, mu, phi_re, phi_im), 
+                    desc = "Perturbative pressure", 
+                    total = len(T), 
+                    ascii = True
+                    )]
+            for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im), desc = "Quark and perturbative baryon density", total = len(T), ascii = True):
+                h = 1e-2
+                mu_vec = []
+                Phi_vec = []
+                Phib_vec = []
+                if mu_el > 0.0:
+                    mu_vec = [mu_el + 2 * h, mu_el + h, mu_el - h, mu_el - 2 * h]
+                else:
+                    mu_vec = [h, 0.0]
+                Phi_vec = [complex(phi_re_el, phi_im_el) for el in mu_vec]
+                Phib_vec = [complex(phi_re_el, -phi_im_el) for el in mu_vec]
+                BDen_Q.append(pnjl.thermo.gcp_quark.bdensity(T_el, mu_vec, Phi_vec, Phib_vec) + pnjl.thermo.gcp_quark.bdensity(T_el, mu_vec, Phi_vec, Phib_vec, ml = pnjl.defaults.default_ms))
+                BDen_pert.append(pnjl.thermo.gcp_perturbative.bdensity(T_el, mu_vec, Phi_vec, Phib_vec, Nf = 3.0))
+            for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im), desc = "Quark and perturbative entropy density", total = len(T), ascii = True):
+                h = 1e-2
+                T_vec = []
+                Phi_vec = []
+                Phib_vec = []
+                if T_el > 0.0:
+                    T_vec = [T_el + 2 * h, T_el + h, T_el - h, T_el - 2 * h]
+                else:
+                    T_vec = [h, 0.0]
+                Phi_vec = [complex(phi_re_el, phi_im_el) for el in T_vec]
+                Phib_vec = [complex(phi_re_el, -phi_im_el) for el in T_vec]
+                SDen_Q.append(pnjl.thermo.gcp_quark.sdensity(T_vec, mu_el, Phi_vec, Phib_vec) + pnjl.thermo.gcp_quark.sdensity(T_vec, mu_el, Phi_vec, Phib_vec, ml = pnjl.defaults.default_ms))
+                SDen_pert.append(pnjl.thermo.gcp_perturbative.sdensity(T_vec, mu_el, Phi_vec, Phib_vec, Nf = 3.0))
+            (
+                (Pres_pi, Pres_rho, Pres_omega, Pres_K, Pres_D, Pres_N, Pres_T, Pres_F, Pres_P, 
+                 Pres_Q5, Pres_H),
+                (BDen_pi, BDen_rho, BDen_omega, BDen_K, BDen_D, BDen_N, BDen_T, BDen_F, BDen_P, 
+                 BDen_Q5, BDen_H),
+                (SDen_pi, SDen_rho, SDen_omega, SDen_K, SDen_D, SDen_N, SDen_T, SDen_F, SDen_P, 
+                 SDen_Q5, SDen_H)
+            ) = clusters_c(T, mu, phi_re, phi_im)
+        else:
+            Pres_Q = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T, mu, [1.0 for el in T], [0.0 for el in T]), 
+                    desc = "Quark pressure", 
+                    total = len(T), 
+                    ascii = True
+                    )]
+            Pres_pert = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T, mu, [1.0 for el in T], [0.0 for el in T]), 
+                    desc = "Perturbative pressure", 
+                    total = len(T), 
+                    ascii = True
+                    )]
+            for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, [1.0 for el in T], [0.0 for el in T]), desc = "Quark and perturbative baryon density", total = len(T), ascii = True):
+                h = 1e-2
+                mu_vec = []
+                Phi_vec = []
+                Phib_vec = []
+                if mu_el > 0.0:
+                    mu_vec = [mu_el + 2 * h, mu_el + h, mu_el - h, mu_el - 2 * h]
+                else:
+                    mu_vec = [h, 0.0]
+                Phi_vec = [complex(phi_re_el, phi_im_el) for el in mu_vec]
+                Phib_vec = [complex(phi_re_el, -phi_im_el) for el in mu_vec]
+                BDen_Q.append(pnjl.thermo.gcp_quark.bdensity(T_el, mu_vec, Phi_vec, Phib_vec) + pnjl.thermo.gcp_quark.bdensity(T_el, mu_vec, Phi_vec, Phib_vec, ml = pnjl.defaults.default_ms))
+                BDen_pert.append(pnjl.thermo.gcp_perturbative.bdensity(T_el, mu_vec, Phi_vec, Phib_vec, Nf = 3.0))
+            for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, [1.0 for el in T], [0.0 for el in T]), desc = "Quark and perturbative entropy density", total = len(T), ascii = True):
+                h = 1e-2
+                T_vec = []
+                Phi_vec = []
+                Phib_vec = []
+                if T_el > 0.0:
+                    T_vec = [T_el + 2 * h, T_el + h, T_el - h, T_el - 2 * h]
+                else:
+                    T_vec = [h, 0.0]
+                Phi_vec = [complex(phi_re_el, phi_im_el) for el in T_vec]
+                Phib_vec = [complex(phi_re_el, -phi_im_el) for el in T_vec]
+                SDen_Q.append(pnjl.thermo.gcp_quark.sdensity(T_vec, mu_el, Phi_vec, Phib_vec) + pnjl.thermo.gcp_quark.sdensity(T_vec, mu_el, Phi_vec, Phib_vec, ml = pnjl.defaults.default_ms))
+                SDen_pert.append(pnjl.thermo.gcp_perturbative.sdensity(T_vec, mu_el, Phi_vec, Phib_vec, Nf = 3.0))
+            (
+                (Pres_pi, Pres_rho, Pres_omega, Pres_K, Pres_D, Pres_N, Pres_T, Pres_F, Pres_P, 
+                 Pres_Q5, Pres_H),
+                (BDen_pi, BDen_rho, BDen_omega, BDen_K, BDen_D, BDen_N, BDen_T, BDen_F, BDen_P, 
+                 BDen_Q5, BDen_H),
+                (SDen_pi, SDen_rho, SDen_omega, SDen_K, SDen_D, SDen_N, SDen_T, SDen_F, SDen_P, 
+                 SDen_Q5, SDen_H)
+            ) = clusters_c(T, mu, [1.0 for el in T], [0.0 for el in T])
+        with open(pressure_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[temp_el, mu_el, q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for temp_el, mu_el, q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(T, mu, Pres_Q, Pres_g, Pres_pert, Pres_pi, Pres_K, Pres_rho, Pres_omega, Pres_D, Pres_N, Pres_T, Pres_F, Pres_P, Pres_Q5, Pres_H, Pres_sea)])
+        with open(baryon_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[temp_el, mu_el, q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for temp_el, mu_el, q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(T, mu, BDen_Q, BDen_g, BDen_pert, BDen_pi, BDen_K, BDen_rho, BDen_omega, BDen_D, BDen_N, BDen_T, BDen_F, BDen_P, BDen_Q5, BDen_H, BDen_sea)])
+        with open(entropy_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[temp_el, mu_el, q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for temp_el, mu_el, q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(T, mu, SDen_Q, SDen_g, SDen_pert, SDen_pi, SDen_K, SDen_rho, SDen_omega, SDen_D, SDen_N, SDen_T, SDen_F, SDen_P, SDen_Q5, SDen_H, SDen_sea)])
+    else:
+        T, mu              = utils.data_collect(0, 1, pressure_file)
+        Pres_Q, Pres_g     = utils.data_collect(2, 3, pressure_file)
+        Pres_pert, Pres_pi = utils.data_collect(4, 5, pressure_file)
+        Pres_K, Pres_rho   = utils.data_collect(6, 7, pressure_file)
+        Pres_omega, Pres_D = utils.data_collect(8, 9, pressure_file)
+        Pres_N, Pres_T     = utils.data_collect(10, 11, pressure_file)
+        Pres_F, Pres_P     = utils.data_collect(12, 13, pressure_file)
+        Pres_Q5, Pres_H    = utils.data_collect(14, 15, pressure_file)
+        Pres_sea, _        = utils.data_collect(16, 16, pressure_file)
+        BDen_Q, BDen_g     = utils.data_collect(2, 3, baryon_file)
+        BDen_pert, BDen_pi = utils.data_collect(4, 5, baryon_file)
+        BDen_K, BDen_rho   = utils.data_collect(6, 7, baryon_file)
+        BDen_omega, BDen_D = utils.data_collect(8, 9, baryon_file)
+        BDen_N, BDen_T     = utils.data_collect(10, 11, baryon_file)
+        BDen_F, BDen_P     = utils.data_collect(12, 13, baryon_file)
+        BDen_Q5, BDen_H    = utils.data_collect(14, 15, baryon_file)
+        BDen_sea, _        = utils.data_collect(16, 16, baryon_file)
+        SDen_Q, SDen_g     = utils.data_collect(2, 3, entropy_file)
+        SDen_pert, SDen_pi = utils.data_collect(4, 5, entropy_file)
+        SDen_K, SDen_rho   = utils.data_collect(6, 7, entropy_file)
+        SDen_omega, SDen_D = utils.data_collect(8, 9, entropy_file)
+        SDen_N, SDen_T     = utils.data_collect(10, 11, entropy_file)
+        SDen_F, SDen_P     = utils.data_collect(12, 13, entropy_file)
+        SDen_Q5, SDen_H    = utils.data_collect(14, 15, entropy_file)
+        SDen_sea, _        = utils.data_collect(16, 16, entropy_file)
+
+    total_s = [sum(el) for el in zip(SDen_Q, SDen_g, SDen_pert, SDen_pi, SDen_K, SDen_rho, SDen_omega, SDen_D, SDen_N, SDen_T, SDen_F, SDen_P, SDen_Q5, SDen_H, SDen_sea)]
+    total_b = [sum(el) for el in zip(BDen_Q, BDen_g, BDen_pert, BDen_pi, BDen_K, BDen_rho, BDen_omega, BDen_D, BDen_N, BDen_T, BDen_F, BDen_P, BDen_Q5, BDen_H, BDen_sea)]
+
+    entropy_per_baryon = [el1 / el2 for el1, el2 in zip(total_s, total_b)]
+
+    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax1 = fig1.add_subplot(1, 1, 1)
+    ax1.axis([0., 2000., min(entropy_per_baryon[1:]), max(entropy_per_baryon[1:])])
+
+    ax1.plot(T[1:], entropy_per_baryon[1:], '-', c = 'blue')
+
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax1.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax1.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax1.set_ylabel(r'entropy per baryon', fontsize = 16)
+
+    fig1.tight_layout(pad = 0.1)
+
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+def PNJL_mu_T_plane_calc():
+
+    calc_pl     = True
+    calc_thermo = True
+
+    cluster_backreaction    = False
+    pl_turned_off           = False
+
+    for mu_trgt in numpy.linspace(1.0, 1000.0, num = 200)[95:]:
+
+        mu_trgt_round = math.floor(mu_trgt * 10) / 10.0
+
+        phi_re, phi_im               = [], []
+
+        Pres_Q, Pres_g, Pres_pert, Pres_sea  = [], [], [], []
+        BDen_Q, BDen_g, BDen_pert, BDen_sea  = [], [], [], []
+        SDen_Q, SDen_g, SDen_pert, SDen_sea  = [], [], [], []
+
+        Pres_pi, Pres_K, Pres_rho  = [], [], []
+        Pres_omega, Pres_D, Pres_N = [], [], []
+        Pres_T, Pres_F, Pres_P     = [], [], []
+        Pres_Q5, Pres_H            = [], []
+
+        BDen_pi, BDen_K, BDen_rho  = [], [], []
+        BDen_omega, BDen_D, BDen_N = [], [], []
+        BDen_T, BDen_F, BDen_P     = [], [], []
+        BDen_Q5, BDen_H            = [], []
+
+        SDen_pi, SDen_K, SDen_rho  = [], [], []
+        SDen_omega, SDen_D, SDen_N = [], [], []
+        SDen_T, SDen_F, SDen_P     = [], [], []
+        SDen_Q5, SDen_H            = [], []
+
+        Pres_tot, BDen_tot, SDen_tot = [], [], []
+
+        T = numpy.linspace(1.0, 1000.0, num = 200)
+        mu = [mu_trgt_round / 3.0 for el in T]
+
+        pl_file     = "D:/EoS/BDK/mu_T_plane/pl_" + str(mu_trgt_round).replace(".", "p") + ".dat"
+        pressure_file = "D:/EoS/BDK/mu_T_plane/pressure_" + str(mu_trgt_round).replace(".", "p") + ".dat"
+        baryon_file = "D:/EoS/BDK/mu_T_plane/bdensity_" + str(mu_trgt_round).replace(".", "p") + ".dat"
+        entropy_file = "D:/EoS/BDK/mu_T_plane/entropy_" + str(mu_trgt_round).replace(".", "p") + ".dat"
+
+        if calc_pl:
+            phi_re.append(1e-15)
+            phi_im.append(2e-15)
+            lT = len(T)
+            for T_el, mu_el in tqdm.tqdm(zip(T, mu), desc = "Traced Polyakov loop, mu = " + str(mu_trgt_round), total = lT, ascii = True):
+                temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re[-1], phi_im[-1], with_clusters = cluster_backreaction)
+                phi_re.append(temp_phi_re)
+                phi_im.append(temp_phi_im)
+            phi_re = phi_re[1:]
+            phi_im = phi_im[1:]
+            with open(pl_file, 'w', newline = '') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T, mu, phi_re, phi_im)])
+        else:
+            T, mu = utils.data_collect(0, 1, pl_file)
+            phi_re, phi_im = utils.data_collect(2, 3, pl_file)
+        
+        if calc_thermo:
+            Pres_g = [
+                pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                for T_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T, phi_re, phi_im), 
+                    desc = "Gluon pressure, mu = " + str(mu_trgt_round), 
+                    total = len(T),
+                    ascii = True
+                    )]
+            BDen_g = [0.0 for T_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, phi_re, phi_im), desc = "Gluon baryon density, mu = " + str(mu_trgt_round), total = len(T), ascii = True)]
+            for T_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, phi_re, phi_im), desc = "Gluon entropy density, mu = " + str(mu_trgt_round), total = len(T), ascii = True):
+                h = 1e-2
+                T_vec = []
+                Phi_vec = []
+                Phib_vec = []
+                if T_el > 0.0:
+                    T_vec = [T_el + 2 * h, T_el + h, T_el - h, T_el - 2 * h]
+                else:
+                    T_vec = [h, 0.0]
+                Phi_vec = [complex(phi_re_el, phi_im_el) for el in T_vec]
+                Phib_vec = [complex(phi_re_el, -phi_im_el) for el in T_vec]
+                SDen_g.append(pnjl.thermo.gcp_pl_polynomial.sdensity(T_vec, Phi_vec, Phib_vec))
+            Pres_sea = [0.0 for T_el, mu_el in tqdm.tqdm(zip(T, mu), desc = "Sigma mf pressure, mu = " + str(mu_trgt_round), total = len(T), ascii = True)]
+            BDen_sea = [0.0 for T_el, mu_el in tqdm.tqdm(zip(T, mu), desc = "Sigma mf baryon density, mu = " + str(mu_trgt_round), total = len(T), ascii = True)]
+            SDen_sea = [0.0 for T_el, mu_el in tqdm.tqdm(zip(T, mu), desc = "Sigma mf entropy density, mu = " + str(mu_trgt_round), total = len(T), ascii = True)]
+            if not pl_turned_off:
+                Pres_Q = [
+                    pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                    + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                    for T_el, mu_el, phi_re_el, phi_im_el 
+                    in tqdm.tqdm(
+                        zip(T, mu, phi_re, phi_im), 
+                        desc = "Quark pressure, mu = " + str(mu_trgt_round), 
+                        total = len(T), 
+                        ascii = True
+                        )]
+                Pres_pert = [
+                    pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                    for T_el, mu_el, phi_re_el, phi_im_el 
+                    in tqdm.tqdm(
+                        zip(T, mu, phi_re, phi_im), 
+                        desc = "Perturbative pressure, mu = " + str(mu_trgt_round), 
+                        total = len(T), 
+                        ascii = True
+                        )]
+                for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im), desc = "Quark and perturbative baryon density, mu = " + str(mu_trgt_round), total = len(T), ascii = True):
+                    h = 1e-2
+                    mu_vec = []
+                    Phi_vec = []
+                    Phib_vec = []
+                    if mu_el > 0.0:
+                        mu_vec = [mu_el + 2 * h, mu_el + h, mu_el - h, mu_el - 2 * h]
+                    else:
+                        mu_vec = [h, 0.0]
+                    Phi_vec = [complex(phi_re_el, phi_im_el) for el in mu_vec]
+                    Phib_vec = [complex(phi_re_el, -phi_im_el) for el in mu_vec]
+                    BDen_Q.append(pnjl.thermo.gcp_quark.bdensity(T_el, mu_vec, Phi_vec, Phib_vec) + pnjl.thermo.gcp_quark.bdensity(T_el, mu_vec, Phi_vec, Phib_vec, ml = pnjl.defaults.default_ms))
+                    BDen_pert.append(pnjl.thermo.gcp_perturbative.bdensity(T_el, mu_vec, Phi_vec, Phib_vec, Nf = 3.0))
+                for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im), desc = "Quark and perturbative entropy density, mu = " + str(mu_trgt_round), total = len(T), ascii = True):
+                    h = 1e-2
+                    T_vec = []
+                    Phi_vec = []
+                    Phib_vec = []
+                    if T_el > 0.0:
+                        T_vec = [T_el + 2 * h, T_el + h, T_el - h, T_el - 2 * h]
+                    else:
+                        T_vec = [h, 0.0]
+                    Phi_vec = [complex(phi_re_el, phi_im_el) for el in T_vec]
+                    Phib_vec = [complex(phi_re_el, -phi_im_el) for el in T_vec]
+                    SDen_Q.append(pnjl.thermo.gcp_quark.sdensity(T_vec, mu_el, Phi_vec, Phib_vec) + pnjl.thermo.gcp_quark.sdensity(T_vec, mu_el, Phi_vec, Phib_vec, ml = pnjl.defaults.default_ms))
+                    SDen_pert.append(pnjl.thermo.gcp_perturbative.sdensity(T_vec, mu_el, Phi_vec, Phib_vec, Nf = 3.0))
+                (
+                    (Pres_pi, Pres_rho, Pres_omega, Pres_K, Pres_D, Pres_N, Pres_T, Pres_F, Pres_P, 
+                     Pres_Q5, Pres_H),
+                    (BDen_pi, BDen_rho, BDen_omega, BDen_K, BDen_D, BDen_N, BDen_T, BDen_F, BDen_P, 
+                     BDen_Q5, BDen_H),
+                    (SDen_pi, SDen_rho, SDen_omega, SDen_K, SDen_D, SDen_N, SDen_T, SDen_F, SDen_P, 
+                     SDen_Q5, SDen_H)
+                ) = clusters_c(T, mu, phi_re, phi_im)
+            else:
+                Pres_Q = [
+                    pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                    + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                    for T_el, mu_el, phi_re_el, phi_im_el 
+                    in tqdm.tqdm(
+                        zip(T, mu, [1.0 for el in T], [0.0 for el in T]), 
+                        desc = "Quark pressure, mu = " + str(mu_trgt_round), 
+                        total = len(T), 
+                        ascii = True
+                        )]
+                Pres_pert = [
+                    pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                    for T_el, mu_el, phi_re_el, phi_im_el 
+                    in tqdm.tqdm(
+                        zip(T, mu, [1.0 for el in T], [0.0 for el in T]), 
+                        desc = "Perturbative pressure, mu = " + str(mu_trgt_round), 
+                        total = len(T), 
+                        ascii = True
+                        )]
+                for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, [1.0 for el in T], [0.0 for el in T]), desc = "Quark and perturbative baryon density, mu = " + str(mu_trgt_round), total = len(T), ascii = True):
+                    h = 1e-2
+                    mu_vec = []
+                    Phi_vec = []
+                    Phib_vec = []
+                    if mu_el > 0.0:
+                        mu_vec = [mu_el + 2 * h, mu_el + h, mu_el - h, mu_el - 2 * h]
+                    else:
+                        mu_vec = [h, 0.0]
+                    Phi_vec = [complex(phi_re_el, phi_im_el) for el in mu_vec]
+                    Phib_vec = [complex(phi_re_el, -phi_im_el) for el in mu_vec]
+                    BDen_Q.append(pnjl.thermo.gcp_quark.bdensity(T_el, mu_vec, Phi_vec, Phib_vec) + pnjl.thermo.gcp_quark.bdensity(T_el, mu_vec, Phi_vec, Phib_vec, ml = pnjl.defaults.default_ms))
+                    BDen_pert.append(pnjl.thermo.gcp_perturbative.bdensity(T_el, mu_vec, Phi_vec, Phib_vec, Nf = 3.0))
+                for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, [1.0 for el in T], [0.0 for el in T]), desc = "Quark and perturbative entropy density, mu = " + str(mu_trgt_round), total = len(T), ascii = True):
+                    h = 1e-2
+                    T_vec = []
+                    Phi_vec = []
+                    Phib_vec = []
+                    if T_el > 0.0:
+                        T_vec = [T_el + 2 * h, T_el + h, T_el - h, T_el - 2 * h]
+                    else:
+                        T_vec = [h, 0.0]
+                    Phi_vec = [complex(phi_re_el, phi_im_el) for el in T_vec]
+                    Phib_vec = [complex(phi_re_el, -phi_im_el) for el in T_vec]
+                    SDen_Q.append(pnjl.thermo.gcp_quark.sdensity(T_vec, mu_el, Phi_vec, Phib_vec) + pnjl.thermo.gcp_quark.sdensity(T_vec, mu_el, Phi_vec, Phib_vec, ml = pnjl.defaults.default_ms))
+                    SDen_pert.append(pnjl.thermo.gcp_perturbative.sdensity(T_vec, mu_el, Phi_vec, Phib_vec, Nf = 3.0))
+                (
+                    (Pres_pi, Pres_rho, Pres_omega, Pres_K, Pres_D, Pres_N, Pres_T, Pres_F, Pres_P, 
+                     Pres_Q5, Pres_H),
+                    (BDen_pi, BDen_rho, BDen_omega, BDen_K, BDen_D, BDen_N, BDen_T, BDen_F, BDen_P, 
+                     BDen_Q5, BDen_H),
+                    (SDen_pi, SDen_rho, SDen_omega, SDen_K, SDen_D, SDen_N, SDen_T, SDen_F, SDen_P, 
+                     SDen_Q5, SDen_H)
+                ) = clusters_c(T, mu, [1.0 for el in T], [0.0 for el in T])
+            with open(pressure_file, 'w', newline = '') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerows([[temp_el, mu_el, q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for temp_el, mu_el, q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(T, mu, Pres_Q, Pres_g, Pres_pert, Pres_pi, Pres_K, Pres_rho, Pres_omega, Pres_D, Pres_N, Pres_T, Pres_F, Pres_P, Pres_Q5, Pres_H, Pres_sea)])
+            with open(baryon_file, 'w', newline = '') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerows([[temp_el, mu_el, q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for temp_el, mu_el, q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(T, mu, BDen_Q, BDen_g, BDen_pert, BDen_pi, BDen_K, BDen_rho, BDen_omega, BDen_D, BDen_N, BDen_T, BDen_F, BDen_P, BDen_Q5, BDen_H, BDen_sea)])
+            with open(entropy_file, 'w', newline = '') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerows([[temp_el, mu_el, q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for temp_el, mu_el, q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(T, mu, SDen_Q, SDen_g, SDen_pert, SDen_pi, SDen_K, SDen_rho, SDen_omega, SDen_D, SDen_N, SDen_T, SDen_F, SDen_P, SDen_Q5, SDen_H, SDen_sea)])
+        else:
+            T, mu              = utils.data_collect(0, 1, pressure_file)
+            Pres_Q, Pres_g     = utils.data_collect(2, 3, pressure_file)
+            Pres_pert, Pres_pi = utils.data_collect(4, 5, pressure_file)
+            Pres_K, Pres_rho   = utils.data_collect(6, 7, pressure_file)
+            Pres_omega, Pres_D = utils.data_collect(8, 9, pressure_file)
+            Pres_N, Pres_T     = utils.data_collect(10, 11, pressure_file)
+            Pres_F, Pres_P     = utils.data_collect(12, 13, pressure_file)
+            Pres_Q5, Pres_H    = utils.data_collect(14, 15, pressure_file)
+            Pres_sea, _        = utils.data_collect(16, 16, pressure_file)
+            BDen_Q, BDen_g     = utils.data_collect(2, 3, baryon_file)
+            BDen_pert, BDen_pi = utils.data_collect(4, 5, baryon_file)
+            BDen_K, BDen_rho   = utils.data_collect(6, 7, baryon_file)
+            BDen_omega, BDen_D = utils.data_collect(8, 9, baryon_file)
+            BDen_N, BDen_T     = utils.data_collect(10, 11, baryon_file)
+            BDen_F, BDen_P     = utils.data_collect(12, 13, baryon_file)
+            BDen_Q5, BDen_H    = utils.data_collect(14, 15, baryon_file)
+            BDen_sea, _        = utils.data_collect(16, 16, baryon_file)
+            SDen_Q, SDen_g     = utils.data_collect(2, 3, entropy_file)
+            SDen_pert, SDen_pi = utils.data_collect(4, 5, entropy_file)
+            SDen_K, SDen_rho   = utils.data_collect(6, 7, entropy_file)
+            SDen_omega, SDen_D = utils.data_collect(8, 9, entropy_file)
+            SDen_N, SDen_T     = utils.data_collect(10, 11, entropy_file)
+            SDen_F, SDen_P     = utils.data_collect(12, 13, entropy_file)
+            SDen_Q5, SDen_H    = utils.data_collect(14, 15, entropy_file)
+            SDen_sea, _        = utils.data_collect(16, 16, entropy_file)
+
 if __name__ == '__main__':
 
-    PNJL_perturbative_fit()
+    PNJL_mu_T_plane_calc()
 
     print("END")

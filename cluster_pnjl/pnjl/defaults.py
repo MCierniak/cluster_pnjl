@@ -78,4 +78,4 @@ default_L           = 60.0
 default_T0          = 175.0
 default_c           = 300.0
 default_d           = 3.2
-default_Lambda      = 798.13
+default_Lambda      = 900.0
