@@ -14,6 +14,9 @@ import math
 import tqdm
 import csv
 
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
 import pnjl.thermo.gcp_cluster.bound_step_continuum_arccos_cos as cluster
 import pnjl.thermo.gcp_cluster.bound_step_continuum_step
 import pnjl.thermo.gcp_pl_polynomial
@@ -3365,7 +3368,7 @@ def PNJL_mu_T_plane_calc():
     cluster_backreaction    = False
     pl_turned_off           = False
 
-    for mu_trgt in numpy.linspace(1.0, 1000.0, num = 200)[95:]:
+    for mu_trgt in numpy.linspace(1.0, 1000.0, num = 200)[120:121]:
 
         mu_trgt_round = math.floor(mu_trgt * 10) / 10.0
 
@@ -3587,8 +3590,2670 @@ def PNJL_mu_T_plane_calc():
             SDen_Q5, SDen_H    = utils.data_collect(14, 15, entropy_file)
             SDen_sea, _        = utils.data_collect(16, 16, entropy_file)
 
+def epja_figure2():
+
+    T0      = numpy.linspace(1.0, 250.0, num = 200)
+    T300    = numpy.linspace(1.0, 250.0, num = 200)
+    T600    = numpy.linspace(1.0, 250.0, num = 200)
+    T900    = numpy.linspace(1.0, 250.0, num = 200)
+    Talt0   = numpy.linspace(1.0, 250.0, num = 200)
+    Talt300 = numpy.linspace(1.0, 250.0, num = 200)
+    Talt600 = numpy.linspace(1.0, 250.0, num = 200)
+    Talt900 = numpy.linspace(1.0, 250.0, num = 200)
+
+    phi_re_0, phi_im_0             = [], []
+    phi_re_300, phi_im_300         = [], []
+    phi_re_600, phi_im_600         = [], []
+    phi_re_900, phi_im_900         = [], []
+    phi_re_alt_0, phi_im_alt_0     = [], []
+    phi_re_alt_300, phi_im_alt_300 = [], []
+    phi_re_alt_600, phi_im_alt_600 = [], []
+    phi_re_alt_900, phi_im_alt_900 = [], []
+
+    pl0_file      = "D:/EoS/epja/figure2/pl_0.dat"
+    pl300_file    = "D:/EoS/epja/figure2/pl_300.dat"
+    pl600_file    = "D:/EoS/epja/figure2/pl_600.dat"
+    pl900_file    = "D:/EoS/epja/figure2/pl_900.dat"
+    plalt0_file   = "D:/EoS/epja/figure2/pl0_0.dat"
+    plalt300_file = "D:/EoS/epja/figure2/pl0_300.dat"
+    plalt600_file = "D:/EoS/epja/figure2/pl0_600.dat"
+    plalt900_file = "D:/EoS/epja/figure2/pl0_900.dat"
+
+    pl0_calc      = False
+    pl300_calc    = False
+    pl600_calc    = False
+    pl900_calc    = True
+    plalt0_calc   = True
+    plalt300_calc = True
+    plalt600_calc = True
+    plalt900_calc = True
+
+    sigma_0   = [pnjl.thermo.gcp_sea_lattice.Delta_ls(el, 0.0)   for el in T0]
+    sigma_300 = [pnjl.thermo.gcp_sea_lattice.Delta_ls(el, 100.0) for el in T300]
+    sigma_600 = [pnjl.thermo.gcp_sea_lattice.Delta_ls(el, 200.0) for el in T600]
+    sigma_900 = [pnjl.thermo.gcp_sea_lattice.Delta_ls(el, 300.0) for el in T900]
+
+    if pl900_calc:
+        with open(pl900_file, 'a', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            phi_re_900.append(1e-15)
+            phi_im_900.append(2e-15)
+            lT = len(T900)
+            for T_el in tqdm.tqdm(T900, desc = "Traced Polyakov loop, mu = 900 MeV", total = lT, ascii = True):
+                temp_phi_re, temp_phi_im = calc_PL_c(T_el, 300.0, phi_re_900[-1], phi_im_900[-1], with_clusters = True)
+                phi_re_900.append(temp_phi_re)
+                phi_im_900.append(temp_phi_im)
+                writer.writerow([T_el, temp_phi_re, temp_phi_im])
+                file.flush()
+            phi_re_900 = phi_re_900[1:]
+            phi_im_900 = phi_im_900[1:]
+    else:
+        T900, phi_re_900 = utils.data_collect(0, 1, pl900_file)
+        phi_im_900, _ = utils.data_collect(2, 2, pl900_file)
+
+    if pl600_calc:
+        phi_re_600.append(1e-15)
+        phi_im_600.append(2e-15)
+        lT = len(T600)
+        for T_el in tqdm.tqdm(T600, desc = "Traced Polyakov loop, mu = 600 MeV", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, 200.0, phi_re_600[-1], phi_im_600[-1], with_clusters = True)
+            phi_re_600.append(temp_phi_re)
+            phi_im_600.append(temp_phi_im)
+        phi_re_600 = phi_re_600[1:]
+        phi_im_600 = phi_im_600[1:]
+        with open(pl600_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T600, phi_re_600, phi_im_600)])
+    else:
+        T600, phi_re_600 = utils.data_collect(0, 1, pl600_file)
+        phi_im_600, _ = utils.data_collect(2, 2, pl600_file)
+
+    if pl300_calc:
+        phi_re_300.append(1e-15)
+        phi_im_300.append(2e-15)
+        lT = len(T300)
+        for T_el in tqdm.tqdm(T300, desc = "Traced Polyakov loop, mu = 300 MeV", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, 100.0, phi_re_300[-1], phi_im_300[-1], with_clusters = True)
+            phi_re_300.append(temp_phi_re)
+            phi_im_300.append(temp_phi_im)
+        phi_re_300 = phi_re_300[1:]
+        phi_im_300 = phi_im_300[1:]
+        with open(pl300_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T300, phi_re_300, phi_im_300)])
+    else:
+        T300, phi_re_300 = utils.data_collect(0, 1, pl300_file)
+        phi_im_300, _ = utils.data_collect(2, 2, pl300_file)
+
+    if pl0_calc:
+        phi_re_0.append(1e-15)
+        phi_im_0.append(2e-15)
+        lT = len(T0)
+        for T_el in tqdm.tqdm(T0, desc = "Traced Polyakov loop, mu = 0", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, 0.0, phi_re_0[-1], phi_im_0[-1], with_clusters = True)
+            phi_re_0.append(temp_phi_re)
+            phi_im_0.append(temp_phi_im)
+        phi_re_0 = phi_re_0[1:]
+        phi_im_0 = phi_im_0[1:]
+        with open(pl0_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(T0, phi_re_0, phi_im_0)])
+    else:
+        T0, phi_re_0 = utils.data_collect(0, 1, pl0_file)
+        phi_im_0, _ = utils.data_collect(2, 2, pl0_file)
+
+    if plalt0_calc:
+        phi_re_alt_0.append(1e-15)
+        phi_im_alt_0.append(2e-15)
+        lT = len(Talt0)
+        for T_el in tqdm.tqdm(Talt0, desc = "Traced Polyakov loop alt, mu = 0", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, 0.0, phi_re_alt_0[-1], phi_im_alt_0[-1], with_clusters = False)
+            phi_re_alt_0.append(temp_phi_re)
+            phi_im_alt_0.append(temp_phi_im)
+        phi_re_alt_0 = phi_re_alt_0[1:]
+        phi_im_alt_0 = phi_im_alt_0[1:]
+        with open(plalt0_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(Talt0, phi_re_alt_0, phi_im_alt_0)])
+    else:
+        Talt0, phi_re_alt_0 = utils.data_collect(0, 1, plalt0_file)
+        phi_im_alt_0, _ = utils.data_collect(2, 2, plalt0_file)
+
+    if plalt300_calc:
+        phi_re_alt_300.append(1e-15)
+        phi_im_alt_300.append(2e-15)
+        lT = len(Talt300)
+        for T_el in tqdm.tqdm(Talt300, desc = "Traced Polyakov loop alt, mu = 300 MeV", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, 100.0, phi_re_alt_300[-1], phi_im_alt_300[-1], with_clusters = False)
+            phi_re_alt_300.append(temp_phi_re)
+            phi_im_alt_300.append(temp_phi_im)
+        phi_re_alt_300 = phi_re_alt_300[1:]
+        phi_im_alt_300 = phi_im_alt_300[1:]
+        with open(plalt300_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(Talt300, phi_re_alt_300, phi_im_alt_300)])
+    else:
+        Talt300, phi_re_alt_300 = utils.data_collect(0, 1, plalt300_file)
+        phi_im_alt_300, _ = utils.data_collect(2, 2, plalt300_file)
+
+    if plalt600_calc:
+        phi_re_alt_600.append(1e-15)
+        phi_im_alt_600.append(2e-15)
+        lT = len(Talt600)
+        for T_el in tqdm.tqdm(Talt600, desc = "Traced Polyakov loop alt, mu = 600 MeV", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, 200.0, phi_re_alt_600[-1], phi_im_alt_600[-1], with_clusters = False)
+            phi_re_alt_600.append(temp_phi_re)
+            phi_im_alt_600.append(temp_phi_im)
+        phi_re_alt_600 = phi_re_alt_600[1:]
+        phi_im_alt_600 = phi_im_alt_600[1:]
+        with open(plalt600_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(Talt600, phi_re_alt_600, phi_im_alt_600)])
+    else:
+        Talt600, phi_re_alt_600 = utils.data_collect(0, 1, plalt600_file)
+        phi_im_alt_600, _ = utils.data_collect(2, 2, plalt600_file)
+
+    if plalt900_calc:
+        phi_re_alt_900.append(1e-15)
+        phi_im_alt_900.append(2e-15)
+        lT = len(Talt900)
+        for T_el in tqdm.tqdm(Talt900, desc = "Traced Polyakov loop alt, mu = 900 MeV", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, 300.0, phi_re_alt_900[-1], phi_im_alt_900[-1], with_clusters = False)
+            phi_re_alt_900.append(temp_phi_re)
+            phi_im_alt_900.append(temp_phi_im)
+        phi_re_alt_900 = phi_re_alt_900[1:]
+        phi_im_alt_900 = phi_im_alt_900[1:]
+        with open(plalt900_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, phi_re_el, phi_im_el] for T_el, phi_re_el, phi_im_el in zip(Talt900, phi_re_alt_900, phi_im_alt_900)])
+    else:
+        Talt900, phi_re_alt_900 = utils.data_collect(0, 1, plalt900_file)
+        phi_im_alt_900, _ = utils.data_collect(2, 2, plalt900_file)
+
+    fig = plt.figure(num = 1, figsize = (5.9, 5))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.axis([min(T), max(T), min(phi_re_0), 1.1])
+    ax.plot(T0, phi_re_0, c = 'blue', label = r'$\mathrm{\Phi}$')
+    ax.plot(Talt0, phi_re_alt_0, '--', c = 'red', label = r'$\mathrm{\Phi_0}$')
+    ax.plot(T0, sigma_0, c = 'green', label = r'$\mathrm{M_q}$ / $\mathrm{M_{q,vac}}$')
+    ax.text(10., 1.03, r'$\mathrm{M_q}$ / $\mathrm{M_{q,vac}}$', fontsize = 14)
+    ax.text(175., 1.03, r'$\mathrm{\mu=0}$', fontsize = 14)
+    ax.text(121., 0.25, r'$\mathrm{\Phi=\Phi_0}$', fontsize = 14)
+    #ax.legend(loc = 'center left')
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax.set_ylabel(r'$\mathrm{\Phi}$', fontsize = 16)
+
+    fig2 = plt.figure(num = 2, figsize = (5.9, 5))
+    ax2 = fig2.add_subplot(1, 1, 1)
+    ax2.axis([min(T), max(T), min(phi_re_0), 1.1])
+    ax2.plot(T900, phi_re_900, c = 'blue', label = r'$\mathrm{\Phi}$')
+    ax2.plot(Talt900, phi_re_alt_900, '--', c = 'red', label = r'$\mathrm{\Phi_0}$')
+    ax2.plot(T900, sigma_900, c = 'green', label = r'$\mathrm{M_q}$ / $\mathrm{M_{q,vac}}$')
+    ax2.text(10., 1.03, r'$\mathrm{M_q}$ / $\mathrm{M_{q,vac}}$', fontsize = 14)
+    ax2.text(145., 1.03, r'$\mathrm{\mu=300}$ MeV', fontsize = 14)
+    ax2.text(85., 0.25, r'$\mathrm{\Phi}$', fontsize = 14)
+    ax2.text(110., 0.25, r'$\mathrm{\Phi_0}$', fontsize = 14)
+    #ax2.legend(loc = 'center left')
+    for tick in ax2.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax2.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax2.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax2.set_ylabel(r'$\mathrm{\Phi}$', fontsize = 16)
+
+    fig.tight_layout()
+    fig2.tight_layout()
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+def epja_figure3():
+
+    phi_re_1, phi_im_1               = [], []
+
+    Pres_Q_1, Pres_g_1, Pres_pert_1, Pres_sea_1  = [], [], [], []
+
+    T_1 = numpy.linspace(1.0, 2000.0, 200)
+
+    mu_1   = [0.0 / 3.0 for el in T_1]
+
+    calc_1                  = False
+
+    cluster_backreaction    = False
+    pl_turned_off           = False
+
+    pl_1_file       = "D:/EoS/epja/figure3/pl_1.dat"
+
+    pressure_1_file = "D:/EoS/epja/figure3/pressure_1.dat"
+
+    if calc_1:
+        phi_re_1.append(1e-15)
+        phi_im_1.append(2e-15)
+        lT = len(T_1)
+        for T_el, mu_el in tqdm.tqdm(zip(T_1, mu_1), desc = "Traced Polyakov loop (calc #1)", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_1[-1], phi_im_1[-1], with_clusters = cluster_backreaction)
+            phi_re_1.append(temp_phi_re)
+            phi_im_1.append(temp_phi_im)
+        phi_re_1 = phi_re_1[1:]
+        phi_im_1 = phi_im_1[1:]
+        with open(pl_1_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_1, mu_1, phi_re_1, phi_im_1)])
+    else:
+        T_1, mu_1 = utils.data_collect(0, 1, pl_1_file)
+        phi_re_1, phi_im_1 = utils.data_collect(2, 3, pl_1_file)
+
+    if calc_1:
+        Pres_g_1 = [
+            pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            for T_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_1, phi_re_1, phi_im_1), 
+                desc = "Gluon pressure (calc #1)", 
+                total = len(T_1),
+                ascii = True
+                )]
+        Pres_sea_1 = [
+            pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el) 
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_1, mu_1), 
+                desc = "Sigma mf pressure (calc #1)", 
+                total = len(T_1),
+                ascii = True
+                )]
+        if not pl_turned_off:
+            Pres_Q_1 = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_1, mu_1, phi_re_1, phi_im_1), 
+                    desc = "Quark pressure (calc #1)", 
+                    total = len(T_1), 
+                    ascii = True
+                    )]
+            Pres_pert_1 = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_1, mu_1, phi_re_1, phi_im_1), 
+                    desc = "Perturbative pressure (calc #1)", 
+                    total = len(T_1), 
+                    ascii = True
+                    )]        
+        else:
+            Pres_Q_1 = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_1, mu_1, [1.0 for el in T_1], [0.0 for el in T_1]), 
+                    desc = "Quark pressure (calc #1)", 
+                    total = len(T_1), 
+                    ascii = True
+                    )]
+            Pres_pert_1 = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_1, mu_1, [1.0 for el in T_1], [0.0 for el in T_1]), 
+                    desc = "Perturbative pressure (calc #1)", 
+                    total = len(T_1), 
+                    ascii = True
+                    )]        
+        with open(pressure_1_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[q_el, g_el, pert_el, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, sea_el] for q_el, g_el, pert_el, sea_el in zip(Pres_Q_1, Pres_g_1, Pres_pert_1, Pres_sea_1)])
+    else:
+        Pres_Q_1, Pres_g_1       = utils.data_collect(0, 1, pressure_1_file)
+        Pres_pert_1, Pres_sea_1   = utils.data_collect(2, 14, pressure_1_file)
+
+    contrib_q_1    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_Q_1)]
+    contrib_g_1    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_g_1)]
+    contrib_pert_1 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_pert_1)]
+    contrib_sea_1  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_sea_1)]
+    contrib_qgp_1  = [sum(el) for el in zip(contrib_q_1, contrib_g_1, contrib_pert_1, contrib_sea_1)]
+
+    (low_1204_6710v2_mu0_x, low_1204_6710v2_mu0_y)       = utils.data_collect(0, 1, "D:/EoS/epja/figure3/1204_6710v2_table4_pressure_mu0_low.dat")
+    (high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y)     = utils.data_collect(0, 1, "D:/EoS/epja/figure3/1204_6710v2_table4_pressure_mu0_high.dat")
+    (high_1407_6387_mu0_x, high_1407_6387_mu0_y)         = utils.data_collect(0, 3, "D:/EoS/epja/figure3/1407_6387_table1_pressure_mu0.dat")
+    (low_1407_6387_mu0_x, low_1407_6387_mu0_y)           = utils.data_collect(0, 2, "D:/EoS/epja/figure3/1407_6387_table1_pressure_mu0.dat")
+    (high_1309_5258_mu0_x, high_1309_5258_mu0_y)         = utils.data_collect(0, 1, "D:/EoS/epja/figure3/1309_5258_figure6_pressure_mu0_high.dat")
+    (low_1309_5258_mu0_x, low_1309_5258_mu0_y)           = utils.data_collect(0, 1, "D:/EoS/epja/figure3/1309_5258_figure6_pressure_mu0_low.dat")
+    (high_1710_05024_mu0_x, high_1710_05024_mu0_y)       = utils.data_collect(0, 1, "D:/EoS/epja/figure3/1710_05024_figure8_pressure_mu0_high.dat")
+    (low_1710_05024_mu0_x, low_1710_05024_mu0_y)         = utils.data_collect(0, 1, "D:/EoS/epja/figure3/1710_05024_figure8_pressure_mu0_low.dat")
+
+    borsanyi_1204_6710v2_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu0_x[::-1], low_1204_6710v2_mu0_y[::-1]):
+        borsanyi_1204_6710v2_mu0.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu0 = numpy.array(borsanyi_1204_6710v2_mu0)
+    bazavov_1407_6387_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1407_6387_mu0_x, high_1407_6387_mu0_y)]
+    for x_el, y_el in zip(low_1407_6387_mu0_x[::-1], low_1407_6387_mu0_y[::-1]):
+        bazavov_1407_6387_mu0.append(numpy.array([x_el, y_el]))
+    bazavov_1407_6387_mu0 = numpy.array(bazavov_1407_6387_mu0)
+    borsanyi_1309_5258_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1309_5258_mu0_x, high_1309_5258_mu0_y)]
+    for x_el, y_el in zip(low_1309_5258_mu0_x[::-1], low_1309_5258_mu0_y[::-1]):
+        borsanyi_1309_5258_mu0.append(numpy.array([x_el, y_el]))
+    borsanyi_1309_5258_mu0 = numpy.array(borsanyi_1309_5258_mu0)
+    bazavov_1710_05024_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1710_05024_mu0_x, high_1710_05024_mu0_y)]
+    for x_el, y_el in zip(low_1710_05024_mu0_x[::-1], low_1710_05024_mu0_y[::-1]):
+        bazavov_1710_05024_mu0.append(numpy.array([x_el, y_el]))
+    bazavov_1710_05024_mu0 = numpy.array(bazavov_1710_05024_mu0)
+
+    fig2 = matplotlib.pyplot.figure(num = 2, figsize = (5.9, 5))
+    ax2 = fig2.add_subplot(1, 1, 1)
+    ax2.axis([10., 2000., -1.5, 5.1])
+    ax2.add_patch(matplotlib.patches.Polygon(bazavov_1407_6387_mu0, closed = True, fill = True, color = 'red', alpha = 0.3, label = r'Bazavov et al. (2014)'))
+    ax2.add_patch(matplotlib.patches.Polygon(borsanyi_1309_5258_mu0, closed = True, fill = True, color = 'green', alpha = 0.3, label = r'Borsanyi et al. (2014)'))
+    ax2.add_patch(matplotlib.patches.Polygon(bazavov_1710_05024_mu0, closed = True, fill = True, color = 'magenta', alpha = 0.3, label = r'Bazavov et al. (2018)'))
+    ax2.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu0, closed = True, fill = True, color = 'blue', alpha = 0.3, label = r'Borsanyi et al. (2012)'))
+    ax2.plot(T_1, contrib_qgp_1, '-', c = 'black')
+    ax2.plot(T_1, contrib_g_1, '--', c = 'red')
+    ax2.plot(T_1, contrib_q_1, '--', c = 'blue')
+    ax2.plot(T_1, contrib_pert_1, '--', c = 'pink')
+    ax2.text(1230.0, 1.2, r'Polyakov--loop potential', color = 'red')
+    ax2.text(1230.0, -0.5, r'Perturbative correction', color = 'red', alpha = 0.6)
+    ax2.text(1230.0, 3.6, r'PNJL quarks', color = 'blue')
+    ax2.text(1230.0, 4.3, r'total pressure', color = 'black')
+    ax2.text(45.0, 4.8, r'$\mathrm{\mu_B=0}$', color = 'black')
+    ax2.text(430.0, 3.35, r'Borsanyi et al. (2012)', color = 'blue', alpha = 0.7)
+    ax2.text(540.0, 3.88, r'Borsanyi et al. (2014)', color = 'green', alpha = 0.7)
+    ax2.text(345.0, 2.9, r'Bazavov et al. (2014)', color = 'red', alpha = 0.7)
+    ax2.text(1340.0, 4.8, r'Bazavov et al. (2018)', color = 'magenta', alpha = 0.7)
+    for tick in ax2.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax2.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax2.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax2.set_ylabel(r'$\mathrm{p/T^4}$', fontsize = 16)
+
+    fig2.tight_layout(pad = 0.1)
+
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+def epja_figure4():
+
+    phi_re_1, phi_im_1               = [], []
+    phi_re_3, phi_im_3               = [], []
+    phi_re_4, phi_im_4               = [], []
+    phi_re_5, phi_im_5               = [], []
+    phi_re_6, phi_im_6               = [], []
+
+    Pres_Q_1, Pres_g_1, Pres_pert_1, Pres_sea_1  = [], [], [], []
+    Pres_Q_3, Pres_g_3, Pres_pert_3, Pres_sea_3  = [], [], [], []
+    Pres_Q_4, Pres_g_4, Pres_pert_4, Pres_sea_4  = [], [], [], []
+    Pres_Q_5, Pres_g_5, Pres_pert_5, Pres_sea_5  = [], [], [], []
+    Pres_Q_6, Pres_g_6, Pres_pert_6, Pres_sea_6  = [], [], [], []
+
+    Pres_pi_1, Pres_K_1, Pres_rho_1  = [], [], []
+    Pres_omega_1, Pres_D_1, Pres_N_1 = [], [], []
+    Pres_T_1, Pres_F_1, Pres_P_1     = [], [], []
+    Pres_Q5_1, Pres_H_1              = [], []
+
+    Pres_pi_3, Pres_K_3, Pres_rho_3  = [], [], [] 
+    Pres_omega_3, Pres_D_3, Pres_N_3 = [], [], []
+    Pres_T_3, Pres_F_3, Pres_P_3     = [], [], []
+    Pres_Q5_3, Pres_H_3              = [], []
+
+    Pres_pi_4, Pres_K_4, Pres_rho_4  = [], [], [] 
+    Pres_omega_4, Pres_D_4, Pres_N_4 = [], [], []
+    Pres_T_4, Pres_F_4, Pres_P_4     = [], [], []
+    Pres_Q5_4, Pres_H_4              = [], []
+
+    Pres_pi_5, Pres_K_5, Pres_rho_5  = [], [], [] 
+    Pres_omega_5, Pres_D_5, Pres_N_5 = [], [], []
+    Pres_T_5, Pres_F_5, Pres_P_5     = [], [], []
+    Pres_Q5_5, Pres_H_5              = [], []
+
+    Pres_pi_6, Pres_K_6, Pres_rho_6  = [], [], [] 
+    Pres_omega_6, Pres_D_6, Pres_N_6 = [], [], []
+    Pres_T_6, Pres_F_6, Pres_P_6     = [], [], []
+    Pres_Q5_6, Pres_H_6              = [], []
+
+    T_1 = numpy.linspace(1.0, 2000.0, 200)
+    T_3 = numpy.linspace(1.0, 2000.0, 200)
+    T_4 = numpy.linspace(1.0, 2000.0, 200)
+    T_5 = numpy.linspace(1.0, 2000.0, 200)
+    T_6 = numpy.linspace(1.0, 2000.0, 200)
+
+    mu_1   = [0.0 / 3.0 for el in T_1]
+    mu_3   = [400.0 / 3.0 for el in T_3]
+    mu_4   = [100.0 / 3.0 for el in T_3]
+    mu_5   = [200.0 / 3.0 for el in T_3]
+    mu_6   = [300.0 / 3.0 for el in T_3]
+
+    calc_1                  = False
+    calc_3                  = False
+    calc_4                  = False
+    calc_5                  = False
+    calc_6                  = False
+
+    cluster_backreaction    = False
+    pl_turned_off           = False
+
+    pl_1_file       = "D:/EoS/epja/figure4/pl_1.dat"
+    pl_3_file       = "D:/EoS/epja/figure4/pl_3.dat"
+    pl_4_file       = "D:/EoS/epja/figure4/pl_4.dat"
+    pl_5_file       = "D:/EoS/epja/figure4/pl_5.dat"
+    pl_6_file       = "D:/EoS/epja/figure4/pl_6.dat"
+    pressure_1_file = "D:/EoS/epja/figure4/pressure_1.dat"
+    pressure_3_file = "D:/EoS/epja/figure4/pressure_3.dat"
+    pressure_4_file = "D:/EoS/epja/figure4/pressure_4.dat"
+    pressure_5_file = "D:/EoS/epja/figure4/pressure_5.dat"
+    pressure_6_file = "D:/EoS/epja/figure4/pressure_6.dat"
+
+    if calc_1:
+        phi_re_1.append(1e-15)
+        phi_im_1.append(2e-15)
+        lT = len(T_1)
+        for T_el, mu_el in tqdm.tqdm(zip(T_1, mu_1), desc = "Traced Polyakov loop (calc #1)", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_1[-1], phi_im_1[-1], with_clusters = cluster_backreaction)
+            phi_re_1.append(temp_phi_re)
+            phi_im_1.append(temp_phi_im)
+        phi_re_1 = phi_re_1[1:]
+        phi_im_1 = phi_im_1[1:]
+        with open(pl_1_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_1, mu_1, phi_re_1, phi_im_1)])
+    else:
+        T_1, mu_1 = utils.data_collect(0, 1, pl_1_file)
+        phi_re_1, phi_im_1 = utils.data_collect(2, 3, pl_1_file)
+
+    if calc_3:
+        phi_re_3.append(1e-15)
+        phi_im_3.append(2e-15)
+        lT = len(T_3)
+        for T_el, mu_el in tqdm.tqdm(zip(T_3, mu_3), desc = "Traced Polyakov loop (calc #3)", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_3[-1], phi_im_3[-1], with_clusters = cluster_backreaction)
+            phi_re_3.append(temp_phi_re)
+            phi_im_3.append(temp_phi_im)
+        phi_re_3 = phi_re_3[1:]
+        phi_im_3 = phi_im_3[1:]
+        with open(pl_3_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_3, mu_3, phi_re_3, phi_im_3)])
+    else:
+        T_3, mu_3 = utils.data_collect(0, 1, pl_3_file)
+        phi_re_3, phi_im_3 = utils.data_collect(2, 3, pl_3_file)
+
+    if calc_4:
+        phi_re_4.append(1e-15)
+        phi_im_4.append(2e-15)
+        lT = len(T_4)
+        for T_el, mu_el in tqdm.tqdm(zip(T_4, mu_4), desc = "Traced Polyakov loop (calc #4)", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_4[-1], phi_im_4[-1], with_clusters = cluster_backreaction)
+            phi_re_4.append(temp_phi_re)
+            phi_im_4.append(temp_phi_im)
+        phi_re_4 = phi_re_4[1:]
+        phi_im_4 = phi_im_4[1:]
+        with open(pl_4_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_4, mu_4, phi_re_4, phi_im_4)])
+    else:
+        T_4, mu_4 = utils.data_collect(0, 1, pl_4_file)
+        phi_re_4, phi_im_4 = utils.data_collect(2, 3, pl_4_file)
+
+    if calc_5:
+        phi_re_5.append(1e-15)
+        phi_im_5.append(2e-15)
+        lT = len(T_5)
+        for T_el, mu_el in tqdm.tqdm(zip(T_5, mu_5), desc = "Traced Polyakov loop (calc #5)", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_5[-1], phi_im_5[-1], with_clusters = cluster_backreaction)
+            phi_re_5.append(temp_phi_re)
+            phi_im_5.append(temp_phi_im)
+        phi_re_5 = phi_re_5[1:]
+        phi_im_5 = phi_im_5[1:]
+        with open(pl_5_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_5, mu_5, phi_re_5, phi_im_5)])
+    else:
+        T_5, mu_5 = utils.data_collect(0, 1, pl_5_file)
+        phi_re_5, phi_im_5 = utils.data_collect(2, 3, pl_5_file)
+
+    if calc_6:
+        phi_re_6.append(1e-15)
+        phi_im_6.append(2e-15)
+        lT = len(T_6)
+        for T_el, mu_el in tqdm.tqdm(zip(T_6, mu_6), desc = "Traced Polyakov loop (calc #6)", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_6[-1], phi_im_6[-1], with_clusters = cluster_backreaction)
+            phi_re_6.append(temp_phi_re)
+            phi_im_6.append(temp_phi_im)
+        phi_re_6 = phi_re_6[1:]
+        phi_im_6 = phi_im_6[1:]
+        with open(pl_6_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_6, mu_6, phi_re_6, phi_im_6)])
+    else:
+        T_6, mu_6 = utils.data_collect(0, 1, pl_6_file)
+        phi_re_6, phi_im_6 = utils.data_collect(2, 3, pl_6_file)
+
+    if calc_1:
+        Pres_g_1 = [
+            pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            for T_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_1, phi_re_1, phi_im_1), 
+                desc = "Gluon pressure (calc #1)", 
+                total = len(T_1),
+                ascii = True
+                )]
+        Pres_sea_1 = [
+            pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el) 
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_1, mu_1), 
+                desc = "Sigma mf pressure (calc #1)", 
+                total = len(T_1),
+                ascii = True
+                )]
+        if not pl_turned_off:
+            Pres_Q_1 = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_1, mu_1, phi_re_1, phi_im_1), 
+                    desc = "Quark pressure (calc #1)", 
+                    total = len(T_1), 
+                    ascii = True
+                    )]
+            Pres_pert_1 = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_1, mu_1, phi_re_1, phi_im_1), 
+                    desc = "Perturbative pressure (calc #1)", 
+                    total = len(T_1), 
+                    ascii = True
+                    )]        
+            (
+                (Pres_pi_1, Pres_rho_1, Pres_omega_1, Pres_K_1, Pres_D_1, Pres_N_1, Pres_T_1, Pres_F_1, Pres_P_1, 
+                 Pres_Q5_1, Pres_H_1),
+                (_, _, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _, _)
+            ) = clusters_c(T_1, mu_1, phi_re_1, phi_im_1)
+        else:
+            Pres_Q_1 = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_1, mu_1, [1.0 for el in T_1], [0.0 for el in T_1]), 
+                    desc = "Quark pressure (calc #1)", 
+                    total = len(T_1), 
+                    ascii = True
+                    )]
+            Pres_pert_1 = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_1, mu_1, [1.0 for el in T_1], [0.0 for el in T_1]), 
+                    desc = "Perturbative pressure (calc #1)", 
+                    total = len(T_1), 
+                    ascii = True
+                    )]        
+            (
+                (Pres_pi_1, Pres_rho_1, Pres_omega_1, Pres_K_1, Pres_D_1, Pres_N_1, Pres_T_1, Pres_F_1, Pres_P_1, 
+                 Pres_Q5_1, Pres_H_1),
+                (_, _, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _, _)
+            ) = clusters_c(T_1, mu_1, [1.0 for el in T_1], [0.0 for el in T_1])
+        with open(pressure_1_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(Pres_Q_1, Pres_g_1, Pres_pert_1, Pres_pi_1, Pres_K_1, Pres_rho_1, Pres_omega_1, Pres_D_1, Pres_N_1, Pres_T_1, Pres_F_1, Pres_P_1, Pres_Q5_1, Pres_H_1, Pres_sea_1)])
+    else:
+        Pres_Q_1, Pres_g_1       = utils.data_collect(0, 1, pressure_1_file)
+        Pres_pert_1, Pres_pi_1   = utils.data_collect(2, 3, pressure_1_file)
+        Pres_K_1, _              = utils.data_collect(4, 4, pressure_1_file)
+        Pres_rho_1, Pres_omega_1 = utils.data_collect(5, 6, pressure_1_file)
+        Pres_D_1, Pres_N_1       = utils.data_collect(7, 8, pressure_1_file)
+        Pres_T_1, Pres_F_1       = utils.data_collect(9, 10, pressure_1_file)
+        Pres_P_1, Pres_Q5_1      = utils.data_collect(11, 12, pressure_1_file)
+        Pres_H_1, Pres_sea_1     = utils.data_collect(13, 14, pressure_1_file)
+
+    if calc_3:
+        Pres_g_3 = [
+            pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            for T_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_3, phi_re_3, phi_im_3), 
+                desc = "Gluon pressure (calc #3)", 
+                total = len(T_3),
+                ascii = True
+                )]
+        Pres_sea_3 = [
+            pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el) 
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_3, mu_3), 
+                desc = "Sigma mf pressure (calc #3)", 
+                total = len(T_3),
+                ascii = True
+                )]
+        if not pl_turned_off:
+            Pres_Q_3 = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_3, mu_3, phi_re_3, phi_im_3), 
+                    desc = "Quark pressure (calc #3)", 
+                    total = len(T_3), 
+                    ascii = True
+                    )]
+            Pres_pert_3 = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_3, mu_3, phi_re_3, phi_im_3), 
+                    desc = "Perturbative pressure (calc #3)", 
+                    total = len(T_3), 
+                    ascii = True
+                    )]        
+            (
+                (Pres_pi_3, Pres_rho_3, Pres_omega_3, Pres_K_3, Pres_D_3, Pres_N_3, Pres_T_3, Pres_F_3, Pres_P_3, 
+                 Pres_Q5_3, Pres_H_3),
+                (_, _, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _, _)
+            ) = clusters_c(T_3, mu_3, phi_re_3, phi_im_3)
+        else:
+            Pres_Q_3 = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_3, mu_3, [1.0 for el in T_3], [0.0 for el in T_3]), 
+                    desc = "Quark pressure (calc #3)", 
+                    total = len(T_3), 
+                    ascii = True
+                    )]
+            Pres_pert_3 = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_3, mu_3, [1.0 for el in T_3], [0.0 for el in T_3]), 
+                    desc = "Perturbative pressure (calc #3)", 
+                    total = len(T_3), 
+                    ascii = True
+                    )]        
+            (
+                (Pres_pi_3, Pres_rho_3, Pres_omega_3, Pres_K_3, Pres_D_3, Pres_N_3, Pres_T_3, Pres_F_3, Pres_P_3, 
+                 Pres_Q5_3, Pres_H_3),
+                (_, _, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _, _)
+            ) = clusters_c(T_3, mu_3, [1.0 for el in T_3], [0.0 for el in T_3])
+        with open(pressure_3_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(Pres_Q_3, Pres_g_3, Pres_pert_3, Pres_pi_3, Pres_K_3, Pres_rho_3, Pres_omega_3, Pres_D_3, Pres_N_3, Pres_T_3, Pres_F_3, Pres_P_3, Pres_Q5_3, Pres_H_3, Pres_sea_3)])
+    else:
+        Pres_Q_3, Pres_g_3       = utils.data_collect(0, 1, pressure_3_file)
+        Pres_pert_3, Pres_pi_3   = utils.data_collect(2, 3, pressure_3_file)
+        Pres_K_3, _              = utils.data_collect(4, 4, pressure_3_file)
+        Pres_rho_3, Pres_omega_3 = utils.data_collect(5, 6, pressure_3_file)
+        Pres_D_3, Pres_N_3       = utils.data_collect(7, 8, pressure_3_file)
+        Pres_T_3, Pres_F_3       = utils.data_collect(9, 10, pressure_3_file)
+        Pres_P_3, Pres_Q5_3      = utils.data_collect(11, 12, pressure_3_file)
+        Pres_H_3, Pres_sea_3     = utils.data_collect(13, 14, pressure_3_file)
+
+    if calc_4:
+        Pres_g_4 = [
+            pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            for T_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_4, phi_re_4, phi_im_4), 
+                desc = "Gluon pressure (calc #4)", 
+                total = len(T_4),
+                ascii = True
+                )]
+        Pres_sea_4 = [
+            pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el) 
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_4, mu_4), 
+                desc = "Sigma mf pressure (calc #4)", 
+                total = len(T_4),
+                ascii = True
+                )]
+        if not pl_turned_off:
+            Pres_Q_4 = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_4, mu_4, phi_re_4, phi_im_4), 
+                    desc = "Quark pressure (calc #4)", 
+                    total = len(T_4), 
+                    ascii = True
+                    )]
+            Pres_pert_4 = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_4, mu_4, phi_re_4, phi_im_4), 
+                    desc = "Perturbative pressure (calc #4)", 
+                    total = len(T_3), 
+                    ascii = True
+                    )]        
+            (
+                (Pres_pi_4, Pres_rho_4, Pres_omega_4, Pres_K_4, Pres_D_4, Pres_N_4, Pres_T_4, Pres_F_4, Pres_P_4, 
+                 Pres_Q5_4, Pres_H_4),
+                (_, _, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _, _)
+            ) = clusters_c(T_4, mu_4, phi_re_4, phi_im_4)
+        else:
+            Pres_Q_4 = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_4, mu_4, [1.0 for el in T_4], [0.0 for el in T_4]), 
+                    desc = "Quark pressure (calc #4)", 
+                    total = len(T_4), 
+                    ascii = True
+                    )]
+            Pres_pert_4 = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_4, mu_4, [1.0 for el in T_4], [0.0 for el in T_4]), 
+                    desc = "Perturbative pressure (calc #4)", 
+                    total = len(T_4), 
+                    ascii = True
+                    )]        
+            (
+                (Pres_pi_4, Pres_rho_4, Pres_omega_4, Pres_K_4, Pres_D_4, Pres_N_4, Pres_T_4, Pres_F_4, Pres_P_4, 
+                 Pres_Q5_4, Pres_H_4),
+                (_, _, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _, _)
+            ) = clusters_c(T_4, mu_4, [1.0 for el in T_4], [0.0 for el in T_4])
+        with open(pressure_4_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(Pres_Q_4, Pres_g_4, Pres_pert_4, Pres_pi_4, Pres_K_4, Pres_rho_4, Pres_omega_4, Pres_D_4, Pres_N_4, Pres_T_4, Pres_F_4, Pres_P_4, Pres_Q5_4, Pres_H_4, Pres_sea_4)])
+    else:
+        Pres_Q_4, Pres_g_4       = utils.data_collect(0, 1, pressure_4_file)
+        Pres_pert_4, Pres_pi_4   = utils.data_collect(2, 3, pressure_4_file)
+        Pres_K_4, _              = utils.data_collect(4, 4, pressure_4_file)
+        Pres_rho_4, Pres_omega_4 = utils.data_collect(5, 6, pressure_4_file)
+        Pres_D_4, Pres_N_4       = utils.data_collect(7, 8, pressure_4_file)
+        Pres_T_4, Pres_F_4       = utils.data_collect(9, 10, pressure_4_file)
+        Pres_P_4, Pres_Q5_4      = utils.data_collect(11, 12, pressure_4_file)
+        Pres_H_4, Pres_sea_4     = utils.data_collect(13, 14, pressure_4_file)
+
+    if calc_5:
+        Pres_g_5 = [
+            pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            for T_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_5, phi_re_5, phi_im_5), 
+                desc = "Gluon pressure (calc #5)", 
+                total = len(T_5),
+                ascii = True
+                )]
+        Pres_sea_5 = [
+            pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el) 
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_5, mu_5), 
+                desc = "Sigma mf pressure (calc #5)", 
+                total = len(T_5),
+                ascii = True
+                )]
+        if not pl_turned_off:
+            Pres_Q_5 = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_5, mu_5, phi_re_5, phi_im_5), 
+                    desc = "Quark pressure (calc #5)", 
+                    total = len(T_5), 
+                    ascii = True
+                    )]
+            Pres_pert_5 = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_5, mu_5, phi_re_5, phi_im_5), 
+                    desc = "Perturbative pressure (calc #5)", 
+                    total = len(T_5), 
+                    ascii = True
+                    )]        
+            (
+                (Pres_pi_5, Pres_rho_5, Pres_omega_5, Pres_K_5, Pres_D_5, Pres_N_5, Pres_T_5, Pres_F_5, Pres_P_5, 
+                 Pres_Q5_5, Pres_H_5),
+                (_, _, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _, _)
+            ) = clusters_c(T_5, mu_5, phi_re_5, phi_im_5)
+        else:
+            Pres_Q_5 = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_5, mu_5, [1.0 for el in T_5], [0.0 for el in T_5]), 
+                    desc = "Quark pressure (calc #5)", 
+                    total = len(T_5), 
+                    ascii = True
+                    )]
+            Pres_pert_5 = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_5, mu_5, [1.0 for el in T_5], [0.0 for el in T_5]), 
+                    desc = "Perturbative pressure (calc #5)", 
+                    total = len(T_5), 
+                    ascii = True
+                    )]        
+            (
+                (Pres_pi_5, Pres_rho_5, Pres_omega_5, Pres_K_5, Pres_D_5, Pres_N_5, Pres_T_5, Pres_F_5, Pres_P_5, 
+                 Pres_Q5_5, Pres_H_5),
+                (_, _, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _, _)
+            ) = clusters_c(T_5, mu_5, [1.0 for el in T_5], [0.0 for el in T_5])
+        with open(pressure_5_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(Pres_Q_5, Pres_g_5, Pres_pert_5, Pres_pi_5, Pres_K_5, Pres_rho_5, Pres_omega_5, Pres_D_5, Pres_N_5, Pres_T_5, Pres_F_5, Pres_P_5, Pres_Q5_5, Pres_H_5, Pres_sea_5)])
+    else:
+        Pres_Q_5, Pres_g_5       = utils.data_collect(0, 1, pressure_5_file)
+        Pres_pert_5, Pres_pi_5   = utils.data_collect(2, 3, pressure_5_file)
+        Pres_K_5, _              = utils.data_collect(4, 4, pressure_5_file)
+        Pres_rho_5, Pres_omega_5 = utils.data_collect(5, 6, pressure_5_file)
+        Pres_D_5, Pres_N_5       = utils.data_collect(7, 8, pressure_5_file)
+        Pres_T_5, Pres_F_5       = utils.data_collect(9, 10, pressure_5_file)
+        Pres_P_5, Pres_Q5_5      = utils.data_collect(11, 12, pressure_5_file)
+        Pres_H_5, Pres_sea_5     = utils.data_collect(13, 14, pressure_5_file)
+
+    if calc_6:
+        Pres_g_6 = [
+            pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            for T_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_6, phi_re_6, phi_im_6), 
+                desc = "Gluon pressure (calc #6)", 
+                total = len(T_6),
+                ascii = True
+                )]
+        Pres_sea_6 = [
+            pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el) 
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_6, mu_6), 
+                desc = "Sigma mf pressure (calc #6)", 
+                total = len(T_6),
+                ascii = True
+                )]
+        if not pl_turned_off:
+            Pres_Q_6 = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_6, mu_6, phi_re_6, phi_im_6), 
+                    desc = "Quark pressure (calc #6)", 
+                    total = len(T_6), 
+                    ascii = True
+                    )]
+            Pres_pert_6 = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_6, mu_6, phi_re_6, phi_im_6), 
+                    desc = "Perturbative pressure (calc #6)", 
+                    total = len(T_6), 
+                    ascii = True
+                    )]        
+            (
+                (Pres_pi_6, Pres_rho_6, Pres_omega_6, Pres_K_6, Pres_D_6, Pres_N_6, Pres_T_6, Pres_F_6, Pres_P_6, 
+                 Pres_Q5_6, Pres_H_6),
+                (_, _, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _, _)
+            ) = clusters_c(T_6, mu_6, phi_re_6, phi_im_6)
+        else:
+            Pres_Q_6 = [
+                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+                + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_6, mu_6, [1.0 for el in T_6], [0.0 for el in T_6]), 
+                    desc = "Quark pressure (calc #6)", 
+                    total = len(T_6), 
+                    ascii = True
+                    )]
+            Pres_pert_6 = [
+                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+                for T_el, mu_el, phi_re_el, phi_im_el 
+                in tqdm.tqdm(
+                    zip(T_6, mu_6, [1.0 for el in T_6], [0.0 for el in T_6]), 
+                    desc = "Perturbative pressure (calc #6)", 
+                    total = len(T_6), 
+                    ascii = True
+                    )]        
+            (
+                (Pres_pi_6, Pres_rho_6, Pres_omega_6, Pres_K_6, Pres_D_6, Pres_N_6, Pres_T_6, Pres_F_6, Pres_P_6, 
+                 Pres_Q5_6, Pres_H_6),
+                (_, _, _, _, _, _, _, _, _, _, _),
+                (_, _, _, _, _, _, _, _, _, _, _)
+            ) = clusters_c(T_6, mu_6, [1.0 for el in T_6], [0.0 for el in T_6])
+        with open(pressure_6_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(Pres_Q_6, Pres_g_6, Pres_pert_6, Pres_pi_6, Pres_K_6, Pres_rho_6, Pres_omega_6, Pres_D_6, Pres_N_6, Pres_T_6, Pres_F_6, Pres_P_6, Pres_Q5_6, Pres_H_6, Pres_sea_6)])
+    else:
+        Pres_Q_6, Pres_g_6       = utils.data_collect(0, 1, pressure_6_file)
+        Pres_pert_6, Pres_pi_6   = utils.data_collect(2, 3, pressure_6_file)
+        Pres_K_6, _              = utils.data_collect(4, 4, pressure_6_file)
+        Pres_rho_6, Pres_omega_6 = utils.data_collect(5, 6, pressure_6_file)
+        Pres_D_6, Pres_N_6       = utils.data_collect(7, 8, pressure_6_file)
+        Pres_T_6, Pres_F_6       = utils.data_collect(9, 10, pressure_6_file)
+        Pres_P_6, Pres_Q5_6      = utils.data_collect(11, 12, pressure_6_file)
+        Pres_H_6, Pres_sea_6     = utils.data_collect(13, 14, pressure_6_file)
+
+    contrib_q_1    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_Q_1)]
+    contrib_g_1    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_g_1)]
+    contrib_pert_1 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_pert_1)]
+    contrib_sea_1  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_sea_1)]
+    contrib_qgp_1  = [sum(el) for el in zip(contrib_q_1, contrib_g_1, contrib_pert_1, contrib_sea_1)]
+
+    contrib_q_3    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_Q_3)]
+    contrib_g_3    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_g_3)]
+    contrib_pert_3 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_pert_3)]
+    contrib_sea_3  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_sea_3)]
+    contrib_qgp_3  = [sum(el) for el in zip(contrib_q_3, contrib_g_3, contrib_pert_3, contrib_sea_3)]
+
+    contrib_q_4    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_Q_4)]
+    contrib_g_4    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_g_4)]
+    contrib_pert_4 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_pert_4)]
+    contrib_sea_4  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_sea_4)]
+    contrib_qgp_4  = [sum(el) for el in zip(contrib_q_4, contrib_g_4, contrib_pert_4, contrib_sea_4)]
+
+    contrib_q_5    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_Q_5)]
+    contrib_g_5    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_g_5)]
+    contrib_pert_5 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_pert_5)]
+    contrib_sea_5  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_sea_5)]
+    contrib_qgp_5  = [sum(el) for el in zip(contrib_q_5, contrib_g_5, contrib_pert_5, contrib_sea_5)]
+
+    contrib_q_6    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_Q_6)]
+    contrib_g_6    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_g_6)]
+    contrib_pert_6 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_pert_6)]
+    contrib_sea_6  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_sea_6)]
+    contrib_qgp_6  = [sum(el) for el in zip(contrib_q_6, contrib_g_6, contrib_pert_6, contrib_sea_6)]
+
+    contrib_pi_1                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_pi_1)]
+    contrib_rho_1                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_rho_1)]
+    contrib_omega_1               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_omega_1)]
+    contrib_K_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_K_1)]
+    contrib_D_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_D_1)]
+    contrib_N_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_N_1)]
+    contrib_T_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_T_1)]
+    contrib_F_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_F_1)]
+    contrib_P_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_P_1)]
+    contrib_Q5_1                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_Q5_1)]
+    contrib_H_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_H_1)]
+    contrib_cluster_1             = [sum(el) for el in zip(contrib_pi_1, contrib_rho_1, contrib_omega_1, contrib_K_1, contrib_D_1, contrib_N_1, contrib_T_1, contrib_F_1, contrib_P_1, contrib_Q5_1, contrib_H_1)]
+    contrib_cluster_singlet_1     = [sum(el) for el in zip(contrib_pi_1, contrib_rho_1, contrib_omega_1, contrib_K_1, contrib_N_1, contrib_T_1, contrib_P_1, contrib_H_1)]
+    contrib_cluster_color_1       = [sum(el) for el in zip(contrib_D_1, contrib_F_1, contrib_Q5_1)]
+    contrib_total_1               = [sum(el) for el in zip(contrib_cluster_1, contrib_qgp_1)]
+
+    contrib_pi_3                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_pi_3)]
+    contrib_rho_3                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_rho_3)]
+    contrib_omega_3               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_omega_3)]
+    contrib_K_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_K_3)]
+    contrib_D_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_D_3)]
+    contrib_N_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_N_3)]
+    contrib_T_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_T_3)]
+    contrib_F_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_F_3)]
+    contrib_P_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_P_3)]
+    contrib_Q5_3                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_Q5_3)]
+    contrib_H_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_H_3)]
+    contrib_cluster_3             = [sum(el) for el in zip(contrib_pi_3, contrib_rho_3, contrib_omega_3, contrib_K_3, contrib_D_3, contrib_N_3, contrib_T_3, contrib_F_3, contrib_P_3, contrib_Q5_3, contrib_H_3)]
+    contrib_cluster_singlet_3     = [sum(el) for el in zip(contrib_pi_3, contrib_rho_3, contrib_omega_3, contrib_K_3, contrib_N_3, contrib_T_3, contrib_P_3, contrib_H_3)]
+    contrib_cluster_color_3       = [sum(el) for el in zip(contrib_D_3, contrib_F_3, contrib_Q5_3)]
+    contrib_total_3               = [sum(el) for el in zip(contrib_cluster_3, contrib_qgp_3)]
+
+    contrib_pi_4                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_pi_4)]
+    contrib_rho_4                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_rho_4)]
+    contrib_omega_4               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_omega_4)]
+    contrib_K_4                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_K_4)]
+    contrib_D_4                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_D_4)]
+    contrib_N_4                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_N_4)]
+    contrib_T_4                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_T_4)]
+    contrib_F_4                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_F_4)]
+    contrib_P_4                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_P_4)]
+    contrib_Q5_4                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_Q5_4)]
+    contrib_H_4                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_4, Pres_H_4)]
+    contrib_cluster_4             = [sum(el) for el in zip(contrib_pi_4, contrib_rho_4, contrib_omega_4, contrib_K_4, contrib_D_4, contrib_N_4, contrib_T_4, contrib_F_4, contrib_P_4, contrib_Q5_4, contrib_H_4)]
+    contrib_cluster_singlet_4     = [sum(el) for el in zip(contrib_pi_4, contrib_rho_4, contrib_omega_4, contrib_K_4, contrib_N_4, contrib_T_4, contrib_P_4, contrib_H_4)]
+    contrib_cluster_color_4       = [sum(el) for el in zip(contrib_D_4, contrib_F_4, contrib_Q5_4)]
+    contrib_total_4               = [sum(el) for el in zip(contrib_cluster_4, contrib_qgp_4)]
+
+    contrib_pi_5                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_pi_5)]
+    contrib_rho_5                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_rho_5)]
+    contrib_omega_5               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_omega_5)]
+    contrib_K_5                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_K_5)]
+    contrib_D_5                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_D_5)]
+    contrib_N_5                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_N_5)]
+    contrib_T_5                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_T_5)]
+    contrib_F_5                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_F_5)]
+    contrib_P_5                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_P_5)]
+    contrib_Q5_5                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_Q5_5)]
+    contrib_H_5                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_5, Pres_H_5)]
+    contrib_cluster_5             = [sum(el) for el in zip(contrib_pi_5, contrib_rho_5, contrib_omega_5, contrib_K_5, contrib_D_5, contrib_N_5, contrib_T_5, contrib_F_5, contrib_P_5, contrib_Q5_5, contrib_H_5)]
+    contrib_cluster_singlet_5     = [sum(el) for el in zip(contrib_pi_5, contrib_rho_5, contrib_omega_5, contrib_K_5, contrib_N_5, contrib_T_5, contrib_P_5, contrib_H_5)]
+    contrib_cluster_color_3       = [sum(el) for el in zip(contrib_D_5, contrib_F_5, contrib_Q5_5)]
+    contrib_total_5               = [sum(el) for el in zip(contrib_cluster_5, contrib_qgp_5)]
+
+    contrib_pi_6                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_pi_6)]
+    contrib_rho_6                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_rho_6)]
+    contrib_omega_6               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_omega_6)]
+    contrib_K_6                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_K_6)]
+    contrib_D_6                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_D_6)]
+    contrib_N_6                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_N_6)]
+    contrib_T_6                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_T_6)]
+    contrib_F_6                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_F_6)]
+    contrib_P_6                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_P_6)]
+    contrib_Q5_6                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_Q5_6)]
+    contrib_H_6                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_6, Pres_H_6)]
+    contrib_cluster_6             = [sum(el) for el in zip(contrib_pi_6, contrib_rho_6, contrib_omega_6, contrib_K_6, contrib_D_6, contrib_N_6, contrib_T_6, contrib_F_6, contrib_P_6, contrib_Q5_6, contrib_H_6)]
+    contrib_cluster_singlet_6     = [sum(el) for el in zip(contrib_pi_6, contrib_rho_6, contrib_omega_6, contrib_K_6, contrib_N_6, contrib_T_6, contrib_P_6, contrib_H_6)]
+    contrib_cluster_color_6       = [sum(el) for el in zip(contrib_D_6, contrib_F_6, contrib_Q5_6)]
+    contrib_total_6               = [sum(el) for el in zip(contrib_cluster_6, contrib_qgp_6)]
+
+    (low_1204_6710v2_mu0_x, low_1204_6710v2_mu0_y)       = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1204_6710v2_table4_pressure_mu0_low.dat")
+    (high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y)     = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1204_6710v2_table4_pressure_mu0_high.dat")
+    (low_1204_6710v2_mu100_x, low_1204_6710v2_mu100_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1204_6710v2_table4_pressure_mu100_low.dat")
+    (high_1204_6710v2_mu100_x, high_1204_6710v2_mu100_y) = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1204_6710v2_table4_pressure_mu100_high.dat")
+    (low_1204_6710v2_mu200_x, low_1204_6710v2_mu200_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1204_6710v2_table4_pressure_mu200_low.dat")
+    (high_1204_6710v2_mu200_x, high_1204_6710v2_mu200_y) = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1204_6710v2_table4_pressure_mu200_high.dat")
+    (low_1204_6710v2_mu300_x, low_1204_6710v2_mu300_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1204_6710v2_table4_pressure_mu300_low.dat")
+    (high_1204_6710v2_mu300_x, high_1204_6710v2_mu300_y) = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1204_6710v2_table4_pressure_mu300_high.dat")
+    (low_1204_6710v2_mu400_x, low_1204_6710v2_mu400_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1204_6710v2_table4_pressure_mu400_low.dat")
+    (high_1204_6710v2_mu400_x, high_1204_6710v2_mu400_y) = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1204_6710v2_table4_pressure_mu400_high.dat")
+    (high_1407_6387_mu0_x, high_1407_6387_mu0_y)         = utils.data_collect(0, 3, "D:/EoS/epja/figure4/1407_6387_table1_pressure_mu0.dat")
+    (low_1407_6387_mu0_x, low_1407_6387_mu0_y)           = utils.data_collect(0, 2, "D:/EoS/epja/figure4/1407_6387_table1_pressure_mu0.dat")
+    (high_1309_5258_mu0_x, high_1309_5258_mu0_y)         = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1309_5258_figure6_pressure_mu0_high.dat")
+    (low_1309_5258_mu0_x, low_1309_5258_mu0_y)           = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1309_5258_figure6_pressure_mu0_low.dat")
+    (high_1710_05024_mu0_x, high_1710_05024_mu0_y)       = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1710_05024_figure8_pressure_mu0_high.dat")
+    (low_1710_05024_mu0_x, low_1710_05024_mu0_y)         = utils.data_collect(0, 1, "D:/EoS/epja/figure4/1710_05024_figure8_pressure_mu0_low.dat")
+
+    borsanyi_1204_6710v2_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu0_x[::-1], low_1204_6710v2_mu0_y[::-1]):
+        borsanyi_1204_6710v2_mu0.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu0 = numpy.array(borsanyi_1204_6710v2_mu0)
+    borsanyi_1204_6710v2_mu100 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu100_x, high_1204_6710v2_mu100_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu100_x[::-1], low_1204_6710v2_mu100_y[::-1]):
+        borsanyi_1204_6710v2_mu100.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu100 = numpy.array(borsanyi_1204_6710v2_mu100)
+    borsanyi_1204_6710v2_mu200 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu200_x, high_1204_6710v2_mu200_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu200_x[::-1], low_1204_6710v2_mu200_y[::-1]):
+        borsanyi_1204_6710v2_mu200.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu200 = numpy.array(borsanyi_1204_6710v2_mu200)
+    borsanyi_1204_6710v2_mu300 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu300_x, high_1204_6710v2_mu300_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu300_x[::-1], low_1204_6710v2_mu300_y[::-1]):
+        borsanyi_1204_6710v2_mu300.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu300 = numpy.array(borsanyi_1204_6710v2_mu300)
+    borsanyi_1204_6710v2_mu400 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu400_x, high_1204_6710v2_mu400_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu400_x[::-1], low_1204_6710v2_mu400_y[::-1]):
+        borsanyi_1204_6710v2_mu400.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu400 = numpy.array(borsanyi_1204_6710v2_mu400)
+    bazavov_1407_6387_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1407_6387_mu0_x, high_1407_6387_mu0_y)]
+    for x_el, y_el in zip(low_1407_6387_mu0_x[::-1], low_1407_6387_mu0_y[::-1]):
+        bazavov_1407_6387_mu0.append(numpy.array([x_el, y_el]))
+    bazavov_1407_6387_mu0 = numpy.array(bazavov_1407_6387_mu0)
+    borsanyi_1309_5258_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1309_5258_mu0_x, high_1309_5258_mu0_y)]
+    for x_el, y_el in zip(low_1309_5258_mu0_x[::-1], low_1309_5258_mu0_y[::-1]):
+        borsanyi_1309_5258_mu0.append(numpy.array([x_el, y_el]))
+    borsanyi_1309_5258_mu0 = numpy.array(borsanyi_1309_5258_mu0)
+    bazavov_1710_05024_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1710_05024_mu0_x, high_1710_05024_mu0_y)]
+    for x_el, y_el in zip(low_1710_05024_mu0_x[::-1], low_1710_05024_mu0_y[::-1]):
+        bazavov_1710_05024_mu0.append(numpy.array([x_el, y_el]))
+    bazavov_1710_05024_mu0 = numpy.array(bazavov_1710_05024_mu0)
+
+    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax1 = fig1.add_subplot(1, 1, 1)
+    ax1.axis([10., 540., 0., 4.2])
+    ax1.add_patch(matplotlib.patches.Polygon(bazavov_1407_6387_mu0, closed = True, fill = True, color = 'red', alpha = 0.3, label = r'Bazavov et al. (2014)'))
+    ax1.add_patch(matplotlib.patches.Polygon(borsanyi_1309_5258_mu0, closed = True, fill = True, color = 'green', alpha = 0.3, label = r'Borsanyi et al. (2014)'))
+    ax1.add_patch(matplotlib.patches.Polygon(bazavov_1710_05024_mu0, closed = True, fill = True, color = 'magenta', alpha = 0.3, label = r'Bazavov et al. (2018)'))
+    ax1.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu0, closed = True, fill = True, color = 'blue', alpha = 0.3, label = r'Borsanyi et al. (2012)'))
+    ax1.plot(T_1, contrib_total_1, '-', c = 'black', label = r'$\mathrm{P_{PNJL+BU},~\mu=0}$')
+    ax1.plot(T_1, contrib_cluster_1, '--', c = 'red', label = r'BU')
+    ax1.plot(T_1, contrib_qgp_1, '--', c = 'blue', label = r'PNJL')
+    ax1.text(185.0, 0.1, r'Beth--Uhlenbeck cluster pressure', color = 'red')
+    ax1.text(170.0, 0.48, r'PNJL pressure', color = 'blue')
+    ax1.text(185.0, 0.9, r'total pressure', color = 'black')
+    ax1.text(25.0, 4.0, r'$\mathrm{\mu_B=0}$', color = 'black')
+    ax1.text(315.0, 2.85, r'Borsanyi et al. (2012)', color = 'blue', alpha = 0.7)
+    ax1.text(230.0, 3.8, r'Borsanyi et al. (2014)', color = 'green', alpha = 0.7)
+    ax1.text(260.0, 2.3, r'Bazavov et al. (2014)', color = 'red', alpha = 0.7)
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax1.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax1.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax1.set_ylabel(r'$\mathrm{p/T^4}$', fontsize = 16)
+
+    fig2 = matplotlib.pyplot.figure(num = 2, figsize = (5.9, 5))
+    ax2 = fig2.add_subplot(1, 1, 1)
+    ax2.axis([10., 2000., 0., 5.0])
+    ax2.add_patch(matplotlib.patches.Polygon(bazavov_1407_6387_mu0, closed = True, fill = True, color = 'red', alpha = 0.3, label = r'Bazavov et al. (2014)'))
+    ax2.add_patch(matplotlib.patches.Polygon(borsanyi_1309_5258_mu0, closed = True, fill = True, color = 'green', alpha = 0.3, label = r'Borsanyi et al. (2014)'))
+    ax2.add_patch(matplotlib.patches.Polygon(bazavov_1710_05024_mu0, closed = True, fill = True, color = 'magenta', alpha = 0.3, label = r'Bazavov et al. (2018)'))
+    ax2.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu0, closed = True, fill = True, color = 'blue', alpha = 0.3, label = r'Borsanyi et al. (2012)'))
+    ax2.plot(T_1, contrib_total_1, '-', c = 'black', label = r'$\mathrm{P_{PNJL+BU},~\mu=0}$')
+    ax2.plot(T_1, contrib_cluster_1, '--', c = 'red', label = r'BU')
+    ax2.plot(T_1, contrib_qgp_1, '--', c = 'blue', label = r'PNJL')
+    ax2.text(200.0, 0.1, r'Beth--Uhlenbeck cluster pressure', color = 'red')
+    ax2.text(200.0, 0.4, r'PNJL pressure', color = 'blue')
+    ax2.text(200.0, 0.7, r'total pressure', color = 'black')
+    ax2.text(45.0, 4.8, r'$\mathrm{\mu_B=0}$', color = 'black')
+    ax2.text(430.0, 3.35, r'Borsanyi et al. (2012)', color = 'blue', alpha = 0.7)
+    ax2.text(540.0, 3.8, r'Borsanyi et al. (2014)', color = 'green', alpha = 0.7)
+    ax2.text(345.0, 2.9, r'Bazavov et al. (2014)', color = 'red', alpha = 0.7)
+    ax2.text(1340.0, 4.4, r'Bazavov et al. (2018)', color = 'magenta', alpha = 0.7)
+    for tick in ax2.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax2.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax2.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax2.set_ylabel(r'$\mathrm{p/T^4}$', fontsize = 16)
+
+    #fig3 = matplotlib.pyplot.figure(num = 3, figsize = (5.9, 5))
+    #ax3 = fig3.add_subplot(1, 1, 1)
+    #ax3.axis([10., 540., 0., 4.2])
+    #ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu100, closed = True, fill = True, color = 'blue', alpha = 0.3, label = r'Borsanyi et al. (2012), $\mathrm{\mu=100}$ MeV'))
+    #ax3.plot(T_4, contrib_total_4, '-', c = 'black', label = r'$\mathrm{P_{PNJL+BU},~\mu=100}$')
+    #ax3.plot(T_4, contrib_cluster_4, '--', c = 'red', label = r'BU')
+    #ax3.plot(T_4, contrib_qgp_4, '--', c = 'blue', label = r'PNJL')
+    #ax3.text(185.0, 0.1, r'Beth--Uhlenbeck cluster pressure', color = 'red')
+    #ax3.text(170.0, 0.48, r'PNJL pressure', color = 'blue')
+    #ax3.text(185.0, 0.9, r'total pressure', color = 'black')
+    #ax3.text(25.0, 4.0, r'$\mathrm{\mu_B=100}$ MeV', color = 'black')
+    #ax3.text(260.0, 2.3, r'Borsanyi et al. (2012)', color = 'blue', alpha = 0.7)
+    #for tick in ax3.xaxis.get_major_ticks():
+    #    tick.label.set_fontsize(16) 
+    #for tick in ax3.yaxis.get_major_ticks():
+    #    tick.label.set_fontsize(16)
+    #ax3.set_xlabel(r'T [MeV]', fontsize = 16)
+    #ax3.set_ylabel(r'$\mathrm{p/T^4}$', fontsize = 16)
+
+    fig4 = matplotlib.pyplot.figure(num = 4, figsize = (5.9, 5))
+    ax4 = fig4.add_subplot(1, 1, 1)
+    ax4.axis([10., 540., 0., 4.2])
+    ax4.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu200, closed = True, fill = True, color = 'blue', alpha = 0.3, label = r'Borsanyi et al. (2012), $\mathrm{\mu=200}$ MeV'))
+    ax4.plot(T_5, contrib_total_5, '-', c = 'black', label = r'$\mathrm{P_{PNJL+BU},~\mu=200}$')
+    ax4.plot(T_5, contrib_cluster_5, '--', c = 'red', label = r'BU')
+    ax4.plot(T_5, contrib_qgp_5, '--', c = 'blue', label = r'PNJL')
+    ax4.text(185.0, 0.1, r'Beth--Uhlenbeck cluster pressure', color = 'red')
+    ax4.text(170.0, 0.48, r'PNJL pressure', color = 'blue')
+    ax4.text(185.0, 0.9, r'total pressure', color = 'black')
+    ax4.text(25.0, 4.0, r'$\mathrm{\mu_B=200}$ MeV', color = 'black')
+    ax4.text(260.0, 2.3, r'Borsanyi et al. (2012)', color = 'blue', alpha = 0.7)
+    for tick in ax4.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax4.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax4.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax4.set_ylabel(r'$\mathrm{p/T^4}$', fontsize = 16)
+
+    #fig5 = matplotlib.pyplot.figure(num = 5, figsize = (5.9, 5))
+    #ax5 = fig5.add_subplot(1, 1, 1)
+    #ax5.axis([10., 540., 0., 4.2])
+    #ax5.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu300, closed = True, fill = True, color = 'blue', alpha = 0.3, label = r'Borsanyi et al. (2012), $\mathrm{\mu=300}$ MeV'))
+    #ax5.plot(T_6, contrib_total_6, '-', c = 'black', label = r'$\mathrm{P_{PNJL+BU},~\mu=300}$')
+    #ax5.plot(T_6, contrib_cluster_6, '--', c = 'red', label = r'BU')
+    #ax5.plot(T_6, contrib_qgp_6, '--', c = 'blue', label = r'PNJL')
+    #ax5.text(185.0, 0.1, r'Beth--Uhlenbeck cluster pressure', color = 'red')
+    #ax5.text(170.0, 0.48, r'PNJL pressure', color = 'blue')
+    #ax5.text(185.0, 0.9, r'total pressure', color = 'black')
+    #ax5.text(25.0, 4.0, r'$\mathrm{\mu_B=300}$ MeV', color = 'black')
+    #ax5.text(260.0, 2.3, r'Borsanyi et al. (2012)', color = 'blue', alpha = 0.7)
+    #for tick in ax5.xaxis.get_major_ticks():
+    #    tick.label.set_fontsize(16) 
+    #for tick in ax5.yaxis.get_major_ticks():
+    #    tick.label.set_fontsize(16)
+    #ax5.set_xlabel(r'T [MeV]', fontsize = 16)
+    #ax5.set_ylabel(r'$\mathrm{p/T^4}$', fontsize = 16)
+
+    fig6 = matplotlib.pyplot.figure(num = 6, figsize = (5.9, 5))
+    ax6 = fig6.add_subplot(1, 1, 1)
+    ax6.axis([10., 540., 0., 4.2])
+    ax6.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu400, closed = True, fill = True, color = 'blue', alpha = 0.3, label = r'Borsanyi et al. (2012), $\mathrm{\mu=400}$ MeV'))
+    ax6.plot(T_3, contrib_total_3, '-', c = 'black', label = r'$\mathrm{P_{PNJL+BU},~\mu=400}$')
+    ax6.plot(T_3, contrib_cluster_3, '--', c = 'red', label = r'BU')
+    ax6.plot(T_3, contrib_qgp_3, '--', c = 'blue', label = r'PNJL')
+    ax6.text(185.0, 0.1, r'Beth--Uhlenbeck cluster pressure', color = 'red')
+    ax6.text(170.0, 0.48, r'PNJL pressure', color = 'blue')
+    ax6.text(185.0, 0.9, r'total pressure', color = 'black')
+    ax6.text(25.0, 4.0, r'$\mathrm{\mu_B=400}$ MeV', color = 'black')
+    ax6.text(260.0, 2.3, r'Borsanyi et al. (2012)', color = 'blue', alpha = 0.7)
+    for tick in ax6.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax6.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax6.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax6.set_ylabel(r'$\mathrm{p/T^4}$', fontsize = 16)
+
+    fig1.tight_layout(pad = 0.1)
+    fig2.tight_layout(pad = 0.1)
+    #fig3.tight_layout(pad = 0.1)
+    fig4.tight_layout(pad = 0.1)
+    #fig5.tight_layout(pad = 0.1)
+    fig6.tight_layout(pad = 0.1)
+
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+def epja_figure5():
+    col_n = '#DEA54B'
+    col_pi = '#653239'
+    col_rho = '#858AE3'
+    col_omega = '#FF37A6'
+    col_p = '#78BC61'
+    col_t = '#23CE6B'
+    col_h = '#A846A0'
+    col_d = '#4CB944'
+    col_f = '#DB222A'
+    col_q5 = '#55DBCB'
+    col_qgp = 'blue'
+    col_pert = 'red'
+    col_gluon = 'pink'
+    col_pnjl = 'magenta'
+    col_total = 'black'
+
+    const_mu = 0.0
+
+    T = numpy.linspace(1.0, 200.0, num = 200)
+
+    fig = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.axis([min(T), max(T), 0.0, 1.05 * max([6.0 * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(el, const_mu) for el in T])])
+
+    ax.plot(T, [pnjl.defaults.default_MN for el in T]                            , '-'   , c = col_n     , label = r'nucleon')
+    ax.add_patch(matplotlib.patches.FancyArrowPatch((30., 1750.), (30., 1000.), arrowstyle='<->', mutation_scale=20, color = col_n))
+    ax.plot(T, [3.0 * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(el, const_mu) for el in T]  , '--'  , c = col_n)
+    ax.text(35., 1320., r'nucleon', fontsize = 14)
+
+    ax.plot(T, [140 for el in T]                                   , '-'   , c = col_pi    , label = r'$\mathrm{\pi}$')
+    ax.add_patch(matplotlib.patches.FancyArrowPatch((50., 1150.), (50., 135.), arrowstyle='<->', mutation_scale=20, color = col_pi))
+    ax.plot(T, [2.0 * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(el, const_mu) for el in T]  , '--'  , c = col_pi)
+    ax.text(55., 620., r'pion', fontsize = 14)
+
+    ax.plot(T, [pnjl.defaults.default_MH for el in T]                            , '-'   , c = col_h     , label = r'hexaquark')
+    ax.add_patch(matplotlib.patches.FancyArrowPatch((10., 3450.), (10., 1900.), arrowstyle='<->', mutation_scale=20, color = col_h))
+    ax.plot(T, [6.0 * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(el, const_mu) for el in T]  , '--'  , c = col_h)
+    ax.text(15., 2650., r'hexaquark', fontsize = 14)
+
+    ax.plot(T, [pnjl.thermo.gcp_sea_lattice.M(el, const_mu) for el in T], '-', c = col_qgp, label = r'u/d quark')
+    ax.text(5., 480., r'u/d quark', fontsize = 10)
+
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax.set_ylabel(r'mass [MeV]', fontsize = 16)
+
+    matplotlib.pyplot.tight_layout()
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+def epja_figure6():
+
+    T0 = numpy.linspace(1.0, 250.0, num = 200)
+
+    sigma_0 = [pnjl.thermo.gcp_sea_lattice.Delta_ls(el, 0.0) for el in T0]
+
+    (low_1005_3508_x, low_1005_3508_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure6/1005_3508_table3_delta.dat")
+    (high_1005_3508_x, high_1005_3508_y) = utils.data_collect(0, 2, "D:/EoS/epja/figure6/1005_3508_table3_delta.dat")
+
+    borsanyi_1005_3508 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1005_3508_x, high_1005_3508_y)]
+    for x_el, y_el in zip(low_1005_3508_x[::-1], low_1005_3508_y[::-1]):
+        borsanyi_1005_3508.append(numpy.array([x_el, y_el]))
+    borsanyi_1005_3508 = numpy.array(borsanyi_1005_3508)
+
+    fig = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.axis([100, 220, 0.0, 1.1])
+    ax.add_patch(matplotlib.patches.Polygon(borsanyi_1005_3508, closed = True, fill = True, color = 'blue', alpha = 0.3))
+    ax.plot(T0, sigma_0, c = 'green')
+    ax.text(200, 1, r'$\mathrm{\mu=0}$')
+    ax.text(155, 0.55, r'Borsanyi et al. (2010)', color = 'blue', alpha = 0.7)
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax.set_ylabel(r'$\mathrm{\Delta_l(T,\mu)}$', fontsize = 16)
+
+    fig.tight_layout(pad = 0.1)
+
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+def epja_figure7():
+
+    def phase(M, Mi, Mthi, Ni, Lambda_i):
+
+        hz = 0.5
+        nlambda = Ni * Lambda_i
+
+        frac1 = M / nlambda
+        frac2 = Mthi / nlambda
+
+        heavi2 = numpy.heaviside((M ** 2) - (Mi ** 2), hz)
+        heavi3 = numpy.heaviside((M ** 2) - (Mthi ** 2), hz)
+        heavi4 = numpy.heaviside(Mthi + nlambda - M, hz)
+        heavi5 = numpy.heaviside(Mthi + nlambda - Mi, hz)
+        heavi7 = numpy.heaviside(math.pi * (frac1 - frac2), hz)
+        heavi8 = numpy.heaviside(math.pi * (frac2 + 1.0 - frac1), hz)
+        
+        arccos_in = 2.0 * frac1 - 2.0 * frac2 - 1.0
+        cos_in = math.pi * arccos_in / 2.0
+
+        first = 0.0
+        second = 0.0
+        third = 0.0
+
+        if (Mthi ** 2) >= (Mi **2):
+            #arccos_el = math.acos(arccos_in) if heavi3 > 0 and heavi4 > 0 else 0.0
+            if M >= Mi and M <= Mthi:
+                first = heavi2 - heavi3
+            if M >= Mthi and M <= Mthi + nlambda:
+                arccos_el = math.acos(arccos_in)
+                second = heavi3 * heavi4 * arccos_el / math.pi
+        else:
+            if M >= Mthi and M <= Mthi + nlambda:
+                #arccos_el2 = math.acos(arccos_in) if heavi5 > 0 and heavi4 > 0 and heavi7 > 0 else 0.0
+                arccos_el2 = math.acos(arccos_in)
+                third = heavi5 * heavi7 * heavi8 * math.cos(cos_in) * (arccos_el2 / math.pi) * ((Mthi + nlambda - Mi) / nlambda)
+
+        return first + second + third
+
+    Mi_val = pnjl.defaults.default_MN
+    Ni_val = 3.0
+    Lam_val = pnjl.defaults.default_L
+
+    Mthi_val1 = 1.2 * Mi_val
+    Mthi_val2 = 1.1 * Mi_val
+    Mthi_val3 = 1.0 * Mi_val
+    Mthi_val4 = 0.9 * Mi_val
+    Mthi_val5 = 0.8 * Mi_val
+
+    M_vec = numpy.linspace(650.0, 1.2 * (Mthi_val1 + Ni_val * Lam_val), 2000)
+    phase_vec1 = [
+        phase(el, Mi_val, Mthi_val1, Ni_val, Lam_val) 
+        for el in M_vec]
+    phase_vec2 = [
+        phase(el, Mi_val, Mthi_val2, Ni_val, Lam_val) 
+        for el in M_vec]
+    phase_vec3 = [
+        phase(el, Mi_val, Mthi_val3, Ni_val, Lam_val) 
+        for el in M_vec]
+    phase_vec4 = [
+        phase(el, Mi_val, Mthi_val4, Ni_val, Lam_val) 
+        for el in M_vec]
+    phase_vec5 = [
+        phase(el, Mi_val, Mthi_val5, Ni_val, Lam_val) 
+        for el in M_vec]
+
+    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax1 = fig1.add_subplot(111, projection='3d')
+    ax1.plot3D(M_vec, [Mthi_val1 for el in M_vec], phase_vec1, '-', c = 'black')
+    ax1.plot3D(M_vec, [Mthi_val2 for el in M_vec], phase_vec2, '-', c = 'black')
+    ax1.plot3D(M_vec, [Mthi_val3 for el in M_vec], phase_vec3, '-', c = 'black')
+    ax1.plot3D(M_vec, [Mthi_val4 for el in M_vec], phase_vec4, '-', c = 'black')
+    ax1.plot3D(M_vec, [Mthi_val5 for el in M_vec], phase_vec5, '-', c = 'black')
+    ax1.plot3D([Mi_val for el in M_vec], numpy.linspace(Mthi_val5, Mthi_val1, num = len(M_vec)), [0.0 for el in M_vec], '--', c = 'blue')
+    ax1.plot3D(numpy.linspace(Mthi_val5, Mthi_val1, num = len(M_vec)), numpy.linspace(Mthi_val5, Mthi_val1, num = len(M_vec)), [0.0 for el in M_vec], '--', c = 'green')
+    ax1.plot3D(numpy.linspace(Mthi_val5 + Ni_val * Lam_val, Mthi_val1 + Ni_val * Lam_val, num = len(M_vec)), numpy.linspace(Mthi_val5, Mthi_val1, num = len(M_vec)), [0.0 for el in M_vec], '--', c = 'red')
+    ax1.text(800, 700, 0, r'$\mathrm{M_{thr,i}}$', color = 'green', fontsize = 16)
+    ax1.text(1150, 700, 0, r'$\mathrm{M_i}$', color = 'blue', fontsize = 16)
+    ax1.text(1432, 1250, 0.03, r'$\mathrm{M_{thr,i}+N_i\Lambda_i}$', color = 'red', fontsize = 16)
+    ax1.xaxis.set_ticklabels([])
+    ax1.yaxis.set_ticklabels([])
+    ax1.zaxis.set_ticklabels([])
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax1.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    for tick in ax1.zaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax1.set_xlabel(r'M', fontsize = 16)
+    #ax1.set_ylabel(r'$\mathrm{M_{thr,i}}$', fontsize = 16)
+    ax1.set_zlabel(r'$\delta_i$', fontsize = 16)
+    fig1.tight_layout(pad = 0.1)
+
+    fig1.tight_layout(pad = 0.1)
+
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+def epja_figure8():
+
+    phi_re_1, phi_im_1               = [], []
+    phi_re_3, phi_im_3               = [], []
+
+    Pres_Q_1, Pres_g_1, Pres_pert_1, Pres_sea_1  = [], [], [], []
+    Pres_Q_3, Pres_g_3, Pres_pert_3, Pres_sea_3  = [], [], [], []
+
+    Pres_pi_1, Pres_K_1, Pres_rho_1  = [], [], []
+    Pres_omega_1, Pres_D_1, Pres_N_1 = [], [], []
+    Pres_T_1, Pres_F_1, Pres_P_1     = [], [], []
+    Pres_Q5_1, Pres_H_1              = [], []
+
+    Pres_pi_3, Pres_K_3, Pres_rho_3  = [], [], [] 
+    Pres_omega_3, Pres_D_3, Pres_N_3 = [], [], []
+    Pres_T_3, Pres_F_3, Pres_P_3     = [], [], []
+    Pres_Q5_3, Pres_H_3              = [], []
+
+    T_1 = numpy.linspace(1.0, 400.0, 200)
+    T_3 = numpy.linspace(1.0, 400.0, 200)
+
+    mu_1   = [0.0 / 3.0 for el in T_1]
+    mu_3   = [0.0 / 3.0 for el in T_3]
+
+    calc_1                  = True
+    calc_3                  = True
+
+    cluster_backreaction    = False
+
+    pl_1_file       = "D:/EoS/epja/figure8/pl_1.dat"
+    pl_3_file       = "D:/EoS/epja/figure8/pl_3.dat"
+    pressure_1_file = "D:/EoS/epja/figure8/pressure_1.dat"
+    pressure_3_file = "D:/EoS/epja/figure8/pressure_3.dat"
+
+    if calc_1:
+        phi_re_1.append(1e-15)
+        phi_im_1.append(2e-15)
+        lT = len(T_1)
+        for T_el, mu_el in tqdm.tqdm(zip(T_1, mu_1), desc = "Traced Polyakov loop (calc #1)", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_1[-1], phi_im_1[-1], with_clusters = cluster_backreaction)
+            phi_re_1.append(temp_phi_re)
+            phi_im_1.append(temp_phi_im)
+        phi_re_1 = phi_re_1[1:]
+        phi_im_1 = phi_im_1[1:]
+        with open(pl_1_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_1, mu_1, phi_re_1, phi_im_1)])
+    else:
+        T_1, mu_1 = utils.data_collect(0, 1, pl_1_file)
+        phi_re_1, phi_im_1 = utils.data_collect(2, 3, pl_1_file)
+
+    if calc_3:
+        phi_re_3.append(1e-15)
+        phi_im_3.append(2e-15)
+        lT = len(T_3)
+        for T_el, mu_el in tqdm.tqdm(zip(T_3, mu_3), desc = "Traced Polyakov loop (calc #3)", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_3[-1], phi_im_3[-1], with_clusters = cluster_backreaction)
+            phi_re_3.append(temp_phi_re)
+            phi_im_3.append(temp_phi_im)
+        phi_re_3 = phi_re_3[1:]
+        phi_im_3 = phi_im_3[1:]
+        with open(pl_3_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_3, mu_3, phi_re_3, phi_im_3)])
+    else:
+        T_3, mu_3 = utils.data_collect(0, 1, pl_3_file)
+        phi_re_3, phi_im_3 = utils.data_collect(2, 3, pl_3_file)
+
+    if calc_1:
+        Pres_g_1 = [
+            pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            for T_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_1, phi_re_1, phi_im_1), 
+                desc = "Gluon pressure (calc #1)", 
+                total = len(T_1),
+                ascii = True
+                )]
+        Pres_sea_1 = [
+            pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el) 
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_1, mu_1), 
+                desc = "Sigma mf pressure (calc #1)", 
+                total = len(T_1),
+                ascii = True
+                )]
+        Pres_Q_1 = [
+            pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+            for T_el, mu_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_1, mu_1, phi_re_1, phi_im_1), 
+                desc = "Quark pressure (calc #1)", 
+                total = len(T_1), 
+                ascii = True
+                )]
+        Pres_pert_1 = [
+            pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+            for T_el, mu_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_1, mu_1, phi_re_1, phi_im_1), 
+                desc = "Perturbative pressure (calc #1)", 
+                total = len(T_1), 
+                ascii = True
+                )]        
+        (
+            (Pres_pi_1, Pres_rho_1, Pres_omega_1, Pres_K_1, Pres_D_1, Pres_N_1, Pres_T_1, Pres_F_1, Pres_P_1, 
+             Pres_Q5_1, Pres_H_1),
+            (_, _, _, _, _, _, _, _, _, _, _),
+            (_, _, _, _, _, _, _, _, _, _, _)
+        ) = clusters_c(T_1, mu_1, phi_re_1, phi_im_1)
+        with open(pressure_1_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(Pres_Q_1, Pres_g_1, Pres_pert_1, Pres_pi_1, Pres_K_1, Pres_rho_1, Pres_omega_1, Pres_D_1, Pres_N_1, Pres_T_1, Pres_F_1, Pres_P_1, Pres_Q5_1, Pres_H_1, Pres_sea_1)])
+    else:
+        Pres_Q_1, Pres_g_1       = utils.data_collect(0, 1, pressure_1_file)
+        Pres_pert_1, Pres_pi_1   = utils.data_collect(2, 3, pressure_1_file)
+        Pres_K_1, _              = utils.data_collect(4, 4, pressure_1_file)
+        Pres_rho_1, Pres_omega_1 = utils.data_collect(5, 6, pressure_1_file)
+        Pres_D_1, Pres_N_1       = utils.data_collect(7, 8, pressure_1_file)
+        Pres_T_1, Pres_F_1       = utils.data_collect(9, 10, pressure_1_file)
+        Pres_P_1, Pres_Q5_1      = utils.data_collect(11, 12, pressure_1_file)
+        Pres_H_1, Pres_sea_1     = utils.data_collect(13, 14, pressure_1_file)
+
+    if calc_3:
+        Pres_g_3 = [
+            pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            for T_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_3, phi_re_3, phi_im_3), 
+                desc = "Gluon pressure (calc #3)", 
+                total = len(T_3),
+                ascii = True
+                )]
+        Pres_sea_3 = [
+            pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el) 
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_3, mu_3), 
+                desc = "Sigma mf pressure (calc #3)", 
+                total = len(T_3),
+                ascii = True
+                )]
+        Pres_Q_3 = [
+            pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+            for T_el, mu_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_3, mu_3, [1.0 for el in T_3], [0.0 for el in T_3]), 
+                desc = "Quark pressure (calc #3)", 
+                total = len(T_3), 
+                ascii = True
+                )]
+        Pres_pert_3 = [
+            pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+            for T_el, mu_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_3, mu_3, [1.0 for el in T_3], [0.0 for el in T_3]), 
+                desc = "Perturbative pressure (calc #3)", 
+                total = len(T_3), 
+                ascii = True
+                )]        
+        (
+            (Pres_pi_3, Pres_rho_3, Pres_omega_3, Pres_K_3, Pres_D_3, Pres_N_3, Pres_T_3, Pres_F_3, Pres_P_3, 
+             Pres_Q5_3, Pres_H_3),
+            (_, _, _, _, _, _, _, _, _, _, _),
+            (_, _, _, _, _, _, _, _, _, _, _)
+        ) = clusters_c(T_3, mu_3, [1.0 for el in T_3], [0.0 for el in T_3])
+        with open(pressure_3_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(Pres_Q_3, Pres_g_3, Pres_pert_3, Pres_pi_3, Pres_K_3, Pres_rho_3, Pres_omega_3, Pres_D_3, Pres_N_3, Pres_T_3, Pres_F_3, Pres_P_3, Pres_Q5_3, Pres_H_3, Pres_sea_3)])
+    else:
+        Pres_Q_3, Pres_g_3       = utils.data_collect(0, 1, pressure_3_file)
+        Pres_pert_3, Pres_pi_3   = utils.data_collect(2, 3, pressure_3_file)
+        Pres_K_3, _              = utils.data_collect(4, 4, pressure_3_file)
+        Pres_rho_3, Pres_omega_3 = utils.data_collect(5, 6, pressure_3_file)
+        Pres_D_3, Pres_N_3       = utils.data_collect(7, 8, pressure_3_file)
+        Pres_T_3, Pres_F_3       = utils.data_collect(9, 10, pressure_3_file)
+        Pres_P_3, Pres_Q5_3      = utils.data_collect(11, 12, pressure_3_file)
+        Pres_H_3, Pres_sea_3     = utils.data_collect(13, 14, pressure_3_file)
+
+    contrib_q_1    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_Q_1)]
+    contrib_g_1    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_g_1)]
+    contrib_pert_1 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_pert_1)]
+    contrib_sea_1  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_sea_1)]
+    contrib_qgp_1  = [sum(el) for el in zip(contrib_q_1, contrib_g_1, contrib_pert_1, contrib_sea_1)]
+
+    contrib_q_3    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_Q_3)]
+    contrib_g_3    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_g_3)]
+    contrib_pert_3 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_pert_3)]
+    contrib_sea_3  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_sea_3)]
+    contrib_qgp_3  = [sum(el) for el in zip(contrib_q_3, contrib_g_3, contrib_pert_3, contrib_sea_3)]
+
+    contrib_pi_1                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_pi_1)]
+    contrib_rho_1                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_rho_1)]
+    contrib_omega_1               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_omega_1)]
+    contrib_K_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_K_1)]
+    contrib_D_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_D_1)]
+    contrib_N_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_N_1)]
+    contrib_T_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_T_1)]
+    contrib_F_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_F_1)]
+    contrib_P_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_P_1)]
+    contrib_Q5_1                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_Q5_1)]
+    contrib_H_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_H_1)]
+    contrib_cluster_1             = [sum(el) for el in zip(contrib_pi_1, contrib_rho_1, contrib_omega_1, contrib_K_1, contrib_D_1, contrib_N_1, contrib_T_1, contrib_F_1, contrib_P_1, contrib_Q5_1, contrib_H_1)]
+    contrib_cluster_singlet_1     = [sum(el) for el in zip(contrib_pi_1, contrib_rho_1, contrib_omega_1, contrib_K_1, contrib_N_1, contrib_T_1, contrib_P_1, contrib_H_1)]
+    contrib_cluster_color_1       = [sum(el) for el in zip(contrib_D_1, contrib_F_1, contrib_Q5_1)]
+    contrib_total_1               = [sum(el) for el in zip(contrib_cluster_1, contrib_qgp_1)]
+
+    contrib_pi_3                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_pi_3)]
+    contrib_rho_3                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_rho_3)]
+    contrib_omega_3               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_omega_3)]
+    contrib_K_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_K_3)]
+    contrib_D_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_D_3)]
+    contrib_N_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_N_3)]
+    contrib_T_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_T_3)]
+    contrib_F_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_F_3)]
+    contrib_P_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_P_3)]
+    contrib_Q5_3                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_Q5_3)]
+    contrib_H_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_H_3)]
+    contrib_cluster_3             = [sum(el) for el in zip(contrib_pi_3, contrib_rho_3, contrib_omega_3, contrib_K_3, contrib_D_3, contrib_N_3, contrib_T_3, contrib_F_3, contrib_P_3, contrib_Q5_3, contrib_H_3)]
+    contrib_cluster_singlet_3     = [sum(el) for el in zip(contrib_pi_3, contrib_rho_3, contrib_omega_3, contrib_K_3, contrib_N_3, contrib_T_3, contrib_P_3, contrib_H_3)]
+    contrib_cluster_color_3       = [sum(el) for el in zip(contrib_D_3, contrib_F_3, contrib_Q5_3)]
+    contrib_total_3               = [sum(el) for el in zip(contrib_cluster_3, contrib_qgp_3)]
+
+    (low_1204_6710v2_mu0_x, low_1204_6710v2_mu0_y)       = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu0_low.dat")
+    (high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y)     = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu0_high.dat")
+    (low_1204_6710v2_mu100_x, low_1204_6710v2_mu100_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu100_low.dat")
+    (high_1204_6710v2_mu100_x, high_1204_6710v2_mu100_y) = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu100_high.dat")
+    (low_1204_6710v2_mu200_x, low_1204_6710v2_mu200_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu200_low.dat")
+    (high_1204_6710v2_mu200_x, high_1204_6710v2_mu200_y) = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu200_high.dat")
+    (low_1204_6710v2_mu300_x, low_1204_6710v2_mu300_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu300_low.dat")
+    (high_1204_6710v2_mu300_x, high_1204_6710v2_mu300_y) = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu300_high.dat")
+    (low_1204_6710v2_mu400_x, low_1204_6710v2_mu400_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu400_low.dat")
+    (high_1204_6710v2_mu400_x, high_1204_6710v2_mu400_y) = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu400_high.dat")
+    (high_1407_6387_mu0_x, high_1407_6387_mu0_y)         = utils.data_collect(0, 3, "D:/EoS/epja/figure8/1407_6387_table1_pressure_mu0.dat")
+    (low_1407_6387_mu0_x, low_1407_6387_mu0_y)           = utils.data_collect(0, 2, "D:/EoS/epja/figure8/1407_6387_table1_pressure_mu0.dat")
+    (high_1309_5258_mu0_x, high_1309_5258_mu0_y)         = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1309_5258_figure6_pressure_mu0_high.dat")
+    (low_1309_5258_mu0_x, low_1309_5258_mu0_y)           = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1309_5258_figure6_pressure_mu0_low.dat")
+    (high_1710_05024_mu0_x, high_1710_05024_mu0_y)       = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1710_05024_figure8_pressure_mu0_high.dat")
+    (low_1710_05024_mu0_x, low_1710_05024_mu0_y)         = utils.data_collect(0, 1, "D:/EoS/epja/figure8/1710_05024_figure8_pressure_mu0_low.dat")
+
+    borsanyi_1204_6710v2_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu0_x[::-1], low_1204_6710v2_mu0_y[::-1]):
+        borsanyi_1204_6710v2_mu0.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu0 = numpy.array(borsanyi_1204_6710v2_mu0)
+    borsanyi_1204_6710v2_mu100 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu100_x, high_1204_6710v2_mu100_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu100_x[::-1], low_1204_6710v2_mu100_y[::-1]):
+        borsanyi_1204_6710v2_mu100.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu100 = numpy.array(borsanyi_1204_6710v2_mu100)
+    borsanyi_1204_6710v2_mu200 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu200_x, high_1204_6710v2_mu200_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu200_x[::-1], low_1204_6710v2_mu200_y[::-1]):
+        borsanyi_1204_6710v2_mu200.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu200 = numpy.array(borsanyi_1204_6710v2_mu200)
+    borsanyi_1204_6710v2_mu300 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu300_x, high_1204_6710v2_mu300_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu300_x[::-1], low_1204_6710v2_mu300_y[::-1]):
+        borsanyi_1204_6710v2_mu300.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu300 = numpy.array(borsanyi_1204_6710v2_mu300)
+    borsanyi_1204_6710v2_mu400 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu400_x, high_1204_6710v2_mu400_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu400_x[::-1], low_1204_6710v2_mu400_y[::-1]):
+        borsanyi_1204_6710v2_mu400.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu400 = numpy.array(borsanyi_1204_6710v2_mu400)
+    bazavov_1407_6387_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1407_6387_mu0_x, high_1407_6387_mu0_y)]
+    for x_el, y_el in zip(low_1407_6387_mu0_x[::-1], low_1407_6387_mu0_y[::-1]):
+        bazavov_1407_6387_mu0.append(numpy.array([x_el, y_el]))
+    bazavov_1407_6387_mu0 = numpy.array(bazavov_1407_6387_mu0)
+    borsanyi_1309_5258_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1309_5258_mu0_x, high_1309_5258_mu0_y)]
+    for x_el, y_el in zip(low_1309_5258_mu0_x[::-1], low_1309_5258_mu0_y[::-1]):
+        borsanyi_1309_5258_mu0.append(numpy.array([x_el, y_el]))
+    borsanyi_1309_5258_mu0 = numpy.array(borsanyi_1309_5258_mu0)
+    bazavov_1710_05024_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1710_05024_mu0_x, high_1710_05024_mu0_y)]
+    for x_el, y_el in zip(low_1710_05024_mu0_x[::-1], low_1710_05024_mu0_y[::-1]):
+        bazavov_1710_05024_mu0.append(numpy.array([x_el, y_el]))
+    bazavov_1710_05024_mu0 = numpy.array(bazavov_1710_05024_mu0)
+
+    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax1 = fig1.add_subplot(1, 1, 1)
+    ax1.axis([10., 400., 0., 4.2])
+    ax1.add_patch(matplotlib.patches.Polygon(bazavov_1407_6387_mu0, closed = True, fill = True, color = 'red', alpha = 0.3, label = r'Bazavov et al. (2014)'))
+    ax1.add_patch(matplotlib.patches.Polygon(borsanyi_1309_5258_mu0, closed = True, fill = True, color = 'green', alpha = 0.3, label = r'Borsanyi et al. (2014)'))
+    ax1.add_patch(matplotlib.patches.Polygon(bazavov_1710_05024_mu0, closed = True, fill = True, color = 'magenta', alpha = 0.3, label = r'Bazavov et al. (2018)'))
+    ax1.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu0, closed = True, fill = True, color = 'blue', alpha = 0.3, label = r'Borsanyi et al. (2012)'))
+    ax1.fill_between(T_1, contrib_cluster_1, color = 'green')
+    ax1.fill_between(T_1, contrib_cluster_color_1, color = 'red')
+    ax1.plot(T_1, contrib_total_1, '-', c = 'black', label = r'$\mathrm{P_{PNJL+BU},~\mu=0}$')
+    ax1.plot(T_1, contrib_qgp_1, '--', c = 'blue', label = r'PNJL')
+    ax1.text(180.0, 0.1, r'Color triplet/antitriplet cluster pressure', color = 'red')
+    ax1.text(165.0, 0.28, r'Color singlet cluster pressure', color = 'green')
+    ax1.text(170.0, 0.48, r'PNJL pressure', color = 'blue')
+    ax1.text(185.0, 0.9, r'total pressure', color = 'black')
+    ax1.text(25.0, 4.0, r'$\mathrm{\mu_B=0}$', color = 'black')
+    ax1.text(225.0, 1.8, r'Borsanyi et al. (2012)', color = 'blue', alpha = 0.7)
+    ax1.text(245.0, 3.7, r'Borsanyi et al. (2014)', color = 'green', alpha = 0.7)
+    ax1.text(260.0, 2.3, r'Bazavov et al. (2014)', color = 'red', alpha = 0.7)
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax1.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax1.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax1.set_ylabel(r'$\mathrm{p/T^4}$', fontsize = 16)
+
+    contrib_qgp_1   = [el / norm for el, norm in zip(contrib_qgp_1, contrib_total_1)]
+    contrib_pi_1    = [el / norm for el, norm in zip(contrib_pi_1, contrib_total_1)]
+    contrib_rho_1   = [el / norm for el, norm in zip(contrib_rho_1, contrib_total_1)]
+    contrib_omega_1 = [el / norm for el, norm in zip(contrib_omega_1, contrib_total_1)]
+    contrib_K_1     = [el / norm for el, norm in zip(contrib_K_1, contrib_total_1)]
+    contrib_D_1     = [el / norm for el, norm in zip(contrib_D_1, contrib_total_1)]
+    contrib_N_1     = [el / norm for el, norm in zip(contrib_N_1, contrib_total_1)]
+    contrib_T_1     = [el / norm for el, norm in zip(contrib_T_1, contrib_total_1)]
+    contrib_F_1     = [el / norm for el, norm in zip(contrib_F_1, contrib_total_1)]
+    contrib_P_1     = [el / norm for el, norm in zip(contrib_P_1, contrib_total_1)]
+    contrib_Q5_1    = [el / norm for el, norm in zip(contrib_Q5_1, contrib_total_1)]
+    contrib_H_1     = [el / norm for el, norm in zip(contrib_H_1, contrib_total_1)]
+
+    fig2 = matplotlib.pyplot.figure(num = 2, figsize = (5.9, 5))
+    ax2 = fig2.add_subplot(1, 1, 1)
+    ax2.axis([20., 250., 1e-6, 1e1])
+    ax2.plot(T_1, [1.0 for el in T_1], '-', c = 'black')
+    ax2.plot(T_1, contrib_qgp_1, '-', c = 'blue')
+    ax2.plot(T_1, contrib_pi_1, '-', c = '#653239')
+    ax2.plot(T_1, contrib_rho_1, '-', c = '#858AE3')
+    ax2.plot(T_1, contrib_omega_1, '-', c = '#FF37A6')
+    ax2.plot(T_1, contrib_K_1, '-', c = 'red')
+    ax2.plot(T_1, contrib_D_1, '-', c = '#4CB944')
+    ax2.plot(T_1, contrib_N_1, '-', c = '#DEA54B')
+    ax2.plot(T_1, contrib_T_1, '-', c = '#23CE6B')
+    ax2.plot(T_1, contrib_F_1, '-', c = '#DB222A')
+    ax2.plot(T_1, contrib_P_1, '-', c = '#78BC61')
+    ax2.plot(T_1, contrib_Q5_1, '-', c = '#55DBCB')
+    ax2.plot(T_1, contrib_H_1, '-', c = '#A846A0')
+    ax2.text(227.0, 3e-6, r'$\mathrm{\pi}$', color = '#653239', fontsize = 16)
+    ax2.text(54.0, 0.02, r'K', color = 'red', fontsize = 16)
+    ax2.text(141.0, 1.5e-6, r'H', color = '#A846A0', fontsize = 16)
+    ax2.text(43.0, 5.3e-6, r'$\mathrm{\omega}$', color = '#FF37A6', fontsize = 16)
+    ax2.text(125.5, 0.005, r'D', color = '#4CB944', fontsize = 16)
+    ax2.text(55.0, 1.5e-6, r'N', color = '#DEA54B', fontsize = 16)
+    ax2.text(128.0, 0.0017, r'T', color = '#23CE6B', fontsize = 16)
+    ax2.text(91.0, 2.3e-6, r'F', color = '#DB222A', fontsize = 16)
+    ax2.text(113.0, 0.0001, r'P', color = '#78BC61', fontsize = 16)
+    ax2.text(135.0, 0.0002, r'Q', color = '#55DBCB', fontsize = 16)
+    ax2.text(90.0, 0.015, r'$\mathrm{\rho}$', color = '#858AE3', fontsize = 16)
+    ax2.text(22., 0.6, r'total pressure', color = 'black')
+    ax2.text(205., 0.6, r'quark', color = 'blue')
+    ax2.set_yscale('log')
+    for tick in ax2.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax2.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax2.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax2.set_ylabel(r'$\mathrm{\log~p}$', fontsize = 16)
+
+    fig3 = matplotlib.pyplot.figure(num = 3, figsize = (5.9, 5))
+    ax3 = fig3.add_subplot(1, 1, 1)
+    ax3.axis([10., 400., 0., 4.2])
+    ax3.add_patch(matplotlib.patches.Polygon(bazavov_1407_6387_mu0, closed = True, fill = True, color = 'red', alpha = 0.3, label = r'Bazavov et al. (2014)'))
+    ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1309_5258_mu0, closed = True, fill = True, color = 'green', alpha = 0.3, label = r'Borsanyi et al. (2014)'))
+    ax3.add_patch(matplotlib.patches.Polygon(bazavov_1710_05024_mu0, closed = True, fill = True, color = 'magenta', alpha = 0.3, label = r'Bazavov et al. (2018)'))
+    ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu0, closed = True, fill = True, color = 'blue', alpha = 0.3, label = r'Borsanyi et al. (2012)'))
+    ax3.fill_between(T_3, contrib_cluster_3, color = 'green')
+    ax3.fill_between(T_3, contrib_cluster_color_3, color = 'red')
+    ax3.plot(T_3, contrib_total_3, '-', c = 'black', label = r'$\mathrm{P_{PNJL+BU},~\mu=0}$')
+    ax3.plot(T_3, contrib_qgp_3, '--', c = 'blue', label = r'PNJL')
+    ax3.text(180.0, 0.1, r'Color triplet/antitriplet cluster pressure', color = 'red')
+    ax3.text(165.0, 0.28, r'Color singlet cluster pressure', color = 'green')
+    ax3.text(170.0, 0.48, r'PNJL pressure', color = 'blue')
+    ax3.text(185.0, 0.9, r'total pressure', color = 'black')
+    ax3.text(25.0, 4.0, r'$\mathrm{\mu_B=0}$', color = 'black')
+    ax3.text(225.0, 1.8, r'Borsanyi et al. (2012)', color = 'blue', alpha = 0.7)
+    ax3.text(245.0, 3.7, r'Borsanyi et al. (2014)', color = 'green', alpha = 0.7)
+    ax3.text(260.0, 2.3, r'Bazavov et al. (2014)', color = 'red', alpha = 0.7)
+    for tick in ax3.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax3.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax3.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax3.set_ylabel(r'$\mathrm{p/T^4}$', fontsize = 16)
+
+    contrib_qgp_3   = [el / norm for el, norm in zip(contrib_qgp_3, contrib_total_3)]
+    contrib_pi_3    = [el / norm for el, norm in zip(contrib_pi_3, contrib_total_3)]
+    contrib_rho_3   = [el / norm for el, norm in zip(contrib_rho_3, contrib_total_3)]
+    contrib_omega_3 = [el / norm for el, norm in zip(contrib_omega_3, contrib_total_3)]
+    contrib_K_3     = [el / norm for el, norm in zip(contrib_K_3, contrib_total_3)]
+    contrib_D_3     = [el / norm for el, norm in zip(contrib_D_3, contrib_total_3)]
+    contrib_N_3     = [el / norm for el, norm in zip(contrib_N_3, contrib_total_3)]
+    contrib_T_3     = [el / norm for el, norm in zip(contrib_T_3, contrib_total_3)]
+    contrib_F_3     = [el / norm for el, norm in zip(contrib_F_3, contrib_total_3)]
+    contrib_P_3     = [el / norm for el, norm in zip(contrib_P_3, contrib_total_3)]
+    contrib_Q5_3    = [el / norm for el, norm in zip(contrib_Q5_3, contrib_total_3)]
+    contrib_H_3     = [el / norm for el, norm in zip(contrib_H_3, contrib_total_3)]
+
+    fig4 = matplotlib.pyplot.figure(num = 4, figsize = (5.9, 5))
+    ax4 = fig4.add_subplot(1, 1, 1)
+    ax4.axis([20., 250., 1e-6, 1e1])
+    ax4.plot(T_3, [1.0 for el in T_3], '-', c = 'black')
+    ax4.plot(T_3, contrib_qgp_3, '-', c = 'blue')
+    ax4.plot(T_3, contrib_pi_3, '-', c = '#653239')
+    ax4.plot(T_3, contrib_rho_3, '-', c = '#858AE3')
+    ax4.plot(T_3, contrib_omega_3, '-', c = '#FF37A6')
+    ax4.plot(T_3, contrib_K_3, '-', c = 'red')
+    ax4.plot(T_3, contrib_D_3, '-', c = '#4CB944')
+    ax4.plot(T_3, contrib_N_3, '-', c = '#DEA54B')
+    ax4.plot(T_3, contrib_T_3, '-', c = '#23CE6B')
+    ax4.plot(T_3, contrib_F_3, '-', c = '#DB222A')
+    ax4.plot(T_3, contrib_P_3, '-', c = '#78BC61')
+    ax4.plot(T_3, contrib_Q5_3, '-', c = '#55DBCB')
+    ax4.plot(T_3, contrib_H_3, '-', c = '#A846A0')
+    ax4.text(227.0, 3e-6, r'$\mathrm{\pi}$', color = '#653239', fontsize = 16)
+    ax4.text(54.0, 0.02, r'K', color = 'red', fontsize = 16)
+    ax4.text(141.0, 1.5e-6, r'H', color = '#A846A0', fontsize = 16)
+    ax4.text(43.0, 5.3e-6, r'$\mathrm{\omega}$', color = '#FF37A6', fontsize = 16)
+    ax4.text(125.5, 0.005, r'D', color = '#4CB944', fontsize = 16)
+    ax4.text(55.0, 1.5e-6, r'N', color = '#DEA54B', fontsize = 16)
+    ax4.text(128.0, 0.0017, r'T', color = '#23CE6B', fontsize = 16)
+    ax4.text(91.0, 2.3e-6, r'F', color = '#DB222A', fontsize = 16)
+    ax4.text(113.0, 0.0001, r'P', color = '#78BC61', fontsize = 16)
+    ax4.text(135.0, 0.0002, r'Q', color = '#55DBCB', fontsize = 16)
+    ax4.text(90.0, 0.015, r'$\mathrm{\rho}$', color = '#858AE3', fontsize = 16)
+    ax4.text(22., 0.6, r'total pressure', color = 'black')
+    ax4.text(205., 0.6, r'quark', color = 'blue')
+    ax4.set_yscale('log')
+    for tick in ax4.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax4.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax4.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax4.set_ylabel(r'$\mathrm{\log~p}$', fontsize = 16)
+
+    fig1.tight_layout(pad = 0.1)
+    fig2.tight_layout(pad = 0.1)
+    fig3.tight_layout(pad = 0.1)
+    fig4.tight_layout(pad = 0.1)
+
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+def epja_figure9():
+
+    phi_re_1, phi_im_1               = [], []
+    phi_re_3, phi_im_3               = [], []
+
+    Pres_Q_1, Pres_g_1, Pres_pert_1, Pres_sea_1  = [], [], [], []
+    Pres_Q_3, Pres_g_3, Pres_pert_3, Pres_sea_3  = [], [], [], []
+
+    Pres_pi_1, Pres_K_1, Pres_rho_1  = [], [], []
+    Pres_omega_1, Pres_D_1, Pres_N_1 = [], [], []
+    Pres_T_1, Pres_F_1, Pres_P_1     = [], [], []
+    Pres_Q5_1, Pres_H_1              = [], []
+
+    Pres_pi_3, Pres_K_3, Pres_rho_3  = [], [], [] 
+    Pres_omega_3, Pres_D_3, Pres_N_3 = [], [], []
+    Pres_T_3, Pres_F_3, Pres_P_3     = [], [], []
+    Pres_Q5_3, Pres_H_3              = [], []
+
+    T_1 = numpy.linspace(1.0, 400.0, 200)
+    T_3 = numpy.linspace(1.0, 400.0, 200)
+
+    mu_1   = [200.0 / 3.0 for el in T_1]
+    mu_3   = [200.0 / 3.0 for el in T_3]
+
+    calc_1                  = False
+    calc_3                  = False
+
+    cluster_backreaction    = False
+
+    pl_1_file       = "D:/EoS/epja/figure9/pl_1.dat"
+    pl_3_file       = "D:/EoS/epja/figure9/pl_3.dat"
+    pressure_1_file = "D:/EoS/epja/figure9/pressure_1.dat"
+    pressure_3_file = "D:/EoS/epja/figure9/pressure_3.dat"
+
+    if calc_1:
+        phi_re_1.append(1e-15)
+        phi_im_1.append(2e-15)
+        lT = len(T_1)
+        for T_el, mu_el in tqdm.tqdm(zip(T_1, mu_1), desc = "Traced Polyakov loop (calc #1)", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_1[-1], phi_im_1[-1], with_clusters = cluster_backreaction)
+            phi_re_1.append(temp_phi_re)
+            phi_im_1.append(temp_phi_im)
+        phi_re_1 = phi_re_1[1:]
+        phi_im_1 = phi_im_1[1:]
+        with open(pl_1_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_1, mu_1, phi_re_1, phi_im_1)])
+    else:
+        T_1, mu_1 = utils.data_collect(0, 1, pl_1_file)
+        phi_re_1, phi_im_1 = utils.data_collect(2, 3, pl_1_file)
+
+    if calc_3:
+        phi_re_3.append(1e-15)
+        phi_im_3.append(2e-15)
+        lT = len(T_3)
+        for T_el, mu_el in tqdm.tqdm(zip(T_3, mu_3), desc = "Traced Polyakov loop (calc #3)", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_3[-1], phi_im_3[-1], with_clusters = cluster_backreaction)
+            phi_re_3.append(temp_phi_re)
+            phi_im_3.append(temp_phi_im)
+        phi_re_3 = phi_re_3[1:]
+        phi_im_3 = phi_im_3[1:]
+        with open(pl_3_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_3, mu_3, phi_re_3, phi_im_3)])
+    else:
+        T_3, mu_3 = utils.data_collect(0, 1, pl_3_file)
+        phi_re_3, phi_im_3 = utils.data_collect(2, 3, pl_3_file)
+
+    if calc_1:
+        Pres_g_1 = [
+            pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            for T_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_1, phi_re_1, phi_im_1), 
+                desc = "Gluon pressure (calc #1)", 
+                total = len(T_1),
+                ascii = True
+                )]
+        Pres_sea_1 = [
+            pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el) 
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_1, mu_1), 
+                desc = "Sigma mf pressure (calc #1)", 
+                total = len(T_1),
+                ascii = True
+                )]
+        Pres_Q_1 = [
+            pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+            for T_el, mu_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_1, mu_1, phi_re_1, phi_im_1), 
+                desc = "Quark pressure (calc #1)", 
+                total = len(T_1), 
+                ascii = True
+                )]
+        Pres_pert_1 = [
+            pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+            for T_el, mu_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_1, mu_1, phi_re_1, phi_im_1), 
+                desc = "Perturbative pressure (calc #1)", 
+                total = len(T_1), 
+                ascii = True
+                )]        
+        (
+            (Pres_pi_1, Pres_rho_1, Pres_omega_1, Pres_K_1, Pres_D_1, Pres_N_1, Pres_T_1, Pres_F_1, Pres_P_1, 
+             Pres_Q5_1, Pres_H_1),
+            (_, _, _, _, _, _, _, _, _, _, _),
+            (_, _, _, _, _, _, _, _, _, _, _)
+        ) = clusters_c(T_1, mu_1, phi_re_1, phi_im_1)
+        with open(pressure_1_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(Pres_Q_1, Pres_g_1, Pres_pert_1, Pres_pi_1, Pres_K_1, Pres_rho_1, Pres_omega_1, Pres_D_1, Pres_N_1, Pres_T_1, Pres_F_1, Pres_P_1, Pres_Q5_1, Pres_H_1, Pres_sea_1)])
+    else:
+        Pres_Q_1, Pres_g_1       = utils.data_collect(0, 1, pressure_1_file)
+        Pres_pert_1, Pres_pi_1   = utils.data_collect(2, 3, pressure_1_file)
+        Pres_K_1, _              = utils.data_collect(4, 4, pressure_1_file)
+        Pres_rho_1, Pres_omega_1 = utils.data_collect(5, 6, pressure_1_file)
+        Pres_D_1, Pres_N_1       = utils.data_collect(7, 8, pressure_1_file)
+        Pres_T_1, Pres_F_1       = utils.data_collect(9, 10, pressure_1_file)
+        Pres_P_1, Pres_Q5_1      = utils.data_collect(11, 12, pressure_1_file)
+        Pres_H_1, Pres_sea_1     = utils.data_collect(13, 14, pressure_1_file)
+
+    if calc_3:
+        Pres_g_3 = [
+            pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            for T_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_3, phi_re_3, phi_im_3), 
+                desc = "Gluon pressure (calc #3)", 
+                total = len(T_3),
+                ascii = True
+                )]
+        Pres_sea_3 = [
+            pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el) 
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_3, mu_3), 
+                desc = "Sigma mf pressure (calc #3)", 
+                total = len(T_3),
+                ascii = True
+                )]
+        Pres_Q_3 = [
+            pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
+            + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms) 
+            for T_el, mu_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_3, mu_3, [1.0 for el in T_3], [0.0 for el in T_3]), 
+                desc = "Quark pressure (calc #3)", 
+                total = len(T_3), 
+                ascii = True
+                )]
+        Pres_pert_3 = [
+            pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0) 
+            for T_el, mu_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_3, mu_3, [1.0 for el in T_3], [0.0 for el in T_3]), 
+                desc = "Perturbative pressure (calc #3)", 
+                total = len(T_3), 
+                ascii = True
+                )]        
+        (
+            (Pres_pi_3, Pres_rho_3, Pres_omega_3, Pres_K_3, Pres_D_3, Pres_N_3, Pres_T_3, Pres_F_3, Pres_P_3, 
+             Pres_Q5_3, Pres_H_3),
+            (_, _, _, _, _, _, _, _, _, _, _),
+            (_, _, _, _, _, _, _, _, _, _, _)
+        ) = clusters_c(T_3, mu_3, [1.0 for el in T_3], [0.0 for el in T_3])
+        with open(pressure_3_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(Pres_Q_3, Pres_g_3, Pres_pert_3, Pres_pi_3, Pres_K_3, Pres_rho_3, Pres_omega_3, Pres_D_3, Pres_N_3, Pres_T_3, Pres_F_3, Pres_P_3, Pres_Q5_3, Pres_H_3, Pres_sea_3)])
+    else:
+        Pres_Q_3, Pres_g_3       = utils.data_collect(0, 1, pressure_3_file)
+        Pres_pert_3, Pres_pi_3   = utils.data_collect(2, 3, pressure_3_file)
+        Pres_K_3, _              = utils.data_collect(4, 4, pressure_3_file)
+        Pres_rho_3, Pres_omega_3 = utils.data_collect(5, 6, pressure_3_file)
+        Pres_D_3, Pres_N_3       = utils.data_collect(7, 8, pressure_3_file)
+        Pres_T_3, Pres_F_3       = utils.data_collect(9, 10, pressure_3_file)
+        Pres_P_3, Pres_Q5_3      = utils.data_collect(11, 12, pressure_3_file)
+        Pres_H_3, Pres_sea_3     = utils.data_collect(13, 14, pressure_3_file)
+
+    contrib_q_1    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_Q_1)]
+    contrib_g_1    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_g_1)]
+    contrib_pert_1 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_pert_1)]
+    contrib_sea_1  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_sea_1)]
+    contrib_qgp_1  = [sum(el) for el in zip(contrib_q_1, contrib_g_1, contrib_pert_1, contrib_sea_1)]
+
+    contrib_q_3    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_Q_3)]
+    contrib_g_3    = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_g_3)]
+    contrib_pert_3 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_pert_3)]
+    contrib_sea_3  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_sea_3)]
+    contrib_qgp_3  = [sum(el) for el in zip(contrib_q_3, contrib_g_3, contrib_pert_3, contrib_sea_3)]
+
+    contrib_pi_1                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_pi_1)]
+    contrib_rho_1                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_rho_1)]
+    contrib_omega_1               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_omega_1)]
+    contrib_K_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_K_1)]
+    contrib_D_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_D_1)]
+    contrib_N_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_N_1)]
+    contrib_T_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_T_1)]
+    contrib_F_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_F_1)]
+    contrib_P_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_P_1)]
+    contrib_Q5_1                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_Q5_1)]
+    contrib_H_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_H_1)]
+    contrib_cluster_1             = [sum(el) for el in zip(contrib_pi_1, contrib_rho_1, contrib_omega_1, contrib_K_1, contrib_D_1, contrib_N_1, contrib_T_1, contrib_F_1, contrib_P_1, contrib_Q5_1, contrib_H_1)]
+    contrib_cluster_singlet_1     = [sum(el) for el in zip(contrib_pi_1, contrib_rho_1, contrib_omega_1, contrib_K_1, contrib_N_1, contrib_T_1, contrib_P_1, contrib_H_1)]
+    contrib_cluster_color_1       = [sum(el) for el in zip(contrib_D_1, contrib_F_1, contrib_Q5_1)]
+    contrib_total_1               = [sum(el) for el in zip(contrib_cluster_1, contrib_qgp_1)]
+
+    contrib_pi_3                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_pi_3)]
+    contrib_rho_3                 = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_rho_3)]
+    contrib_omega_3               = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_omega_3)]
+    contrib_K_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_K_3)]
+    contrib_D_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_D_3)]
+    contrib_N_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_N_3)]
+    contrib_T_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_T_3)]
+    contrib_F_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_F_3)]
+    contrib_P_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_P_3)]
+    contrib_Q5_3                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_Q5_3)]
+    contrib_H_3                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_3, Pres_H_3)]
+    contrib_cluster_3             = [sum(el) for el in zip(contrib_pi_3, contrib_rho_3, contrib_omega_3, contrib_K_3, contrib_D_3, contrib_N_3, contrib_T_3, contrib_F_3, contrib_P_3, contrib_Q5_3, contrib_H_3)]
+    contrib_cluster_singlet_3     = [sum(el) for el in zip(contrib_pi_3, contrib_rho_3, contrib_omega_3, contrib_K_3, contrib_N_3, contrib_T_3, contrib_P_3, contrib_H_3)]
+    contrib_cluster_color_3       = [sum(el) for el in zip(contrib_D_3, contrib_F_3, contrib_Q5_3)]
+    contrib_total_3               = [sum(el) for el in zip(contrib_cluster_3, contrib_qgp_3)]
+
+    (low_1204_6710v2_mu0_x, low_1204_6710v2_mu0_y)       = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1204_6710v2_table4_pressure_mu0_low.dat")
+    (high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y)     = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1204_6710v2_table4_pressure_mu0_high.dat")
+    (low_1204_6710v2_mu100_x, low_1204_6710v2_mu100_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1204_6710v2_table4_pressure_mu100_low.dat")
+    (high_1204_6710v2_mu100_x, high_1204_6710v2_mu100_y) = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1204_6710v2_table4_pressure_mu100_high.dat")
+    (low_1204_6710v2_mu200_x, low_1204_6710v2_mu200_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1204_6710v2_table4_pressure_mu200_low.dat")
+    (high_1204_6710v2_mu200_x, high_1204_6710v2_mu200_y) = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1204_6710v2_table4_pressure_mu200_high.dat")
+    (low_1204_6710v2_mu300_x, low_1204_6710v2_mu300_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1204_6710v2_table4_pressure_mu300_low.dat")
+    (high_1204_6710v2_mu300_x, high_1204_6710v2_mu300_y) = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1204_6710v2_table4_pressure_mu300_high.dat")
+    (low_1204_6710v2_mu400_x, low_1204_6710v2_mu400_y)   = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1204_6710v2_table4_pressure_mu400_low.dat")
+    (high_1204_6710v2_mu400_x, high_1204_6710v2_mu400_y) = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1204_6710v2_table4_pressure_mu400_high.dat")
+    (high_1407_6387_mu0_x, high_1407_6387_mu0_y)         = utils.data_collect(0, 3, "D:/EoS/epja/figure9/1407_6387_table1_pressure_mu0.dat")
+    (low_1407_6387_mu0_x, low_1407_6387_mu0_y)           = utils.data_collect(0, 2, "D:/EoS/epja/figure9/1407_6387_table1_pressure_mu0.dat")
+    (high_1309_5258_mu0_x, high_1309_5258_mu0_y)         = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1309_5258_figure6_pressure_mu0_high.dat")
+    (low_1309_5258_mu0_x, low_1309_5258_mu0_y)           = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1309_5258_figure6_pressure_mu0_low.dat")
+    (high_1710_05024_mu0_x, high_1710_05024_mu0_y)       = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1710_05024_figure8_pressure_mu0_high.dat")
+    (low_1710_05024_mu0_x, low_1710_05024_mu0_y)         = utils.data_collect(0, 1, "D:/EoS/epja/figure9/1710_05024_figure8_pressure_mu0_low.dat")
+
+    borsanyi_1204_6710v2_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu0_x[::-1], low_1204_6710v2_mu0_y[::-1]):
+        borsanyi_1204_6710v2_mu0.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu0 = numpy.array(borsanyi_1204_6710v2_mu0)
+    borsanyi_1204_6710v2_mu100 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu100_x, high_1204_6710v2_mu100_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu100_x[::-1], low_1204_6710v2_mu100_y[::-1]):
+        borsanyi_1204_6710v2_mu100.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu100 = numpy.array(borsanyi_1204_6710v2_mu100)
+    borsanyi_1204_6710v2_mu200 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu200_x, high_1204_6710v2_mu200_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu200_x[::-1], low_1204_6710v2_mu200_y[::-1]):
+        borsanyi_1204_6710v2_mu200.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu200 = numpy.array(borsanyi_1204_6710v2_mu200)
+    borsanyi_1204_6710v2_mu300 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu300_x, high_1204_6710v2_mu300_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu300_x[::-1], low_1204_6710v2_mu300_y[::-1]):
+        borsanyi_1204_6710v2_mu300.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu300 = numpy.array(borsanyi_1204_6710v2_mu300)
+    borsanyi_1204_6710v2_mu400 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu400_x, high_1204_6710v2_mu400_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu400_x[::-1], low_1204_6710v2_mu400_y[::-1]):
+        borsanyi_1204_6710v2_mu400.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu400 = numpy.array(borsanyi_1204_6710v2_mu400)
+    bazavov_1407_6387_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1407_6387_mu0_x, high_1407_6387_mu0_y)]
+    for x_el, y_el in zip(low_1407_6387_mu0_x[::-1], low_1407_6387_mu0_y[::-1]):
+        bazavov_1407_6387_mu0.append(numpy.array([x_el, y_el]))
+    bazavov_1407_6387_mu0 = numpy.array(bazavov_1407_6387_mu0)
+    borsanyi_1309_5258_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1309_5258_mu0_x, high_1309_5258_mu0_y)]
+    for x_el, y_el in zip(low_1309_5258_mu0_x[::-1], low_1309_5258_mu0_y[::-1]):
+        borsanyi_1309_5258_mu0.append(numpy.array([x_el, y_el]))
+    borsanyi_1309_5258_mu0 = numpy.array(borsanyi_1309_5258_mu0)
+    bazavov_1710_05024_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1710_05024_mu0_x, high_1710_05024_mu0_y)]
+    for x_el, y_el in zip(low_1710_05024_mu0_x[::-1], low_1710_05024_mu0_y[::-1]):
+        bazavov_1710_05024_mu0.append(numpy.array([x_el, y_el]))
+    bazavov_1710_05024_mu0 = numpy.array(bazavov_1710_05024_mu0)
+
+    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax1 = fig1.add_subplot(1, 1, 1)
+    ax1.axis([10., 400., 0., 4.2])
+    ax1.add_patch(matplotlib.patches.Polygon(bazavov_1407_6387_mu0, closed = True, fill = True, color = 'red', alpha = 0.3, label = r'Bazavov et al. (2014)'))
+    ax1.add_patch(matplotlib.patches.Polygon(borsanyi_1309_5258_mu0, closed = True, fill = True, color = 'green', alpha = 0.3, label = r'Borsanyi et al. (2014)'))
+    ax1.add_patch(matplotlib.patches.Polygon(bazavov_1710_05024_mu0, closed = True, fill = True, color = 'magenta', alpha = 0.3, label = r'Bazavov et al. (2018)'))
+    ax1.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu0, closed = True, fill = True, color = 'blue', alpha = 0.3, label = r'Borsanyi et al. (2012)'))
+    ax1.fill_between(T_1, contrib_cluster_1, color = 'green')
+    ax1.fill_between(T_1, contrib_cluster_color_1, color = 'red')
+    ax1.plot(T_1, contrib_total_1, '-', c = 'black', label = r'$\mathrm{P_{PNJL+BU},~\mu=0}$')
+    ax1.plot(T_1, contrib_qgp_1, '--', c = 'blue', label = r'PNJL')
+    ax1.text(180.0, 0.1, r'Color triplet/antitriplet cluster pressure', color = 'red')
+    ax1.text(165.0, 0.28, r'Color singlet cluster pressure', color = 'green')
+    ax1.text(170.0, 0.48, r'PNJL pressure', color = 'blue')
+    ax1.text(185.0, 0.9, r'total pressure', color = 'black')
+    ax1.text(25.0, 4.0, r'$\mathrm{\mu_B=200}$ MeV', color = 'black')
+    ax1.text(225.0, 1.8, r'Borsanyi et al. (2012)', color = 'blue', alpha = 0.7)
+    ax1.text(245.0, 3.7, r'Borsanyi et al. (2014)', color = 'green', alpha = 0.7)
+    ax1.text(260.0, 2.3, r'Bazavov et al. (2014)', color = 'red', alpha = 0.7)
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax1.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax1.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax1.set_ylabel(r'$\mathrm{p/T^4}$', fontsize = 16)
+
+    contrib_qgp_1   = [el / norm for el, norm in zip(contrib_qgp_1, contrib_total_1)]
+    contrib_pi_1    = [el / norm for el, norm in zip(contrib_pi_1, contrib_total_1)]
+    contrib_rho_1   = [el / norm for el, norm in zip(contrib_rho_1, contrib_total_1)]
+    contrib_omega_1 = [el / norm for el, norm in zip(contrib_omega_1, contrib_total_1)]
+    contrib_K_1     = [el / norm for el, norm in zip(contrib_K_1, contrib_total_1)]
+    contrib_D_1     = [el / norm for el, norm in zip(contrib_D_1, contrib_total_1)]
+    contrib_N_1     = [el / norm for el, norm in zip(contrib_N_1, contrib_total_1)]
+    contrib_T_1     = [el / norm for el, norm in zip(contrib_T_1, contrib_total_1)]
+    contrib_F_1     = [el / norm for el, norm in zip(contrib_F_1, contrib_total_1)]
+    contrib_P_1     = [el / norm for el, norm in zip(contrib_P_1, contrib_total_1)]
+    contrib_Q5_1    = [el / norm for el, norm in zip(contrib_Q5_1, contrib_total_1)]
+    contrib_H_1     = [el / norm for el, norm in zip(contrib_H_1, contrib_total_1)]
+
+    fig2 = matplotlib.pyplot.figure(num = 2, figsize = (5.9, 5))
+    ax2 = fig2.add_subplot(1, 1, 1)
+    ax2.axis([20., 250., 1e-6, 1e1])
+    ax2.plot(T_1, [1.0 for el in T_1], '-', c = 'black')
+    ax2.plot(T_1, contrib_qgp_1, '-', c = 'blue')
+    ax2.plot(T_1, contrib_pi_1, '-', c = '#653239')
+    ax2.plot(T_1, contrib_rho_1, '-', c = '#858AE3')
+    ax2.plot(T_1, contrib_omega_1, '-', c = '#FF37A6')
+    ax2.plot(T_1, contrib_K_1, '-', c = 'red')
+    ax2.plot(T_1, contrib_D_1, '-', c = '#4CB944')
+    ax2.plot(T_1, contrib_N_1, '-', c = '#DEA54B')
+    ax2.plot(T_1, contrib_T_1, '-', c = '#23CE6B')
+    ax2.plot(T_1, contrib_F_1, '-', c = '#DB222A')
+    ax2.plot(T_1, contrib_P_1, '-', c = '#78BC61')
+    ax2.plot(T_1, contrib_Q5_1, '-', c = '#55DBCB')
+    ax2.plot(T_1, contrib_H_1, '-', c = '#A846A0')
+    ax2.text(227.0, 3e-6, r'$\mathrm{\pi}$', color = '#653239', fontsize = 16)
+    ax2.text(54.0, 0.02, r'K', color = 'red', fontsize = 16)
+    ax2.text(141.0, 1.5e-6, r'H', color = '#A846A0', fontsize = 16)
+    ax2.text(43.0, 5.3e-6, r'$\mathrm{\omega}$', color = '#FF37A6', fontsize = 16)
+    ax2.text(125.5, 0.005, r'D', color = '#4CB944', fontsize = 16)
+    ax2.text(55.0, 1.5e-6, r'N', color = '#DEA54B', fontsize = 16)
+    ax2.text(128.0, 0.0017, r'T', color = '#23CE6B', fontsize = 16)
+    ax2.text(91.0, 2.3e-6, r'F', color = '#DB222A', fontsize = 16)
+    ax2.text(113.0, 0.0001, r'P', color = '#78BC61', fontsize = 16)
+    ax2.text(135.0, 0.0002, r'Q', color = '#55DBCB', fontsize = 16)
+    ax2.text(90.0, 0.015, r'$\mathrm{\rho}$', color = '#858AE3', fontsize = 16)
+    ax2.text(22., 0.6, r'total pressure', color = 'black')
+    ax2.text(205., 0.6, r'quark', color = 'blue')
+    ax2.set_yscale('log')
+    for tick in ax2.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax2.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax2.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax2.set_ylabel(r'$\mathrm{\log~p}$', fontsize = 16)
+
+    fig3 = matplotlib.pyplot.figure(num = 3, figsize = (5.9, 5))
+    ax3 = fig3.add_subplot(1, 1, 1)
+    ax3.axis([10., 400., 0., 4.2])
+    ax3.add_patch(matplotlib.patches.Polygon(bazavov_1407_6387_mu0, closed = True, fill = True, color = 'red', alpha = 0.3, label = r'Bazavov et al. (2014)'))
+    ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1309_5258_mu0, closed = True, fill = True, color = 'green', alpha = 0.3, label = r'Borsanyi et al. (2014)'))
+    ax3.add_patch(matplotlib.patches.Polygon(bazavov_1710_05024_mu0, closed = True, fill = True, color = 'magenta', alpha = 0.3, label = r'Bazavov et al. (2018)'))
+    ax3.add_patch(matplotlib.patches.Polygon(borsanyi_1204_6710v2_mu0, closed = True, fill = True, color = 'blue', alpha = 0.3, label = r'Borsanyi et al. (2012)'))
+    ax3.fill_between(T_3, contrib_cluster_3, color = 'green')
+    ax3.fill_between(T_3, contrib_cluster_color_3, color = 'red')
+    ax3.plot(T_3, contrib_total_3, '-', c = 'black', label = r'$\mathrm{P_{PNJL+BU},~\mu=0}$')
+    ax3.plot(T_3, contrib_qgp_3, '--', c = 'blue', label = r'PNJL')
+    ax3.text(180.0, 0.1, r'Color triplet/antitriplet cluster pressure', color = 'red')
+    ax3.text(165.0, 0.28, r'Color singlet cluster pressure', color = 'green')
+    ax3.text(170.0, 0.48, r'PNJL pressure', color = 'blue')
+    ax3.text(185.0, 0.9, r'total pressure', color = 'black')
+    ax3.text(25.0, 4.0, r'$\mathrm{\mu_B=200}$ MeV', color = 'black')
+    ax3.text(225.0, 1.8, r'Borsanyi et al. (2012)', color = 'blue', alpha = 0.7)
+    ax3.text(245.0, 3.7, r'Borsanyi et al. (2014)', color = 'green', alpha = 0.7)
+    ax3.text(260.0, 2.3, r'Bazavov et al. (2014)', color = 'red', alpha = 0.7)
+    for tick in ax3.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax3.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax3.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax3.set_ylabel(r'$\mathrm{p/T^4}$', fontsize = 16)
+
+    contrib_qgp_3   = [el / norm for el, norm in zip(contrib_qgp_3, contrib_total_3)]
+    contrib_pi_3    = [el / norm for el, norm in zip(contrib_pi_3, contrib_total_3)]
+    contrib_rho_3   = [el / norm for el, norm in zip(contrib_rho_3, contrib_total_3)]
+    contrib_omega_3 = [el / norm for el, norm in zip(contrib_omega_3, contrib_total_3)]
+    contrib_K_3     = [el / norm for el, norm in zip(contrib_K_3, contrib_total_3)]
+    contrib_D_3     = [el / norm for el, norm in zip(contrib_D_3, contrib_total_3)]
+    contrib_N_3     = [el / norm for el, norm in zip(contrib_N_3, contrib_total_3)]
+    contrib_T_3     = [el / norm for el, norm in zip(contrib_T_3, contrib_total_3)]
+    contrib_F_3     = [el / norm for el, norm in zip(contrib_F_3, contrib_total_3)]
+    contrib_P_3     = [el / norm for el, norm in zip(contrib_P_3, contrib_total_3)]
+    contrib_Q5_3    = [el / norm for el, norm in zip(contrib_Q5_3, contrib_total_3)]
+    contrib_H_3     = [el / norm for el, norm in zip(contrib_H_3, contrib_total_3)]
+
+    fig4 = matplotlib.pyplot.figure(num = 4, figsize = (5.9, 5))
+    ax4 = fig4.add_subplot(1, 1, 1)
+    ax4.axis([20., 250., 1e-6, 1e1])
+    ax4.plot(T_3, [1.0 for el in T_3], '-', c = 'black')
+    ax4.plot(T_3, contrib_qgp_3, '-', c = 'blue')
+    ax4.plot(T_3, contrib_pi_3, '-', c = '#653239')
+    ax4.plot(T_3, contrib_rho_3, '-', c = '#858AE3')
+    ax4.plot(T_3, contrib_omega_3, '-', c = '#FF37A6')
+    ax4.plot(T_3, contrib_K_3, '-', c = 'red')
+    ax4.plot(T_3, contrib_D_3, '-', c = '#4CB944')
+    ax4.plot(T_3, contrib_N_3, '-', c = '#DEA54B')
+    ax4.plot(T_3, contrib_T_3, '-', c = '#23CE6B')
+    ax4.plot(T_3, contrib_F_3, '-', c = '#DB222A')
+    ax4.plot(T_3, contrib_P_3, '-', c = '#78BC61')
+    ax4.plot(T_3, contrib_Q5_3, '-', c = '#55DBCB')
+    ax4.plot(T_3, contrib_H_3, '-', c = '#A846A0')
+    ax4.text(227.0, 3e-6, r'$\mathrm{\pi}$', color = '#653239', fontsize = 16)
+    ax4.text(54.0, 0.02, r'K', color = 'red', fontsize = 16)
+    ax4.text(141.0, 1.5e-6, r'H', color = '#A846A0', fontsize = 16)
+    ax4.text(43.0, 5.3e-6, r'$\mathrm{\omega}$', color = '#FF37A6', fontsize = 16)
+    ax4.text(125.5, 0.005, r'D', color = '#4CB944', fontsize = 16)
+    ax4.text(55.0, 1.5e-6, r'N', color = '#DEA54B', fontsize = 16)
+    ax4.text(128.0, 0.0017, r'T', color = '#23CE6B', fontsize = 16)
+    ax4.text(91.0, 2.3e-6, r'F', color = '#DB222A', fontsize = 16)
+    ax4.text(113.0, 0.0001, r'P', color = '#78BC61', fontsize = 16)
+    ax4.text(135.0, 0.0002, r'Q', color = '#55DBCB', fontsize = 16)
+    ax4.text(90.0, 0.015, r'$\mathrm{\rho}$', color = '#858AE3', fontsize = 16)
+    ax4.text(22., 0.6, r'total pressure', color = 'black')
+    ax4.text(205., 0.6, r'quark', color = 'blue')
+    ax4.set_yscale('log')
+    for tick in ax4.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax4.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax4.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax4.set_ylabel(r'$\mathrm{\log~p}$', fontsize = 16)
+
+    fig1.tight_layout(pad = 0.1)
+    fig2.tight_layout(pad = 0.1)
+    fig3.tight_layout(pad = 0.1)
+    fig4.tight_layout(pad = 0.1)
+
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+def epja_figure10():
+
+    phi_re_1, phi_im_1               = [], []
+    phi_re_3, phi_im_3               = [], []
+
+    Pres_Q_1, Pres_g_1, Pres_pert_1, Pres_sea_1  = [], [], [], []
+    Pres_Q_3, Pres_g_3, Pres_pert_3, Pres_sea_3  = [], [], [], []
+
+    Pres_pi_1, Pres_K_1, Pres_rho_1  = [], [], []
+    Pres_omega_1, Pres_D_1, Pres_N_1 = [], [], []
+    Pres_T_1, Pres_F_1, Pres_P_1     = [], [], []
+    Pres_Q5_1, Pres_H_1              = [], []
+
+    Pres_pi_3, Pres_K_3, Pres_rho_3  = [], [], [] 
+    Pres_omega_3, Pres_D_3, Pres_N_3 = [], [], []
+    Pres_T_3, Pres_F_3, Pres_P_3     = [], [], []
+    Pres_Q5_3, Pres_H_3              = [], []
+
+    T_1 = numpy.linspace(1.0, 400.0, 200)
+    T_3 = numpy.linspace(1.0, 400.0, 200)
+
+    mu_1   = [200.0 / 3.0 for el in T_1]
+    mu_3   = [200.0 / 3.0 for el in T_3]
+
+    calc_1                  = True
+    calc_3                  = True
+
+    cluster_backreaction    = False
+
+    pl_1_file       = "D:/EoS/epja/figure10/pl_1.dat"
+    pl_3_file       = "D:/EoS/epja/figure10/pl_3.dat"
+    pressure_1_file = "D:/EoS/epja/figure10/pressure_1.dat"
+    pressure_3_file = "D:/EoS/epja/figure10/pressure_3.dat"
+
+    if calc_1:
+        phi_re_1.append(1e-15)
+        phi_im_1.append(2e-15)
+        lT = len(T_1)
+        for T_el, mu_el in tqdm.tqdm(zip(T_1, mu_1), desc = "Traced Polyakov loop (calc #1)", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_1[-1], phi_im_1[-1], with_clusters = cluster_backreaction)
+            phi_re_1.append(temp_phi_re)
+            phi_im_1.append(temp_phi_im)
+        phi_re_1 = phi_re_1[1:]
+        phi_im_1 = phi_im_1[1:]
+        with open(pl_1_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_1, mu_1, phi_re_1, phi_im_1)])
+    else:
+        T_1, mu_1 = utils.data_collect(0, 1, pl_1_file)
+        phi_re_1, phi_im_1 = utils.data_collect(2, 3, pl_1_file)
+
+    if calc_3:
+        phi_re_3.append(1e-15)
+        phi_im_3.append(2e-15)
+        lT = len(T_3)
+        for T_el, mu_el in tqdm.tqdm(zip(T_3, mu_3), desc = "Traced Polyakov loop (calc #3)", total = lT, ascii = True):
+            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_3[-1], phi_im_3[-1], with_clusters = cluster_backreaction)
+            phi_re_3.append(temp_phi_re)
+            phi_im_3.append(temp_phi_im)
+        phi_re_3 = phi_re_3[1:]
+        phi_im_3 = phi_im_3[1:]
+        with open(pl_3_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_3, mu_3, phi_re_3, phi_im_3)])
+    else:
+        T_3, mu_3 = utils.data_collect(0, 1, pl_3_file)
+        phi_re_3, phi_im_3 = utils.data_collect(2, 3, pl_3_file)
+
+    if calc_1:
+        Pres_g_1 = [
+            0.0
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_1, mu_1), 
+                desc = "Gluon baryon density (calc #1)", 
+                total = len(T_1),
+                ascii = True
+                )]
+        Pres_sea_1 = [
+            0.0
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_1, mu_1), 
+                desc = "Sigma mf baryon density (calc #1)", 
+                total = len(T_1),
+                ascii = True
+                )]
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T_1, mu_1, phi_re_1, phi_im_1), desc = "Quark and perturbative baryon density (calc #1)", total = len(T_1), ascii = True):
+            h = 1e-2
+            mu_vec = [mu_el + 2 * h, mu_el + h, mu_el - h, mu_el - 2 * h]
+            Phi_vec = [complex(phi_re_el, phi_im_el) for el in mu_vec]
+            Phib_vec = [complex(phi_re_el, -phi_im_el) for el in mu_vec]
+            Pres_Q_1.append(pnjl.thermo.gcp_quark.bdensity(T_el, mu_vec, Phi_vec, Phib_vec) + pnjl.thermo.gcp_quark.bdensity(T_el, mu_vec, Phi_vec, Phib_vec, Nf = 1.0, ml = pnjl.defaults.default_ms))
+            Pres_pert_1.append(pnjl.thermo.gcp_perturbative.bdensity(T_el, mu_vec, Phi_vec, Phib_vec, Nf = 3.0))
+        (
+            (_, _, _, _, _, _, _, _, _, _, _),
+            (Pres_pi_1, Pres_rho_1, Pres_omega_1, Pres_K_1, Pres_D_1, Pres_N_1, Pres_T_1, Pres_F_1, Pres_P_1, 
+             Pres_Q5_1, Pres_H_1),
+            (_, _, _, _, _, _, _, _, _, _, _)
+        ) = clusters_c(T_1, mu_1, phi_re_1, phi_im_1)
+        with open(pressure_1_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(Pres_Q_1, Pres_g_1, Pres_pert_1, Pres_pi_1, Pres_K_1, Pres_rho_1, Pres_omega_1, Pres_D_1, Pres_N_1, Pres_T_1, Pres_F_1, Pres_P_1, Pres_Q5_1, Pres_H_1, Pres_sea_1)])
+    else:
+        Pres_Q_1, Pres_g_1       = utils.data_collect(0, 1, pressure_1_file)
+        Pres_pert_1, Pres_pi_1   = utils.data_collect(2, 3, pressure_1_file)
+        Pres_K_1, _              = utils.data_collect(4, 4, pressure_1_file)
+        Pres_rho_1, Pres_omega_1 = utils.data_collect(5, 6, pressure_1_file)
+        Pres_D_1, Pres_N_1       = utils.data_collect(7, 8, pressure_1_file)
+        Pres_T_1, Pres_F_1       = utils.data_collect(9, 10, pressure_1_file)
+        Pres_P_1, Pres_Q5_1      = utils.data_collect(11, 12, pressure_1_file)
+        Pres_H_1, Pres_sea_1     = utils.data_collect(13, 14, pressure_1_file)
+
+    if calc_3:
+        Pres_g_3 = [
+            0.0
+            for T_el, phi_re_el, phi_im_el 
+            in tqdm.tqdm(
+                zip(T_3, phi_re_3, phi_im_3), 
+                desc = "Gluon pressure (calc #3)", 
+                total = len(T_3),
+                ascii = True
+                )]
+        Pres_sea_3 = [
+            0.0
+            for T_el, mu_el
+            in tqdm.tqdm(
+                zip(T_3, mu_3), 
+                desc = "Sigma mf pressure (calc #3)", 
+                total = len(T_3),
+                ascii = True
+                )]
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T_3, mu_3, [1.0 for el in T_3], [0.0 for el in T_3]), desc = "Quark and perturbative baryon density (calc #3)", total = len(T_3), ascii = True):
+            h = 1e-2
+            mu_vec = [mu_el + 2 * h, mu_el + h, mu_el - h, mu_el - 2 * h]
+            Phi_vec = [complex(phi_re_el, phi_im_el) for el in mu_vec]
+            Phib_vec = [complex(phi_re_el, -phi_im_el) for el in mu_vec]
+            Pres_Q_3.append(pnjl.thermo.gcp_quark.bdensity(T_el, mu_vec, Phi_vec, Phib_vec) + pnjl.thermo.gcp_quark.bdensity(T_el, mu_vec, Phi_vec, Phib_vec, Nf = 1.0, ml = pnjl.defaults.default_ms))
+            Pres_pert_3.append(pnjl.thermo.gcp_perturbative.bdensity(T_el, mu_vec, Phi_vec, Phib_vec, Nf = 3.0))
+        (
+            (_, _, _, _, _, _, _, _, _, _, _),
+            (Pres_pi_3, Pres_rho_3, Pres_omega_3, Pres_K_3, Pres_D_3, Pres_N_3, Pres_T_3, Pres_F_3, Pres_P_3, 
+             Pres_Q5_3, Pres_H_3),
+            (_, _, _, _, _, _, _, _, _, _, _)
+        ) = clusters_c(T_3, mu_3, [1.0 for el in T_3], [0.0 for el in T_3])
+        with open(pressure_3_file, 'w', newline = '') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerows([[q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(Pres_Q_3, Pres_g_3, Pres_pert_3, Pres_pi_3, Pres_K_3, Pres_rho_3, Pres_omega_3, Pres_D_3, Pres_N_3, Pres_T_3, Pres_F_3, Pres_P_3, Pres_Q5_3, Pres_H_3, Pres_sea_3)])
+    else:
+        Pres_Q_3, Pres_g_3       = utils.data_collect(0, 1, pressure_3_file)
+        Pres_pert_3, Pres_pi_3   = utils.data_collect(2, 3, pressure_3_file)
+        Pres_K_3, _              = utils.data_collect(4, 4, pressure_3_file)
+        Pres_rho_3, Pres_omega_3 = utils.data_collect(5, 6, pressure_3_file)
+        Pres_D_3, Pres_N_3       = utils.data_collect(7, 8, pressure_3_file)
+        Pres_T_3, Pres_F_3       = utils.data_collect(9, 10, pressure_3_file)
+        Pres_P_3, Pres_Q5_3      = utils.data_collect(11, 12, pressure_3_file)
+        Pres_H_3, Pres_sea_3     = utils.data_collect(13, 14, pressure_3_file)
+
+    contrib_q_1    = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_Q_1)]
+    contrib_g_1    = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_g_1)]
+    contrib_pert_1 = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_pert_1)]
+    contrib_sea_1  = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_sea_1)]
+    contrib_qgp_1  = [sum(el) for el in zip(contrib_q_1, contrib_g_1, contrib_pert_1, contrib_sea_1)]
+
+    contrib_q_3    = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_Q_3)]
+    contrib_g_3    = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_g_3)]
+    contrib_pert_3 = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_pert_3)]
+    contrib_sea_3  = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_sea_3)]
+    contrib_qgp_3  = [sum(el) for el in zip(contrib_q_3, contrib_g_3, contrib_pert_3, contrib_sea_3)]
+
+    contrib_pi_1                  = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_pi_1)]
+    contrib_rho_1                 = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_rho_1)]
+    contrib_omega_1               = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_omega_1)]
+    contrib_K_1                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_K_1)]
+    contrib_D_1                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_D_1)]
+    contrib_N_1                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_N_1)]
+    contrib_T_1                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_T_1)]
+    contrib_F_1                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_F_1)]
+    contrib_P_1                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_P_1)]
+    contrib_Q5_1                  = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_Q5_1)]
+    contrib_H_1                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_1, Pres_H_1)]
+    contrib_cluster_1             = [sum(el) for el in zip(contrib_pi_1, contrib_rho_1, contrib_omega_1, contrib_K_1, contrib_D_1, contrib_N_1, contrib_T_1, contrib_F_1, contrib_P_1, contrib_Q5_1, contrib_H_1)]
+    contrib_cluster_singlet_1     = [sum(el) for el in zip(contrib_pi_1, contrib_rho_1, contrib_omega_1, contrib_K_1, contrib_N_1, contrib_T_1, contrib_P_1, contrib_H_1)]
+    contrib_cluster_color_1       = [sum(el) for el in zip(contrib_D_1, contrib_F_1, contrib_Q5_1)]
+    contrib_total_1               = [sum(el) for el in zip(contrib_cluster_1, contrib_qgp_1)]
+
+    contrib_pi_3                  = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_pi_3)]
+    contrib_rho_3                 = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_rho_3)]
+    contrib_omega_3               = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_omega_3)]
+    contrib_K_3                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_K_3)]
+    contrib_D_3                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_D_3)]
+    contrib_N_3                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_N_3)]
+    contrib_T_3                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_T_3)]
+    contrib_F_3                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_F_3)]
+    contrib_P_3                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_P_3)]
+    contrib_Q5_3                  = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_Q5_3)]
+    contrib_H_3                   = [p_el / (T_el ** 3) for T_el, p_el in zip(T_3, Pres_H_3)]
+    contrib_cluster_3             = [sum(el) for el in zip(contrib_pi_3, contrib_rho_3, contrib_omega_3, contrib_K_3, contrib_D_3, contrib_N_3, contrib_T_3, contrib_F_3, contrib_P_3, contrib_Q5_3, contrib_H_3)]
+    contrib_cluster_singlet_3     = [sum(el) for el in zip(contrib_pi_3, contrib_rho_3, contrib_omega_3, contrib_K_3, contrib_N_3, contrib_T_3, contrib_P_3, contrib_H_3)]
+    contrib_cluster_color_3       = [sum(el) for el in zip(contrib_D_3, contrib_F_3, contrib_Q5_3)]
+    contrib_total_3               = [sum(el) for el in zip(contrib_cluster_3, contrib_qgp_3)]
+
+    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax1 = fig1.add_subplot(1, 1, 1)
+    ax1.axis([10., 400., 0., 4.2])
+    ax1.fill_between(T_1, contrib_cluster_1, color = 'green')
+    ax1.fill_between(T_1, contrib_cluster_color_1, color = 'red')
+    ax1.plot(T_1, contrib_total_1, '-', c = 'black', label = r'$\mathrm{P_{PNJL+BU},~\mu=0}$')
+    ax1.plot(T_1, contrib_qgp_1, '--', c = 'blue', label = r'PNJL')
+    ax1.text(180.0, 0.1, r'Color triplet/antitriplet cluster baryon density', color = 'red')
+    ax1.text(165.0, 0.28, r'Color singlet cluster baryon density', color = 'green')
+    ax1.text(170.0, 0.48, r'PNJL baryon density', color = 'blue')
+    ax1.text(185.0, 0.9, r'total baryon density', color = 'black')
+    ax1.text(25.0, 4.0, r'$\mathrm{\mu_B=200}$ MeV', color = 'black')
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax1.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax1.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax1.set_ylabel(r'$\mathrm{n_B/T^3}$', fontsize = 16)
+
+    contrib_qgp_1   = [el / norm for el, norm in zip(contrib_qgp_1, contrib_total_1)]
+    contrib_pi_1    = [el / norm for el, norm in zip(contrib_pi_1, contrib_total_1)]
+    contrib_rho_1   = [el / norm for el, norm in zip(contrib_rho_1, contrib_total_1)]
+    contrib_omega_1 = [el / norm for el, norm in zip(contrib_omega_1, contrib_total_1)]
+    contrib_K_1     = [el / norm for el, norm in zip(contrib_K_1, contrib_total_1)]
+    contrib_D_1     = [el / norm for el, norm in zip(contrib_D_1, contrib_total_1)]
+    contrib_N_1     = [el / norm for el, norm in zip(contrib_N_1, contrib_total_1)]
+    contrib_T_1     = [el / norm for el, norm in zip(contrib_T_1, contrib_total_1)]
+    contrib_F_1     = [el / norm for el, norm in zip(contrib_F_1, contrib_total_1)]
+    contrib_P_1     = [el / norm for el, norm in zip(contrib_P_1, contrib_total_1)]
+    contrib_Q5_1    = [el / norm for el, norm in zip(contrib_Q5_1, contrib_total_1)]
+    contrib_H_1     = [el / norm for el, norm in zip(contrib_H_1, contrib_total_1)]
+
+    fig2 = matplotlib.pyplot.figure(num = 2, figsize = (5.9, 5))
+    ax2 = fig2.add_subplot(1, 1, 1)
+    ax2.axis([20., 250., 1e-6, 1e1])
+    ax2.plot(T_1, [1.0 for el in T_1], '-', c = 'black')
+    ax2.plot(T_1, contrib_qgp_1, '-', c = 'blue')
+    ax2.plot(T_1, contrib_pi_1, '-', c = '#653239')
+    ax2.plot(T_1, contrib_rho_1, '-', c = '#858AE3')
+    ax2.plot(T_1, contrib_omega_1, '-', c = '#FF37A6')
+    ax2.plot(T_1, contrib_K_1, '-', c = 'red')
+    ax2.plot(T_1, contrib_D_1, '-', c = '#4CB944')
+    ax2.plot(T_1, contrib_N_1, '-', c = '#DEA54B')
+    ax2.plot(T_1, contrib_T_1, '-', c = '#23CE6B')
+    ax2.plot(T_1, contrib_F_1, '-', c = '#DB222A')
+    ax2.plot(T_1, contrib_P_1, '-', c = '#78BC61')
+    ax2.plot(T_1, contrib_Q5_1, '-', c = '#55DBCB')
+    ax2.plot(T_1, contrib_H_1, '-', c = '#A846A0')
+    ax2.text(227.0, 3e-6, r'$\mathrm{\pi}$', color = '#653239', fontsize = 16)
+    ax2.text(54.0, 0.02, r'K', color = 'red', fontsize = 16)
+    ax2.text(141.0, 1.5e-6, r'H', color = '#A846A0', fontsize = 16)
+    ax2.text(43.0, 5.3e-6, r'$\mathrm{\omega}$', color = '#FF37A6', fontsize = 16)
+    ax2.text(125.5, 0.005, r'D', color = '#4CB944', fontsize = 16)
+    ax2.text(55.0, 1.5e-6, r'N', color = '#DEA54B', fontsize = 16)
+    ax2.text(128.0, 0.0017, r'T', color = '#23CE6B', fontsize = 16)
+    ax2.text(91.0, 2.3e-6, r'F', color = '#DB222A', fontsize = 16)
+    ax2.text(113.0, 0.0001, r'P', color = '#78BC61', fontsize = 16)
+    ax2.text(135.0, 0.0002, r'Q', color = '#55DBCB', fontsize = 16)
+    ax2.text(90.0, 0.015, r'$\mathrm{\rho}$', color = '#858AE3', fontsize = 16)
+    ax2.text(22., 0.6, r'total baryon density', color = 'black')
+    ax2.text(205., 0.6, r'quark', color = 'blue')
+    ax2.set_yscale('log')
+    for tick in ax2.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax2.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax2.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax2.set_ylabel(r'$\mathrm{\log~n_B}$', fontsize = 16)
+
+    fig3 = matplotlib.pyplot.figure(num = 3, figsize = (5.9, 5))
+    ax3 = fig3.add_subplot(1, 1, 1)
+    ax3.axis([10., 400., 0., 4.2])
+    ax3.fill_between(T_3, contrib_cluster_3, color = 'green')
+    ax3.fill_between(T_3, contrib_cluster_color_3, color = 'red')
+    ax3.plot(T_3, contrib_total_3, '-', c = 'black', label = r'$\mathrm{P_{PNJL+BU},~\mu=0}$')
+    ax3.plot(T_3, contrib_qgp_3, '--', c = 'blue', label = r'PNJL')
+    ax3.text(180.0, 0.1, r'Color triplet/antitriplet cluster baryon density', color = 'red')
+    ax3.text(165.0, 0.28, r'Color singlet cluster baryon density', color = 'green')
+    ax3.text(170.0, 0.48, r'PNJL baryon density', color = 'blue')
+    ax3.text(185.0, 0.9, r'total baryon density', color = 'black')
+    ax3.text(25.0, 4.0, r'$\mathrm{\mu_B=200}$ MeV', color = 'black')
+    for tick in ax3.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax3.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax3.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax3.set_ylabel(r'$\mathrm{n_B/T^3}$', fontsize = 16)
+
+    contrib_qgp_3   = [el / norm for el, norm in zip(contrib_qgp_3, contrib_total_3)]
+    contrib_pi_3    = [el / norm for el, norm in zip(contrib_pi_3, contrib_total_3)]
+    contrib_rho_3   = [el / norm for el, norm in zip(contrib_rho_3, contrib_total_3)]
+    contrib_omega_3 = [el / norm for el, norm in zip(contrib_omega_3, contrib_total_3)]
+    contrib_K_3     = [el / norm for el, norm in zip(contrib_K_3, contrib_total_3)]
+    contrib_D_3     = [el / norm for el, norm in zip(contrib_D_3, contrib_total_3)]
+    contrib_N_3     = [el / norm for el, norm in zip(contrib_N_3, contrib_total_3)]
+    contrib_T_3     = [el / norm for el, norm in zip(contrib_T_3, contrib_total_3)]
+    contrib_F_3     = [el / norm for el, norm in zip(contrib_F_3, contrib_total_3)]
+    contrib_P_3     = [el / norm for el, norm in zip(contrib_P_3, contrib_total_3)]
+    contrib_Q5_3    = [el / norm for el, norm in zip(contrib_Q5_3, contrib_total_3)]
+    contrib_H_3     = [el / norm for el, norm in zip(contrib_H_3, contrib_total_3)]
+
+    fig4 = matplotlib.pyplot.figure(num = 4, figsize = (5.9, 5))
+    ax4 = fig4.add_subplot(1, 1, 1)
+    ax4.axis([20., 250., 1e-6, 1e1])
+    ax4.plot(T_3, [1.0 for el in T_3], '-', c = 'black')
+    ax4.plot(T_3, contrib_qgp_3, '-', c = 'blue')
+    ax4.plot(T_3, contrib_pi_3, '-', c = '#653239')
+    ax4.plot(T_3, contrib_rho_3, '-', c = '#858AE3')
+    ax4.plot(T_3, contrib_omega_3, '-', c = '#FF37A6')
+    ax4.plot(T_3, contrib_K_3, '-', c = 'red')
+    ax4.plot(T_3, contrib_D_3, '-', c = '#4CB944')
+    ax4.plot(T_3, contrib_N_3, '-', c = '#DEA54B')
+    ax4.plot(T_3, contrib_T_3, '-', c = '#23CE6B')
+    ax4.plot(T_3, contrib_F_3, '-', c = '#DB222A')
+    ax4.plot(T_3, contrib_P_3, '-', c = '#78BC61')
+    ax4.plot(T_3, contrib_Q5_3, '-', c = '#55DBCB')
+    ax4.plot(T_3, contrib_H_3, '-', c = '#A846A0')
+    ax4.text(227.0, 3e-6, r'$\mathrm{\pi}$', color = '#653239', fontsize = 16)
+    ax4.text(54.0, 0.02, r'K', color = 'red', fontsize = 16)
+    ax4.text(141.0, 1.5e-6, r'H', color = '#A846A0', fontsize = 16)
+    ax4.text(43.0, 5.3e-6, r'$\mathrm{\omega}$', color = '#FF37A6', fontsize = 16)
+    ax4.text(125.5, 0.005, r'D', color = '#4CB944', fontsize = 16)
+    ax4.text(55.0, 1.5e-6, r'N', color = '#DEA54B', fontsize = 16)
+    ax4.text(128.0, 0.0017, r'T', color = '#23CE6B', fontsize = 16)
+    ax4.text(91.0, 2.3e-6, r'F', color = '#DB222A', fontsize = 16)
+    ax4.text(113.0, 0.0001, r'P', color = '#78BC61', fontsize = 16)
+    ax4.text(135.0, 0.0002, r'Q', color = '#55DBCB', fontsize = 16)
+    ax4.text(90.0, 0.015, r'$\mathrm{\rho}$', color = '#858AE3', fontsize = 16)
+    ax4.text(22., 0.6, r'total baryon density', color = 'black')
+    ax4.text(205., 0.6, r'quark', color = 'blue')
+    ax4.set_yscale('log')
+    for tick in ax4.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax4.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax4.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax4.set_ylabel(r'$\mathrm{\log~n_B}$', fontsize = 16)
+
+    fig1.tight_layout(pad = 0.1)
+    fig2.tight_layout(pad = 0.1)
+    fig3.tight_layout(pad = 0.1)
+    fig4.tight_layout(pad = 0.1)
+
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
 if __name__ == '__main__':
 
-    PNJL_mu_T_plane_calc()
+    epja_figure10()
 
     print("END")
