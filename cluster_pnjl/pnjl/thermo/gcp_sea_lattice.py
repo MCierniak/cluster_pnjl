@@ -8,7 +8,7 @@ import pnjl.defaults
 
 def Tc(mu : float, **kwargs) -> float:
 
-    options ={'kappa' : pnjl.defaults.default_kappa, 'Tc0' : pnjl.defaults.default_Tc0}
+    options = {'kappa' : pnjl.defaults.default_kappa, 'Tc0' : pnjl.defaults.default_Tc0}
     options.update(kwargs)
 
     Tc0 = options['Tc0']

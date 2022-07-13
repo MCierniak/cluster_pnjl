@@ -6,7 +6,7 @@ def f_fermion_singlet(y_val = 0.0, y_status = 4) -> float:
     else:
         return 1.0 / (y_val + 1.0)
 
-def f_baryon_singlet(y_val = 0.0, y_status = 4) -> float:
+def f_boson_singlet(y_val = 0.0, y_status = 4) -> float:
     if y_status == 4:
         raise RuntimeError("Error in pnj.thermo.distributions.f_baryon_singlet, y value not passed...")
     elif y_status == 2:
@@ -59,7 +59,7 @@ def f_fermion_antitriplet(
         raise RuntimeError("Error in pnj.thermo.distributions.f_fermion_antitriplet, y value not passed...")
     return f_fermion_triplet(Phib, Phi, y_1_val = y_1_val, y_1_status = y_1_status, y_2_val = y_2_val, y_2_status = y_2_status, y_3_val = y_3_val, y_3_status = y_3_status)
 
-def f_baryon_triplet(
+def f_boson_triplet(
     Phi : complex, Phib : complex, 
     y_1_val = 0.0, y_1_status = 4,
     y_2_val = 0.0, y_2_status = 4,
@@ -102,7 +102,7 @@ def f_baryon_triplet(
 
     return part1 + part2 + part3
 
-def f_baryon_antitriplet(
+def f_boson_antitriplet(
     Phi : complex, Phib : complex, 
     y_1_val = 0.0, y_1_status = 4,
     y_2_val = 0.0, y_2_status = 4,
