@@ -6,14 +6,19 @@
 #5. return to sigma/phi derivation using a momentum-dependent quark mass (check Omega_Delta!).
 #6. change the pl potential to this one https://arxiv.org/pdf/1307.5958.pdf
 
+import matplotlib
+
 import matplotlib.patches
 import matplotlib.pyplot
 import scipy.integrate
 import scipy.optimize
 import numpy
+import time
+import glob
 import math
 import tqdm
 import csv
+import os
 
 from scipy.interpolate import interp1d
 from mpl_toolkits.mplot3d import Axes3D
@@ -33,6 +38,18 @@ import papers.epja_2022
 import warnings
 warnings.filterwarnings("ignore")
 
+#regulator_N = 0.0
+#regulator_P = 0.0
+#regulator_H = 0.0
+#regulator_pi = 0.0
+#regulator_K = 0.0
+#regulator_rho = 0.0
+#regulator_omega = 0.0
+#regulator_T = 0.0
+#regulator_D = 0.0
+#regulator_F = 0.0
+#regulator_Q5 = 0.0
+
 def cluster_thermo(T, mu, phi_re, phi_im, M, Mth, dMdmu, dMthdmu, dMdT, dMthdT, a, b, dx):
     Pres = [
         pnjl.thermo.gcp_cluster.bound_step_continuum_step.pressure(
@@ -51,8 +68,14 @@ def cluster_thermo(T, mu, phi_re, phi_im, M, Mth, dMdmu, dMthdmu, dMdT, dMthdT, 
     SDen = [0.0 for T_el, mu_el, phi_re_el, phi_im_el, M_el, Mth_el, dM_el, dMth_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im, M, Mth, dMdT, dMthdT), desc = "SDen", total = len(T), ascii = True)]
     return Pres, BDen, SDen
 
-def cluster_c_thermo(T, mu, phi_re, phi_im, M, a, b, dx, Ni, L, strangeness):
-    T_crit = scipy.optimize.root(lambda x, ni, s, muel, mi: math.sqrt(2) * ((ni - s) * pnjl.thermo.gcp_sea_lattice.M(x, muel) + s * pnjl.thermo.gcp_sea_lattice.M(x, muel, ml = pnjl.defaults.default_ms)) - mi, 0.0, args = (Ni, strangeness, mu, M)).x
+def cluster_c_thermo(T, mu, phi_re, phi_im, M, a, b, dx, Ni, L, strangeness, regulator):
+    Tc0 = pnjl.defaults.default_Tc0
+    kappa = pnjl.defaults.default_kappa
+    delta_T = pnjl.defaults.default_delta_T
+    M0 = pnjl.defaults.default_M0
+    ml = pnjl.defaults.default_ml
+    ms = pnjl.defaults.default_ms
+    T_crit_v = [((Tc0 ** 2) - kappa * (el ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * Ni + 2.0 * (ms - ml) * strangeness - 2.0 * M) / (M0 * Ni))) / Tc0 for el in mu]
     Pres = [
         cluster.pressure(
             T_el,                                                           #temperature
@@ -60,73 +83,65 @@ def cluster_c_thermo(T, mu, phi_re, phi_im, M, a, b, dx, Ni, L, strangeness):
             complex(phi_re_el, phi_im_el),                                  #traced PL
             complex(phi_re_el, -phi_im_el),                                 #traced PL c.c.
             M,                                                              #bound state mass
-            math.sqrt(2) * ((Ni - strangeness) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el) + strangeness * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el, ml = pnjl.defaults.default_ms)), #threshold mass
-            a,                                                              #nr of valence quarks - nr of valence antiquarks
-            b,                                                              #nr of valence s quarks - nr of valence anti s quarks
+            ((Ni - strangeness) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el) + strangeness * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el, ml = pnjl.defaults.default_ms)), #threshold mass
+            a,                                                              #net nr of valence quarks
+            b,                                                              #net nr of valence s quarks
             dx,                                                             #degeneracy factor
             Ni,                                                             #total number of valence d.o.f.'s
             L,                                                              #continuum energy scale
-            T_crit                                                          #temperature for which Mthi = Mi
+            T_crit_el,                                                      #temperature for which Mthi = Mi
+            regulator
             ) 
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im), desc = "Pres", total = len(T), ascii = True)]
+        for T_el, T_crit_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, T_crit_v, mu, phi_re, phi_im), desc = "Pres", total = len(T), ascii = True)]
+        #for T_el, T_crit_el, mu_el, phi_re_el, phi_im_el in zip(T, T_crit_v, mu, phi_re, phi_im)]
     BDen = []
-    for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im), desc = "BDen", total = len(T), ascii = True):
-        h = 1e-2
-        mu_vec = []
-        Phi_vec = []
-        Phib_vec = []
-        if mu_el > 0.0:
-            mu_vec = [mu_el + 2 * h, mu_el + h, mu_el - h, mu_el - 2 * h]
-        else:
-            mu_vec = [h, 0.0]
-        Phi_vec = [complex(phi_re_el, phi_im_el) for el in mu_vec]
-        Phib_vec = [complex(phi_re_el, -phi_im_el) for el in mu_vec]
-        Mth_vec = [math.sqrt(2) * ((Ni - strangeness) * pnjl.thermo.gcp_sea_lattice.M(T_el, el) + strangeness * pnjl.thermo.gcp_sea_lattice.M(T_el, el, ml = pnjl.defaults.default_ms)) for el in mu_vec]
-        BDen.append(
-            cluster.bdensity(
-                T_el, 
-                mu_vec, 
-                Phi_vec, 
-                Phib_vec,
-                M, 
-                Mth_vec,
-                a, 
-                b, 
-                dx, 
-                Ni, 
-                L,
-                T_crit
-                )
-            )
+    #for T_el, T_crit_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, T_crit_v, mu, phi_re, phi_im), desc = "BDen", total = len(T), ascii = True):
+    #    h = 1e-2
+    #    mu_vec = []
+    #    Phi_vec = []
+    #    Phib_vec = []
+    #    if mu_el > 0.0:
+    #        mu_vec = [mu_el + 2 * h, mu_el + h, mu_el - h, mu_el - 2 * h]
+    #    else:
+    #        mu_vec = [h, 0.0]
+    #    Phi_vec = [complex(phi_re_el, phi_im_el) for el in mu_vec]
+    #    Phib_vec = [complex(phi_re_el, -phi_im_el) for el in mu_vec]
+    #    Mth_vec = [math.sqrt(2) * ((Ni - strangeness) * pnjl.thermo.gcp_sea_lattice.M(T_el, el) + strangeness * pnjl.thermo.gcp_sea_lattice.M(T_el, el, ml = pnjl.defaults.default_ms)) for el in mu_vec]
+    #    BDen.append(
+    #        cluster.bdensity(
+    #            T_el, 
+    #            mu_vec, 
+    #            Phi_vec, 
+    #            Phib_vec,
+    #            M, 
+    #            Mth_vec,
+    #            a, 
+    #            b, 
+    #            dx, 
+    #            Ni, 
+    #            L,
+    #            T_crit_el,
+    #            regulator
+    #            )
+    #        )
     SDen = []
-    for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, mu, phi_re, phi_im), desc = "SDen", total = len(T), ascii = True):
-        h = 1e-2
-        T_vec = []
-        Phi_vec = []
-        Phib_vec = []
-        if T_el > 0.0:
-            T_vec = [T_el + 2 * h, T_el + h, T_el - h, T_el - 2 * h]
-        else:
-            T_vec = [h, 0.0]
-        Phi_vec = [complex(phi_re_el, phi_im_el) for el in T_vec]
-        Phib_vec = [complex(phi_re_el, -phi_im_el) for el in T_vec]
-        Mth_vec = [math.sqrt(2) * ((Ni - strangeness) * pnjl.thermo.gcp_sea_lattice.M(el, mu_el) + strangeness * pnjl.thermo.gcp_sea_lattice.M(el, mu_el, ml = pnjl.defaults.default_ms)) for el in T_vec]
-        SDen.append(
-            cluster.sdensity(
-                T_vec, 
-                mu_el, 
-                Phi_vec, 
-                Phib_vec,
-                M, 
-                Mth_vec,
-                a, 
-                b, 
-                dx, 
-                Ni, 
-                L,
-                T_crit
-                )
-            )    
+    #SDen = [
+    #    cluster.sdensity(
+    #        T_el, 
+    #        mu_el, 
+    #        complex(phi_re_el, phi_im_el), 
+    #        complex(phi_re_el, -phi_im_el),
+    #        M, 
+    #        ((Ni - strangeness) * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el) + strangeness * pnjl.thermo.gcp_sea_lattice.M(T_el, mu_el, ml = pnjl.defaults.default_ms)),
+    #        a, 
+    #        b, 
+    #        dx, 
+    #        Ni, 
+    #        L,
+    #        T_crit_el,
+    #        regulator
+    #    )
+    #    for T_el, T_crit_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(T, T_crit_v, mu, phi_re, phi_im), desc = "SDen", total = len(T), ascii = True)]
     return Pres, BDen, SDen
 
 def calc_PL(
@@ -436,94 +451,101 @@ def clusters(T, mu, phi_re, phi_im):
         (SDen_pi, SDen_rho, SDen_omega, SDen_K, SDen_D, SDen_N, SDen_T, SDen_F, SDen_P, SDen_Q5, SDen_H)
         )
 
-def clusters_c(T, mu, phi_re, phi_im):
+def clusters_c(T, mu, phi_re, phi_im,
+               regulator_N, regulator_P, regulator_H, regulator_pi, regulator_K, regulator_rho,
+               regulator_omega, regulator_T, regulator_D, regulator_F, regulator_Q5):
+
     print("Calculating nucleon thermo..")
     M_N = pnjl.defaults.default_MN
     #(N(Dq): spin * isospin * color)
-    dN = (2.0 * 2.0 * 1.0)
+    dN = (2.0 * 2.0 * 1.0) / 2.0
     NN = 3.0
     LN = pnjl.defaults.default_L
-    Pres_N, BDen_N, SDen_N = cluster_c_thermo(T, mu, phi_re, phi_im, M_N, 3, 0, dN, NN, LN, 0)
+    Pres_N, BDen_N, SDen_N = cluster_c_thermo(T, mu, phi_re, phi_im, M_N, 3, 0, dN, NN, LN, 0, regulator_N)
 
     print("Calculating pentaquark thermo..")
     M_P = pnjl.defaults.default_MP
     #P(NM) + P(NM)
-    dP = (4.0 * 2.0 * 1.0) + (2.0 * 4.0 * 1.0)
+    dP = ((4.0 * 2.0 * 1.0) + (2.0 * 4.0 * 1.0)) / 2.0
     NP = 5.0
     LP = pnjl.defaults.default_L
-    Pres_P, BDen_P, SDen_P = cluster_c_thermo(T, mu, phi_re, phi_im, M_P, 3, 0, dP, NP, LP, 0)
+    Pres_P, BDen_P, SDen_P = cluster_c_thermo(T, mu, phi_re, phi_im, M_P, 3, 0, dP, NP, LP, 0, regulator_P)
 
     print("Calculating hexaquark thermo..")
     M_H = pnjl.defaults.default_MH
     #H(Qq) / H(FD) / H(NN) + H(Qq) / H(NN)
-    dH = (1.0 * 3.0 * 1.0) + (3.0 * 1.0 * 1.0)
+    dH = ((1.0 * 3.0 * 1.0) + (3.0 * 1.0 * 1.0)) / 2.0
     NH = 6.0
     LH = pnjl.defaults.default_L
-    Pres_H, BDen_H, SDen_H = cluster_c_thermo(T, mu, phi_re, phi_im, M_H, 6, 0, dH, NH, LH, 0)
+    Pres_H, BDen_H, SDen_H = cluster_c_thermo(T, mu, phi_re, phi_im, M_H, 6, 0, dH, NH, LH, 0, regulator_H)
 
     print("Calculating pi meson thermo..")
     M_pi = pnjl.defaults.default_Mpi
     #pi(q aq)
+    #the 3.0 isospin factor spans pi^+/pi^-/pi^0... all other particles should have a factor of 1/2 to account for antiparticles
     dpi = (1.0 * 3.0 * 1.0)
     Npi = 2.0
     Lpi = pnjl.defaults.default_L
-    Pres_pi, BDen_pi, SDen_pi = cluster_c_thermo(T, mu, phi_re, phi_im, M_pi, 0, 0, dpi, Npi, Lpi, 0)
+    Pres_pi, BDen_pi, SDen_pi = cluster_c_thermo(T, mu, phi_re, phi_im, M_pi, 0, 0, dpi, Npi, Lpi, 0, regulator_pi)
 
     print("Calculating K meson thermo..")
     M_K = pnjl.defaults.default_MK
     #K(q aq)
-    dK = (1.0 * 4.0 * 1.0)
+    #the 6.0 isospin factor spans K^+/K^-/K^0/Kbar^0/K^0_S/K^0_L... all other particles should have a factor of 1/2 to account for antiparticles
+    dK = (1.0 * 6.0 * 1.0)
     NK = 2.0
     LK = pnjl.defaults.default_L
-    Pres_K, BDen_K, SDen_K = cluster_c_thermo(T, mu, phi_re, phi_im, M_K, 0, 0, dK, NK, LK, 1)
+    Pres_K, BDen_K, SDen_K = cluster_c_thermo(T, mu, phi_re, phi_im, M_K, 1, -1, dK, NK, LK, 1, regulator_K)
 
     print("Calculating rho meson thermo..")
     M_rho = pnjl.defaults.default_MM
     #rho(q aq)
+    #the 3.0 isospin factor spans rho^+/rho^-/rho^0... all other particles should have a factor of 1/2 to account for antiparticles
     drho = (3.0 * 3.0 * 1.0)
     Nrho = 2.0
     Lrho = pnjl.defaults.default_L
-    Pres_rho, BDen_rho, SDen_rho = cluster_c_thermo(T, mu, phi_re, phi_im, M_rho, 0, 0, drho, Nrho, Lrho, 0)
+    Pres_rho, BDen_rho, SDen_rho = cluster_c_thermo(T, mu, phi_re, phi_im, M_rho, 0, 0, drho, Nrho, Lrho, 0, regulator_rho)
 
     print("Calculating omega meson thermo..")
     M_omega = pnjl.defaults.default_MM
     #omega(q aq)
+    #the 1.0 isospin factor spans the omega and its self-antiparticle... all other particles should have a factor of 1/2 to account for antiparticles
     domega = (3.0 * 1.0 * 1.0)
     Nomega = 2.0
     Lomega = pnjl.defaults.default_L
-    Pres_omega, BDen_omega, SDen_omega = cluster_c_thermo(T, mu, phi_re, phi_im, M_omega, 0, 0, domega, Nomega, Lomega, 0)
+    Pres_omega, BDen_omega, SDen_omega = cluster_c_thermo(T, mu, phi_re, phi_im, M_omega, 0, 0, domega, Nomega, Lomega, 0, regulator_omega)
 
     print("Calculating tetraquark thermo..")
     M_T = pnjl.defaults.default_MT
     #T(MM) + T(MM) + T(MM)
-    dT = (1.0 * 5.0 * 1.0) + (5.0 * 1.0 * 1.0) + (3.0 * 3.0 * 1.0)
+    dT = ((1.0 * 5.0 * 1.0) + (5.0 * 1.0 * 1.0) + (3.0 * 3.0 * 1.0)) / 2.0
     NT = 4.0
     LT = pnjl.defaults.default_L
-    Pres_T, BDen_T, SDen_T = cluster_c_thermo(T, mu, phi_re, phi_im, M_T, 0, 0, dT, NT, LT, 0)
+    Pres_T, BDen_T, SDen_T = cluster_c_thermo(T, mu, phi_re, phi_im, M_T, 0, 0, dT, NT, LT, 0, regulator_T)
 
     print("Calculating diquark thermo..")
     M_D = pnjl.defaults.default_MD
     #D(qq)
-    dD = (1.0 * 1.0 * 3.0)
+    dD = (1.0 * 1.0 * 3.0) / 2.0
     ND = 2.0
     LD = pnjl.defaults.default_L
-    Pres_D, BDen_D, SDen_D = cluster_c_thermo(T, mu, phi_re, [-el for el in phi_im], M_D, 2, 0, dD, ND, LD, 0)
+    Pres_D, BDen_D, SDen_D = cluster_c_thermo(T, mu, phi_re, [-el for el in phi_im], M_D, 2, 0, dD, ND, LD, 0, regulator_D)
 
     print("Calculating 4-quark thermo..")
     M_F = pnjl.defaults.default_MF
     #F(Nq)
-    dF = (1.0 * 1.0 * 3.0)
+    dF = (1.0 * 1.0 * 3.0) / 2.0
     NF = 4.0
     LF = pnjl.defaults.default_L
-    Pres_F, BDen_F, SDen_F = cluster_c_thermo(T, mu, phi_re, phi_im, M_F, 4, 0, dF, NF, LF, 0)
+    Pres_F, BDen_F, SDen_F = cluster_c_thermo(T, mu, phi_re, phi_im, M_F, 4, 0, dF, NF, LF, 0, regulator_F)
 
     print("Calculating 5-quark thermo..")
     M_Q5 = pnjl.defaults.default_MQ
     #Q5(F(Nq)q) / Q5(F(DD)q) / Q5(ND)
-    dQ5 = (2.0 * 2.0 * 3.0)
+    dQ5 = (2.0 * 1.0 * 3.0) / 2.0
     NQ5 = 5.0
     LQ5 = pnjl.defaults.default_L
-    Pres_Q5, BDen_Q5, SDen_Q5 = cluster_c_thermo(T, mu, phi_re, [-el for el in phi_im], M_Q5, 5, 0, dQ5, NQ5, LQ5, 0)
+    Pres_Q5, BDen_Q5, SDen_Q5 = cluster_c_thermo(T, mu, phi_re, [-el for el in phi_im], M_Q5, 5, 0, dQ5, NQ5, LQ5, 0, regulator_Q5)
 
     return (
         (Pres_pi, Pres_rho, Pres_omega, Pres_K, Pres_D, Pres_N, Pres_T, Pres_F, Pres_P, Pres_Q5, Pres_H),
@@ -4966,56 +4988,55 @@ def epja_figure8():
         hz = 0.5
         nlambda = Ni * Lambda_i
         nlambda2 = Ni * Lambda2_i
+        
+        M_gap = (Ni * M0 + Ni * ml) - Mi
 
-        frac1 = M / nlambda
-        frac2 = Mthi / nlambda
+        T_slope = 10.0
 
         T_trans = ((Tc0 ** 2) - kappa * (mu ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * Ni - 2.0 * Mi) / (M0 * Ni))) / Tc0
 
         heavi2 = numpy.heaviside((M ** 2) - (Mi ** 2), hz)
         heavi3 = numpy.heaviside((M ** 2) - (Mthi ** 2), hz)
-        heavi4 = numpy.heaviside(Mthi + nlambda - M, hz)
-        arccos_in = 2.0 * (M / nlambda) - 2.0 * (Mthi / nlambda) - 1.0
+        heavi4 = numpy.heaviside((Ni * M0 + Ni * ml) + nlambda - M, hz)
+        arccos_in = -2.0 * (M / (Mthi - M0 * Ni - ml * Ni - nlambda)) + ((Mthi + M0 * Ni + ml * Ni + nlambda) / (Mthi - M0 * Ni - ml * Ni - nlambda))
 
-        #heavi5 = numpy.heaviside(Mthi + nlambda2 - Mi - 10.0 * (T - T_trans), hz)
-        #heavi7 = numpy.heaviside(math.pi * ((M / nlambda) - (Mthi / nlambda)), hz)
-        #heavi8 = numpy.heaviside(math.pi * (((Mi + 10.0 * (T - T_trans)) / nlambda) + 1.0 - (M / nlambda)), hz)
-        #arccos_in2 = (2 * M / ((Mi + 10.0 * (T - T_trans)) - Mthi + nlambda)) + (((Mi + 10.0 * (T - T_trans)) + Mthi + nlambda) / (Mthi - (Mi + 10.0 * (T - T_trans)) - nlambda))
-        #cos_in = math.pi * arccos_in2 / 2.0
-
-        heavi5 = numpy.heaviside(nlambda2 - 10.0 * (T - T_trans), hz)
-        heavi7 = numpy.heaviside(math.pi * (M - Mi), hz)
-        heavi8 = numpy.heaviside(math.pi * (((Mi + 10.0 * (T - T_trans)) / nlambda) + 1.0 - (M / nlambda)), hz)
-        arccos_in2 = (2 * M / (10.0 * (T - T_trans) + nlambda)) - ((2.0 * Mi + 10.0 * (T - T_trans) + nlambda) / (10.0 * (T - T_trans) + nlambda))
+        heavi5 = numpy.heaviside(nlambda2 - T_slope * (T - T_trans), hz)
+        heavi7 = numpy.heaviside(math.pi * (M - Mthi), hz)
+        heavi8 = numpy.heaviside(math.pi * (((Mi + T_slope * (T - T_trans) + M_gap) / nlambda) + 1.0 - (M / nlambda)), hz)
+        arccos_in2 = (2.0 * M / (Mi - Mthi + nlambda + T_slope * (T - T_trans) + M_gap)) + ((Mi + Mthi + nlambda + T_slope * (T - T_trans) + M_gap) / (Mthi - Mi - nlambda - T_slope * (T - T_trans) - M_gap))
         cos_in = math.pi * arccos_in2 / 2.0
-        factor = 1.8 * ((nlambda2 - 10.0 * (T - T_trans)) / nlambda2)
+        factor = 1.0 * ((nlambda2 - T_slope * (T - T_trans)) / nlambda2)
+        factor2 = 1.0 * ((nlambda - T_slope * (T - T_trans)) / nlambda)
 
         first = 0.0
         second = 0.0
         third = 0.0
 
-        if (Mthi ** 2) >= (Mi **2):
+        if Mthi >= Mi:
             if M >= Mi and M <= Mthi:
                 first = (heavi2 - heavi3)
-            if M >= Mthi and M <= Mthi + nlambda:
+            if M >= Mthi and M <= (Ni * M0 + Ni * ml) + nlambda:
                 arccos_el = math.acos(arccos_in)
                 second = heavi3 * heavi4 * arccos_el / math.pi
         else:
-            if M >= Mi and M <= Mi + 10.0 * (T - T_trans) + nlambda:
+            if M >= Mthi and M <= Mi + T_slope * (T - T_trans) + nlambda + M_gap:
                 arccos_el2 = math.acos(arccos_in2)
-                third = heavi5 * heavi7 * heavi8 * math.cos(cos_in) * (arccos_el2 / math.pi) * factor
+                if factor2 > 0.0:
+                    third = heavi5 * heavi7 * heavi8 * factor * (factor2 * (arccos_el2 / math.pi) + (1.0 - factor2) * math.cos(cos_in) * (arccos_el2 / math.pi))
+                else:
+                    third = heavi5 * heavi7 * heavi8 * factor * math.cos(cos_in) * (arccos_el2 / math.pi)
         
         yp = {}
         yp["y_val"], yp["y_status"] = pnjl.aux_functions.y_plus(3.0 * T / 2.0, T, mu, M, Ni, 1.0)
 
-        return (first + second + third) * pnjl.thermo.distributions.f_fermion_singlet(**yp)
+        return (first + second + third) #* pnjl.thermo.distributions.f_boson_singlet(**yp)
 
-    Mi_val = pnjl.defaults.default_Mpi
-    Ni_val = 2.0
+    Mi_val = pnjl.defaults.default_MH
+    Ni_val = 6.0
     Lam_val = pnjl.defaults.default_L
     Lam2_val = 5.8 * pnjl.defaults.default_L
 
-    T_list = numpy.linspace(120, 350, num = 17)
+    T_list = numpy.linspace(120, 220, num = 17)
 
     T_val1, T_val2, T_val3, T_val4, T_val5, T_val6, T_val7, T_val8, T_val9, T_val10, T_val11, T_val12, T_val13, T_val14, T_val15, T_val16, T_val17 = T_list
 
@@ -5037,7 +5058,15 @@ def epja_figure8():
     Mthi_val16 = pnjl.thermo.gcp_sea_lattice.M(T_val16, 0.0) * Ni_val
     Mthi_val17 = pnjl.thermo.gcp_sea_lattice.M(T_val17, 0.0) * Ni_val
 
-    M_vec = numpy.linspace(0.0, 1.5 * (Mthi_val1 + Ni_val * Lam_val), 2000)
+    Mthi_vec = [Mthi_val1, Mthi_val2, Mthi_val3, Mthi_val4, Mthi_val5, Mthi_val6, Mthi_val7, Mthi_val8, Mthi_val9, Mthi_val10, Mthi_val11, Mthi_val12, Mthi_val13, Mthi_val14, Mthi_val15, Mthi_val16, Mthi_val17]
+
+    M_gap = (Ni_val * pnjl.defaults.default_M0 + Ni_val * pnjl.defaults.default_ml) - Mi_val
+    T_critical = ((pnjl.defaults.default_Tc0 ** 2) - pnjl.defaults.default_kappa * (0.0 ** 2) + pnjl.defaults.default_Tc0 * pnjl.defaults.default_delta_T * math.atanh(((pnjl.defaults.default_M0 + 2.0 * pnjl.defaults.default_ml) * Ni_val - 2.0 * Mi_val) / (pnjl.defaults.default_M0 * Ni_val))) / pnjl.defaults.default_Tc0
+    redline = [Mi_val + M_gap + Ni_val * Lam_val if Mthi_el > Mi_val else Mi_val + M_gap + Ni_val * Lam_val + 10.0 * (T_el - T_critical) for Mthi_el, T_el in zip(Mthi_vec, T_list)]
+
+    M_vec_min = 0.0
+    M_vec_max = 5500.0
+    M_vec = numpy.linspace(M_vec_min, M_vec_max, 2000)
     phase_vec1 = [
         phase(el, T_val1, Mi_val, Mthi_val1, Ni_val, Lam_val, Lam2_val)
         for el in M_vec]
@@ -5090,10 +5119,46 @@ def epja_figure8():
         phase(el, T_val17, Mi_val, Mthi_val17, Ni_val, Lam_val, Lam2_val)
         for el in M_vec]
 
+    if numpy.any([el > 1.0 for el in phase_vec1]):
+        print("phase_vec1 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec2]):
+        print("phase_vec2 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec3]):
+        print("phase_vec3 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec4]):
+        print("phase_vec4 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec5]):
+        print("phase_vec5 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec6]):
+        print("phase_vec6 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec7]):
+        print("phase_vec7 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec8]):
+        print("phase_vec8 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec9]):
+        print("phase_vec9 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec10]):
+        print("phase_vec10 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec11]):
+        print("phase_vec11 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec12]):
+        print("phase_vec12 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec13]):
+        print("phase_vec13 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec14]):
+        print("phase_vec14 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec15]):
+        print("phase_vec15 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec16]):
+        print("phase_vec16 exceeds 1!")
+    if numpy.any([el > 1.0 for el in phase_vec17]):
+        print("phase_vec17 exceeds 1!")
+
     fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
     ax1 = fig1.add_subplot(111, projection='3d')
     fig1.subplots_adjust(left = 0, bottom = 0, right = 1, top = 1)
     ax1.set_ylim3d(T_val17, T_val1 - 1.0)
+    ax1.set_xlim3d(M_vec_min, M_vec_max)
     #ax1.set_zlim3d(0, 1)
     ax1.plot3D(M_vec, [T_val1 for el in M_vec], phase_vec1, '-', c = 'black')
     ax1.plot3D(M_vec, [T_val2 for el in M_vec], phase_vec2, '-', c = 'black')
@@ -5112,7 +5177,7 @@ def epja_figure8():
     ax1.plot3D(M_vec, [T_val15 for el in M_vec], phase_vec15, '-', c = 'black')
     ax1.plot3D(M_vec, [T_val16 for el in M_vec], phase_vec16, '-', c = 'black')
     ax1.plot3D(M_vec, [T_val17 for el in M_vec], phase_vec17, '-', c = 'black')
-    ax1.plot3D([Mi_val if Mi_val < pnjl.thermo.gcp_sea_lattice.M(T_el, 0.0) * Ni_val else Mi_val + 10.0 * T_el - 10.0 * ((pnjl.defaults.default_Tc0 ** 2) - pnjl.defaults.default_kappa * (0.0 ** 2) + pnjl.defaults.default_Tc0 * pnjl.defaults.default_delta_T * math.atanh(((pnjl.defaults.default_M0 + 2.0 * pnjl.defaults.default_ml) * Ni_val - 2.0 * Mi_val) / (pnjl.defaults.default_M0 * Ni_val))) / pnjl.defaults.default_Tc0 for M_el, T_el in zip(M_vec, numpy.linspace(T_val17, T_val1, num = len(M_vec)))], numpy.linspace(T_val17, T_val1, num = len(M_vec)), [0.0 for el in M_vec], '--', c = 'blue')
+    ax1.plot3D([Mi_val if Mi_val < pnjl.thermo.gcp_sea_lattice.M(T_el, 0.0) * Ni_val else Mi_val + 5.0 * T_el - 5.0 * ((pnjl.defaults.default_Tc0 ** 2) - pnjl.defaults.default_kappa * (0.0 ** 2) + pnjl.defaults.default_Tc0 * pnjl.defaults.default_delta_T * math.atanh(((pnjl.defaults.default_M0 + 2.0 * pnjl.defaults.default_ml) * Ni_val - 2.0 * Mi_val) / (pnjl.defaults.default_M0 * Ni_val))) / pnjl.defaults.default_Tc0 for M_el, T_el in zip(M_vec, numpy.linspace(T_val17, T_val1, num = len(M_vec)))], numpy.linspace(T_val17, T_val1, num = len(M_vec)), [0.0 for el in M_vec], '--', c = 'blue')
     ax1.plot3D([Mthi_val1, Mthi_val2, Mthi_val3, Mthi_val4, Mthi_val5, Mthi_val6, Mthi_val7, Mthi_val8, Mthi_val9, Mthi_val10, Mthi_val11, Mthi_val12, Mthi_val13, Mthi_val14, Mthi_val15, Mthi_val16, Mthi_val17], [T_val1, T_val2, T_val3, T_val4, T_val5, T_val6, T_val7, T_val8, T_val9, T_val10, T_val11, T_val12, T_val13, T_val14, T_val15, T_val16, T_val17], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '--', c = 'green')
     #ax1.plot3D([Mthi_val1, Mthi_val1], [T_val1, T_val1], [0, 1], '--', c = 'green')
     #ax1.plot3D([Mthi_val2, Mthi_val2], [T_val2, T_val2], [0, 1], '--', c = 'green')
@@ -5120,13 +5185,15 @@ def epja_figure8():
     #ax1.plot3D([Mi_val, Mi_val], [T_val1, T_val1], [0, 1], '--', c = 'blue')
     #ax1.plot3D([Mi_val, Mi_val], [T_val2, T_val2], [0, 1], '--', c = 'blue')
     #ax1.plot3D([Mi_val, Mi_val], [T_val3, T_val3], [0, 1], '--', c = 'blue')
-    ax1.plot3D([Mthi_val17 + Ni_val * Lam_val, Mthi_val16 + Ni_val * Lam_val, Mthi_val15 + Ni_val * Lam_val, Mthi_val14 + Ni_val * Lam_val, Mthi_val13 + Ni_val * Lam_val, Mthi_val12 + Ni_val * Lam_val, Mthi_val11 + Ni_val * Lam_val, Mthi_val10 + Ni_val * Lam_val, Mthi_val9 + Ni_val * Lam_val, Mthi_val8 + Ni_val * Lam_val, Mthi_val7 + Ni_val * Lam_val, Mthi_val6 + Ni_val * Lam_val, Mthi_val5 + Ni_val * Lam_val, Mthi_val4 + Ni_val * Lam_val, Mthi_val3 + Ni_val * Lam_val, Mthi_val2 + Ni_val * Lam_val, Mthi_val1 + Ni_val * Lam_val], [T_val17, T_val16, T_val15, T_val14, T_val13, T_val12, T_val11, T_val10, T_val9, T_val8, T_val7, T_val6, T_val5, T_val4, T_val3, T_val2, T_val1], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '--', c = 'red')
-    #ax1.text(1450, 143, 0.54, r'$\mathrm{M_{thr,i}}$', color = 'green', fontsize = 16)
-    #ax1.text(1220, 145, 0.54, r'$\mathrm{M_i}$', color = 'blue', fontsize = 16)
-    #ax1.text(1610, 146.5, 0.54, r'$\mathrm{M_{thr,i}+N_i\Lambda_i}$', color = 'red', fontsize = 16)
+    ax1.plot3D(redline, T_list, [0.0 for el in T_list], '--', c = 'red')
+    ax1.text(400, 300, 0.065, r'$\mathrm{M_{thr,i}}$', color = 'green', fontsize = 16, bbox = dict(color = 'white', boxstyle = 'square, pad=-0.5'))
+    ax1.text(1500, 300, 0.08, r'$\mathrm{M_i}$', color = 'blue', fontsize = 16, bbox = dict(color = 'white', boxstyle = 'square, pad=0.0'))
+    ax1.text(2200, 300, 0.08, r'$\mathrm{M_{c,i}}$', color = 'red', fontsize = 16, bbox = dict(color = 'white', boxstyle = 'square, pad=0.0'))
     ax1.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
     ax1.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
     ax1.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+    ax1.set_xticklabels([0, 0.5, 1, 1.5, 2, 2.5])
+    #ax1.set_yticks([125, 175, 225, 275])
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
     for tick in ax1.yaxis.get_major_ticks():
@@ -5135,7 +5202,7 @@ def epja_figure8():
         tick.label.set_fontsize(16)
     ax1.tick_params(axis='x', which='major', pad=-3)
     ax1.tick_params(axis='y', which='major', pad=-2)
-    ax1.set_xlabel(r'M [MeV]', fontsize = 16)
+    ax1.set_xlabel(r'M [GeV]', fontsize = 16)
     ax1.set_ylabel(r'T [MeV]', fontsize = 16)
     ax1.set_zlabel(r'$\delta_i$', fontsize = 16)
 
@@ -5170,7 +5237,7 @@ def epja_figure9():
     mu_1   = [0.0 / 3.0 for el in T_1]
     mu_3   = [0.0 / 3.0 for el in T_3]
 
-    calc_1                  = False
+    calc_1                  = True
     calc_3                  = False
 
     cluster_backreaction    = False
@@ -5180,7 +5247,7 @@ def epja_figure9():
     pressure_1_file = "D:/EoS/epja/figure8/pressure_1.dat"
     pressure_3_file = "D:/EoS/epja/figure8/pressure_3.dat"
 
-    if calc_1:
+    if False:
         phi_re_1.append(1e-15)
         phi_im_1.append(2e-15)
         lT = len(T_1)
@@ -5197,7 +5264,7 @@ def epja_figure9():
         T_1, mu_1 = utils.data_collect(0, 1, pl_1_file)
         phi_re_1, phi_im_1 = utils.data_collect(2, 3, pl_1_file)
 
-    if calc_3:
+    if False:
         phi_re_3.append(1e-15)
         phi_im_3.append(2e-15)
         lT = len(T_3)
@@ -5251,13 +5318,15 @@ def epja_figure9():
                 desc = "Perturbative pressure (calc #1)", 
                 total = len(T_1), 
                 ascii = True
-                )]        
+                )]
+        (regulator_N, regulator_P, regulator_H, regulator_pi, regulator_K, regulator_rho, regulator_omega, 
+         regulator_T, regulator_D, regulator_F, regulator_Q5) = cluster_regulator_calc(mu_1[0])
         (
             (Pres_pi_1, Pres_rho_1, Pres_omega_1, Pres_K_1, Pres_D_1, Pres_N_1, Pres_T_1, Pres_F_1, Pres_P_1, 
              Pres_Q5_1, Pres_H_1),
             (_, _, _, _, _, _, _, _, _, _, _),
             (_, _, _, _, _, _, _, _, _, _, _)
-        ) = clusters_c(T_1, mu_1, phi_re_1, phi_im_1)
+        ) = clusters_c(T_1, mu_1, phi_re_1, phi_im_1, regulator_N, regulator_P, regulator_H, regulator_pi, regulator_K, regulator_rho, regulator_omega, regulator_T, regulator_D, regulator_F, regulator_Q5)
         with open(pressure_1_file, 'w', newline = '') as file:
             writer = csv.writer(file, delimiter = '\t')
             writer.writerows([[q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el] for q_el, g_el, pert_el, pi_el, k_el, rho_el, omega_el, D_el, N_el, T_el, F_el, P_el, Q5_el, H_el, sea_el in zip(Pres_Q_1, Pres_g_1, Pres_pert_1, Pres_pi_1, Pres_K_1, Pres_rho_1, Pres_omega_1, Pres_D_1, Pres_N_1, Pres_T_1, Pres_F_1, Pres_P_1, Pres_Q5_1, Pres_H_1, Pres_sea_1)])
@@ -5349,6 +5418,7 @@ def epja_figure9():
     contrib_T_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_T_1)]
     contrib_F_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_F_1)]
     contrib_P_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_P_1)]
+    #contrib_Q5_1                  = [0.0 for T_el, p_el in zip(T_1, Pres_Q5_1)]
     contrib_Q5_1                  = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_Q5_1)]
     contrib_H_1                   = [p_el / (T_el ** 4) for T_el, p_el in zip(T_1, Pres_H_1)]
     contrib_cluster_1             = [sum(el) for el in zip(contrib_pi_1, contrib_rho_1, contrib_omega_1, contrib_K_1, contrib_D_1, contrib_N_1, contrib_T_1, contrib_F_1, contrib_P_1, contrib_Q5_1, contrib_H_1)]
@@ -5571,7 +5641,29 @@ def epja_figure9():
     ax4.set_xlabel(r'T [MeV]', fontsize = 16)
     ax4.set_ylabel(r'$\mathrm{\log~p}$', fontsize = 16)
 
+    fig2 = matplotlib.pyplot.figure(num = 2, figsize = (6, 5))
+    ax5 = fig2.add_subplot(1, 1, 1)
+    ax5.axis([20., 250., 0., 0.5])
+    ax5.plot(T_1, [ el_p / (el_T ** 4) for el_T, el_p in zip(T_1, Pres_pi_1)], '-', c = '#653239')
+    ax5.plot(T_1, [ el_p / (el_T ** 4) for el_T, el_p in zip(T_1, Pres_rho_1)], '-', c = '#858AE3')
+    ax5.plot(T_1, [ el_p / (el_T ** 4) for el_T, el_p in zip(T_1, Pres_omega_1)], '-', c = '#FF37A6')
+    ax5.plot(T_1, [ el_p / (el_T ** 4) for el_T, el_p in zip(T_1, Pres_K_1)], '-', c = 'red')
+    ax5.plot(T_1, [ el_p / (el_T ** 4) for el_T, el_p in zip(T_1, Pres_D_1)], '--', c = '#4CB944')
+    ax5.plot(T_1, [ el_p / (el_T ** 4) for el_T, el_p in zip(T_1, Pres_N_1)], '-', c = '#DEA54B')
+    ax5.plot(T_1, [ el_p / (el_T ** 4) for el_T, el_p in zip(T_1, Pres_T_1)], '-', c = '#23CE6B')
+    ax5.plot(T_1, [ el_p / (el_T ** 4) for el_T, el_p in zip(T_1, Pres_F_1)], '--', c = '#DB222A')
+    ax5.plot(T_1, [ el_p / (el_T ** 4) for el_T, el_p in zip(T_1, Pres_P_1)], '-', c = '#78BC61')
+    ax5.plot(T_1, [ el_p / (el_T ** 4) for el_T, el_p in zip(T_1, Pres_Q5_1)], '--', c = '#55DBCB')
+    ax5.plot(T_1, [ el_p / (el_T ** 4) for el_T, el_p in zip(T_1, Pres_H_1)], '-', c = '#A846A0')
+    for tick in ax5.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax5.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax5.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax5.set_ylabel(r'pressure', fontsize = 16)
+
     fig1.tight_layout(pad = 0.1)
+    fig2.tight_layout(pad = 0.1)
 
     matplotlib.pyplot.show()
     matplotlib.pyplot.close()
@@ -6749,33 +6841,16 @@ def epja_figure12():
     epj_pnjl_10_collected_x = numpy.append(mu_t[98:][::-1], numpy.append(mu_t[44:73][::-1], numpy.append(mu_t[44:73], numpy.append(mu_t[73:98], numpy.append(mu_t[73:98][::-1], mu_t[73:])))))
     epj_pnjl_10_collected_y = numpy.append(epb_pnjl_10_alt[98:][::-1], numpy.append(epb_pnjl_10_alt[44:73][::-1], numpy.append(epb_pnjl_10[44:73], numpy.append(epb_pnjl_10_alt2[73:98], numpy.append(epb_pnjl_10_alt[73:98][::-1], epb_pnjl_10[73:])))))
 
-    ax1.plot(epj_pnjl_50_collected_x, epj_pnjl_50_collected_y, '--', c = 'black')
-    ax1.plot(epj_50_colleced_x, epj_50_collected_y, '-',c = 'black')
-    ax1.plot(epj_pnjl_25_collected_x, epj_pnjl_25_collected_y, '--',c = 'blue')
-    ax1.plot(epj_25_collected_x, epj_25_collected_y, '-',c = 'blue')
-    ax1.plot(epj_pnjl_10_collected_x, epj_pnjl_10_collected_y, '--',c = 'green')
-    ax1.plot(epj_10_collected_x, epj_10_collected_y, '-',c = 'green')
-
-    #ax1.plot(
-    #    numpy.append(mu_t[14:17], numpy.append(mu_t[14:17][::-1], mu_t[14:75])), 
-    #    numpy.append(epb_50_alt2[14:17], numpy.append(epb_50_alt[14:17][::-1], epb_50[14:75])), 
-    #    c = 'black'
-    #)
-    #ax1.plot(
-    #    numpy.append(mu_t[27:34], numpy.append(mu_t[27:34][::-1], mu_t[27:150])), 
-    #    numpy.append(epb_25_alt2[27:34], numpy.append(epb_25_alt[27:34][::-1], epb_25[27:150])), 
-    #    c = 'blue'
-    #)
-    #ax1.plot(
-    #    numpy.append(mu_t[70:91], numpy.append(mu_t[70:91][::-1], mu_t[70:])), 
-    #    numpy.append(epb_10_alt2[70:91], numpy.append(epb_10_alt[70:91][::-1], epb_10[70:])), 
-    #    c = 'red'
-    #)
-    #ax1.plot(
-    #    numpy.append(mu_t[155:171], numpy.append(mu_t[172:178], numpy.append([el for el, test in zip(mu_t[180:], epb_5_alt2[180:]) if test == test], numpy.append(mu_t[172:][::-1], numpy.append(mu_t[155:171][::-1], mu_t[155:]))))), 
-    #    numpy.append(epb_5_alt2[155:171], numpy.append(epb_5_alt2[172:178], numpy.append([el for el in epb_5_alt2[180:] if el == el], numpy.append(epb_5_alt[172:][::-1], numpy.append(epb_5_alt[155:171][::-1], epb_5[155:]))))), 
-    #    c = 'green'
-    #)
+    ax1.plot(epj_pnjl_50_collected_x[:10], epj_pnjl_50_collected_y[:10], '--', c = 'black')
+    ax1.plot(epj_50_colleced_x[:202], epj_50_collected_y[:202], '-',c = 'black')
+    ax1.plot(epj_50_colleced_x, epj_50_collected_y, ':',c = 'black')
+    ax1.plot(epj_pnjl_25_collected_x[:120], epj_pnjl_25_collected_y[:120], '--',c = 'blue')
+    ax1.plot(epj_25_collected_x[:202], epj_25_collected_y[:202], '-',c = 'blue')
+    ax1.plot(epj_25_collected_x, epj_25_collected_y, ':',c = 'blue')
+    ax1.plot(epj_pnjl_10_collected_x[:220], epj_pnjl_10_collected_y[:220], '--',c = 'green')
+    ax1.plot(epj_10_collected_x[:202], epj_10_collected_y[:202], '-',c = 'green')
+    ax1.plot(epj_10_collected_x, epj_10_collected_y, ':',c = 'green')
+    #ax1.plot(numpy.linspace(0, 1700, num = 300), [0.52 * el for el in numpy.linspace(0, 1700, num = 300)], '-', c = 'magenta')
 
     (sn331_x, sn331_y) = utils.data_collect(0, 1, "D:/EoS/sn331.dat")
     sn331_x = [el * 3.0 for el in sn331_x]
@@ -6799,44 +6874,14 @@ def epja_figure12():
     sn26_x = [el * 3.0 for el in sn26_x]
     sn26_y, sn26_x = [list(tuple) for tuple in zip(*sorted(zip(sn26_y, sn26_x)))]
 
-    #ax1.plot(sn331_x, sn331_y, '--', c = 'blue')
-    ##ax1.plot(sn277_x, sn277_y, '--', c = 'red')
-    #ax1.plot(sn123_x, sn123_y, '--', c = 'green')
-    #ax1.plot(sn84_x, sn84_y, '--', c = 'black')
-    #ax1.plot(sn56_x, sn56_y, '--', c = 'cyan')
-    #ax1.plot(sn45_x, sn45_y, '--', c = 'magenta')
-    #ax1.plot(sn26_x, sn26_y, '--', c = 'yellow')
-
-    #ax1.plot(
-    #    numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(mu_t[:5],mu_t[5:8]), mu_t[5:8][::-1]), mu_t[5:14]), mu_t[14:17]), mu_t[14:17][::-1]), mu_t[14:]),
-    #    numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(epb_pnjl_50[:5],epb_pnjl_50_alt2[5:8]), epb_pnjl_50_alt[5:8][::-1]), epb_pnjl_50[5:14]), epb_pnjl_50_alt2[14:17]), epb_pnjl_50_alt[14:17][::-1]), epb_pnjl_50[14:]),
-    #    '-.',
-    #    c = 'black'
-    #)
-    #ax1.plot(
-    #    numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(mu_t[:12], mu_t[12:29]), mu_t[35:76]), mu_t[35:76][::-1]), mu_t[12:29][::-1]), mu_t[12:29]), mu_t[29:35]), mu_t[29:35][::-1]), mu_t[29:150]), 
-    #    numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(epb_pnjl_25[:12], epb_pnjl_25_alt2[12:29]), epb_pnjl_25_alt2[35:76]), epb_pnjl_25_alt[35:76][::-1]), epb_pnjl_25_alt[12:29][::-1]), epb_pnjl_25[12:29]), epb_pnjl_25_alt2[29:35]), epb_pnjl_25_alt[29:35][::-1]), epb_pnjl_25[29:150]), 
-    #    '-.',
-    #    c = 'blue'
-    #)
-    #ax1.plot(
-    #    numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(mu_t[:44], mu_t[44:73]), mu_t[98:110]), mu_t[111:133]), mu_t[98:][::-1]), mu_t[44:73][::-1]), mu_t[44:73]), mu_t[73:98]), mu_t[73:98][::-1]), mu_t[73:]),
-    #    numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(epb_pnjl_10[:44], epb_pnjl_10_alt2[44:73]), epb_pnjl_10_alt2[98:110]), epb_pnjl_10_alt2[111:133]), epb_pnjl_10_alt[98:][::-1]), epb_pnjl_10_alt[44:73][::-1]), epb_pnjl_10[44:73]), epb_pnjl_10_alt2[73:98]), epb_pnjl_10_alt[73:98][::-1]), epb_pnjl_10[73:]),
-    #    '-.',
-    #    c = 'red'
-    #)
-    #ax1.plot(
-    #    numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(mu_t[:110], mu_t[111:133]), mu_t[161]), mu_t[161:171]), mu_t[172:]), mu_t[172:][::-1]), mu_t[156:171][::-1]), mu_t[156:]),
-    #    numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(numpy.append(epb_pnjl_5[:110], epb_pnjl_5[111:133]), -200.0), epb_pnjl_5_alt2[161:171]), epb_pnjl_5_alt2[172:]), epb_pnjl_5_alt[172:][::-1]), epb_pnjl_5_alt[156:171][::-1]), epb_pnjl_5[156:]),
-    #    '-.',
-    #    c = 'green'
-    #)
-
     ax1.plot(mu_t, [pnjl.thermo.gcp_sea_lattice.Tc(el / 3.0) for el in mu_t], ':', c = 'black')
 
-    ax1.text(105.0, 435.0, r'300', c = 'black', fontsize = 14)
-    ax1.text(580.0, 435.0, r'45', c = 'blue', fontsize = 14)
-    ax1.text(650.0, 301.0, r'30', c = 'green', fontsize = 14)
+    ax1.text(110.0, 465.0, r'T/${\rm \mu}$=5.3', c = 'black', fontsize = 14)
+    ax1.text(583.0, 431.0, r'T/${\rm \mu}$=0.79', c = 'blue', fontsize = 14)
+    ax1.text(610.0, 300.0, r'T/${\rm \mu}$=0.52', c = 'green', fontsize = 14)
+    ax1.text(65.0, 270.0, r's/n=300', c = 'black', fontsize = 14)
+    ax1.text(360.0, 270.0, r's/n=45', c = 'blue', fontsize = 14)
+    ax1.text(512.0, 242.0, r's/n=30', c = 'green', fontsize = 14)
     ax1.text(95, 370, r'Schmidt et al. (2009)', c = 'red', alpha = 0.5, fontsize = 14)
     ax1.text(675, 121, r'$\mathrm{T_c(\mu)}$', c = 'black', fontsize = 14)
 
@@ -6851,6 +6896,430 @@ def epja_figure12():
 
     matplotlib.pyplot.show()
     matplotlib.pyplot.close()
+
+def cluster_regulator_calc(mu : float):
+
+    regulator_N = 0.0
+    regulator_P = 0.0
+    regulator_H = 0.0
+    regulator_pi = 0.0
+    regulator_K = 0.0
+    regulator_rho = 0.0
+    regulator_omega = 0.0
+    regulator_T = 0.0
+    regulator_D = 0.0
+    regulator_F = 0.0
+    regulator_Q5 = 0.0
+
+    temp_mu = []
+    temp_regN = []
+    temp_regP = []
+    temp_regH = []
+    temp_regpi = []
+    temp_regK = []
+    temp_regrho = []
+    temp_regomega = []
+    temp_regT = []
+    temp_regD = []
+    temp_regF = []
+    temp_regQ5 = []
+
+    print("Retreiving regulator data...")
+
+    if os.path.exists("D:/EoS/epja/regulators.dat"):
+        temp_mu, temp_regN = utils.data_collect(0, 1, "D:/EoS/epja/regulators.dat")
+        temp_mu, temp_regP = utils.data_collect(0, 2, "D:/EoS/epja/regulators.dat")
+        temp_mu, temp_regH = utils.data_collect(0, 3, "D:/EoS/epja/regulators.dat")
+        temp_mu, temp_regpi = utils.data_collect(0, 4, "D:/EoS/epja/regulators.dat")
+        temp_mu, temp_regK = utils.data_collect(0, 5, "D:/EoS/epja/regulators.dat")
+        temp_mu, temp_regrho = utils.data_collect(0, 6, "D:/EoS/epja/regulators.dat")
+        temp_mu, temp_regomega = utils.data_collect(0, 7, "D:/EoS/epja/regulators.dat")
+        temp_mu, temp_regT = utils.data_collect(0, 8, "D:/EoS/epja/regulators.dat")
+        temp_mu, temp_regD = utils.data_collect(0, 9, "D:/EoS/epja/regulators.dat")
+        temp_mu, temp_regF = utils.data_collect(0, 10, "D:/EoS/epja/regulators.dat")
+        temp_mu, temp_regQ5 = utils.data_collect(0, 11, "D:/EoS/epja/regulators.dat")
+
+    if mu in temp_mu:
+        regulator_N = [reg_el for reg_mu, reg_el in zip(temp_mu, temp_regN) if reg_mu == mu][0]
+        regulator_P = [reg_el for reg_mu, reg_el in zip(temp_mu, temp_regP) if reg_mu == mu][0]
+        regulator_H = [reg_el for reg_mu, reg_el in zip(temp_mu, temp_regH) if reg_mu == mu][0]
+        regulator_pi = [reg_el for reg_mu, reg_el in zip(temp_mu, temp_regpi) if reg_mu == mu][0]
+        regulator_K = [reg_el for reg_mu, reg_el in zip(temp_mu, temp_regK) if reg_mu == mu][0]
+        regulator_rho = [reg_el for reg_mu, reg_el in zip(temp_mu, temp_regrho) if reg_mu == mu][0]
+        regulator_omega = [reg_el for reg_mu, reg_el in zip(temp_mu, temp_regomega) if reg_mu == mu][0]
+        regulator_T = [reg_el for reg_mu, reg_el in zip(temp_mu, temp_regT) if reg_mu == mu][0]
+        regulator_D = [reg_el for reg_mu, reg_el in zip(temp_mu, temp_regD) if reg_mu == mu][0]
+        regulator_F = [reg_el for reg_mu, reg_el in zip(temp_mu, temp_regF) if reg_mu == mu][0]
+        regulator_Q5 = [reg_el for reg_mu, reg_el in zip(temp_mu, temp_regQ5) if reg_mu == mu][0]
+    else:
+
+        print("Regulator data missing. Calculating...")
+
+        Tc0 = pnjl.defaults.default_Tc0
+        kappa = pnjl.defaults.default_kappa
+        delta_T = pnjl.defaults.default_delta_T
+        M0 = pnjl.defaults.default_M0
+        ml = pnjl.defaults.default_ml
+        ms = pnjl.defaults.default_ms
+
+        MN = pnjl.defaults.default_MN
+        NN = 3.0
+        sN = 0.0
+        dN = (2.0 * 2.0 * 1.0) / 2.0
+        MP = pnjl.defaults.default_MP
+        NP = 5.0
+        sP = 0.0
+        dP = ((4.0 * 2.0 * 1.0) + (2.0 * 4.0 * 1.0)) / 2.0
+        MH = pnjl.defaults.default_MH
+        NH = 6.0
+        sH = 0.0
+        dH = ((1.0 * 3.0 * 1.0) + (3.0 * 1.0 * 1.0)) / 2.0
+        Mpi = pnjl.defaults.default_Mpi
+        Npi = 2.0
+        spi = 0.0
+        dpi = (1.0 * 3.0 * 1.0)
+        MK = pnjl.defaults.default_MK
+        NK = 2.0
+        sK = 1.0
+        dK = (1.0 * 6.0 * 1.0)
+        Mrho = pnjl.defaults.default_MM
+        Nrho = 2.0
+        srho = 0.0
+        drho = (3.0 * 3.0 * 1.0)
+        Momega = pnjl.defaults.default_MM
+        Nomega = 2.0
+        somega = 0.0
+        domega = (3.0 * 1.0 * 1.0)
+        MT = pnjl.defaults.default_MT
+        NT = 4.0
+        sT = 0.0
+        dT = ((1.0 * 5.0 * 1.0) + (5.0 * 1.0 * 1.0) + (3.0 * 3.0 * 1.0)) / 2.0
+        MD = pnjl.defaults.default_MD
+        ND = 2.0
+        sD = 0.0
+        dD = (1.0 * 1.0 * 3.0) / 2.0
+        MF = pnjl.defaults.default_MF
+        NF = 4.0
+        sF = 0.0
+        dF = (1.0 * 1.0 * 3.0) / 2.0
+        MQ5 = pnjl.defaults.default_MQ
+        NQ5 = 5.0
+        sQ5 = 0.0
+        dQ5 = (2.0 * 1.0 * 3.0) / 2.0
+
+        L = pnjl.defaults.default_L
+
+        print("T_Mott...")
+
+        T_crit_N = ((Tc0 ** 2) - kappa * (mu ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * NN + 2.0 * (ms - ml) * sN - 2.0 * MN) / (M0 * NN))) / Tc0
+        T_crit_P = ((Tc0 ** 2) - kappa * (mu ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * NP + 2.0 * (ms - ml) * sP - 2.0 * MP) / (M0 * NP))) / Tc0
+        T_crit_H = ((Tc0 ** 2) - kappa * (mu ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * NH + 2.0 * (ms - ml) * sH - 2.0 * MH) / (M0 * NH))) / Tc0
+        T_crit_pi = ((Tc0 ** 2) - kappa * (mu ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * Npi + 2.0 * (ms - ml) * spi - 2.0 * Mpi) / (M0 * Npi))) / Tc0
+        T_crit_K = ((Tc0 ** 2) - kappa * (mu ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * NK + 2.0 * (ms - ml) * sK - 2.0 * MK) / (M0 * NK))) / Tc0
+        T_crit_rho = ((Tc0 ** 2) - kappa * (mu ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * Nrho + 2.0 * (ms - ml) * srho - 2.0 * Mrho) / (M0 * Nrho))) / Tc0
+        T_crit_omega = ((Tc0 ** 2) - kappa * (mu ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * Nomega + 2.0 * (ms - ml) * somega - 2.0 * Momega) / (M0 * Nomega))) / Tc0
+        T_crit_T = ((Tc0 ** 2) - kappa * (mu ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * NT + 2.0 * (ms - ml) * sT - 2.0 * MT) / (M0 * NT))) / Tc0
+        T_crit_D = ((Tc0 ** 2) - kappa * (mu ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * ND + 2.0 * (ms - ml) * sD - 2.0 * MD) / (M0 * ND))) / Tc0
+        T_crit_F = ((Tc0 ** 2) - kappa * (mu ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * NF + 2.0 * (ms - ml) * sF - 2.0 * MF) / (M0 * NF))) / Tc0
+        T_crit_Q5 = ((Tc0 ** 2) - kappa * (mu ** 2) + Tc0 * delta_T * math.atanh(((M0 + 2.0 * ml) * NQ5 + 2.0 * (ms - ml) * sQ5 - 2.0 * MQ5) / (M0 * NQ5))) / Tc0
+
+        print("Phi...")
+
+        phi_re_N_low, phi_im_N_low = calc_PL_c(T_crit_N - 3e-2, mu, 1e-15, 2e-15, with_clusters = False)
+        phi_re_N_high, phi_im_N_high = calc_PL_c(T_crit_N + 3e-2, mu, phi_re_N_low, phi_im_N_low, with_clusters = False)
+
+        phi_re_P_low, phi_im_P_low = calc_PL_c(T_crit_P - 3e-2, mu, 1e-15, 2e-15, with_clusters = False)
+        phi_re_P_high, phi_im_P_high = calc_PL_c(T_crit_P + 3e-2, mu, phi_re_P_low, phi_im_P_low, with_clusters = False)
+
+        phi_re_H_low, phi_im_H_low = calc_PL_c(T_crit_H - 3e-2, mu, 1e-15, 2e-15, with_clusters = False)
+        phi_re_H_high, phi_im_H_high = calc_PL_c(T_crit_H + 3e-2, mu, phi_re_H_low, phi_im_H_low, with_clusters = False)
+
+        phi_re_pi_low, phi_im_pi_low = calc_PL_c(T_crit_pi - 3e-2, mu, 1e-15, 2e-15, with_clusters = False)
+        phi_re_pi_high, phi_im_pi_high = calc_PL_c(T_crit_pi + 3e-2, mu, phi_re_pi_low, phi_im_pi_low, with_clusters = False)
+
+        phi_re_K_low, phi_im_K_low = calc_PL_c(T_crit_K - 3e-2, mu, 1e-15, 2e-15, with_clusters = False)
+        phi_re_K_high, phi_im_K_high = calc_PL_c(T_crit_K + 3e-2, mu, phi_re_K_low, phi_im_K_low, with_clusters = False)
+
+        phi_re_rho_low, phi_im_rho_low = calc_PL_c(T_crit_rho - 3e-2, mu, 1e-15, 2e-15, with_clusters = False)
+        phi_re_rho_high, phi_im_rho_high = calc_PL_c(T_crit_rho + 3e-2, mu, phi_re_rho_low, phi_im_rho_low, with_clusters = False)
+
+        phi_re_omega_low, phi_im_omega_low = calc_PL_c(T_crit_omega - 3e-2, mu, 1e-15, 2e-15, with_clusters = False)
+        phi_re_omega_high, phi_im_omega_high = calc_PL_c(T_crit_omega + 3e-2, mu, phi_re_omega_low, phi_im_omega_low, with_clusters = False)
+
+        phi_re_T_low, phi_im_T_low = calc_PL_c(T_crit_T - 3e-2, mu, 1e-15, 2e-15, with_clusters = False)
+        phi_re_T_high, phi_im_T_high = calc_PL_c(T_crit_T + 3e-2, mu, phi_re_T_low, phi_im_T_low, with_clusters = False)
+
+        phi_re_D_low, phi_im_D_low = calc_PL_c(T_crit_D - 3e-2, mu, 1e-15, 2e-15, with_clusters = False)
+        phi_re_D_high, phi_im_D_high = calc_PL_c(T_crit_D + 3e-2, mu, phi_re_D_low, phi_im_D_low, with_clusters = False)
+
+        phi_re_F_low, phi_im_F_low = calc_PL_c(T_crit_F - 3e-2, mu, 1e-15, 2e-15, with_clusters = False)
+        phi_re_F_high, phi_im_F_high = calc_PL_c(T_crit_F + 3e-2, mu, phi_re_F_low, phi_im_F_low, with_clusters = False)
+
+        phi_re_Q5_low, phi_im_Q5_low = calc_PL_c(T_crit_Q5 - 3e-2, mu, 1e-15, 2e-15, with_clusters = False)
+        phi_re_Q5_high, phi_im_Q5_high = calc_PL_c(T_crit_Q5 + 3e-2, mu, phi_re_Q5_low, phi_im_Q5_low, with_clusters = False)
+
+        print("M_th...")
+
+        MthN_low = ((NN - sN) * pnjl.thermo.gcp_sea_lattice.M(T_crit_N - 3e-2, mu) + sN * pnjl.thermo.gcp_sea_lattice.M(T_crit_N - 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthN_high = ((NN - sN) * pnjl.thermo.gcp_sea_lattice.M(T_crit_N + 3e-2, mu) + sN * pnjl.thermo.gcp_sea_lattice.M(T_crit_N + 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthP_low = ((NP - sP) * pnjl.thermo.gcp_sea_lattice.M(T_crit_P - 3e-2, mu) + sP * pnjl.thermo.gcp_sea_lattice.M(T_crit_P - 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthP_high = ((NP - sP) * pnjl.thermo.gcp_sea_lattice.M(T_crit_P + 3e-2, mu) + sP * pnjl.thermo.gcp_sea_lattice.M(T_crit_P + 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthH_low = ((NH - sH) * pnjl.thermo.gcp_sea_lattice.M(T_crit_H - 3e-2, mu) + sH * pnjl.thermo.gcp_sea_lattice.M(T_crit_H - 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthH_high = ((NH - sH) * pnjl.thermo.gcp_sea_lattice.M(T_crit_H + 3e-2, mu) + sH * pnjl.thermo.gcp_sea_lattice.M(T_crit_H + 3e-2, mu, ml = pnjl.defaults.default_ms))
+        Mthpi_low = ((Npi - spi) * pnjl.thermo.gcp_sea_lattice.M(T_crit_pi - 3e-2, mu) + spi * pnjl.thermo.gcp_sea_lattice.M(T_crit_pi - 3e-2, mu, ml = pnjl.defaults.default_ms))
+        Mthpi_high = ((Npi - spi) * pnjl.thermo.gcp_sea_lattice.M(T_crit_pi + 3e-2, mu) + spi * pnjl.thermo.gcp_sea_lattice.M(T_crit_pi + 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthK_low = ((NK - sK) * pnjl.thermo.gcp_sea_lattice.M(T_crit_K - 3e-2, mu) + sK * pnjl.thermo.gcp_sea_lattice.M(T_crit_K - 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthK_high = ((NK - sK) * pnjl.thermo.gcp_sea_lattice.M(T_crit_K + 3e-2, mu) + sK * pnjl.thermo.gcp_sea_lattice.M(T_crit_K + 3e-2, mu, ml = pnjl.defaults.default_ms))
+        Mthrho_low = ((Nrho - srho) * pnjl.thermo.gcp_sea_lattice.M(T_crit_rho - 3e-2, mu) + srho * pnjl.thermo.gcp_sea_lattice.M(T_crit_rho - 3e-2, mu, ml = pnjl.defaults.default_ms))
+        Mthrho_high = ((Nrho - srho) * pnjl.thermo.gcp_sea_lattice.M(T_crit_rho + 3e-2, mu) + srho * pnjl.thermo.gcp_sea_lattice.M(T_crit_rho + 3e-2, mu, ml = pnjl.defaults.default_ms))
+        Mthomega_low = ((Nomega - somega) * pnjl.thermo.gcp_sea_lattice.M(T_crit_omega - 3e-2, mu) + somega * pnjl.thermo.gcp_sea_lattice.M(T_crit_omega - 3e-2, mu, ml = pnjl.defaults.default_ms))
+        Mthomega_high = ((Nomega - somega) * pnjl.thermo.gcp_sea_lattice.M(T_crit_omega + 3e-2, mu) + somega * pnjl.thermo.gcp_sea_lattice.M(T_crit_omega + 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthT_low = ((NT - sT) * pnjl.thermo.gcp_sea_lattice.M(T_crit_T - 3e-2, mu) + sT * pnjl.thermo.gcp_sea_lattice.M(T_crit_T - 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthT_high = ((NT - sT) * pnjl.thermo.gcp_sea_lattice.M(T_crit_T + 3e-2, mu) + sT * pnjl.thermo.gcp_sea_lattice.M(T_crit_T + 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthD_low = ((ND - sD) * pnjl.thermo.gcp_sea_lattice.M(T_crit_D - 3e-2, mu) + sD * pnjl.thermo.gcp_sea_lattice.M(T_crit_D - 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthD_high = ((ND - sD) * pnjl.thermo.gcp_sea_lattice.M(T_crit_D + 3e-2, mu) + sD * pnjl.thermo.gcp_sea_lattice.M(T_crit_D + 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthF_low = ((NF - sF) * pnjl.thermo.gcp_sea_lattice.M(T_crit_F - 3e-2, mu) + sF * pnjl.thermo.gcp_sea_lattice.M(T_crit_F - 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthF_high = ((NF - sF) * pnjl.thermo.gcp_sea_lattice.M(T_crit_F + 3e-2, mu) + sF * pnjl.thermo.gcp_sea_lattice.M(T_crit_F + 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthQ5_low = ((NQ5 - sQ5) * pnjl.thermo.gcp_sea_lattice.M(T_crit_Q5 - 3e-2, mu) + sQ5 * pnjl.thermo.gcp_sea_lattice.M(T_crit_Q5 - 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthQ5_high = ((NQ5 - sQ5) * pnjl.thermo.gcp_sea_lattice.M(T_crit_Q5 + 3e-2, mu) + sQ5 * pnjl.thermo.gcp_sea_lattice.M(T_crit_Q5 + 3e-2, mu, ml = pnjl.defaults.default_ms))
+
+        def slope_diff(reg, _T_crit, _mu, _phire_low, _phiim_low, _phire_high, _phiim_high, _M, _Mth_low, _Mth_high, _d, _N, _L, _a, _b, name):
+            print("Cluster", name, "regulator value", reg[0])
+            low = cluster.sdensity(_T_crit - 3e-2, _mu, complex(_phire_low, _phiim_low), complex(_phire_low, -_phiim_low), _M, _Mth_low, _a, _b, _d, _N, _L, _T_crit, reg[0])
+            high = cluster.sdensity(_T_crit + 3e-2, _mu, complex(_phire_high, _phiim_high), complex(_phire_high, -_phiim_high), _M, _Mth_high, _a, _b, _d, _N, _L, _T_crit, reg[0])
+            print("Cluster", name, "regulator error", math.fabs(high - low))
+            return math.fabs(high - low)
+        def slope_diff_alt(_T_crit, _mu, _phire_low, _phiim_low, _phire_high, _phiim_high, _M, _Mth_low, _Mth_high, _d, _N, _L, _a, _b, name):
+            print("Cluster", name)
+            low = cluster.sdensity(_T_crit - 3e-2, _mu, complex(_phire_low, _phiim_low), complex(_phire_low, -_phiim_low), _M, _Mth_low, _a, _b, _d, _N, _L, _T_crit, 1.0)
+            high = cluster.sdensity(_T_crit + 3e-2, _mu, complex(_phire_high, _phiim_high), complex(_phire_high, -_phiim_high), _M, _Mth_high, _a, _b, _d, _N, _L, _T_crit, 1.0)
+            #low_p = cluster.pressure(_T_crit - 3e-2, _mu, complex(_phire_low, _phiim_low), complex(_phire_low, -_phiim_low), _M, _Mth_low, _a, _b, _d, _N, _L, _T_crit, 1.0)
+            #high_p = cluster.sdensity(_T_crit + 3e-2, _mu, complex(_phire_high, _phiim_high), complex(_phire_high, -_phiim_high), _M, _Mth_high, _a, _b, _d, _N, _L, _T_crit, 1.0)
+            #print(math.fabs(high_p - low_p))
+            return math.fabs(low / high)
+
+        args_N = (T_crit_N, mu, phi_re_N_low, phi_im_N_low, phi_re_N_high, phi_im_N_high, MN, MthN_low, MthN_high, dN, NN, L, 3, 0, "N")
+        args_P = (T_crit_P, mu, phi_re_P_low, phi_im_P_low, phi_re_P_high, phi_im_P_high, MP, MthP_low, MthP_high, dP, NP, L, 3, 0, "P")
+        args_H = (T_crit_H, mu, phi_re_H_low, phi_im_H_low, phi_re_H_high, phi_im_H_high, MH, MthH_low, MthH_high, dH, NH, L, 6, 0, "H")
+        args_pi = (T_crit_pi, mu, phi_re_pi_low, phi_im_pi_low, phi_re_pi_high, phi_im_pi_high, Mpi, Mthpi_low, Mthpi_high, dpi, Npi, L, 0, 0, "pi")
+        args_K = (T_crit_K, mu, phi_re_K_low, phi_im_K_low, phi_re_K_high, phi_im_K_high, MK, MthK_low, MthK_high, dK, NK, L, 1, -1, "K")
+        args_rho = (T_crit_rho, mu, phi_re_rho_low, phi_im_rho_low, phi_re_rho_high, phi_im_rho_high, Mrho, Mthrho_low, Mthrho_high, drho, Nrho, L, 0, 0, "rho")
+        args_omega = (T_crit_omega, mu, phi_re_omega_low, phi_im_omega_low, phi_re_omega_high, phi_im_omega_high, Momega, Mthomega_low, Mthomega_high, domega, Nomega, L, 0, 0, "omega")
+        args_T = (T_crit_T, mu, phi_re_T_low, phi_im_T_low, phi_re_T_high, phi_im_T_high, MT, MthT_low, MthT_high, dT, NT, L, 0, 0, "T")
+        args_D = (T_crit_D, mu, phi_re_D_low, phi_im_D_low, phi_re_D_high, phi_im_D_high, MD, MthD_low, MthD_high, dD, ND, L, 2, 0, "D")
+        args_F = (T_crit_F, mu, phi_re_F_low, phi_im_F_low, phi_re_F_high, phi_im_F_high, MF, MthF_low, MthF_high, dF, NF, L, 4, 0, "F")
+        args_Q5 = (T_crit_Q5, mu, phi_re_Q5_low, phi_im_Q5_low, phi_re_Q5_high, phi_im_Q5_high, MQ5, MthQ5_low, MthQ5_high, dQ5, NQ5, L, 5, 0, "Q5")
+        
+        print("Regulators...")
+
+        test_mu = []
+        test_reg = []
+        if os.path.exists("D:/EoS/epja/regulator_N.dat"): test_mu, test_reg = utils.data_collect(0, 1, "D:/EoS/epja/regulator_N.dat")
+        if mu in test_mu: regulator_N = [reg_el for reg_el, reg_mu in zip(test_reg, test_mu) if reg_mu == mu][0]
+        else:
+            #regulator_N = scipy.optimize.minimize(slope_diff, 1e-5, bounds = ((0.0, math.inf),), args = args_N).x[0]
+            regulator_N = slope_diff_alt(*args_N)
+            with open("D:/EoS/epja/regulator_N.dat", 'w') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerow([mu, regulator_N])
+                file.flush()
+        test_mu = []
+        test_reg = []
+        if os.path.exists("D:/EoS/epja/regulator_P.dat"): test_mu, test_reg = utils.data_collect(0, 1, "D:/EoS/epja/regulator_P.dat")
+        if mu in test_mu: regulator_P = [reg_el for reg_el, reg_mu in zip(test_reg, test_mu) if reg_mu == mu][0]
+        else:
+            #regulator_P = scipy.optimize.minimize(slope_diff, 1e-5, bounds = ((0.0, math.inf),), args = args_P).x[0]
+            regulator_P = slope_diff_alt(*args_P)
+            with open("D:/EoS/epja/regulator_P.dat", 'w') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerow([mu, regulator_P])
+                file.flush()
+        test_mu = []
+        test_reg = []
+        if os.path.exists("D:/EoS/epja/regulator_H.dat"): test_mu, test_reg = utils.data_collect(0, 1, "D:/EoS/epja/regulator_H.dat")
+        if mu in test_mu: regulator_H = [reg_el for reg_el, reg_mu in zip(test_reg, test_mu) if reg_mu == mu][0]
+        else:
+            #regulator_H = scipy.optimize.minimize(slope_diff, 1e-5, bounds = ((0.0, math.inf),), args = args_H).x[0]
+            regulator_H = slope_diff_alt(*args_H)
+            with open("D:/EoS/epja/regulator_H.dat", 'w') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerow([mu, regulator_H])
+                file.flush()
+        test_mu = []
+        test_reg = []
+        if os.path.exists("D:/EoS/epja/regulator_pi.dat"): test_mu, test_reg = utils.data_collect(0, 1, "D:/EoS/epja/regulator_pi.dat")
+        if mu in test_mu: regulator_pi = [reg_el for reg_el, reg_mu in zip(test_reg, test_mu) if reg_mu == mu][0]
+        else:
+            #regulator_pi = scipy.optimize.minimize(slope_diff, 1e-5, bounds = ((0.0, math.inf),), args = args_pi).x[0]
+            regulator_pi = slope_diff_alt(*args_pi)
+            with open("D:/EoS/epja/regulator_pi.dat", 'w') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerow([mu, regulator_pi])
+                file.flush()
+        test_mu = []
+        test_reg = []
+        if os.path.exists("D:/EoS/epja/regulator_K.dat"): test_mu, test_reg = utils.data_collect(0, 1, "D:/EoS/epja/regulator_K.dat")
+        if mu in test_mu: regulator_K = [reg_el for reg_el, reg_mu in zip(test_reg, test_mu) if reg_mu == mu][0]
+        else:
+            #regulator_K = scipy.optimize.minimize(slope_diff, 1e-5, bounds = ((0.0, math.inf),), args = args_K).x[0]
+            regulator_K = slope_diff_alt(*args_K)
+            with open("D:/EoS/epja/regulator_K.dat", 'w') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerow([mu, regulator_K])
+                file.flush()
+        test_mu = []
+        test_reg = []
+        if os.path.exists("D:/EoS/epja/regulator_rho.dat"): test_mu, test_reg = utils.data_collect(0, 1, "D:/EoS/epja/regulator_rho.dat")
+        if mu in test_mu: regulator_rho = [reg_el for reg_el, reg_mu in zip(test_reg, test_mu) if reg_mu == mu][0]
+        else:
+            #regulator_rho = scipy.optimize.minimize(slope_diff, 1e-5, bounds = ((0.0, math.inf),), args = args_rho).x[0]
+            regulator_rho = slope_diff_alt(*args_rho)
+            with open("D:/EoS/epja/regulator_rho.dat", 'w') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerow([mu, regulator_rho])
+                file.flush()
+        test_mu = []
+        test_reg = []
+        if os.path.exists("D:/EoS/epja/regulator_omega.dat"): test_mu, test_reg = utils.data_collect(0, 1, "D:/EoS/epja/regulator_omega.dat")
+        if mu in test_mu: regulator_omega = [reg_el for reg_el, reg_mu in zip(test_reg, test_mu) if reg_mu == mu][0]
+        else:
+            #regulator_omega = scipy.optimize.minimize(slope_diff, 1e-5, bounds = ((0.0, math.inf),), args = args_omega).x[0]
+            regulator_omega = slope_diff_alt(*args_omega)
+            with open("D:/EoS/epja/regulator_omega.dat", 'w') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerow([mu, regulator_N])
+                file.flush()
+        test_mu = []
+        test_reg = []
+        if os.path.exists("D:/EoS/epja/regulator_T.dat"): test_mu, test_reg = utils.data_collect(0, 1, "D:/EoS/epja/regulator_T.dat")
+        if mu in test_mu: regulator_T = [reg_el for reg_el, reg_mu in zip(test_reg, test_mu) if reg_mu == mu][0]
+        else:
+            #regulator_T = scipy.optimize.minimize(slope_diff, 1e-5, bounds = ((0.0, math.inf),), args = args_T).x[0]
+            regulator_T = slope_diff_alt(*args_T)
+            with open("D:/EoS/epja/regulator_T.dat", 'w') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerow([mu, regulator_N])
+                file.flush()
+        test_mu = []
+        test_reg = []
+        if os.path.exists("D:/EoS/epja/regulator_D.dat"): test_mu, test_reg = utils.data_collect(0, 1, "D:/EoS/epja/regulator_D.dat")
+        if mu in test_mu: regulator_D = [reg_el for reg_el, reg_mu in zip(test_reg, test_mu) if reg_mu == mu][0]
+        else:
+            #regulator_D = scipy.optimize.minimize(slope_diff, 1e-5, bounds = ((0.0, math.inf),), args = args_D).x[0]
+            regulator_D = slope_diff_alt(*args_D)
+            with open("D:/EoS/epja/regulator_D.dat", 'w') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerow([mu, regulator_D])
+                file.flush()
+        test_mu = []
+        test_reg = []
+        if os.path.exists("D:/EoS/epja/regulator_F.dat"): test_mu, test_reg = utils.data_collect(0, 1, "D:/EoS/epja/regulator_F.dat")
+        if mu in test_mu: regulator_F = [reg_el for reg_el, reg_mu in zip(test_reg, test_mu) if reg_mu == mu][0]
+        else:
+            #regulator_F = scipy.optimize.minimize(slope_diff, 1e-5, bounds = ((0.0, math.inf),), args = args_F).x[0]
+            regulator_F = slope_diff_alt(*args_F)
+            with open("D:/EoS/epja/regulator_F.dat", 'w') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerow([mu, regulator_F])
+                file.flush()
+        test_mu = []
+        test_reg = []
+        if os.path.exists("D:/EoS/epja/regulator_Q5.dat"): test_mu, test_reg = utils.data_collect(0, 1, "D:/EoS/epja/regulator_Q5.dat")
+        if mu in test_mu: regulator_Q5 = [reg_el for reg_el, reg_mu in zip(test_reg, test_mu) if reg_mu == mu][0]
+        else:
+            #regulator_Q5 = scipy.optimize.minimize(slope_diff, 1e-5, bounds = ((0.0, math.inf),), args = args_Q5).x[0]
+            regulator_Q5 = slope_diff_alt(*args_Q5)
+            with open("D:/EoS/epja/regulator_Q5.dat", 'w') as file:
+                writer = csv.writer(file, delimiter = '\t')
+                writer.writerow([mu, regulator_Q5])
+                file.flush()
+
+        with open("D:/EoS/epja/regulators.dat", 'w') as file:
+            writer = csv.writer(file, delimiter = '\t')
+            writer.writerow([mu, regulator_N, regulator_P, regulator_H, regulator_pi, regulator_K, regulator_rho, regulator_omega, regulator_T, regulator_D, regulator_F, regulator_Q5])
+            file.flush()
+
+        for file in glob.glob("D:/EoS/epja/regulator_*.dat"): os.remove(file)
+
+    print("Regulator data retreived.")
+
+    return regulator_N, regulator_P, regulator_H, regulator_pi, regulator_K, regulator_rho, regulator_omega, regulator_T, regulator_D, regulator_F, regulator_Q5
+
+def phase_shift_test():
+
+    matplotlib.use('Agg')
+
+    T = numpy.linspace(1.0, 400.0, 200)
+
+    for T_el in T:
+
+        try:
+            fig = matplotlib.pyplot.figure(num = 1, figsize = (11.0, 5))
+            ax = fig.add_subplot(1, 2, 1)
+            ax2 = fig.add_subplot(1, 2, 2)
+            fig.subplots_adjust(wspace = 0.3)
+
+            paths = glob.glob("D:\\EoS\\epja\\bulkdat\\cont_T_" + str(T_el).replace('.', 'p') + "_*.dat")
+            colormap = matplotlib.pyplot.cm.rainbow(numpy.linspace(0, 1, len(paths)))
+
+            min_M = 1e300
+            max_M = 0.0
+
+            min_integ = 1e300
+            max_integ = 0.0
+
+            for path, color in zip(paths, colormap):
+                p, M                = utils.data_collect(2, 3, path)
+                delta_i, integ_i    = utils.data_collect(4, 5, path)
+                flag, _             = utils.data_collect(6, 6, path)
+                
+                for M_el in M:
+                    if M_el < min_M:
+                        min_M = M_el
+                    if M_el > max_M:
+                        max_M = M_el
+
+                for iel in integ_i:
+                    if iel < min_integ:
+                        min_integ = iel
+                    if iel > max_integ:
+                        max_integ = iel
+
+                M, delta_i, integ_i = zip(*sorted(zip(M, delta_i, integ_i)))
+
+                lab = "p=" + str(p[0])
+                ax.plot(M, delta_i, c = color, label = lab)
+                ax2.plot(M, integ_i, c = color, label = lab)
+
+            ax.axis([min_M, max_M, -0.1, 1.1])
+            ax2.axis([min_M, max_M, min_integ, max_integ])
+            for tick in ax.xaxis.get_major_ticks():
+                tick.label.set_fontsize(12) 
+            for tick in ax.yaxis.get_major_ticks():
+                tick.label.set_fontsize(12)
+            ax.set_xlabel(r'M [MeV]', fontsize = 16)
+            ax.set_ylabel(r'$\mathrm{\delta_i}$', fontsize = 16)
+            #ax.legend()
+
+            for tick in ax2.xaxis.get_major_ticks():
+                tick.label.set_fontsize(12) 
+            for tick in ax2.yaxis.get_major_ticks():
+                tick.label.set_fontsize(12)
+            ax2.set_xlabel(r'M [MeV]', fontsize = 16)
+            ax2.set_ylabel(r'integ', fontsize = 16)
+            #ax2.legend()
+    
+            #fig.tight_layout()
+            #matplotlib.pyplot.show()
+            fig.savefig("D:\\EoS\\epja\\testfig\\cont_T_" + str(T_el).replace('.', 'p') + ".png")
+            matplotlib.pyplot.close(fig)
+            time.sleep(5)
+        except RuntimeError as e:
+            print("Jest błąd!")
+            print(e)
+            print("Jak żyć?")
+            input()
+    #end
 
 def pnjl_with_sigma_test():
 
@@ -6995,6 +7464,6 @@ def pnjl_with_sigma_test():
 
 if __name__ == '__main__':
 
-    epja_figure8()
+    epja_figure9()
 
     print("END")

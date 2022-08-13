@@ -110,4 +110,4 @@ def f_boson_antitriplet(
     ) -> complex:
     if 4 in [y_1_status, y_2_status, y_3_status]:
         raise RuntimeError("Error in pnj.thermo.distributions.f_baryon_antitriplet, y value not passed...")
-    return f_baryon_triplet(Phib, Phi, y_1_val, y_1_status, y_2_val, y_2_status, y_3_val, y_3_status)
+    return f_boson_triplet(Phib, Phi, y_1_val, y_1_status, y_2_val, y_2_status, y_3_val, y_3_status)

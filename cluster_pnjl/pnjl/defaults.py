@@ -36,8 +36,7 @@ default_ms          = 100.0
 
 #defaults from me (Lambda, gcp_sea_lattice cutoff parameter)
 
-#fit to lattice (see below)
-#default_Lambda      = 900.0
+default_Lambda      = 900.0
 
 #default cluster masses
 
@@ -61,21 +60,14 @@ default_MH          = 6 * (default_M0 + default_ml) - 5 * default_B
 #parameters fitted to lattice pressure 
 
 #initial
-#default_L           = 100.0 #bigger value - greater pressure for T < T_Mott
-#default_T0          = 187.0 #bigger value - smaller pressure slope for T > T_Mott
-#default_c           = 350.0 #bigger value - smaller total pressure
-#default_d           = 3.2   #bigger value - ???
+#default_L           = 10.0 #bigger value - greater pressure for T < T_Mott
+#default_T0          = 175.0 #bigger value - smaller pressure slope for T > T_Mott
+#default_c           = 300.0 #bigger value - smaller total pressure
+#default_d           = 3.2   #bigger value - bigger total pressure
 
-#current 1
-#default_L           = 60.0
-#default_T0          = 180.0
-#default_c           = 550.0
-#default_d           = 6.0
-#default_Lambda      = 900.0
-
-#current 2
-default_L           = 60.0
+#current
+default_L           = 25.0
 default_T0          = 175.0
 default_c           = 300.0
 default_d           = 3.2
-default_Lambda      = 900.0
+

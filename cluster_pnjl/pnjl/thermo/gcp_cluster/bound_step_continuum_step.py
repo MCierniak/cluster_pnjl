@@ -16,7 +16,7 @@ def gcp_real_a0(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
     def mass_integrand(_m, _p, _T2, key2):
         yp = {}
         yp["y_val"], yp["y_status"] = pnjl.aux_functions.y_plus(_p, _T2, 0.0, _m, 0.0, 1.0, **key2)
-        return (_m / pnjl.aux_functions.En(_p, _m)) * pnjl.thermo.distributions.f_baryon_singlet(**yp)
+        return (_m / pnjl.aux_functions.En(_p, _m)) * pnjl.thermo.distributions.f_boson_singlet(**yp)
     def integrand(p, _T, _M, _Mth, key):
         inner_int, _ = scipy.integrate.quad(mass_integrand, _M, _Mth, args = (p, _T, key))
         return (p ** 2) * inner_int
@@ -40,7 +40,7 @@ def gcp_real_a1_bm1(T : float, mu : float, Phi : complex, Phib : complex, bmass 
     def mass_integrand(_m, _p, _T2, _mu2, key2):
         yp = {}
         yp["y_val"], yp["y_status"] = pnjl.aux_functions.y_plus(_p, _T2, _mu2, _m, 1.0, 1.0, **key2)
-        return (_m / pnjl.aux_functions.En(_p, _m)) * pnjl.thermo.distributions.f_baryon_singlet(**yp)
+        return (_m / pnjl.aux_functions.En(_p, _m)) * pnjl.thermo.distributions.f_boson_singlet(**yp)
     def integrand(p, _T, _mu, _M, _Mth, key):
         inner_int, _ = scipy.integrate.quad(mass_integrand, _M, _Mth, args = (p, _T, _mu, key))
         return (p ** 2) * inner_int
@@ -74,8 +74,8 @@ def gcp_real_a2(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         ym1["y_1_val"], ym1["y_1_status"] = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 2.0, 1.0, **key2)
         ym2["y_2_val"], ym2["y_2_status"] = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 2.0, 2.0, **key2)
         ym3["y_3_val"], ym3["y_3_status"] = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 2.0, 3.0, **key2)
-        fpe = pnjl.thermo.distributions.f_baryon_antitriplet(_Phi2, _Phib2, **yp1, **yp2, **yp3).real
-        fme = pnjl.thermo.distributions.f_baryon_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).real
+        fpe = pnjl.thermo.distributions.f_boson_antitriplet(_Phi2, _Phib2, **yp1, **yp2, **yp3).real
+        fme = pnjl.thermo.distributions.f_boson_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).real
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme)
     def integrand(p, _T, _mu, _Phi, _Phib, _M, _Mth, key):
         inner_int, _ = scipy.integrate.quad(mass_integrand, _M, _Mth, args = (p, _T, _mu, _Phi, _Phib, key))
@@ -106,8 +106,8 @@ def gcp_imag_a2(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         ym1["y_1_val"], ym1["y_1_status"] = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 2.0, 1.0, **key2)
         ym2["y_2_val"], ym2["y_2_status"] = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 2.0, 2.0, **key2)
         ym3["y_3_val"], ym3["y_3_status"] = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 2.0, 3.0, **key2)
-        fpe = pnjl.thermo.distributions.f_baryon_antitriplet(_Phi2, _Phib2, **yp1, **yp2, **yp3).imag
-        fme = pnjl.thermo.distributions.f_baryon_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).imag
+        fpe = pnjl.thermo.distributions.f_boson_antitriplet(_Phi2, _Phib2, **yp1, **yp2, **yp3).imag
+        fme = pnjl.thermo.distributions.f_boson_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).imag
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme)
     def integrand(p, _T, _mu, _Phi, _Phib, _M, _Mth, key):
         inner_int, _ = scipy.integrate.quad(mass_integrand, _M, _Mth, args = (p, _T, _mu, _Phi, _Phib, key))
@@ -165,8 +165,8 @@ def gcp_real_a4(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         ym1["y_1_val"], ym1["y_1_status"] = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 4.0, 1.0, **key2)
         ym2["y_2_val"], ym2["y_2_status"] = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 4.0, 2.0, **key2)
         ym3["y_3_val"], ym3["y_3_status"] = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 4.0, 3.0, **key2)
-        fpe = pnjl.thermo.distributions.f_baryon_antitriplet(_Phi2, _Phib2, **yp1, **yp2, **yp3).real
-        fme = pnjl.thermo.distributions.f_baryon_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).real
+        fpe = pnjl.thermo.distributions.f_boson_antitriplet(_Phi2, _Phib2, **yp1, **yp2, **yp3).real
+        fme = pnjl.thermo.distributions.f_boson_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).real
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme)
     def integrand(p, _T, _mu, _Phi, _Phib, _M, _Mth, key):
         inner_int, _ = scipy.integrate.quad(mass_integrand, _M, _Mth, args = (p, _T, _mu, _Phi, _Phib, key))
@@ -198,8 +198,8 @@ def gcp_imag_a4(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         ym2["y_2_val"], ym2["y_2_status"] = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 4.0, 2.0, **key2)
         ym3["y_3_val"], ym3["y_3_status"] = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 4.0, 3.0, **key2)
         ym3 = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 4.0, 3.0, **key2)
-        fpe = pnjl.thermo.distributions.f_baryon_antitriplet(_Phi2, _Phib2, **yp1, **yp2, **yp3).imag
-        fme = pnjl.thermo.distributions.f_baryon_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).imag
+        fpe = pnjl.thermo.distributions.f_boson_antitriplet(_Phi2, _Phib2, **yp1, **yp2, **yp3).imag
+        fme = pnjl.thermo.distributions.f_boson_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).imag
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme)
     def integrand(p, _T, _mu, _Phi, _Phib, _M, _Mth, key):
         inner_int, _ = scipy.integrate.quad(mass_integrand, _M, _Mth, args = (p, _T, _mu, _Phi, _Phib, key))
@@ -286,8 +286,8 @@ def gcp_real_a6(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         ym = {}
         yp["y_val"], yp["y_status"] = pnjl.aux_functions.y_plus(_p, _T2, _mu2, _m, 6.0, 1.0, **key2)
         ym["y_val"], ym["y_status"] = pnjl.aux_functions.y_minus(_p, _T2, _mu2, _m, 6.0, 1.0, **key2)
-        fpe = pnjl.thermo.distributions.f_baryon_singlet(**yp)
-        fme = pnjl.thermo.distributions.f_baryon_singlet(**ym)
+        fpe = pnjl.thermo.distributions.f_boson_singlet(**yp)
+        fme = pnjl.thermo.distributions.f_boson_singlet(**ym)
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme)
     def integrand(p, _T, _mu, _M, _Mth, key):
         inner_int, _ = scipy.integrate.quad(mass_integrand, _M, _Mth, args = (p, _T, _mu, key))
