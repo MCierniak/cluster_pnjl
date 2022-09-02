@@ -261,6 +261,4 @@ __pycache__/
 *.pyc
 
 #My ignores
-*.sln
-*.pyproj
 /cluster_pnjl/env/
