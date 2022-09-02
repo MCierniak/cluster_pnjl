@@ -6,14 +6,16 @@ import pnjl.aux_functions
 import pnjl.defaults
 
 
-def Tc(mu):
+def Tc(mu: float) -> float:
     """Pseudo-critical temperature ansatz.
 
-    ---- Parameters ----
+    Parameters
+    ----------
     mu : float
         Quark chemical potential in MeV.
 
-    ---- Returns ----
+    Returns
+    -------
     Tc : float
         Value of the pseudocritical temperature in MeV for a given mu.
     """
@@ -24,18 +26,19 @@ def Tc(mu):
     return Tc0 * (1.0 - kappa * (( mu / Tc0) ** 2))
 
 
-def Delta_ls(T, mu):
+def Delta_ls(T: float, mu: float) -> float:
     """LQCD-fit ansatz for the 2+1 Nf normalized chiral condensate.
-
     Details in https://arxiv.org/pdf/2012.12894.pdf .
 
-    ---- Parameters ----
+    Parameters
+    ----------
     T : float
         Temperature in MeV.
     mu : float
         Quark chemical potential in MeV.
 
-    ---- Returns ----
+    Returns
+    -------
     Delta_ls : float
         Value of the normalized chiral condensate for a given T and mu.
     """
@@ -45,16 +48,18 @@ def Delta_ls(T, mu):
     return 0.5 * (1.0 - math.tanh((T - Tc(mu)) / delta_T))
 
 
-def Ml(T, mu):
+def Ml(T: float, mu: float) -> float:
     """Mass of up / down quarks (ansatz)
 
-    ---- Parameters ----
+    Parameters
+    ----------
     T : float
         Temperature in MeV.
     mu : float
         Quark chemical potential in MeV.
 
-    ---- Returns ----
+    Returns
+    -------
     Ml : float
         Quark mass in MeV.
     """
@@ -65,16 +70,18 @@ def Ml(T, mu):
     return M0 * Delta_ls(T, mu) + ml
 
 
-def Ms(T, mu):
+def Ms(T: float, mu: float) -> float:
     """Mass of the strange quarks (ansatz)
 
-    ---- Parameters ----
+    Parameters
+    ----------
     T : float
         Temperature in MeV.
     mu : float
         Quark chemical potential in MeV.
 
-    ---- Returns ----
+    Returns
+    -------
     Ms : float
         Quark mass in MeV.
     """
@@ -85,16 +92,18 @@ def Ms(T, mu):
     return M0 * Delta_ls(T, mu) + ml
 
 
-def V(T, mu):
+def V(T: float, mu: float) -> float:
     """Sigma mean-field grandcanonical thermodynamic potential.
 
-    ---- Parameters ----
+    Parameters
+    ----------
     T : float
         Temperature in MeV.
     mu : float
         Quark chemical potential in MeV.
 
-    ---- Returns ----
+    Returns
+    -------
     V : float
         Mean-field value in MeV^4.
     """
@@ -105,22 +114,24 @@ def V(T, mu):
     return ((Delta_ls(T, mu)**2) * (M0**2)) / (4.0*Gs)
 
 
-def gcp_real(T, mu, type, **kwargs):
+def gcp_real(T: float, mu: float, typ: str, **kwargs) -> float:
     """Fermi sea grandcanonical thermodynamic potential of a single quark flavor.
 
-    ---- Parameters ----
+    Parameters
+    ----------
     T : float
         Temperature in MeV.
     mu : float
         Quark chemical potential in MeV.
-    type : string 
+    typ : string 
         Type of quark
             - 'l' : up / down quark
             - 's' : strange quark
     no_sea : bool, optional
         No-sea approximation flag.
 
-    ---- Returns ----
+    Returns
+    -------
     gcp : float
         Value of the thermodynamic potential in MeV^4.
     """

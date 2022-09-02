@@ -1,16 +1,18 @@
 import math
 
 
-def En(p, mass):
+def En(p: float, mass: float) -> float:
     """Relativistic energy.
 
-    ---- Parameters ----
+    Parameters
+    ----------
     p : float
         Absoltue value of the 3-momentum vector in MeV.
     mass : float
         Relativistic mass in MeV.
 
-    ---- Returns ----
+    Returns
+    -------
     En : float
         Relativistic energy value in MeV.
     """
@@ -19,10 +21,13 @@ def En(p, mass):
     return math.sqrt(body)
 
 
-def log_y_plus(p, T, mu, mass, mu_factor, en_factor):
-    """Relativistic particle energy exponent logaritm.
+def log_y(
+        p: float, T: float, mu: float, mass: float,
+        mu_factor: int, en_factor: int, typ: str) -> float:
+    """Relativistic particle/antiparticle energy exponent logaritm.
 
-    ---- Parameters ----
+    Parameters
+    ----------
     p : float
         Absoltue value of the 3-momentum vector in MeV.
     T : float
@@ -35,44 +40,30 @@ def log_y_plus(p, T, mu, mass, mu_factor, en_factor):
         Multiplication factor for the chemical potential.
     en_factor : int
         Multiplication factor for the total energy exponent.
+    typ : string
+        Type of particle:
+            '+' : positive energy particle
+            '-' : negative energy antiparticle
 
-    ---- Returns ----
+    Returns
+    -------
     log_y_plus : float
         Relativistic particle energy exponent logaritm.
     """
 
-    ensum = math.fsum([En(p, mass), -mu_factor*mu])
+    match typ:
+        case '+':
+            ensum = math.fsum([En(p, mass), -mu_factor*mu])
+        case '-':
+            ensum = math.fsum([En(p, mass), mu_factor*mu])
+        case _:
+            raise ValueError("log_y typ must be '+' or '-'!")        
+
     return en_factor*ensum/T
 
 
-def log_y_minus(p, T, mu, mass, mu_factor, en_factor):
-    """Relativistic antiparticle energy exponent logaritm.
-
-    ---- Parameters ----
-    p : float
-        Absoltue value of the 3-momentum vector in MeV.
-    T : float
-        Temperature in MeV.
-    mu : float
-        Quark chemical potential in MeV.
-    mass : float
-        Relativistic mass in MeV.
-    mu_factor : int
-        Multiplication factor for the chemical potential.
-    en_factor : int
-        Multiplication factor for the total energy exponent.
-
-    ---- Returns ----
-    log_y_plus : float
-        Relativistic antiparticle energy exponent logaritm.
-    """
-
-    ensum = math.fsum([En(p, mass), mu_factor*mu])
-    return en_factor*ensum/T
-
-
-def f_fermion_singlet(p, T, mu, mass, mu_factor, en_factor, type):
-    if type not in ['+', '-']:
+def f_fermion_singlet(p, T, mu, mass, mu_factor, en_factor, typ):
+    if typ not in ['+', '-']:
         raise ValueError("Distribution type can only be + or -.")
     if y_status == 4:
         raise RuntimeError("Error in pnj.thermo.distributions.f_fermion_singlet, y value not passed...")

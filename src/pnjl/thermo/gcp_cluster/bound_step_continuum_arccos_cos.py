@@ -1807,10 +1807,11 @@ def sdensity(
         raise RuntimeError("Value vectors don't match!")
 
 
-def cluster_thermo(T, mu, phi_re, phi_im, L, regulator, regulator2, type, **kwargs):
+def cluster_thermo(T, mu, phi_re, phi_im, L, regulator, regulator2, typ, **kwargs):
     """Main thermodynamics output function for clusters with step-up - step-down + arccos-cos continuum.
 
-    ---- Parameters ----
+    Parameters
+    ----------
     T : list
         Temperature values in MeV (length n).
     mu : list
@@ -1825,7 +1826,7 @@ def cluster_thermo(T, mu, phi_re, phi_im, L, regulator, regulator2, type, **kwar
         Phase shift correction factor for entropy.
     regulator: float
         Phase shift correction factor for pressure in MeV^4.
-    type : string 
+    typ : string 
         Cluster predefined shorthand
             - 'pi' : pion
             - 'K' : kaon
@@ -1848,7 +1849,8 @@ def cluster_thermo(T, mu, phi_re, phi_im, L, regulator, regulator2, type, **kwar
         Set to True to output baryon number 2nd rank susceptibility R2,
         definition in https://arxiv.org/pdf/2012.12894.pdf .
 
-    ---- Returns ----
+    Returns
+    -------
     out : dict
         Contains keys
             - 'pressure' if with_pressure set to True
@@ -1857,15 +1859,15 @@ def cluster_thermo(T, mu, phi_re, phi_im, L, regulator, regulator2, type, **kwar
             - 'bnumber_R2' if with_bnumber_R2 set to True.
     """
 
-    if type not in pnjl.defaults.default_M:
+    if typ not in pnjl.defaults.default_M:
         raise RuntimeError("Unknown cluster type!")
 
-    M = pnjl.defaults.default_M[type]
-    #a = pnjl.defaults.default_a[type]
-    #b = pnjl.defaults.default_b[type]
-    #dx = pnjl.defaults.default_d[type]
-    Ni = pnjl.defaults.default_N[type]
-    s = pnjl.defaults.default_s[type]
+    M = pnjl.defaults.default_M[typ]
+    #a = pnjl.defaults.default_a[typ]
+    #b = pnjl.defaults.default_b[typ]
+    #dx = pnjl.defaults.default_d[typ]
+    Ni = pnjl.defaults.default_N[typ]
+    s = pnjl.defaults.default_s[typ]
 
     options = {
         'with_pressure' : True,

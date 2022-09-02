@@ -4826,6 +4826,8 @@ if __name__ == '__main__':
 
     #cumulant_test()
 
+    var1 = "Test"
+
     print(__debug__)
 
     print("END")
