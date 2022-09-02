@@ -1,79 +1,145 @@
-import scipy.integrate
 import math
+
+import scipy.integrate
 
 import pnjl.aux_functions
 import pnjl.defaults
 
-#Mass fit to lattice from https://arxiv.org/pdf/2012.12894.pdf
 
-def Tc(mu : float, **kwargs) -> float:
+def Tc(mu):
+    """Pseudo-critical temperature ansatz.
 
-    options = {'kappa' : pnjl.defaults.default_kappa, 'Tc0' : pnjl.defaults.default_Tc0}
-    options.update(kwargs)
+    ---- Parameters ----
+    mu : float
+        Quark chemical potential in MeV.
 
-    Tc0 = options['Tc0']
-    kappa = options['kappa']
+    ---- Returns ----
+    Tc : float
+        Value of the pseudocritical temperature in MeV for a given mu.
+    """
+
+    Tc0 = pnjl.defaults.default_Tc0
+    kappa = pnjl.defaults.default_kappa
 
     return Tc0 * (1.0 - kappa * (( mu / Tc0) ** 2))
-def Delta_ls(T: float, mu : float, **kwargs) -> float:
 
-    options = {'delta_T' : pnjl.defaults.default_delta_T}
-    options.update(kwargs)
 
-    delta_T = options['delta_T']
+def Delta_ls(T, mu):
+    """LQCD-fit ansatz for the 2+1 Nf normalized chiral condensate.
 
-    return 0.5 * (1.0 - math.tanh((T - Tc(mu, **kwargs)) / delta_T))
-def M(T : float, mu : float, **kwargs) -> float:
+    Details in https://arxiv.org/pdf/2012.12894.pdf .
 
-    options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
-    options.update(kwargs)
+    ---- Parameters ----
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
 
-    M0 = options['M0']
-    ml = options['ml']
+    ---- Returns ----
+    Delta_ls : float
+        Value of the normalized chiral condensate for a given T and mu.
+    """
 
-    return M0 * Delta_ls(T, mu, **kwargs) + ml
-def dMdmu(T : float, mu : float, **kwargs) -> float:
+    delta_T = pnjl.defaults.default_delta_T
 
-    options = {'M0' : pnjl.defaults.default_M0, 'kappa' : pnjl.defaults.default_kappa, 'Tc0' : pnjl.defaults.default_Tc0, 'delta_T' : pnjl.defaults.default_delta_T}
-    options.update(kwargs)
+    return 0.5 * (1.0 - math.tanh((T - Tc(mu)) / delta_T))
 
-    M0 = options['M0']
-    kappa = options['kappa']
-    Tc0 = options['Tc0']
-    delta_T = options['delta_T']
 
-    return -((M0 * kappa * mu) / (Tc0 * delta_T)) * ((1.0 / math.cosh((T - Tc(mu, **kwargs)) / delta_T)) ** 2)
-def dMdT(T : float, mu : float, **kwargs) -> float:
+def Ml(T, mu):
+    """Mass of up / down quarks (ansatz)
+
+    ---- Parameters ----
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+
+    ---- Returns ----
+    Ml : float
+        Quark mass in MeV.
+    """
     
-    options = {'M0' : pnjl.defaults.default_M0, 'delta_T' : pnjl.defaults.default_delta_T}
-    options.update(kwargs)
-
-    M0 = options['M0']
-    delta_T = options['delta_T']
-
-    return -(M0 / (2.0 * delta_T)) * ((1.0 / math.cosh((T - Tc(mu, **kwargs)) / delta_T)) ** 2)
-def V(T : float, mu : float, **kwargs) -> float:
+    M0 = pnjl.defaults.default_M0
+    ml = pnjl.defaults.default_ml
     
-    options = {'M0' : pnjl.defaults.default_M0, 'Gs' : pnjl.defaults.default_Gs}
+    return M0 * Delta_ls(T, mu) + ml
+
+
+def Ms(T, mu):
+    """Mass of the strange quarks (ansatz)
+
+    ---- Parameters ----
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+
+    ---- Returns ----
+    Ms : float
+        Quark mass in MeV.
+    """
+
+    M0 = pnjl.defaults.default_M0
+    ml = pnjl.defaults.default_ms
+    
+    return M0 * Delta_ls(T, mu) + ml
+
+
+def V(T, mu):
+    """Sigma mean-field grandcanonical thermodynamic potential.
+
+    ---- Parameters ----
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+
+    ---- Returns ----
+    V : float
+        Mean-field value in MeV^4.
+    """
+
+    M0 = pnjl.defaults.default_M0
+    Gs = pnjl.defaults.default_Gs
+
+    return ((Delta_ls(T, mu)**2) * (M0**2)) / (4.0*Gs)
+
+
+def gcp_real(T, mu, type, **kwargs):
+    """Fermi sea grandcanonical thermodynamic potential of a single quark flavor.
+
+    ---- Parameters ----
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    type : string 
+        Type of quark
+            - 'l' : up / down quark
+            - 's' : strange quark
+    no_sea : bool, optional
+        No-sea approximation flag.
+
+    ---- Returns ----
+    gcp : float
+        Value of the thermodynamic potential in MeV^4.
+    """
+    options = {'no_sea' : True}
     options.update(kwargs)
 
-    M0 = options['M0']
-    Gs = options['Gs']
+    M0 = pnjl.defaults.default_M0
+    Nc = pnjl.defaults.default_Nc
+    Lambda = pnjl.defaults.default_Lambda
+    nosea = options['no_sea']
 
-    return (Delta_ls(T, mu, **kwargs) ** 2) / (4.0 * Gs)
-
-#Grandcanonical potential (Fermi sea part) with hard cutoff regularization
-
-def gcp_real(T : float, mu : float, **kwargs) -> float:
-
-    options = {'M0' : pnjl.defaults.default_M0, 'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.default_Nc, 'Lambda' : pnjl.defaults.default_Lambda, 'gcp_sea_lattice_debug_flag' : False}
-    options.update(kwargs)
-
-    M0 = options['M0']
-    Nf = options['Nf']
-    Nc = options['Nc']
-    Lambda = options['Lambda']
-    debug_flag = options['gcp_sea_lattice_debug_flag']
+    if nosea:
+        return 0.0
+    else:
+        def integrand(p):
+            mass = Ml(T, mu)
+            mass0 = Ml(0.0, 0.0)
+            energy = pnjl.aux_functions.En(p, mass)
+           = lambda p, _T, _mu, key : (p ** 2) * (pnjl.aux_functions.En(p, M(_T, _mu, **key), **key) - pnjl.aux_functions.En(p, M(0.0, 0.0, **key), **key))
 
     #integrand = lambda p, _T, _mu, key : (p ** 2) * (pnjl.aux_functions.En(p, M(_T, _mu, **key), **key) - pnjl.aux_functions.En(p, M(0.0, 0.0, **key), **key))
 
@@ -95,12 +161,14 @@ def bdensity(T : float, mu : float, **kwargs):
     
     h = 1e-2
 
-    if mu > 0.0:
+    if mu - 2 * h > 0.0:
         mu_vec = [mu + 2 * h, mu + h, mu - h, mu - 2 * h]
         p_vec = [pressure(T, el, **kwargs) for el in mu_vec]
         return (1.0 / 3.0) * (p_vec[3] - 8.0 * p_vec[2] + 8.0 * p_vec[1] - p_vec[0]) / (12.0 * h)
     else:
-        mu_vec = [h, 0.0]
+        mu_vec = [mu + h, mu]
+        if numpy.any([el < 0.0 for el in mu_vec]):
+            return bdensity(T, mu + h, **kwargs)
         p_vec = [pressure(T, el, **kwargs) for el in mu_vec]
         return (1.0 / 3.0) * (p_vec[0] - p_vec[1]) / h
 def sdensity(T : float, mu : float, **kwargs):
@@ -116,23 +184,27 @@ def sdensity(T : float, mu : float, **kwargs):
         p_vec = [pressure(el, mu, **kwargs) for el in T_vec]
         return (1.0 / 3.0) * (p_vec[0] - p_vec[1]) / h
 
-def bdensity_true(T : float, mu : float, **kwargs):
+def bnumber_cumulant(rank : int, T : float, mu : float, **kwargs):
 
-    options = {'M0' : pnjl.defaults.default_M0, 'Gs' : pnjl.defaults.default_Gs, 'ml' : pnjl.defaults.default_ml, 'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.default_Nc, 'Lambda' : pnjl.defaults.default_Lambda, 'gcp_sea_lattice_debug_flag' : False}
-    options.update(kwargs)
+    if rank == 1:
+        return bdensity(T, mu, **kwargs) / (T ** 3)
+    elif rank < 1:
+        raise RuntimeError("Cumulant rank lower than 1!")
+    else:
+        h = 1e-2
+        mu_vec = []
+        if mu - 2 * h > 0.0:
+            mu_vec = [mu + 2 * h, mu + h, mu - h, mu - 2 * h]
+        else:
+            mu_vec = [mu + h, mu]
+            if numpy.any([el < 0.0 for el in mu_vec]):
+                return bnumber_cumulant(rank, T, mu + h, **kwargs)
 
-    M0 = options['M0']
-    Nf = options['Nf']
-    Nc = options['Nc']
-    ml = options['ml']
-    Gs = options['Gs']
-    Lambda = options['Lambda']
-    debug_flag = options['gcp_sea_lattice_debug_flag']
-
-    integrand = lambda p, _T, _mu, key : (p ** 2) * (M(_T, _mu, **key) / pnjl.aux_functions.En(p, M(_T, _mu, **key), **key)) * dMdmu(_T, _mu, **key)
-
-    sigma_contrib = (2.0 * (M(T, mu, **kwargs) - ml) * dMdmu(T, mu, **kwargs)) / (4.0 * Gs)
-
-    integral, error = scipy.integrate.quad(integrand, 0.0, Lambda, args = (T, mu, kwargs))
-
-    return -1.0 / 3.0 * (sigma_contrib - (Nf / (math.pi ** 2)) * (Nc / 3.0) * integral)
+        if len(mu_vec) == 4 and numpy.all(mu_vec[i] > mu_vec[i + 1] for i, el in enumerate(mu_vec[:-1])):
+            out_vec = [bnumber_cumulant(rank - 1, T, mu_el, **kwargs) for mu_el in mu_vec]
+            return T * (out_vec[3] - 8.0 * out_vec[2] + 8.0 * out_vec[1] - out_vec[0]) / (12.0 * h)
+        elif len(mu_vec) == 2 and mu_vec[0] > mu_vec[1]:
+            out_vec = [bnumber_cumulant(rank - 1, T, mu_el, **kwargs) for mu_el in mu_vec]
+            return T * (out_vec[0] - out_vec[1]) / h
+        else:
+            raise RuntimeError("Vectors have wrong size or are not strictly decreasing!")

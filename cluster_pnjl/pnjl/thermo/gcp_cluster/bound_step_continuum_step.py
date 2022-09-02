@@ -37,17 +37,17 @@ def gcp_real_a1_bm1(T : float, mu : float, Phi : complex, Phib : complex, bmass 
 
     debug_flag = options['gcp_cluster_debug_flag']
 
-    def mass_integrand(_m, _p, _T2, _mu2, key2):
+    def mass_integrand(_m, _p, _T2, key2):
         yp = {}
-        yp["y_val"], yp["y_status"] = pnjl.aux_functions.y_plus(_p, _T2, _mu2, _m, 1.0, 1.0, **key2)
+        yp["y_val"], yp["y_status"] = pnjl.aux_functions.y_plus(_p, _T2, 0.0, _m, 1.0, 1.0, **key2)
         return (_m / pnjl.aux_functions.En(_p, _m)) * pnjl.thermo.distributions.f_boson_singlet(**yp)
-    def integrand(p, _T, _mu, _M, _Mth, key):
-        inner_int, _ = scipy.integrate.quad(mass_integrand, _M, _Mth, args = (p, _T, _mu, key))
+    def integrand(p, _T, _M, _Mth, key):
+        inner_int, _ = scipy.integrate.quad(mass_integrand, _M, _Mth, args = (p, _T, key))
         return (p ** 2) * inner_int
 
     integral = 0.0
     if thmass > bmass:
-        integral, _ = scipy.integrate.quad(integrand, 0.0, math.inf, args = (T, mu, bmass, thmass, kwargs))
+        integral, _ = scipy.integrate.quad(integrand, 0.0, math.inf, args = (T, bmass, thmass, kwargs))
 
     return -(d / (2.0 * (math.pi ** 2))) * integral
 def gcp_imag_a1_bm1(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, d : float, **kwargs):
