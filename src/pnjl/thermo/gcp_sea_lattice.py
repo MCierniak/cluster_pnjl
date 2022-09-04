@@ -12,13 +12,20 @@ Ms
     Mass of the strange quarks (ansatz).
 V
     Sigma mean-field grandcanonical thermodynamic potential.
-gcp_real
-    Fermi sea grandcanonical thermodynamic potential of a single quark flavor.
+gcp_real_l
+    Fermi sea grandcanonical thermodynamic potential of a single light quark flavor.
+gcp_real_s
+    Fermi sea grandcanonical thermodynamic potential of a single strange quark flavor.
 pressure
+    Fermi sea pressure of a single quark flavor.
 bdensity
-bnumber_cumulant_R
-bnumber_cumulant_chiB
+    Fermi sea baryon density of a single quark flavor.
+qnumber_cumulant
+    Fermi sea quark number cumulant chi_q of a single quark flavor.
+bnumber_cumulant
+    (Not implemented yet)
 sdensity
+    Fermi sea entropy density of a single quark flavor.
 """
 
 
@@ -45,7 +52,7 @@ def Tc(mu: float) -> float:
     Tc0 = pnjl.defaults.default_Tc0
     kappa = pnjl.defaults.default_kappa
 
-    return Tc0 * (1.0 - kappa * (( mu / Tc0) ** 2))
+    return math.fsum([Tc0, -Tc0*kappa*((mu/Tc0)**2)])
 
 
 def Delta_ls(T: float, mu: float) -> float:
@@ -64,7 +71,9 @@ def Delta_ls(T: float, mu: float) -> float:
 
     delta_T = pnjl.defaults.default_delta_T
 
-    return 0.5 * (1.0 - math.tanh((T - Tc(mu)) / delta_T))
+    tanh_internal = math.fsum([T/delta_T, -Tc(mu)/delta_T])
+
+    return math.fsum([0.5, -0.5*math.tanh(tanh_internal)])
 
 
 def Ml(T: float, mu: float) -> float:
@@ -84,7 +93,7 @@ def Ml(T: float, mu: float) -> float:
     M0 = pnjl.defaults.default_M0
     ml = pnjl.defaults.default_ml
     
-    return M0 * Delta_ls(T, mu) + ml
+    return math.fsum([M0*Delta_ls(T, mu), ml])
 
 
 def Ms(T: float, mu: float) -> float:
@@ -102,15 +111,9 @@ def Ms(T: float, mu: float) -> float:
     """
 
     M0 = pnjl.defaults.default_M0
-    ml = pnjl.defaults.default_ms
+    ms = pnjl.defaults.default_ms
     
-    return M0 * Delta_ls(T, mu) + ml
-
-
-mass_table = {
-    'l' : Ml,
-    's' : Ms
-}
+    return math.fsum([M0*Delta_ls(T, mu), ms])
 
 
 def V(T: float, mu: float) -> float:
@@ -130,11 +133,89 @@ def V(T: float, mu: float) -> float:
     M0 = pnjl.defaults.default_M0
     Gs = pnjl.defaults.default_Gs
 
-    return ((Delta_ls(T, mu)**2) * (M0**2)) / (4.0*Gs)
+    return math.fsum([
+        ((Delta_ls(T, mu)**2) * (M0**2)) / (4.0*Gs),
+        -((Delta_ls(0.0, 0.0)**2) * (M0**2)) / (4.0*Gs)
+    ])
 
 
-def gcp_real(T: float, mu: float, typ: str, **kwargs) -> float:
-    """Fermi sea grandcanonical thermodynamic potential of a single quark flavor.
+def gcp_real_l(T: float, mu: float) -> float:
+    """Fermi sea grandcanonical thermodynamic potential of a single light quark flavor.
+
+    ### Parameters
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+
+    ### Returns
+    gcp : float
+        Value of the thermodynamic potential in MeV^4.
+    """
+
+    Nc = pnjl.defaults.default_Nc
+    Lambda = pnjl.defaults.default_Lambda
+
+    def integrand(p):   
+
+        mass = Ml(T, mu)
+        mass0 = Ml(0.0, 0.0)
+
+        energy = pnjl.thermo.distributions.En(p, mass)
+        energy0 = pnjl.thermo.distributions.En(p, mass0)
+
+        energy_norm = math.fsum([energy, -energy0])
+
+        return (p**2)*energy_norm
+    
+    integral, error = scipy.integrate.quad(integrand, 0.0, Lambda)
+    
+    return (1.0/(math.pi**2))*(Nc/3.0)*integral
+
+
+def gcp_real_s(T: float, mu: float) -> float:
+    """Fermi sea grandcanonical thermodynamic potential of a single strange quark flavor.
+
+    ### Parameters
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+
+    ### Returns
+    gcp : float
+        Value of the thermodynamic potential in MeV^4.
+    """
+
+    Nc = pnjl.defaults.default_Nc
+    Lambda = pnjl.defaults.default_Lambda
+
+    def integrand(p):
+
+        mass = Ms(T, mu)
+        mass0 = Ms(0.0, 0.0)
+
+        energy = pnjl.thermo.distributions.En(p, mass)
+        energy0 = pnjl.thermo.distributions.En(p, mass0)
+
+        energy_norm = math.fsum([energy, -energy0])
+
+        return (p**2)*energy_norm
+    
+    integral, error = scipy.integrate.quad(integrand, 0.0, Lambda)
+    
+    return (1.0/(math.pi**2))*(Nc/3.0)*integral
+
+
+gcp_hash = {
+    'l' : gcp_real_l,
+    's' : gcp_real_s,
+    'sigma' : V
+}
+
+
+def pressure(T: float, mu: float, typ: str, no_sea: bool = True) -> float:
+    """Fermi sea pressure of a single quark flavor.
 
     ### Parameters
     T : float
@@ -143,97 +224,173 @@ def gcp_real(T: float, mu: float, typ: str, **kwargs) -> float:
         Quark chemical potential in MeV.
     typ : string 
         Type of quark
-            - 'l' : up / down quark
-            - 's' : strange quark
+            'l' : up / down quark
+            's' : strange quark
+            'sigma' : sigma mean-field
     no_sea : bool, optional
         No-sea approximation flag.
 
     ### Returns
-    gcp : float
-        Value of the thermodynamic potential in MeV^4.
+    pressure : float
+        Value of the thermodynamic pressure in MeV^4.
     """
 
-    options = {'no_sea' : True}
-    options.update(kwargs)
-
-    M0 = pnjl.defaults.default_M0
-    Nc = pnjl.defaults.default_Nc
-    Lambda = pnjl.defaults.default_Lambda
-    nosea = options['no_sea']
-
-    if nosea:
-
+    if no_sea:
         return 0.0
+    else:
+        return -gcp_hash[typ](T, mu)
 
+
+def bdensity(T: float, mu: float, typ: str, no_sea: bool = True) -> float:
+    """Fermi sea baryon density of a single quark flavor.
+
+    ### Parameters
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    typ : string 
+        Type of quark
+            'l' : up / down quark
+            's' : strange quark
+            'sigma' : sigma mean-field
+    no_sea : bool, optional
+        No-sea approximation flag.
+
+    ### Returns
+    bdensity : float
+        Value of the thermodynamic baryon density in MeV^3.
+    """
+
+    if no_sea:
+        return 0.0
     else:
 
-        def integrand(p):
-            
-            mass = mass_table[typ](T, mu)
-            mass0 = mass_table[typ](0.0, 0.0)
-            energy = pnjl.thermo.distributions.En(p, mass)
-            energy0 = pnjl.thermo.distributions.En(p, mass0)
-            energy_norm = math.fsum([energy, -energy0])
-
-            return (p**2)*energy_norm
-
-        integral, error = scipy.integrate.quad(integrand, 0.0, Lambda)
-
-        return (1.0/(math.pi**2))*(Nc/3.0)*integral
-
-
-#Extensive thermodynamic properties
-def pressure(T : float, mu : float, **kwargs):
-    #
-    return -gcp_real(T, mu, **kwargs)
-def bdensity(T : float, mu : float, **kwargs):
-    
-    h = 1e-2
-
-    if mu - 2 * h > 0.0:
-        mu_vec = [mu + 2 * h, mu + h, mu - h, mu - 2 * h]
-        p_vec = [pressure(T, el, **kwargs) for el in mu_vec]
-        return (1.0 / 3.0) * (p_vec[3] - 8.0 * p_vec[2] + 8.0 * p_vec[1] - p_vec[0]) / (12.0 * h)
-    else:
-        mu_vec = [mu + h, mu]
-        if numpy.any([el < 0.0 for el in mu_vec]):
-            return bdensity(T, mu + h, **kwargs)
-        p_vec = [pressure(T, el, **kwargs) for el in mu_vec]
-        return (1.0 / 3.0) * (p_vec[0] - p_vec[1]) / h
-def sdensity(T : float, mu : float, **kwargs):
-    
-    h = 1e-2
-
-    if T > 0.0:
-        T_vec = [T + 2 * h, T + h, T - h, T - 2 * h]
-        p_vec = [pressure(el, mu, **kwargs) for el in T_vec]
-        return (1.0 / 3.0) * (p_vec[3] - 8.0 * p_vec[2] + 8.0 * p_vec[1] - p_vec[0]) / (12.0 * h)
-    else:
-        T_vec = [h, 0.0]
-        p_vec = [pressure(el, mu, **kwargs) for el in T_vec]
-        return (1.0 / 3.0) * (p_vec[0] - p_vec[1]) / h
-
-def bnumber_cumulant(rank : int, T : float, mu : float, **kwargs):
-
-    if rank == 1:
-        return bdensity(T, mu, **kwargs) / (T ** 3)
-    elif rank < 1:
-        raise RuntimeError("Cumulant rank lower than 1!")
-    else:
         h = 1e-2
-        mu_vec = []
-        if mu - 2 * h > 0.0:
-            mu_vec = [mu + 2 * h, mu + h, mu - h, mu - 2 * h]
-        else:
-            mu_vec = [mu + h, mu]
-            if numpy.any([el < 0.0 for el in mu_vec]):
-                return bnumber_cumulant(rank, T, mu + h, **kwargs)
 
-        if len(mu_vec) == 4 and numpy.all(mu_vec[i] > mu_vec[i + 1] for i, el in enumerate(mu_vec[:-1])):
-            out_vec = [bnumber_cumulant(rank - 1, T, mu_el, **kwargs) for mu_el in mu_vec]
-            return T * (out_vec[3] - 8.0 * out_vec[2] + 8.0 * out_vec[1] - out_vec[0]) / (12.0 * h)
-        elif len(mu_vec) == 2 and mu_vec[0] > mu_vec[1]:
-            out_vec = [bnumber_cumulant(rank - 1, T, mu_el, **kwargs) for mu_el in mu_vec]
-            return T * (out_vec[0] - out_vec[1]) / h
+        if math.fsum([mu, -2*h]) > 0.0:
+
+            mu_vec = [
+                math.fsum(mu, 2*h), math.fsum(mu, h),
+                math.fsum(mu, -h), math.fsum(mu, -2*h)
+            ]
+            deriv_coef = [
+                -1.0/(12.0*h), 8.0/(12.0*h),
+                -8.0/(12.0*h), 1.0/(12.0*h)
+            ]
+
+            p_vec = [
+                coef*pressure(T, mu_el, typ, no_sea=no_sea)/3.0
+                for mu_el, coef in zip(mu_vec, deriv_coef)
+            ]
+
+            return math.fsum(p_vec)
+
         else:
-            raise RuntimeError("Vectors have wrong size or are not strictly decreasing!")
+            return bdensity(T, math.fsum([mu, h]), typ, no_sea=no_sea)
+
+
+def qnumber_cumulant(rank: int, T: float, mu: float, typ: str, no_sea: bool = True) -> float:
+    """Fermi sea quark number cumulant chi_q of a single quark flavor. Based on Eq.29 of
+    https://arxiv.org/pdf/2012.12894.pdf and the subsequent inline definition.
+
+    ### Parameters
+    rank : int
+        Cumulant rank. Rank 1 equals to 3 times the baryon density.
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    typ : string 
+        Type of quark
+            'l' : up / down quark
+            's' : strange quark
+            'sigma' : sigma mean-field
+    no_sea : bool, optional
+        No-sea approximation flag.
+
+    ### Returns
+    qnumber_cumulant : float
+        Value of the thermodynamic quark number cumulant in MeV^3.
+    """
+
+    if no_sea:
+        return 0.0
+    else:
+
+        if rank == 1:
+            return 3.0 * bdensity(T, mu, typ, no_sea=no_sea)
+        else:
+
+            h = 1e-2
+
+            if math.fsum([mu, -2*h]) > 0.0:
+
+                mu_vec = [
+                    math.fsum(mu, 2*h), math.fsum(mu, h),
+                    math.fsum(mu, -h), math.fsum(mu, -2*h)
+                ]
+                deriv_coef = [
+                    -1.0/(12.0*h), 8.0/(12.0*h),
+                    -8.0/(12.0*h), 1.0/(12.0*h)
+                ]
+
+                out_vec = [
+                    coef*qnumber_cumulant(rank-1, T, mu_el, typ, no_sea=no_sea)
+                    for mu_el, coef in zip(mu_vec, deriv_coef)
+                ]
+
+                return math.fsum(out_vec)
+
+            else:
+                return qnumber_cumulant(rank, T, math.fsum([mu, h]), typ, no_sea=no_sea)
+
+
+def sdensity(T: float, mu: float, typ: str, no_sea: bool = True):
+    """Fermi sea entropy density of a single quark flavor.
+
+    ### Parameters
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    typ : string 
+        Type of quark
+            'l' : up / down quark
+            's' : strange quark
+            'sigma' : sigma mean-field
+    no_sea : bool, optional
+        No-sea approximation flag.
+
+    ### Returns
+    sdensity : float
+        Value of the thermodynamic entropy density in MeV^3.
+    """
+
+    if no_sea:
+        return 0.0
+    else:
+
+        h = 1e-2
+
+        if math.fsum([T, -2*h]) > 0.0:
+
+            T_vec = [
+                math.fsum(T, 2*h), math.fsum(T, h),
+                math.fsum(T, -h), math.fsum(T, -2*h)
+            ]
+            deriv_coef = [
+                -1.0/(12.0*h), 8.0/(12.0*h),
+                -8.0/(12.0*h), 1.0/(12.0*h)
+            ]
+
+            p_vec = [
+                coef*pressure(T_el, mu, typ, no_sea=no_sea)
+                for T_el, coef in zip(T_vec, deriv_coef)
+            ]
+
+            return math.fsum(p_vec)
+
+        else:
+            return sdensity(math.fsum([T, h]), mu, typ, no_sea=no_sea)
+

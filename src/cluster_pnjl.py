@@ -4826,48 +4826,11 @@ def pnjl_with_sigma_test():
 """
 
 
-import operator
-import random
-import math
-
-
-f_fermion_singlet_hash = {
-    0 : lambda logg: 1.0 / math.fsum([math.exp(logg), 1.0]),
-    1 : lambda logg: 0.0
-}
-log_y_hash = {
-    '+' : operator.neg,
-    '-' : operator.pos
-}
-def with_dict():
-    logy = random.uniform(0.0, 1000.0)
-    test = f_fermion_singlet_hash[logy >= 709.0](logy)
-def with_if():
-    logy = random.uniform(0.0, 1000.0)
-    if logy >= 709.0:
-        test = 0.0
-    else:
-        test = 1.0 / math.fsum([math.exp(logy), 1.0])
-def with_dict2():
-    el = random.choice(['+', '-'])
-    test = log_y_hash[el](1)
-def with_if2():
-    el = random.choice(['+', '-'])
-    if el == '+':
-        test = -1
-    else:
-        test = 1
-
-
 if __name__ == '__main__':
 
     #cumulant_test()
 
-    import timeit
-
-    print(timeit.timeit("with_dict()", setup="from __main__ import with_dict"))
-    print(timeit.timeit("with_if()", setup="from __main__ import with_if"))
-    print(timeit.timeit("with_dict2()", setup="from __main__ import with_dict2"))
-    print(timeit.timeit("with_if2()", setup="from __main__ import with_if2"))
+    print(10)
+    print([[]]*10)
 
     print("END")

@@ -1,15 +1,41 @@
-import numpy as np
+"""Generic utility functions
 
-def data_collect(i, j, path, firstrow = 0):
+### Functions
+data_collect
+    Extract columns from file.
+"""
+
+
+import typing
+
+
+def data_collect(path: str, *indices: int, firstrow: int = 0) -> typing.Tuple[list, ...]:
+    """Extract columns from file.
+
+    ### Parameters
+    path : str
+        Path to file.
+    indices : int
+        Indices of columns to extract.
+    firstrow : int, optional
+        First data row number. Use this to skip headers.
+
+    ### Returns
+    data : tuple(list, ..)
+        Tuple containing the separated data columns.
+    """
+
     print("Loading", path)
-    x = []
-    y = []
+
+    payload = [[]]*len(indices)
+    max_index = max(indices)
+
     with open(path) as data:
         for row in data.readlines()[firstrow:]:
-            if not row == '\n':
-                x.append(row.split()[i])
-                y.append(row.split()[j])
-        x = np.array(x).astype(float)
-        y = np.array(y).astype(float)
+            raw = row.split()
+            if len(raw)>max_index:
+                for i, index in enumerate(indices):
+                    payload[i].append(raw[index])
     
-    return (x, y)
+    return tuple(payload)
+
