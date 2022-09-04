@@ -1,18 +1,48 @@
+"""Particle and cluster distribution functions
+
+### Functions
+En
+    Relativistic energy.
+log_y
+    Relativistic particle/antiparticle energy exponent logaritm.
+f_fermion_singlet
+    Color-singlet fermion distribution function.
+f_boson_singlet
+    Color-singlet boson distribution function.
+f_fermion_triplet
+    Color-triplet fermion distribution function.
+f_fermion_antitriplet
+    Color-antitriplet fermion distribution function.
+f_boson_triplet
+    Color-triplet boson distribution function.
+f_boson_antitriplet
+    Color-antitriplet boson distribution function.
+
+### Globals
+exp_limit:
+    Limit for math.exp input before OverflowError is raised
+log_y_hash:
+    Dict for energy sign operator lookup.
+"""
+
+
+import operator
 import math
+
+
+exp_limit = 709.78271
 
 
 def En(p: float, mass: float) -> float:
     """Relativistic energy.
 
-    Parameters
-    ----------
+    ### Parameters
     p : float
         Absoltue value of the 3-momentum vector in MeV.
     mass : float
         Relativistic mass in MeV.
 
-    Returns
-    -------
+    ### Returns
     En : float
         Relativistic energy value in MeV.
     """
@@ -21,13 +51,18 @@ def En(p: float, mass: float) -> float:
     return math.sqrt(body)
 
 
+log_y_hash = {
+    '+' : operator.neg,
+    '-' : operator.pos
+}
+
+
 def log_y(
         p: float, T: float, mu: float, mass: float,
         mu_factor: int, en_factor: int, typ: str) -> float:
     """Relativistic particle/antiparticle energy exponent logaritm.
 
-    Parameters
-    ----------
+    ### Parameters
     p : float
         Absoltue value of the 3-momentum vector in MeV.
     T : float
@@ -45,133 +80,351 @@ def log_y(
             '+' : positive energy particle
             '-' : negative energy antiparticle
 
-    Returns
-    -------
+    ### Returns
     log_y_plus : float
         Relativistic particle energy exponent logaritm.
     """
 
-    match typ:
-        case '+':
-            ensum = math.fsum([En(p, mass), -mu_factor*mu])
-        case '-':
-            ensum = math.fsum([En(p, mass), mu_factor*mu])
-        case _:
-            raise ValueError("log_y typ must be '+' or '-'!")        
-
+    ensum = math.fsum([En(p, mass), log_y_hash[typ](mu_factor*mu)])
+    
     return en_factor*ensum/T
 
 
-def f_fermion_singlet(p, T, mu, mass, mu_factor, en_factor, typ):
-    if typ not in ['+', '-']:
-        raise ValueError("Distribution type can only be + or -.")
-    if y_status == 4:
-        raise RuntimeError("Error in pnj.thermo.distributions.f_fermion_singlet, y value not passed...")
-    else:
-        return 1.0 / (y_val + 1.0)
+def f_fermion_singlet(
+        p: float, T: float, mu: float,
+        mass: float, mu_factor: int, typ: str) -> float:
+    """Color-singlet fermion distribution function.
 
-def f_boson_singlet(y_val = 0.0, y_status = 4) -> float:
-    if y_status == 4:
-        raise RuntimeError("Error in pnj.thermo.distributions.f_baryon_singlet, y value not passed...")
-    elif y_status == 2:
-        return math.inf
+    ### Parameters
+    p : float
+        Absoltue value of the 3-momentum vector in MeV.
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    mass : float
+        Relativistic mass in MeV.
+    mu_factor : int
+        Multiplication factor for the chemical potential.
+    typ : string
+        Type of particle:
+            '+' : positive energy particle
+            '-' : negative energy antiparticle
+
+    ### Returns
+    f_fermion_singlet : float
+        Value of the distribution function.
+    """
+
+    logy = log_y(p, T, mu, mass, mu_factor, 1, typ)
+
+    if logy >= exp_limit:
+        return 0.0
     else:
-        return 1.0 / (y_val - 1.0)
+        return 1.0/math.fsum([math.exp(logy), 1.0])
+
+
+def f_boson_singlet(
+        p: float, T: float, mu: float, 
+        mass: float, mu_factor: int, typ: str) -> float:
+    """Color-singlet boson distribution function.
+
+    ### Parameters
+    p : float
+        Absoltue value of the 3-momentum vector in MeV.
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    mass : float
+        Relativistic mass in MeV.
+    mu_factor : int
+        Multiplication factor for the chemical potential.
+    typ : string
+        Type of particle:
+            '+' : positive energy particle
+            '-' : negative energy antiparticle
+
+    ### Returns
+    f_boson_singlet : float
+        Value of the distribution function.
+    """
+
+    logy = log_y(p, T, mu, mass, mu_factor, 1, typ)
+
+    if logy >= exp_limit:
+        return 0.0
+    else:
+        return 1.0/math.expm1(logy)
+
 
 def f_fermion_triplet(
-    Phi : complex, Phib : complex, 
-    y_1_val = 0.0, y_1_status = 4,
-    y_2_val = 0.0, y_2_status = 4,
-    y_3_val = 0.0, y_3_status = 4,
-    ) -> complex:
-    if 4 in [y_1_status, y_2_status, y_3_status]:
-        raise RuntimeError("Error in pnj.thermo.distributions.f_fermion_triplet, y value not passed...")
+        p: float, T: float, mu: float, phi_re: float, phi_im: float,
+        mass: float, mu_factor: int, typ: str) -> complex:
+    """Color-triplet fermion distribution function.
 
-    y_m1_val = 1.0 / y_1_val if not y_1_status == 1 else math.inf
-    y_m2_val = 1.0 / y_2_val if not y_2_status == 1 else math.inf
+    ### Parameters
+    p : float
+        Absoltue value of the 3-momentum vector in MeV.
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re: float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im: float
+        Imaginary part of the traced Polyakov-loop in MeV.
+    mass : float
+        Relativistic mass in MeV.
+    mu_factor : int
+        Multiplication factor for the chemical potential.
+    typ : string
+        Type of particle:
+            '+' : positive energy particle
+            '-' : negative energy antiparticle
 
-    Phi_m1_real = 3.0 * Phi.real * y_m1_val if not Phi.real == 0.0 and not y_m1_val == 0.0 else 0.0
-    Phi_m1_imag = 3.0 * Phi.imag * y_m1_val if not Phi.imag == 0.0 and not y_m1_val == 0.0 else 0.0
+    ### Returns
+    f_fermion_triplet : complex
+        Value of the distribution function.
+    """
 
-    Phib_1_real = 3.0 * Phib.real * y_1_val if not Phib.real == 0.0 and not y_1_val == 0.0 else 0.0
-    Phib_1_imag = 3.0 * Phib.imag * y_1_val if not Phib.imag == 0.0 and not y_1_val == 0.0 else 0.0
+    logy_p1 = log_y(p, T, mu, mass, mu_factor, 1, typ)
+    logy_p2 = log_y(p, T, mu, mass, mu_factor, 2, typ)
+    logy_p3 = log_y(p, T, mu, mass, mu_factor, 3, typ)
 
-    Phib_2_real = 3.0 * Phib.real * y_2_val if not Phib.real == 0.0 and not y_2_val == 0.0 else 0.0
-    Phib_2_imag = 3.0 * Phib.imag * y_2_val if not Phib.imag == 0.0 and not y_2_val == 0.0 else 0.0
+    test = [el <= -exp_limit for el in [logy_p1, logy_p2, logy_p3]]
 
-    Phi_1_real = 3.0 * Phi.real * y_1_val if not Phi.real == 0.0 and not y_1_val == 0.0 else 0.0
-    Phi_1_imag = 3.0 * Phi.imag * y_1_val if not Phi.imag == 0.0 and not y_1_val == 0.0 else 0.0
+    match test:
+        case [False, False, False]:
 
-    den1 = y_1_val + 3.0 * Phib + complex(Phi_m1_real, Phi_m1_imag) + y_m2_val
-    den2 = y_2_val + complex(Phib_1_real, Phib_1_imag) + 3.0 * Phi + y_m1_val
-    den3 = y_3_val + complex(Phib_2_real, Phib_2_imag) + complex(Phi_1_real, Phi_1_imag) + 1.0
+            num_real_el = [
+                phi_re*math.exp(-logy_p1),
+                2.0*phi_re*math.exp(-logy_p2),
+                math.exp(-logy_p3)
+            ]
+            num_imag_el = [
+                -phi_im*math.exp(-logy_p1),
+                2.0*phi_im*math.exp(-logy_p2)
+            ]
+            den_real_el = [
+                1.0,
+                3.0*phi_re*math.exp(-logy_p1),
+                3.0*phi_re*math.exp(-logy_p2),
+                math.exp(-logy_p3)
+            ]
+            den_imag_el = [
+                -3.0*phi_im*math.exp(-logy_p1),
+                3.0*phi_im*math.exp(-logy_p2)
+            ]
 
-    part1 = 3.0 * Phib / den1 if not math.fabs(den1.real) == math.inf and not math.fabs(den1.imag) == math.inf else complex(0.0, 0.0)
-    part2 = 6.0 * Phi / den2 if not math.fabs(den2.real) == math.inf and not math.fabs(den2.imag) == math.inf else complex(0.0, 0.0)
-    part3 = 3.0 / den3 if not math.fabs(den3.real) == math.inf and not math.fabs(den3.imag) == math.inf else complex(0.0, 0.0)
+            num_real = math.fsum(num_real_el)
+            num_imag = math.fsum(num_imag_el)
+            den_real = math.fsum(den_real_el)
+            den_imag = math.fsum(den_imag_el)
 
-    return part1 + part2 + part3
+            return complex(num_real, num_imag)/complex(den_real, den_imag)
+
+        case [False, False, True] | [False, True, True]:
+
+            num_real_el = [
+                phi_re*math.exp(logy_p1),
+                2.0*phi_re,
+                math.exp(-logy_p1)
+            ]
+            num_imag_el = [
+                -phi_im*math.exp(logy_p1),
+                2.0*phi_im
+            ]
+            den_real_el = [
+                math.exp(logy_p2),
+                3.0*phi_re*math.exp(logy_p1),
+                3.0*phi_re,
+                math.exp(-logy_p1)
+            ]
+            den_imag_el = [
+                -3.0*phi_im*math.exp(logy_p1),
+                3.0*phi_im
+            ]
+
+            num_real = math.fsum(num_real_el)
+            num_imag = math.fsum(num_imag_el)
+            den_real = math.fsum(den_real_el)
+            den_imag = math.fsum(den_imag_el)
+
+            return complex(num_real, num_imag)/complex(den_real, den_imag)
+
+        case [True, True, True]:
+
+            return complex(1.0, 0.0)
+
+        case _:
+
+            raise RuntimeError("Sanity test failed!")
+
 
 def f_fermion_antitriplet(
-    Phi : complex, Phib : complex, 
-    y_1_val = 0.0, y_1_status = 4,
-    y_2_val = 0.0, y_2_status = 4,
-    y_3_val = 0.0, y_3_status = 4,
-    ) -> complex:
-    #
-    if 4 in [y_1_status, y_2_status, y_3_status]:
-        raise RuntimeError("Error in pnj.thermo.distributions.f_fermion_antitriplet, y value not passed...")
-    return f_fermion_triplet(Phib, Phi, y_1_val = y_1_val, y_1_status = y_1_status, y_2_val = y_2_val, y_2_status = y_2_status, y_3_val = y_3_val, y_3_status = y_3_status)
+        p: float, T: float, mu: float, phi_re: float, phi_im: float,
+        mass: float, mu_factor: int, typ: str) -> complex:
+    """Color-antitriplet fermion distribution function.
+
+    ### Parameters
+    p : float
+        Absoltue value of the 3-momentum vector in MeV.
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re: float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im: float
+        Imaginary part of the traced Polyakov-loop in MeV.
+    mass : float
+        Relativistic mass in MeV.
+    mu_factor : int
+        Multiplication factor for the chemical potential.
+    typ : string
+        Type of particle:
+            '+' : positive energy particle
+            '-' : negative energy antiparticle
+
+    ### Returns
+    f_fermion_antitriplet : complex
+        Value of the distribution function.
+    """
+
+    return f_fermion_triplet(p, T, mu, phi_re, -phi_im, mass, mu_factor, typ)
+
 
 def f_boson_triplet(
-    Phi : complex, Phib : complex, 
-    y_1_val = 0.0, y_1_status = 4,
-    y_2_val = 0.0, y_2_status = 4,
-    y_3_val = 0.0, y_3_status = 4,
-    ) -> complex:
-    if 4 in [y_1_status, y_2_status, y_3_status]:
-        raise RuntimeError("Error in pnj.thermo.distributions.f_baryon_triplet, y value not passed...")
+        p: float, T: float, mu: float, phi_re: float, phi_im: float,
+        mass: float, mu_factor: int, typ: str) -> complex:
+    """Color-triplet boson distribution function.
 
-    y_m1_val = 1.0 / y_1_val if not y_1_status == 1 else math.inf
-    y_m2_val = 1.0 / y_2_val if not y_2_status == 1 else math.inf
+    ### Parameters
+    p : float
+        Absoltue value of the 3-momentum vector in MeV.
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re: float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im: float
+        Imaginary part of the traced Polyakov-loop in MeV.
+    mass : float
+        Relativistic mass in MeV.
+    mu_factor : int
+        Multiplication factor for the chemical potential.
+    typ : string
+        Type of particle:
+            '+' : positive energy particle
+            '-' : negative energy antiparticle
 
-    Phi_m1_real = 3.0 * Phi.real * y_m1_val if not Phi.real == 0.0 and not y_m1_val == 0.0 else 0.0
-    Phi_m1_imag = 3.0 * Phi.imag * y_m1_val if not Phi.imag == 0.0 and not y_m1_val == 0.0 else 0.0
+    ### Returns
+    f_boson_triplet : complex
+        Value of the distribution function.
+    """
 
-    Phi_1_real = 3.0 * Phi.real * y_1_val if not Phi.real == 0.0 and not y_1_val == 0.0 else 0.0
-    Phi_1_imag = 3.0 * Phi.imag * y_1_val if not Phi.imag == 0.0 and not y_1_val == 0.0 else 0.0
+    logy_p1 = log_y(p, T, mu, mass, mu_factor, 1, typ)
+    logy_p2 = log_y(p, T, mu, mass, mu_factor, 2, typ)
+    logy_p3 = log_y(p, T, mu, mass, mu_factor, 3, typ)
 
-    Phib_1_real = 3.0 * Phib.real * y_1_val if not Phib.real == 0.0 and not y_1_val == 0.0 else 0.0
-    Phib_1_imag = 3.0 * Phib.imag * y_1_val if not Phib.imag == 0.0 and not y_1_val == 0.0 else 0.0
+    test = [el <= -exp_limit for el in [logy_p1, logy_p2, logy_p3]]
 
-    Phib_2_real = 3.0 * Phib.real * y_2_val if not Phib.real == 0.0 and not y_2_val == 0.0 else 0.0
-    Phib_2_imag = 3.0 * Phib.imag * y_2_val if not Phib.imag == 0.0 and not y_2_val == 0.0 else 0.0
+    match test:
+        case [False, False, False]:
 
-    den1_sub2_real = Phi_m1_real - y_m2_val if not (math.fabs(Phi_m1_real) == math.inf and math.fabs(y_m2_val) == math.inf) else -math.inf
-    den1_sub2_imag = Phi_m1_imag
+            num_real_el = [
+                phi_re*math.exp(-logy_p2),
+                phi_re*math.exp(-logy_p1)*math.expm1(-logy_p1),
+                -math.exp(-logy_p3)
+            ]
+            num_imag_el = [
+                phi_im*math.exp(-logy_p1),
+                2.0*phi_im*math.exp(-logy_p2)
+            ]
+            den_real_el = [
+                3.0*phi_re*math.exp(-logy_p1)*math.expm1(-logy_p1),
+                math.expm1(-logy_p3)
+            ]
+            den_imag_el = [
+                3.0*phi_im*math.exp(-logy_p1),
+                3.0*phi_im*math.exp(-logy_p2)
+            ]
 
-    den2_sub1_real = y_2_val - Phib_1_real if not (math.fabs(y_2_val) == math.inf and math.fabs(Phib_1_real) == math.inf) else math.inf
-    den2_sub1_imag = -Phib_1_imag
+            num_real = math.fsum(num_real_el)
+            num_imag = math.fsum(num_imag_el)
+            den_real = math.fsum(den_real_el)
+            den_imag = math.fsum(den_imag_el)
 
-    den3_sub1_real = y_3_val - Phib_2_real if not (math.fabs(y_3_val) == math.inf and math.fabs(Phib_2_real) == math.inf) else math.inf
-    den3_sub1_imag = -Phib_2_imag
+            return complex(num_real, num_imag)/complex(den_real, den_imag)
 
-    den1 = y_1_val - 3.0 * Phib + complex(den1_sub2_real, den1_sub2_imag)
-    den2 = complex(den2_sub1_real, den2_sub1_imag) + 3.0 * Phi - y_m1_val
-    den3 = complex(den3_sub1_real, den3_sub1_imag) + complex(Phi_1_real, Phi_1_imag) - 1.0
+        case [False, False, True] | [False, True, True]:
 
-    part1 = 3.0 * Phib / den1 if not math.fabs(den1.real) == math.fabs(math.inf) and not math.fabs(den1.imag) == math.fabs(math.inf) else complex(0.0, 0.0)
-    part2 = -6.0 * Phi / den2 if not math.fabs(den2.real) == math.fabs(math.inf) and not math.fabs(den2.imag) == math.fabs(math.inf) else complex(0.0, 0.0)
-    part3 = 3.0 / den3 if not math.fabs(den3.real) == math.fabs(math.inf) and not math.fabs(den3.imag) == math.fabs(math.inf) else complex(0.0, 0.0)
+            num_real_el = [
+                phi_re,
+                -phi_re*math.expm1(logy_p1),
+                -math.exp(-logy_p1)
+            ]
+            num_imag_el = [
+                2.0*phi_im,
+                phi_im*math.exp(logy_p1)
+            ]
+            den_real_el = [
+                math.exp(logy_p2),
+                math.exp(-logy_p1),
+                -3.0*phi_re*math.expm1(logy_p1)
+            ]
+            den_imag_el = [
+                3.0*phi_im*math.exp(logy_p1),
+                3.0*phi_im
+            ]
 
-    return part1 + part2 + part3
+            num_real = math.fsum(num_real_el)
+            num_imag = math.fsum(num_imag_el)
+            den_real = math.fsum(den_real_el)
+            den_imag = math.fsum(den_imag_el)
+
+            return complex(num_real, num_imag)/complex(den_real, den_imag)
+
+        case [True, True, True]:
+
+            return complex(-1.0, 0.0)
+
+        case _:
+
+            raise RuntimeError("Sanity test failed!")
+
 
 def f_boson_antitriplet(
-    Phi : complex, Phib : complex, 
-    y_1_val = 0.0, y_1_status = 4,
-    y_2_val = 0.0, y_2_status = 4,
-    y_3_val = 0.0, y_3_status = 4,
-    ) -> complex:
-    if 4 in [y_1_status, y_2_status, y_3_status]:
-        raise RuntimeError("Error in pnj.thermo.distributions.f_baryon_antitriplet, y value not passed...")
-    return f_boson_triplet(Phib, Phi, y_1_val, y_1_status, y_2_val, y_2_status, y_3_val, y_3_status)
+        p: float, T: float, mu: float, phi_re: float, phi_im: float,
+        mass: float, mu_factor: int, typ: str) -> complex:
+    """Color-antitriplet boson distribution function.
+
+    ### Parameters
+    p : float
+        Absoltue value of the 3-momentum vector in MeV.
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re: float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im: float
+        Imaginary part of the traced Polyakov-loop in MeV.
+    mass : float
+        Relativistic mass in MeV.
+    mu_factor : int
+        Multiplication factor for the chemical potential.
+    typ : string
+        Type of particle:
+            '+' : positive energy particle
+            '-' : negative energy antiparticle
+
+    ### Returns
+    f_boson_antitriplet : complex
+        Value of the distribution function.
+    """
+
+    return f_boson_triplet(p, T, mu, phi_re, -phi_im, mass, mu_factor, typ)
+

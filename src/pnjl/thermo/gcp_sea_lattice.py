@@ -1,21 +1,43 @@
+"""Fermi-sea grandcanonical thermodynamic potential and associated functions.
+Lattice-fit version from https://arxiv.org/pdf/2012.12894.pdf .
+
+### Functions
+Tc
+    Pseudo-critical temperature ansatz.
+Delta_ls
+    LQCD-fit ansatz for the 2+1 Nf normalized chiral condensate.
+Ml
+    Mass of up / down quarks (ansatz).
+Ms
+    Mass of the strange quarks (ansatz).
+V
+    Sigma mean-field grandcanonical thermodynamic potential.
+gcp_real
+    Fermi sea grandcanonical thermodynamic potential of a single quark flavor.
+pressure
+bdensity
+bnumber_cumulant_R
+bnumber_cumulant_chiB
+sdensity
+"""
+
+
 import math
 
 import scipy.integrate
 
-import pnjl.aux_functions
+import pnjl.thermo.distributions
 import pnjl.defaults
 
 
 def Tc(mu: float) -> float:
     """Pseudo-critical temperature ansatz.
 
-    Parameters
-    ----------
+    ### Parameters
     mu : float
         Quark chemical potential in MeV.
 
-    Returns
-    -------
+    ### Returns
     Tc : float
         Value of the pseudocritical temperature in MeV for a given mu.
     """
@@ -28,17 +50,14 @@ def Tc(mu: float) -> float:
 
 def Delta_ls(T: float, mu: float) -> float:
     """LQCD-fit ansatz for the 2+1 Nf normalized chiral condensate.
-    Details in https://arxiv.org/pdf/2012.12894.pdf .
 
-    Parameters
-    ----------
+    ### Parameters
     T : float
         Temperature in MeV.
     mu : float
         Quark chemical potential in MeV.
 
-    Returns
-    -------
+    ### Returns
     Delta_ls : float
         Value of the normalized chiral condensate for a given T and mu.
     """
@@ -49,17 +68,15 @@ def Delta_ls(T: float, mu: float) -> float:
 
 
 def Ml(T: float, mu: float) -> float:
-    """Mass of up / down quarks (ansatz)
+    """Mass of up / down quarks (ansatz).
 
-    Parameters
-    ----------
+    ### Parameters
     T : float
         Temperature in MeV.
     mu : float
         Quark chemical potential in MeV.
 
-    Returns
-    -------
+    ### Returns
     Ml : float
         Quark mass in MeV.
     """
@@ -71,17 +88,15 @@ def Ml(T: float, mu: float) -> float:
 
 
 def Ms(T: float, mu: float) -> float:
-    """Mass of the strange quarks (ansatz)
+    """Mass of the strange quarks (ansatz).
 
-    Parameters
-    ----------
+    ### Parameters
     T : float
         Temperature in MeV.
     mu : float
         Quark chemical potential in MeV.
 
-    Returns
-    -------
+    ### Returns
     Ms : float
         Quark mass in MeV.
     """
@@ -92,18 +107,22 @@ def Ms(T: float, mu: float) -> float:
     return M0 * Delta_ls(T, mu) + ml
 
 
+mass_table = {
+    'l' : Ml,
+    's' : Ms
+}
+
+
 def V(T: float, mu: float) -> float:
     """Sigma mean-field grandcanonical thermodynamic potential.
 
-    Parameters
-    ----------
+    ### Parameters
     T : float
         Temperature in MeV.
     mu : float
         Quark chemical potential in MeV.
 
-    Returns
-    -------
+    ### Returns
     V : float
         Mean-field value in MeV^4.
     """
@@ -117,8 +136,7 @@ def V(T: float, mu: float) -> float:
 def gcp_real(T: float, mu: float, typ: str, **kwargs) -> float:
     """Fermi sea grandcanonical thermodynamic potential of a single quark flavor.
 
-    Parameters
-    ----------
+    ### Parameters
     T : float
         Temperature in MeV.
     mu : float
@@ -130,11 +148,11 @@ def gcp_real(T: float, mu: float, typ: str, **kwargs) -> float:
     no_sea : bool, optional
         No-sea approximation flag.
 
-    Returns
-    -------
+    ### Returns
     gcp : float
         Value of the thermodynamic potential in MeV^4.
     """
+
     options = {'no_sea' : True}
     options.update(kwargs)
 
@@ -144,27 +162,27 @@ def gcp_real(T: float, mu: float, typ: str, **kwargs) -> float:
     nosea = options['no_sea']
 
     if nosea:
+
         return 0.0
+
     else:
+
         def integrand(p):
-            mass = Ml(T, mu)
-            mass0 = Ml(0.0, 0.0)
-            energy = pnjl.aux_functions.En(p, mass)
-           = lambda p, _T, _mu, key : (p ** 2) * (pnjl.aux_functions.En(p, M(_T, _mu, **key), **key) - pnjl.aux_functions.En(p, M(0.0, 0.0, **key), **key))
+            
+            mass = mass_table[typ](T, mu)
+            mass0 = mass_table[typ](0.0, 0.0)
+            energy = pnjl.thermo.distributions.En(p, mass)
+            energy0 = pnjl.thermo.distributions.En(p, mass0)
+            energy_norm = math.fsum([energy, -energy0])
 
-    #integrand = lambda p, _T, _mu, key : (p ** 2) * (pnjl.aux_functions.En(p, M(_T, _mu, **key), **key) - pnjl.aux_functions.En(p, M(0.0, 0.0, **key), **key))
+            return (p**2)*energy_norm
 
-    #sigma_contrib = V(T, mu, **kwargs) - V(0.0, 0.0, **kwargs)
+        integral, error = scipy.integrate.quad(integrand, 0.0, Lambda)
 
-    #print(T, mu, sigma_contrib)
-    #input()
+        return (1.0/(math.pi**2))*(Nc/3.0)*integral
 
-    #integral, error = scipy.integrate.quad(integrand, 0.0, Lambda, args = (T, mu, kwargs))
-
-    return 0.0#sigma_contrib - (Nf / (math.pi ** 2)) * (Nc / 3.0) * integral
 
 #Extensive thermodynamic properties
-
 def pressure(T : float, mu : float, **kwargs):
     #
     return -gcp_real(T, mu, **kwargs)

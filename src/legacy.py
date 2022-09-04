@@ -1,4 +1,4 @@
-#LEGACY CODE, DO NOT USE
+"""#LEGACY CODE, DO NOT USE
 
 #pnjl_functions.py
 
@@ -3284,4 +3284,4 @@ def phase_shift_test():
             print(e)
             print("Jak żyć?")
             input()
-    #end
+    #end"""
