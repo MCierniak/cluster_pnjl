@@ -4830,19 +4830,9 @@ if __name__ == '__main__':
 
     #cumulant_test()
 
-    class cached:
-        def __init__(self, func):
-            print("Wrapper initialized!")
-            self.func = func
-        def __call__(self, *args, **kwds):
-            print("Wrapper called!")
-            print("Function name:", self.func.__name__)
-            print("Function args:", args)
-            print("Function kwds:", kwds)
-            print("Function return:\n")
-            return self.func(*args, **kwds)
+    import utils
 
-    @cached
+    @utils.cached
     def testfunc(a, b, c, d="test"):
         print(a, b, c, d)
 

@@ -10,14 +10,14 @@ import utils
 
 def figure2():
 
-    (T, phi_re_0)       = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(0.0)) + "p0_cluster_dense.dat")
-    (T, phi_re_100)     = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(100.0)) + "p0_cluster_dense.dat")
-    (T, phi_re_200)     = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(200.0)) + "p0_cluster_dense.dat")
-    (T, phi_re_300)     = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(300.0)) + "p0_cluster_dense.dat")
-    (T, phi_re_alt_0)   = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(0.0)) + "p0_dev_dense.dat")
-    (T, phi_re_alt_100) = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(100.0)) + "p0_dev_dense.dat")
-    (T, phi_re_alt_200) = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(200.0)) + "p0_dev_dense.dat")
-    (T, phi_re_alt_300) = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(300.0)) + "p0_dev_dense.dat")
+    (T, phi_re_0)       = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(0.0)) + "p0_cluster_dense.dat")
+    (T, phi_re_100)     = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(100.0)) + "p0_cluster_dense.dat")
+    (T, phi_re_200)     = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(200.0)) + "p0_cluster_dense.dat")
+    (T, phi_re_300)     = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(300.0)) + "p0_cluster_dense.dat")
+    (T, phi_re_alt_0)   = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(0.0)) + "p0_dev_dense.dat")
+    (T, phi_re_alt_100) = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(100.0)) + "p0_dev_dense.dat")
+    (T, phi_re_alt_200) = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(200.0)) + "p0_dev_dense.dat")
+    (T, phi_re_alt_300) = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(300.0)) + "p0_dev_dense.dat")
 
     sigma_0 = [(400. * pnjl.aux_functions.Delta_ls(el, 0.0) + 5.5) / 405.5 for el in T]
     sigma_100 = [(400. * pnjl.aux_functions.Delta_ls(el, 100.0) + 5.5) / 405.5 for el in T]
@@ -73,15 +73,15 @@ def figure3():
     col_gluon = 'pink'
     col_pnjl = 'magenta'
 
-    (T, phi_re_0)               = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(0.0)) + "p0_cluster_dense.dat")
-    Pres_Q, BDen_Q              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(0.0)) + "p0.dat")
-    SDen_Q, _                   = utils.data_collect(4, 4, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(0.0)) + "p0.dat")
-    Pres_g, SDen_g              = utils.data_collect(2, 4, "D:/EoS/BDK/thermo_mu_const/pl_mu_" + str(int(0.0)) + "p0.dat")
-    Pres_pert, BDen_pert        = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(0.0)) + "p0.dat")
-    SDen_pert, _                = utils.data_collect(4, 4, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(0.0)) + "p0.dat")
+    (T, phi_re_0)               = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(0.0)) + "p0_cluster_dense.dat")
+    Pres_Q, BDen_Q              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(0.0)) + "p0.dat")
+    SDen_Q, _                   = utils.data_load(4, 4, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(0.0)) + "p0.dat")
+    Pres_g, SDen_g              = utils.data_load(2, 4, "D:/EoS/BDK/thermo_mu_const/pl_mu_" + str(int(0.0)) + "p0.dat")
+    Pres_pert, BDen_pert        = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(0.0)) + "p0.dat")
+    SDen_pert, _                = utils.data_load(4, 4, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(0.0)) + "p0.dat")
 
-    (low_1204_6710v2_x, low_1204_6710v2_y)      = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu0_low.dat")
-    (high_1204_6710v2_x, high_1204_6710v2_y)    = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu0_high.dat")
+    (low_1204_6710v2_x, low_1204_6710v2_y)      = utils.data_load(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu0_low.dat")
+    (high_1204_6710v2_x, high_1204_6710v2_y)    = utils.data_load(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu0_high.dat")
 
     borsanyi_1204_6710v2 = [np.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_x, high_1204_6710v2_y)]
     for x_el, y_el in zip(low_1204_6710v2_x[::-1], low_1204_6710v2_y[::-1]):
@@ -139,7 +139,7 @@ def figure4():
 
     const_mu = 0.0
 
-    (T, phi_re_0) = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(const_mu)) + "p0_cluster_dense.dat")
+    (T, phi_re_0) = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(const_mu)) + "p0_cluster_dense.dat")
 
     fig = plt.figure(num = 1, figsize = (5.9, 5))
     ax = fig.add_subplot(1, 1, 1)
@@ -180,35 +180,35 @@ def figure4():
 def figure5():
 
     const_mu = 0.0
-    (T, phi_re) = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(const_mu)) + "p0_cluster_dense.dat")
+    (T, phi_re) = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(const_mu)) + "p0_cluster_dense.dat")
 
-    Pres_Q, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_g, _              = utils.data_collect(2, 4, "D:/EoS/BDK/thermo_mu_const/pl_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_pert, _           = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_pi, _             = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pi_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_rho, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/rho_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_omega, _          = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/omega_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_D, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/D_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_N, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/N_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_T, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/T_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_F, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/F_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_P, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/P_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_Q5, _             = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/Q5_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_H, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/H_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_Q, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_g, _              = utils.data_load(2, 4, "D:/EoS/BDK/thermo_mu_const/pl_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_pert, _           = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_pi, _             = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pi_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_rho, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/rho_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_omega, _          = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/omega_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_D, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/D_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_N, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/N_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_T, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/T_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_F, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/F_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_P, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/P_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_Q5, _             = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/Q5_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_H, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/H_mu_" + str(int(const_mu)) + "p0.dat")
 
-    Pres_Q0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_g0, _            = utils.data_collect(2, 4, "D:/EoS/BDK/thermo_mu_const/pl_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_pert0, _         = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_pi0, _           = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pi_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_rho0, _          = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/rho_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_omega0, _        = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/omega_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_D0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/D_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_N0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/N_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_T0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/T_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_F0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/F_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_P0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/P_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_Q50, _           = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/Q5_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_H0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/H_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_Q0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_g0, _            = utils.data_load(2, 4, "D:/EoS/BDK/thermo_mu_const/pl_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_pert0, _         = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_pi0, _           = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pi_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_rho0, _          = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/rho_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_omega0, _        = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/omega_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_D0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/D_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_N0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/N_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_T0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/T_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_F0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/F_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_P0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/P_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_Q50, _           = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/Q5_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_H0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/H_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
 
     col_n = '#DEA54B'
     col_pi = '#653239'
@@ -226,12 +226,12 @@ def figure5():
     col_pnjl = 'magenta'
     col_total = 'black'
 
-    (borsanyi_upper_x, borsanyi_upper_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/borsanyi_upper.dat")
-    (borsanyi_lower_x, borsanyi_lower_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/borsanyi_lower.dat")
-    (bazavov_upper_x, bazavov_upper_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/bazavov_upper.dat")
-    (bazavov_lower_x, bazavov_lower_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/bazavov_lower.dat")
-    (low_1204_6710v2_x, low_1204_6710v2_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu0_low.dat")
-    (high_1204_6710v2_x, high_1204_6710v2_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu0_high.dat")
+    (borsanyi_upper_x, borsanyi_upper_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/borsanyi_upper.dat")
+    (borsanyi_lower_x, borsanyi_lower_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/borsanyi_lower.dat")
+    (bazavov_upper_x, bazavov_upper_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/bazavov_upper.dat")
+    (bazavov_lower_x, bazavov_lower_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/bazavov_lower.dat")
+    (low_1204_6710v2_x, low_1204_6710v2_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu0_low.dat")
+    (high_1204_6710v2_x, high_1204_6710v2_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu0_high.dat")
 
     bazavov = [np.array([x_el, y_el]) for x_el, y_el in zip(bazavov_upper_x, bazavov_upper_y)]
     for x_el, y_el in zip(bazavov_lower_x[::-1], bazavov_lower_y[::-1]):
@@ -430,35 +430,35 @@ def figure6():
     #przerobic ten plot zeby porownac zmiany mu=0..200 dla lattice i dla mojego modelu
 
     const_mu = 200.0
-    (T, phi_re) = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(const_mu)) + "p0_cluster_dense.dat")
+    (T, phi_re) = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(const_mu)) + "p0_cluster_dense.dat")
 
-    Pres_Q, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_g, _              = utils.data_collect(2, 4, "D:/EoS/BDK/thermo_mu_const/pl_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_pert, _           = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_pi, _             = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pi_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_rho, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/rho_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_omega, _          = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/omega_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_D, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/D_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_N, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/N_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_T, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/T_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_F, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/F_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_P, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/P_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_Q5, _             = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/Q5_mu_" + str(int(const_mu)) + "p0.dat")
-    Pres_H, _              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/H_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_Q, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_g, _              = utils.data_load(2, 4, "D:/EoS/BDK/thermo_mu_const/pl_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_pert, _           = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_pi, _             = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pi_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_rho, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/rho_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_omega, _          = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/omega_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_D, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/D_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_N, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/N_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_T, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/T_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_F, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/F_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_P, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/P_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_Q5, _             = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/Q5_mu_" + str(int(const_mu)) + "p0.dat")
+    Pres_H, _              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/H_mu_" + str(int(const_mu)) + "p0.dat")
 
-    Pres_Q0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_g0, _            = utils.data_collect(2, 4, "D:/EoS/BDK/thermo_mu_const/pl_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_pert0, _         = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_pi0, _           = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pi_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_rho0, _          = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/rho_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_omega0, _        = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/omega_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_D0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/D_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_N0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/N_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_T0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/T_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_F0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/F_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_P0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/P_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_Q50, _           = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/Q5_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    Pres_H0, _            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/H_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_Q0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_g0, _            = utils.data_load(2, 4, "D:/EoS/BDK/thermo_mu_const/pl_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_pert0, _         = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_pi0, _           = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pi_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_rho0, _          = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/rho_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_omega0, _        = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/omega_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_D0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/D_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_N0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/N_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_T0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/T_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_F0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/F_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_P0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/P_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_Q50, _           = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/Q5_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    Pres_H0, _            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/H_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
 
     col_n = '#DEA54B'
     col_pi = '#653239'
@@ -476,15 +476,15 @@ def figure6():
     col_pnjl = 'magenta'
     col_total = 'black'
 
-    (borsanyi_upper_x, borsanyi_upper_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/borsanyi_upper.dat")
-    (borsanyi_lower_x, borsanyi_lower_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/borsanyi_lower.dat")
-    (bazavov_upper_x, bazavov_upper_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/bazavov_upper.dat")
-    (bazavov_lower_x, bazavov_lower_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/bazavov_lower.dat")
-    (low_1204_6710v2_x, low_1204_6710v2_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu200_low.dat")
-    (high_1204_6710v2_x, high_1204_6710v2_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu200_high.dat")
+    (borsanyi_upper_x, borsanyi_upper_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/borsanyi_upper.dat")
+    (borsanyi_lower_x, borsanyi_lower_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/borsanyi_lower.dat")
+    (bazavov_upper_x, bazavov_upper_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/bazavov_upper.dat")
+    (bazavov_lower_x, bazavov_lower_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/bazavov_lower.dat")
+    (low_1204_6710v2_x, low_1204_6710v2_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu200_low.dat")
+    (high_1204_6710v2_x, high_1204_6710v2_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu200_high.dat")
 
-    (low_1204_6710v2_x_alt, low_1204_6710v2_y_alt) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu0_low.dat")
-    (high_1204_6710v2_x_alt, high_1204_6710v2_y_alt) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu0_high.dat")
+    (low_1204_6710v2_x_alt, low_1204_6710v2_y_alt) = utils.data_load(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu0_low.dat")
+    (high_1204_6710v2_x_alt, high_1204_6710v2_y_alt) = utils.data_load(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu0_high.dat")
 
     bazavov = [np.array([x_el, y_el]) for x_el, y_el in zip(bazavov_upper_x, bazavov_upper_y)]
     for x_el, y_el in zip(bazavov_lower_x[::-1], bazavov_lower_y[::-1]):
@@ -690,25 +690,25 @@ def figure6():
 def figure7():
 
     const_mu = 100.0
-    (T, phi_re) = utils.data_collect(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(const_mu)) + "p0_cluster_dense.dat")
+    (T, phi_re) = utils.data_load(0, 1, "D:/EoS/BDK/gap_sol_mu_const/gap_mu_" + str(int(const_mu)) + "p0_cluster_dense.dat")
 
-    _ , BDen_Q              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(const_mu)) + "p0.dat")
-    _ , BDen_pert           = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(const_mu)) + "p0.dat")
-    _ , BDen_D              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/D_mu_" + str(int(const_mu)) + "p0.dat")
-    _ , BDen_N              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/N_mu_" + str(int(const_mu)) + "p0.dat")
-    _ , BDen_F              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/F_mu_" + str(int(const_mu)) + "p0.dat")
-    _ , BDen_P              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/P_mu_" + str(int(const_mu)) + "p0.dat")
-    _ , BDen_Q5             = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/Q5_mu_" + str(int(const_mu)) + "p0.dat")
-    _ , BDen_H              = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/H_mu_" + str(int(const_mu)) + "p0.dat")
+    _ , BDen_Q              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(const_mu)) + "p0.dat")
+    _ , BDen_pert           = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(const_mu)) + "p0.dat")
+    _ , BDen_D              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/D_mu_" + str(int(const_mu)) + "p0.dat")
+    _ , BDen_N              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/N_mu_" + str(int(const_mu)) + "p0.dat")
+    _ , BDen_F              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/F_mu_" + str(int(const_mu)) + "p0.dat")
+    _ , BDen_P              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/P_mu_" + str(int(const_mu)) + "p0.dat")
+    _ , BDen_Q5             = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/Q5_mu_" + str(int(const_mu)) + "p0.dat")
+    _ , BDen_H              = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/H_mu_" + str(int(const_mu)) + "p0.dat")
 
-    _ , BDen_Q0            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    _ , BDen_pert0         = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    _ , BDen_D0            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/D_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    _ , BDen_N0            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/N_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    _ , BDen_F0            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/F_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    _ , BDen_P0            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/P_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    _ , BDen_Q50           = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/Q5_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
-    _ , BDen_H0            = utils.data_collect(2, 3, "D:/EoS/BDK/thermo_mu_const/H_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    _ , BDen_Q0            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pnjl_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    _ , BDen_pert0         = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/pert_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    _ , BDen_D0            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/D_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    _ , BDen_N0            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/N_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    _ , BDen_F0            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/F_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    _ , BDen_P0            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/P_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    _ , BDen_Q50           = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/Q5_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
+    _ , BDen_H0            = utils.data_load(2, 3, "D:/EoS/BDK/thermo_mu_const/H_mu_" + str(int(const_mu)) + "p0_no_phi.dat")
 
     col_n = '#DEA54B'
     col_pi = '#653239'
@@ -726,12 +726,12 @@ def figure7():
     col_pnjl = 'magenta'
     col_total = 'black'
 
-    (borsanyi_upper_x, borsanyi_upper_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/borsanyi_upper.dat")
-    (borsanyi_lower_x, borsanyi_lower_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/borsanyi_lower.dat")
-    (bazavov_upper_x, bazavov_upper_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/bazavov_upper.dat")
-    (bazavov_lower_x, bazavov_lower_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/bazavov_lower.dat")
-    (low_1204_6710v2_x, low_1204_6710v2_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu200_low.dat")
-    (high_1204_6710v2_x, high_1204_6710v2_y) = utils.data_collect(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu200_high.dat")
+    (borsanyi_upper_x, borsanyi_upper_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/borsanyi_upper.dat")
+    (borsanyi_lower_x, borsanyi_lower_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/borsanyi_lower.dat")
+    (bazavov_upper_x, bazavov_upper_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/bazavov_upper.dat")
+    (bazavov_lower_x, bazavov_lower_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/bazavov_lower.dat")
+    (low_1204_6710v2_x, low_1204_6710v2_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu200_low.dat")
+    (high_1204_6710v2_x, high_1204_6710v2_y) = utils.data_load(0, 1, "D:/EoS/archive/BDK/lattice_data/const_mu/1204_6710v2_table4_pressure_mu200_high.dat")
 
     bazavov = [np.array([x_el, y_el]) for x_el, y_el in zip(bazavov_upper_x, bazavov_upper_y)]
     for x_el, y_el in zip(bazavov_lower_x[::-1], bazavov_lower_y[::-1]):

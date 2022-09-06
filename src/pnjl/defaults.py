@@ -1,4 +1,9 @@
-"""Model parameters
+"""### Description
+Model parameters
+
+### Functions
+get_all_defaults
+    Function returning a dictionary of all global variables.
 
 ### Globals
 TC0 : float
@@ -129,6 +134,8 @@ S : dict[str, float]
 
 
 import math
+import numpy
+import typing
 
 
 TC0 = 154.#170.
@@ -152,7 +159,7 @@ M_L_VAC = math.fsum([0.5*M0*math.fsum([1.0, math.tanh(TC0/DELTA_T)]), ML])
 M_S_VAC = math.fsum([0.5*M0*math.fsum([1.0, math.tanh(TC0/DELTA_T)]), MS])
 LAMBDA = 900.0
 L = 50.0
-B = 100
+B = 100.0
 MI = {
     'pi': 200.0,
     'K': 500.0,
@@ -231,3 +238,33 @@ S = {
     'Q': 0,
     'H': 0
 }
+
+
+def get_all_defaults(split_dict: bool = False) -> typing.Dict:
+    """### Description
+    Function returning a dictionary of all global variables.
+
+    ### Parameters
+    split_dict: bool, optional
+        Split dict globals into "global_name:dict_key" : "dict_val"
+        pair.
+
+    ### Returns
+    vars: dict
+        Dictionary of all global variables.
+    """
+    output = {}
+    for key, value in globals().items():
+        if isinstance(value, (float, int)):
+            output[str(key)] = value
+        elif isinstance(value, dict):
+            if numpy.all([
+                isinstance(ival, (float, int)) for ival in value.values()
+            ]):
+                if split_dict:
+                    for ikey, ival in value.items():
+                        output[str(key)+':'+str(ikey)] = ival
+                else:
+                    output[str(key)] = value
+    return output
+
