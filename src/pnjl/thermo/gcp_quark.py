@@ -11,7 +11,7 @@ import pnjl.defaults
 
 def gcp_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
 
-    options = {'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.default_Nc, 'gcp_quark_debug_flag' : False}
+    options = {'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.NC, 'gcp_quark_debug_flag' : False}
     options.update(kwargs)
 
     Nf = options['Nf']
@@ -42,7 +42,7 @@ def gcp_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> 
     return -(Nf / (math.pi ** 2)) * (Nc / 3.0) * integral / 3.0
 def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
     
-    options = {'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.default_Nc, 'gcp_quark_debug_flag' : False}
+    options = {'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.NC, 'gcp_quark_debug_flag' : False}
     options.update(kwargs)
 
     Nf = options['Nf']

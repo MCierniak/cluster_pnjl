@@ -49,10 +49,10 @@ def Tc(mu: float) -> float:
         Value of the pseudocritical temperature in MeV for a given mu.
     """
 
-    Tc0 = pnjl.defaults.default_Tc0
-    kappa = pnjl.defaults.default_kappa
+    TC0 = pnjl.defaults.TC0
+    KAPPA = pnjl.defaults.KAPPA
 
-    return math.fsum([Tc0, -Tc0*kappa*((mu/Tc0)**2)])
+    return math.fsum([TC0, -TC0*KAPPA*((mu/TC0)**2)])
 
 
 def Delta_ls(T: float, mu: float) -> float:
@@ -69,9 +69,9 @@ def Delta_ls(T: float, mu: float) -> float:
         Value of the normalized chiral condensate for a given T and mu.
     """
 
-    delta_T = pnjl.defaults.default_delta_T
+    DELTA_T = pnjl.defaults.DELTA_T
 
-    tanh_internal = math.fsum([T/delta_T, -Tc(mu)/delta_T])
+    tanh_internal = math.fsum([T/DELTA_T, -Tc(mu)/DELTA_T])
 
     return math.fsum([0.5, -0.5*math.tanh(tanh_internal)])
 
@@ -90,10 +90,10 @@ def Ml(T: float, mu: float) -> float:
         Quark mass in MeV.
     """
     
-    M0 = pnjl.defaults.default_M0
-    ml = pnjl.defaults.default_ml
+    M0 = pnjl.defaults.M0
+    ML = pnjl.defaults.ML
     
-    return math.fsum([M0*Delta_ls(T, mu), ml])
+    return math.fsum([M0*Delta_ls(T, mu), ML])
 
 
 def Ms(T: float, mu: float) -> float:
@@ -110,10 +110,10 @@ def Ms(T: float, mu: float) -> float:
         Quark mass in MeV.
     """
 
-    M0 = pnjl.defaults.default_M0
-    ms = pnjl.defaults.default_ms
+    M0 = pnjl.defaults.M0
+    MS = pnjl.defaults.MS
     
-    return math.fsum([M0*Delta_ls(T, mu), ms])
+    return math.fsum([M0*Delta_ls(T, mu), MS])
 
 
 def V(T: float, mu: float) -> float:
@@ -130,13 +130,25 @@ def V(T: float, mu: float) -> float:
         Mean-field value in MeV^4.
     """
 
-    M0 = pnjl.defaults.default_M0
-    Gs = pnjl.defaults.default_Gs
+    M0 = pnjl.defaults.M0
+    GS = pnjl.defaults.GS
 
     return math.fsum([
-        ((Delta_ls(T, mu)**2) * (M0**2)) / (4.0*Gs),
-        -((Delta_ls(0.0, 0.0)**2) * (M0**2)) / (4.0*Gs)
+        ((Delta_ls(T, mu)**2) * (M0**2)) / (4.0*GS),
+        -((Delta_ls(0.0, 0.0)**2) * (M0**2)) / (4.0*GS)
     ])
+
+
+def gcp_real_l_integrand(p: float, mass: float) -> float:   
+
+    M_L_VAC = pnjl.defaults.M_L_VAC
+
+    energy = pnjl.thermo.distributions.En(p, mass)
+    energy0 = pnjl.thermo.distributions.En(p, M_L_VAC)
+
+    energy_norm = math.fsum([energy, -energy0])
+
+    return (p**2)*energy_norm
 
 
 def gcp_real_l(T: float, mu: float) -> float:
@@ -153,24 +165,26 @@ def gcp_real_l(T: float, mu: float) -> float:
         Value of the thermodynamic potential in MeV^4.
     """
 
-    Nc = pnjl.defaults.default_Nc
-    Lambda = pnjl.defaults.default_Lambda
+    NC = pnjl.defaults.NC
+    LAMBDA = pnjl.defaults.LAMBDA
 
-    def integrand(p):   
-
-        mass = Ml(T, mu)
-        mass0 = Ml(0.0, 0.0)
-
-        energy = pnjl.thermo.distributions.En(p, mass)
-        energy0 = pnjl.thermo.distributions.En(p, mass0)
-
-        energy_norm = math.fsum([energy, -energy0])
-
-        return (p**2)*energy_norm
+    mass = Ml(T, mu)
     
-    integral, error = scipy.integrate.quad(integrand, 0.0, Lambda)
+    integral, error = scipy.integrate.quad(gcp_real_l_integrand, 0.0, LAMBDA, args=(mass,))
     
-    return (1.0/(math.pi**2))*(Nc/3.0)*integral
+    return (1.0/(math.pi**2))*(NC/3.0)*integral
+
+
+def gcp_real_s_integrand(p: float, mass: float) -> float:   
+
+    M_S_VAC = pnjl.defaults.M_S_VAC
+
+    energy = pnjl.thermo.distributions.En(p, mass)
+    energy0 = pnjl.thermo.distributions.En(p, M_S_VAC)
+
+    energy_norm = math.fsum([energy, -energy0])
+
+    return (p**2)*energy_norm
 
 
 def gcp_real_s(T: float, mu: float) -> float:
@@ -187,24 +201,14 @@ def gcp_real_s(T: float, mu: float) -> float:
         Value of the thermodynamic potential in MeV^4.
     """
 
-    Nc = pnjl.defaults.default_Nc
-    Lambda = pnjl.defaults.default_Lambda
+    NC = pnjl.defaults.NC
+    LAMBDA = pnjl.defaults.LAMBDA
 
-    def integrand(p):
-
-        mass = Ms(T, mu)
-        mass0 = Ms(0.0, 0.0)
-
-        energy = pnjl.thermo.distributions.En(p, mass)
-        energy0 = pnjl.thermo.distributions.En(p, mass0)
-
-        energy_norm = math.fsum([energy, -energy0])
-
-        return (p**2)*energy_norm
+    mass = Ms(T, mu)
     
-    integral, error = scipy.integrate.quad(integrand, 0.0, Lambda)
+    integral, error = scipy.integrate.quad(gcp_real_s_integrand, 0.0, LAMBDA, args=(mass,))
     
-    return (1.0/(math.pi**2))*(Nc/3.0)*integral
+    return (1.0/(math.pi**2))*(NC/3.0)*integral
 
 
 gcp_hash = {

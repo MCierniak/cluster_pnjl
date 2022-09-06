@@ -5,6 +5,12 @@
 		}
 	],
 	"settings": {
-		"jupyter.kernels.filter": []
+		"files.exclude": {
+			"**/.venv": true,
+			"**/.vscode": true,
+			"**/__pycache__": true,
+			"**/*.code-workspace": true,
+			"**/.cache": false
+		}
 	}
 }

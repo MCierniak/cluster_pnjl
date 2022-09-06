@@ -27,7 +27,7 @@ exp_limit:
 import math
 
 
-exp_limit = 709.78271
+EXP_LIMIT = 709.78271
 
 
 def En(p: float, mass: float) -> float:
@@ -115,7 +115,7 @@ def f_fermion_singlet(
 
     logy = log_y(p, T, mu, mass, mu_factor, 1, typ)
 
-    if logy >= exp_limit:
+    if logy >= EXP_LIMIT:
         return 0.0
     else:
         return 1.0/math.fsum([math.exp(logy), 1.0])
@@ -149,7 +149,7 @@ def f_boson_singlet(
 
     logy = log_y(p, T, mu, mass, mu_factor, 1, typ)
 
-    if logy >= exp_limit:
+    if logy >= EXP_LIMIT:
         return 0.0
     else:
         return 1.0/math.expm1(logy)
@@ -261,7 +261,7 @@ def f_fermion_triplet(
     logy_p2 = log_y(p, T, mu, mass, mu_factor, 2, typ)
     logy_p3 = log_y(p, T, mu, mass, mu_factor, 3, typ)
 
-    test = tuple([el <= -exp_limit for el in [logy_p1, logy_p2, logy_p3]])
+    test = tuple([el <= -EXP_LIMIT for el in [logy_p1, logy_p2, logy_p3]])
 
     return f_fermion_triplet_hash[test](logy_p1, logy_p2, logy_p3, phi_re, phi_im)
 
@@ -408,7 +408,7 @@ def f_boson_triplet(
     logy_p2 = log_y(p, T, mu, mass, mu_factor, 2, typ)
     logy_p3 = log_y(p, T, mu, mass, mu_factor, 3, typ)
 
-    test = tuple([el <= -exp_limit for el in [logy_p1, logy_p2, logy_p3]])
+    test = tuple([el <= -EXP_LIMIT for el in [logy_p1, logy_p2, logy_p3]])
 
     return f_boson_triplet_hash[test](logy_p1, logy_p2, logy_p3, phi_re, phi_im)
 

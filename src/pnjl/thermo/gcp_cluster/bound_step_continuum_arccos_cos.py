@@ -26,7 +26,7 @@ def gcp_real_a0(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
 
     def mass_integrand1(_m, _p, _T2, _thmass, _Ni, _L, key2):
 
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -48,14 +48,14 @@ def gcp_real_a0(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
             continuum_factor = 1.0
         return (_m / pnjl.aux_functions.En(_p, _m)) * pnjl.thermo.distributions.f_boson_singlet(**yp) * continuum_factor
     def integrand1(p, _T, _Mth, _ni, _l, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
         inner_int, _ = scipy.integrate.quad(mass_integrand1, _Mth, _ni * (M0 + ml) + _ni * _l, args = (p, _T, _Mth, _ni, _l, key))
         return (p ** 2) * inner_int
     def mass_integrand2(_m, _p, _T2, _bmass, _thmass, _Ni, _L, _T_crit, _reg, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -88,7 +88,7 @@ def gcp_real_a0(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
             continuum_factor = 1.0
         return (_m / pnjl.aux_functions.En(_p, _m)) * pnjl.thermo.distributions.f_boson_singlet(**yp) * continuum_factor * _reg
     def integrand2(p, _T, _Mi, _Mth, _ni, _l, _T_c, _regulator, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
@@ -120,11 +120,11 @@ def gcp_real_a1_bm1(T : float, mu : float, Phi : complex, Phib : complex, bmass 
     debug_flag = options['gcp_cluster_debug_flag']
 
     def mass_integrand1(_m, _p, _T2, _thmass, _Ni, _L, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
-        ms = pnjl.defaults.default_ms
+        ms = pnjl.defaults.MS
 
         yp = {}
         yp["y_val"], yp["y_status"] = pnjl.aux_functions.y_plus(_p, _T2, 0.0, _m, 1.0, 1.0, **key2)
@@ -143,19 +143,19 @@ def gcp_real_a1_bm1(T : float, mu : float, Phi : complex, Phib : complex, bmass 
             continuum_factor = 1.0
         return (_m / pnjl.aux_functions.En(_p, _m)) * pnjl.thermo.distributions.f_boson_singlet(**yp) * continuum_factor
     def integrand1(p, _T, _Mth, _ni, _l, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
-        ms = pnjl.defaults.default_ms
+        ms = pnjl.defaults.MS
         inner_int, _ = scipy.integrate.quad(mass_integrand1, _Mth, (_ni - 1.0) * (M0 + ml) + (M0 + ms) + _ni * _l, args = (p, _T, _Mth, _ni, _l, key))
         return (p ** 2) * inner_int
     def mass_integrand2(_m, _p, _T2, _bmass, _thmass, _Ni, _L, _T_crit, _reg, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
-        ms = pnjl.defaults.default_ms
+        ms = pnjl.defaults.MS
 
         yp = {}
         yp["y_val"], yp["y_status"] = pnjl.aux_functions.y_plus(_p, _T2, 0.0, _m, 1.0, 1.0, **key2)
@@ -185,11 +185,11 @@ def gcp_real_a1_bm1(T : float, mu : float, Phi : complex, Phib : complex, bmass 
             continuum_factor = 1.0
         return (_m / pnjl.aux_functions.En(_p, _m)) * pnjl.thermo.distributions.f_boson_singlet(**yp) * continuum_factor * _reg
     def integrand2(p, _T, _Mi, _Mth, _ni, _l, _T_c, _regulator, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
-        ms = pnjl.defaults.default_ms
+        ms = pnjl.defaults.MS
         T_slope = default_T_slope
         M_gap = (_ni - 1.0) * (M0 + ml) + (M0 + ms) - _Mi
         inner_int, _ = scipy.integrate.quad(mass_integrand2, _Mth, _Mi + T_slope * (_T - _T_c) + _ni * _l + M_gap, args = (p, _T, _Mi, _Mth, _ni, _l, _T_c, _regulator, key))
@@ -218,7 +218,7 @@ def gcp_real_a2(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
     debug_flag = options['gcp_cluster_debug_flag']
 
     def mass_integrand1(_m, _p, _T2, _mu2, _Phi2, _Phib2, _thmass, _Ni, _L, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -252,14 +252,14 @@ def gcp_real_a2(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_boson_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).real
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor
     def integrand1(p, _T, _mu, _Phi, _Phib, _Mth, _ni, _l, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
         inner_int, _ = scipy.integrate.quad(mass_integrand1, _Mth, _ni * (M0 + ml) + _ni * _l, args = (p, _T, _mu, _Phi, _Phib, _Mth, _ni, _l, key))
         return (p ** 2) * inner_int
     def mass_integrand2(_m, _p, _T2, _mu2, _Phi2, _Phib2, _bmass, _thmass, _Ni, _L, _T_crit, _reg, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -304,7 +304,7 @@ def gcp_real_a2(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_boson_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).real
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor * _reg
     def integrand2(p, _T, _mu, _Phi, _Phib, _Mi, _Mth, _ni, _l, _T_c, _regulator, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
@@ -333,7 +333,7 @@ def gcp_imag_a2(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
 
     def mass_integrand1(_m, _p, _T2, _mu2, _Phi2, _Phib2, _thmass, _Ni, _L, key2):
 
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -367,14 +367,14 @@ def gcp_imag_a2(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_boson_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).imag
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor
     def integrand1(p, _T, _mu, _Phi, _Phib, _Mth, _ni, _l, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
         inner_int, _ = scipy.integrate.quad(mass_integrand1, _Mth, _ni * (M0 + ml) + _ni * _l, args = (p, _T, _mu, _Phi, _Phib, _Mth, _ni, _l, key))
         return (p ** 2) * inner_int
     def mass_integrand2(_m, _p, _T2, _mu2, _Phi2, _Phib2, _bmass, _thmass, _Ni, _L, _T_crit, _reg, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -419,7 +419,7 @@ def gcp_imag_a2(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_boson_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).imag
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor * _reg
     def integrand2(p, _T, _mu, _Phi, _Phib, _Mi, _Mth, _ni, _l, _T_c, _regulator, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
@@ -448,7 +448,7 @@ def gcp_real_a3(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
 
     def mass_integrand1(_m, _p, _T2, _mu2, _thmass, _Ni, _L, key2):
 
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -474,14 +474,14 @@ def gcp_real_a3(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_fermion_singlet(**ym)
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor
     def integrand1(p, _T, _mu, _Mth, _ni, _l, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
         inner_int, _ = scipy.integrate.quad(mass_integrand1, _Mth, _ni * (M0 + ml) + _ni * _l, args = (p, _T, _mu, _Mth, _ni, _l, key))
         return (p ** 2) * inner_int
     def mass_integrand2(_m, _p, _T2, _mu2, _bmass, _thmass, _Ni, _L, _T_crit, _reg, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -518,7 +518,7 @@ def gcp_real_a3(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_fermion_singlet(**ym)
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor * _reg
     def integrand2(p, _T, _mu, _Mi, _Mth, _ni, _l, _T_c, _regulator, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
@@ -549,7 +549,7 @@ def gcp_real_a4(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
     debug_flag = options['gcp_cluster_debug_flag']
 
     def mass_integrand1(_m, _p, _T2, _mu2, _Phi2, _Phib2, _thmass, _Ni, _L, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -583,14 +583,14 @@ def gcp_real_a4(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_boson_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).real
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor
     def integrand1(p, _T, _mu, _Phi, _Phib, _Mth, _ni, _l, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
         inner_int, _ = scipy.integrate.quad(mass_integrand1, _Mth, _ni * (M0 + ml) + _ni * _l, args = (p, _T, _mu, _Phi, _Phib, _Mth, _ni, _l, key))
         return (p ** 2) * inner_int
     def mass_integrand2(_m, _p, _T2, _mu2, _Phi2, _Phib2, _bmass, _thmass, _Ni, _L, _T_crit, _reg, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -635,7 +635,7 @@ def gcp_real_a4(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_boson_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).real
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor * _reg
     def integrand2(p, _T, _mu, _Phi, _Phib, _Mi, _Mth, _ni, _l, _T_c, _regulator, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
@@ -663,7 +663,7 @@ def gcp_imag_a4(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
     debug_flag = options['gcp_cluster_debug_flag']
 
     def mass_integrand1(_m, _p, _T2, _mu2, _Phi2, _Phib2, _thmass, _Ni, _L, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -697,14 +697,14 @@ def gcp_imag_a4(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_boson_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).imag
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor
     def integrand1(p, _T, _mu, _Phi, _Phib, _Mth, _ni, _l, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
         inner_int, _ = scipy.integrate.quad(mass_integrand1, _Mth, _ni * (M0 + ml) + _ni * _l, args = (p, _T, _mu, _Phi, _Phib, _Mth, _ni, _l, key))
         return (p ** 2) * inner_int
     def mass_integrand2(_m, _p, _T2, _mu2, _Phi2, _Phib2, _bmass, _thmass, _Ni, _L, _T_crit, _reg, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -749,7 +749,7 @@ def gcp_imag_a4(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_boson_triplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).imag
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor * _reg
     def integrand2(p, _T, _mu, _Phi, _Phib, _Mi, _Mth, _ni, _l, _T_c, _regulator, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
@@ -777,7 +777,7 @@ def gcp_real_a5(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
     debug_flag = options['gcp_cluster_debug_flag']
 
     def mass_integrand1(_m, _p, _T2, _mu2, _Phi2, _Phib2, _thmass, _Ni, _L, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -811,14 +811,14 @@ def gcp_real_a5(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_fermion_antitriplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).real
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor
     def integrand1(p, _T, _mu, _Phi, _Phib, _Mth, _ni, _l, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
         inner_int, _ = scipy.integrate.quad(mass_integrand1, _Mth, _ni * (M0 + ml) + _ni * _l, args = (p, _T, _mu, _Phi, _Phib, _Mth, _ni, _l, key))
         return (p ** 2) * inner_int
     def mass_integrand2(_m, _p, _T2, _mu2, _Phi2, _Phib2, _bmass, _thmass, _Ni, _L, _T_crit, _reg, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -863,7 +863,7 @@ def gcp_real_a5(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_fermion_antitriplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).real
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor * _reg
     def integrand2(p, _T, _mu, _Phi, _Phib, _Mi, _Mth, _ni, _l, _T_c, _regulator, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
@@ -891,7 +891,7 @@ def gcp_imag_a5(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
     debug_flag = options['gcp_cluster_debug_flag']
 
     def mass_integrand1(_m, _p, _T2, _mu2, _Phi2, _Phib2, _thmass, _Ni, _L, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -925,14 +925,14 @@ def gcp_imag_a5(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_fermion_antitriplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).imag
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor
     def integrand1(p, _T, _mu, _Phi, _Phib, _Mth, _ni, _l, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
         inner_int, _ = scipy.integrate.quad(mass_integrand1, _Mth, _ni * (M0 + ml) + _ni * _l, args = (p, _T, _mu, _Phi, _Phib, _Mth, _ni, _l, key))
         return (p ** 2) * inner_int
     def mass_integrand2(_m, _p, _T2, _mu2, _Phi2, _Phib2, _bmass, _thmass, _Ni, _L, _T_crit, _reg, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -977,7 +977,7 @@ def gcp_imag_a5(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
         fme = pnjl.thermo.distributions.f_fermion_antitriplet(_Phi2, _Phib2, **ym1, **ym2, **ym3).imag
         return (_m / pnjl.aux_functions.En(_p, _m)) * (fpe + fme) * continuum_factor * _reg
     def integrand2(p, _T, _mu, _Phi, _Phib, _Mi, _Mth, _ni, _l, _T_c, _regulator, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
@@ -1005,7 +1005,7 @@ def gcp_real_a6(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
     debug_flag = options['gcp_cluster_debug_flag']
 
     def mass_integrand1(_m, _p, _T2, _mu2, _thmass, _Ni, _L, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -1034,14 +1034,14 @@ def gcp_real_a6(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
 
         return out
     def integrand1(p, _T, _mu, _Mth, _ni, _l, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
         inner_int, _ = scipy.integrate.quad(mass_integrand1, _Mth, _ni * (M0 + ml) + _ni * _l, args = (p, _T, _mu, _Mth, _ni, _l, key))
         return (p ** 2) * inner_int
     def mass_integrand2(_m, _p, _T2, _mu2, _bmass, _thmass, _Ni, _L, _T_crit, _reg, key2):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key2)
         M0 = options['M0']
         ml = options['ml']
@@ -1081,7 +1081,7 @@ def gcp_real_a6(T : float, mu : float, Phi : complex, Phib : complex, bmass : fl
 
         return out
     def integrand2(p, _T, _mu, _Mi, _Mth, _ni, _l, _T_c, _regulator, key):
-        options = {'M0' : pnjl.defaults.default_M0, 'ml' : pnjl.defaults.default_ml}
+        options = {'M0' : pnjl.defaults.M0, 'ml' : pnjl.defaults.ML}
         options.update(key)
         M0 = options['M0']
         ml = options['ml']
@@ -1123,7 +1123,7 @@ def calc_PL(
     if light_kwargs is None:
         light_kwargs = {}
     if strange_kwargs is None:
-        strange_kwargs = {'Nf' : 1.0, 'ml' : pnjl.defaults.default_ms}
+        strange_kwargs = {'Nf' : 1.0, 'ml' : pnjl.defaults.MS}
     if gluon_kwargs is None:
         gluon_kwargs = {}
     if perturbative_kwargs is None:
@@ -1169,17 +1169,17 @@ def calc_PL(
         diquark_thmass = 2.0 * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T, mu)
         d_diquark = 1.0 * 1.0 * 3.0
         ni_diquark = 2.0
-        l_diquark = pnjl.defaults.default_L
+        l_diquark = pnjl.defaults.L
         fquark_bmass = pnjl.defaults.default_MF
         fquark_thmass = 4.0 * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T, mu)
         d_fquark = 1.0 * 1.0 * 3.0
         ni_fquark = 4.0
-        l_fquark = pnjl.defaults.default_L
+        l_fquark = pnjl.defaults.L
         qquark_bmass = pnjl.defaults.default_MQ
         qquark_thmass = 5.0 * math.sqrt(2) * pnjl.thermo.gcp_sea_lattice.M(T, mu)
         d_qquark = 2.0 * 2.0 * 3.0
         ni_qquark = 5.0
-        l_qquark = pnjl.defaults.default_L
+        l_qquark = pnjl.defaults.L
 
         omega_result = scipy.optimize.dual_annealing(
                 thermodynamic_potential_with_clusters,
@@ -1311,12 +1311,12 @@ def cluster_regulator_calc(mu : float, nophi = False):
 
         print("Regulator data missing. Calculating...")
 
-        Tc0 = pnjl.defaults.default_Tc0
-        kappa = pnjl.defaults.default_kappa
-        delta_T = pnjl.defaults.default_delta_T
-        M0 = pnjl.defaults.default_M0
-        ml = pnjl.defaults.default_ml
-        ms = pnjl.defaults.default_ms
+        Tc0 = pnjl.defaults.TC0
+        kappa = pnjl.defaults.KAPPA
+        delta_T = pnjl.defaults.DELTA_T
+        M0 = pnjl.defaults.M0
+        ml = pnjl.defaults.ML
+        ms = pnjl.defaults.MS
 
         MN = pnjl.defaults.default_MN
         NN = 3.0
@@ -1363,7 +1363,7 @@ def cluster_regulator_calc(mu : float, nophi = False):
         sQ5 = 0.0
         dQ5 = (2.0 * 1.0 * 3.0) / 2.0
 
-        L = pnjl.defaults.default_L
+        L = pnjl.defaults.L
 
         print("T_Mott...")
 
@@ -1450,28 +1450,28 @@ def cluster_regulator_calc(mu : float, nophi = False):
 
         print("M_th...")
 
-        MthN_low = ((NN - sN) * pnjl.thermo.gcp_sea_lattice.M(T_crit_N - 3e-2, mu) + sN * pnjl.thermo.gcp_sea_lattice.M(T_crit_N - 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthN_high = ((NN - sN) * pnjl.thermo.gcp_sea_lattice.M(T_crit_N + 3e-2, mu) + sN * pnjl.thermo.gcp_sea_lattice.M(T_crit_N + 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthP_low = ((NP - sP) * pnjl.thermo.gcp_sea_lattice.M(T_crit_P - 3e-2, mu) + sP * pnjl.thermo.gcp_sea_lattice.M(T_crit_P - 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthP_high = ((NP - sP) * pnjl.thermo.gcp_sea_lattice.M(T_crit_P + 3e-2, mu) + sP * pnjl.thermo.gcp_sea_lattice.M(T_crit_P + 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthH_low = ((NH - sH) * pnjl.thermo.gcp_sea_lattice.M(T_crit_H - 3e-2, mu) + sH * pnjl.thermo.gcp_sea_lattice.M(T_crit_H - 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthH_high = ((NH - sH) * pnjl.thermo.gcp_sea_lattice.M(T_crit_H + 3e-2, mu) + sH * pnjl.thermo.gcp_sea_lattice.M(T_crit_H + 3e-2, mu, ml = pnjl.defaults.default_ms))
-        Mthpi_low = ((Npi - spi) * pnjl.thermo.gcp_sea_lattice.M(T_crit_pi - 3e-2, mu) + spi * pnjl.thermo.gcp_sea_lattice.M(T_crit_pi - 3e-2, mu, ml = pnjl.defaults.default_ms))
-        Mthpi_high = ((Npi - spi) * pnjl.thermo.gcp_sea_lattice.M(T_crit_pi + 3e-2, mu) + spi * pnjl.thermo.gcp_sea_lattice.M(T_crit_pi + 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthK_low = ((NK - sK) * pnjl.thermo.gcp_sea_lattice.M(T_crit_K - 3e-2, mu) + sK * pnjl.thermo.gcp_sea_lattice.M(T_crit_K - 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthK_high = ((NK - sK) * pnjl.thermo.gcp_sea_lattice.M(T_crit_K + 3e-2, mu) + sK * pnjl.thermo.gcp_sea_lattice.M(T_crit_K + 3e-2, mu, ml = pnjl.defaults.default_ms))
-        Mthrho_low = ((Nrho - srho) * pnjl.thermo.gcp_sea_lattice.M(T_crit_rho - 3e-2, mu) + srho * pnjl.thermo.gcp_sea_lattice.M(T_crit_rho - 3e-2, mu, ml = pnjl.defaults.default_ms))
-        Mthrho_high = ((Nrho - srho) * pnjl.thermo.gcp_sea_lattice.M(T_crit_rho + 3e-2, mu) + srho * pnjl.thermo.gcp_sea_lattice.M(T_crit_rho + 3e-2, mu, ml = pnjl.defaults.default_ms))
-        Mthomega_low = ((Nomega - somega) * pnjl.thermo.gcp_sea_lattice.M(T_crit_omega - 3e-2, mu) + somega * pnjl.thermo.gcp_sea_lattice.M(T_crit_omega - 3e-2, mu, ml = pnjl.defaults.default_ms))
-        Mthomega_high = ((Nomega - somega) * pnjl.thermo.gcp_sea_lattice.M(T_crit_omega + 3e-2, mu) + somega * pnjl.thermo.gcp_sea_lattice.M(T_crit_omega + 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthT_low = ((NT - sT) * pnjl.thermo.gcp_sea_lattice.M(T_crit_T - 3e-2, mu) + sT * pnjl.thermo.gcp_sea_lattice.M(T_crit_T - 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthT_high = ((NT - sT) * pnjl.thermo.gcp_sea_lattice.M(T_crit_T + 3e-2, mu) + sT * pnjl.thermo.gcp_sea_lattice.M(T_crit_T + 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthD_low = ((ND - sD) * pnjl.thermo.gcp_sea_lattice.M(T_crit_D - 3e-2, mu) + sD * pnjl.thermo.gcp_sea_lattice.M(T_crit_D - 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthD_high = ((ND - sD) * pnjl.thermo.gcp_sea_lattice.M(T_crit_D + 3e-2, mu) + sD * pnjl.thermo.gcp_sea_lattice.M(T_crit_D + 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthF_low = ((NF - sF) * pnjl.thermo.gcp_sea_lattice.M(T_crit_F - 3e-2, mu) + sF * pnjl.thermo.gcp_sea_lattice.M(T_crit_F - 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthF_high = ((NF - sF) * pnjl.thermo.gcp_sea_lattice.M(T_crit_F + 3e-2, mu) + sF * pnjl.thermo.gcp_sea_lattice.M(T_crit_F + 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthQ5_low = ((NQ5 - sQ5) * pnjl.thermo.gcp_sea_lattice.M(T_crit_Q5 - 3e-2, mu) + sQ5 * pnjl.thermo.gcp_sea_lattice.M(T_crit_Q5 - 3e-2, mu, ml = pnjl.defaults.default_ms))
-        MthQ5_high = ((NQ5 - sQ5) * pnjl.thermo.gcp_sea_lattice.M(T_crit_Q5 + 3e-2, mu) + sQ5 * pnjl.thermo.gcp_sea_lattice.M(T_crit_Q5 + 3e-2, mu, ml = pnjl.defaults.default_ms))
+        MthN_low = ((NN - sN) * pnjl.thermo.gcp_sea_lattice.M(T_crit_N - 3e-2, mu) + sN * pnjl.thermo.gcp_sea_lattice.M(T_crit_N - 3e-2, mu, ml = pnjl.defaults.MS))
+        MthN_high = ((NN - sN) * pnjl.thermo.gcp_sea_lattice.M(T_crit_N + 3e-2, mu) + sN * pnjl.thermo.gcp_sea_lattice.M(T_crit_N + 3e-2, mu, ml = pnjl.defaults.MS))
+        MthP_low = ((NP - sP) * pnjl.thermo.gcp_sea_lattice.M(T_crit_P - 3e-2, mu) + sP * pnjl.thermo.gcp_sea_lattice.M(T_crit_P - 3e-2, mu, ml = pnjl.defaults.MS))
+        MthP_high = ((NP - sP) * pnjl.thermo.gcp_sea_lattice.M(T_crit_P + 3e-2, mu) + sP * pnjl.thermo.gcp_sea_lattice.M(T_crit_P + 3e-2, mu, ml = pnjl.defaults.MS))
+        MthH_low = ((NH - sH) * pnjl.thermo.gcp_sea_lattice.M(T_crit_H - 3e-2, mu) + sH * pnjl.thermo.gcp_sea_lattice.M(T_crit_H - 3e-2, mu, ml = pnjl.defaults.MS))
+        MthH_high = ((NH - sH) * pnjl.thermo.gcp_sea_lattice.M(T_crit_H + 3e-2, mu) + sH * pnjl.thermo.gcp_sea_lattice.M(T_crit_H + 3e-2, mu, ml = pnjl.defaults.MS))
+        Mthpi_low = ((Npi - spi) * pnjl.thermo.gcp_sea_lattice.M(T_crit_pi - 3e-2, mu) + spi * pnjl.thermo.gcp_sea_lattice.M(T_crit_pi - 3e-2, mu, ml = pnjl.defaults.MS))
+        Mthpi_high = ((Npi - spi) * pnjl.thermo.gcp_sea_lattice.M(T_crit_pi + 3e-2, mu) + spi * pnjl.thermo.gcp_sea_lattice.M(T_crit_pi + 3e-2, mu, ml = pnjl.defaults.MS))
+        MthK_low = ((NK - sK) * pnjl.thermo.gcp_sea_lattice.M(T_crit_K - 3e-2, mu) + sK * pnjl.thermo.gcp_sea_lattice.M(T_crit_K - 3e-2, mu, ml = pnjl.defaults.MS))
+        MthK_high = ((NK - sK) * pnjl.thermo.gcp_sea_lattice.M(T_crit_K + 3e-2, mu) + sK * pnjl.thermo.gcp_sea_lattice.M(T_crit_K + 3e-2, mu, ml = pnjl.defaults.MS))
+        Mthrho_low = ((Nrho - srho) * pnjl.thermo.gcp_sea_lattice.M(T_crit_rho - 3e-2, mu) + srho * pnjl.thermo.gcp_sea_lattice.M(T_crit_rho - 3e-2, mu, ml = pnjl.defaults.MS))
+        Mthrho_high = ((Nrho - srho) * pnjl.thermo.gcp_sea_lattice.M(T_crit_rho + 3e-2, mu) + srho * pnjl.thermo.gcp_sea_lattice.M(T_crit_rho + 3e-2, mu, ml = pnjl.defaults.MS))
+        Mthomega_low = ((Nomega - somega) * pnjl.thermo.gcp_sea_lattice.M(T_crit_omega - 3e-2, mu) + somega * pnjl.thermo.gcp_sea_lattice.M(T_crit_omega - 3e-2, mu, ml = pnjl.defaults.MS))
+        Mthomega_high = ((Nomega - somega) * pnjl.thermo.gcp_sea_lattice.M(T_crit_omega + 3e-2, mu) + somega * pnjl.thermo.gcp_sea_lattice.M(T_crit_omega + 3e-2, mu, ml = pnjl.defaults.MS))
+        MthT_low = ((NT - sT) * pnjl.thermo.gcp_sea_lattice.M(T_crit_T - 3e-2, mu) + sT * pnjl.thermo.gcp_sea_lattice.M(T_crit_T - 3e-2, mu, ml = pnjl.defaults.MS))
+        MthT_high = ((NT - sT) * pnjl.thermo.gcp_sea_lattice.M(T_crit_T + 3e-2, mu) + sT * pnjl.thermo.gcp_sea_lattice.M(T_crit_T + 3e-2, mu, ml = pnjl.defaults.MS))
+        MthD_low = ((ND - sD) * pnjl.thermo.gcp_sea_lattice.M(T_crit_D - 3e-2, mu) + sD * pnjl.thermo.gcp_sea_lattice.M(T_crit_D - 3e-2, mu, ml = pnjl.defaults.MS))
+        MthD_high = ((ND - sD) * pnjl.thermo.gcp_sea_lattice.M(T_crit_D + 3e-2, mu) + sD * pnjl.thermo.gcp_sea_lattice.M(T_crit_D + 3e-2, mu, ml = pnjl.defaults.MS))
+        MthF_low = ((NF - sF) * pnjl.thermo.gcp_sea_lattice.M(T_crit_F - 3e-2, mu) + sF * pnjl.thermo.gcp_sea_lattice.M(T_crit_F - 3e-2, mu, ml = pnjl.defaults.MS))
+        MthF_high = ((NF - sF) * pnjl.thermo.gcp_sea_lattice.M(T_crit_F + 3e-2, mu) + sF * pnjl.thermo.gcp_sea_lattice.M(T_crit_F + 3e-2, mu, ml = pnjl.defaults.MS))
+        MthQ5_low = ((NQ5 - sQ5) * pnjl.thermo.gcp_sea_lattice.M(T_crit_Q5 - 3e-2, mu) + sQ5 * pnjl.thermo.gcp_sea_lattice.M(T_crit_Q5 - 3e-2, mu, ml = pnjl.defaults.MS))
+        MthQ5_high = ((NQ5 - sQ5) * pnjl.thermo.gcp_sea_lattice.M(T_crit_Q5 + 3e-2, mu) + sQ5 * pnjl.thermo.gcp_sea_lattice.M(T_crit_Q5 + 3e-2, mu, ml = pnjl.defaults.MS))
 
         def slope_diff(reg, reg1, _T_crit, _mu, _phire_low, _phiim_low, _phire_high, _phiim_high, _M, _Mth_low, _Mth_high, _d, _N, _L, _a, _b, name):
             print("Cluster", name, "regulator value", reg[0])
@@ -1689,7 +1689,7 @@ def bdensity(T : float, mu : float, Phi : complex, Phib : complex, bmass : float
             return bdensity(T, mu + h, Phi, Phib, bmass, thmass, a, b, d, Ni, L, T_crit, regulator, regulator2, **kwargs)
     Phi_vec = [Phi for el in mu_vec]
     Phib_vec = [Phib for el in mu_vec]
-    Mth_vec = [((Ni - math.fabs(b)) * pnjl.thermo.gcp_sea_lattice.M(T, el) + math.fabs(b) * pnjl.thermo.gcp_sea_lattice.M(T, el, ml = pnjl.defaults.default_ms)) for el in mu_vec]
+    Mth_vec = [((Ni - math.fabs(b)) * pnjl.thermo.gcp_sea_lattice.M(T, el) + math.fabs(b) * pnjl.thermo.gcp_sea_lattice.M(T, el, ml = pnjl.defaults.MS)) for el in mu_vec]
 
     if len(mu_vec) == len(Phi_vec) and len(mu_vec) == len(Phib_vec) and len(mu_vec) == len(Mth_vec):
         if len(mu_vec) == 4 and numpy.all(mu_vec[i] > mu_vec[i + 1] for i, el in enumerate(mu_vec[:-1])):
@@ -1775,7 +1775,7 @@ def sdensity(
         T_crit : float, regulator : float, regulator2 : float, type : str, **kwargs
 ) -> float:
     
-    if type not in pnjl.defaults.default_M:
+    if type not in pnjl.defaults.MI:
         raise RuntimeError("Unknown cluster type!")
 
     bmass : float, a : int, b : int, d : float, Ni : float, 
@@ -1792,7 +1792,7 @@ def sdensity(
             return sdensity(T + h, mu, Phi, Phib, bmass, thmass, a, b, d, Ni, L, T_crit, regulator, regulator2, **kwargs)
     Phi_vec = [Phi for el in T_vec]
     Phib_vec = [Phib for el in T_vec]
-    Mth_vec = [((Ni - math.fabs(b)) * pnjl.thermo.gcp_sea_lattice.M(el, mu) + math.fabs(b) * pnjl.thermo.gcp_sea_lattice.M(el, mu, ml = pnjl.defaults.default_ms)) for el in T_vec]
+    Mth_vec = [((Ni - math.fabs(b)) * pnjl.thermo.gcp_sea_lattice.M(el, mu) + math.fabs(b) * pnjl.thermo.gcp_sea_lattice.M(el, mu, ml = pnjl.defaults.MS)) for el in T_vec]
 
     if len(T_vec) == len(Phi_vec) and len(T_vec) == len(Phib_vec) and len(T_vec) == len(Mth_vec):
         if len(T_vec) == 4 and numpy.all(T_vec[i] > T_vec[i + 1] for i, el in enumerate(T_vec[:-1])):
@@ -1859,15 +1859,15 @@ def cluster_thermo(T, mu, phi_re, phi_im, L, regulator, regulator2, typ, **kwarg
             - 'bnumber_R2' if with_bnumber_R2 set to True.
     """
 
-    if typ not in pnjl.defaults.default_M:
+    if typ not in pnjl.defaults.MI:
         raise RuntimeError("Unknown cluster type!")
 
-    M = pnjl.defaults.default_M[typ]
+    M = pnjl.defaults.MI[typ]
     #a = pnjl.defaults.default_a[typ]
     #b = pnjl.defaults.default_b[typ]
     #dx = pnjl.defaults.default_d[typ]
-    Ni = pnjl.defaults.default_N[typ]
-    s = pnjl.defaults.default_s[typ]
+    Ni = pnjl.defaults.NI[typ]
+    s = pnjl.defaults.S[typ]
 
     options = {
         'with_pressure' : True,
@@ -1877,12 +1877,12 @@ def cluster_thermo(T, mu, phi_re, phi_im, L, regulator, regulator2, typ, **kwarg
     }
     options.update(kwargs)
 
-    Tc0 = pnjl.defaults.default_Tc0
-    kappa = pnjl.defaults.default_kappa
-    delta_T = pnjl.defaults.default_delta_T
-    M0 = pnjl.defaults.default_M0
-    ml = pnjl.defaults.default_ml
-    ms =  pnjl.defaults.default_ms
+    Tc0 = pnjl.defaults.TC0
+    kappa = pnjl.defaults.KAPPA
+    delta_T = pnjl.defaults.DELTA_T
+    M0 = pnjl.defaults.M0
+    ml = pnjl.defaults.ML
+    ms =  pnjl.defaults.MS
     with_pressure = options['with_pressure']
     with_bdensity = options['with_bdensity']
     with_sdensity = options['with_sdensity']

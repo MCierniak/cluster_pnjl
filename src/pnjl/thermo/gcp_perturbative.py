@@ -1,36 +1,65 @@
-import scipy.integrate
+"""Pertrubative correction of the PNJL grandcanonical potential.
+Finite-mu extension of formulas in https://arxiv.org/pdf/2012.12894.pdf .
+Based on https://inspirehep.net/files/901191eb2f4d03c023787042343325d2 .
+
+### Functions
+alpha_s
+    QCD running coupling.
+"""
+
+
 import numpy
 import math
+
+import scipy.integrate
 
 import pnjl.thermo.gcp_sea_lattice
 import pnjl.thermo.distributions
 import pnjl.defaults
 
-#Perturbative contribution to the GCP from https://arxiv.org/pdf/2012.12894.pdf
 
-def alpha_s(T : float, mu : float, **kwargs) -> float:
-    
-    options = {'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.default_Nc, 'c' : pnjl.defaults.default_c, 'd' : pnjl.defaults.default_d}
-    options.update(kwargs)
+def alpha_s(T : float, mu : float) -> float:
+    """QCD running coupling.
 
-    Nf = options['Nf']
-    Nc = options['Nc']
-    c = options['c']
-    d = options['d']
+    ### Parameters
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
 
-    r = d * T
-    return ((12.0 * math.pi) / (11 * Nc - 2 * Nf)) * ( (1.0 / (math.log((r ** 2) / (c ** 2)))) - ((c ** 2) / ((r ** 2) - (c ** 2))) )
-def dalpha_s_dT(T : float, mu : float, **kwargs) -> float:
-    
-    options = {'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.default_Nc, 'c' : pnjl.defaults.default_c, 'd' : pnjl.defaults.default_d}
-    options.update(kwargs)
+    ### Returns
+    alpha_s : float
+        Value of the running coupling.
+    """
 
-    Nf = options['Nf']
-    Nc = options['Nc']
-    c = options['c']
-    d = options['d']
+    NF = 3.0
+    NC = pnjl.defaults.NC
+    C = pnjl.defaults.C
+    D = pnjl.defaults.D
 
-    return ((12.0 * np.pi) / (11 * Nc - 2 * Nf)) * ((2.0 * (c ** 2) * (d ** 2) * T) / (((d ** 2) * (T ** 2) - (c ** 2)) ** 2) - 2.0 / (T * (( math.log(d ** 2) + math.log((T ** 2) / (c ** 2))) ** 2)))
+    den1 = math.fsum([11.0 * NC, -2.0*NF])
+    den2 = math.fsum([
+        2.0*math.log(D),
+        2.0*math.log(T),
+        -2.0*math.log(C)
+    ])
+    den3 = math.fsum([((D*T)**2), -(C**2)])
+
+    par = math.fsum([1.0/den2, -(C**2)/den3])
+
+    return ((12.0*math.pi)/den1)*par
+
+
+def I_fermion_integrand_real(p: float, T: float, mu: float, )
+def I_fermion(
+    T: float, mu: float, phi_re: float, phi_im: float, typ: str
+) -> complex:
+    """
+    """
+
+
+
+
 def I_plus_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
     
     options = {'gcp_perturbative_debug_flag' : False}
@@ -46,7 +75,7 @@ def I_plus_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) 
         yp2["y_2_val"], yp2["y_2_status"] = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 2.0, **key)
         yp3["y_3_val"], yp3["y_3_status"] = pnjl.aux_functions.y_plus(x * _T, _T, _mu, 0.0, 1.0, 3.0, **key)
         fpe = pnjl.thermo.distributions.f_fermion_triplet(_Phi, _Phib, **yp1, **yp2, **yp3)
-        return (x / 3.0) * fpe.real
+        return x * fpe.real
 
     mass = pnjl.thermo.gcp_sea_lattice.M(T, mu, **kwargs)
     integral, error = scipy.integrate.quad(integrand, mass / T, math.inf, args = (mu, T, Phi, Phib, kwargs))
