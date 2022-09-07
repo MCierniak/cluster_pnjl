@@ -1,10 +1,6 @@
 """### Description
 Model parameters
 
-### Functions
-get_all_defaults
-    Function returning a dictionary of all global variables.
-
 ### Globals
 TC0 : float
 DELTA_T : float
@@ -238,33 +234,4 @@ S = {
     'Q': 0,
     'H': 0
 }
-
-
-def get_all_defaults(split_dict: bool = False) -> typing.Dict:
-    """### Description
-    Function returning a dictionary of all global variables.
-
-    ### Parameters
-    split_dict: bool, optional
-        Split dict globals into "global_name:dict_key" : "dict_val"
-        pair.
-
-    ### Returns
-    vars: dict
-        Dictionary of all global variables.
-    """
-    output = {}
-    for key, value in globals().items():
-        if isinstance(value, (float, int)):
-            output[str(key)] = value
-        elif isinstance(value, dict):
-            if numpy.all([
-                isinstance(ival, (float, int)) for ival in value.values()
-            ]):
-                if split_dict:
-                    for ikey, ival in value.items():
-                        output[str(key)+':'+str(ikey)] = ival
-                else:
-                    output[str(key)] = value
-    return output
 

@@ -4830,14 +4830,17 @@ if __name__ == '__main__':
 
     #cumulant_test()
 
-    import utils
+    import timeit
 
-    @utils.cached
-    def testfunc(a, b, c, d="test"):
-        print(a, b, c, d)
+    print(timeit.timeit("Tc(2.0)", "from pnjl.thermo.gcp_sea_lattice import Tc", number=1000000))
 
-    testfunc(1, 2, 3)
-    testfunc(3, 2, 1)
-    testfunc(3, 2, 1, d="last test")
+    """ from pnjl.thermo.gcp_sea_lattice import Tc
+
+    print(Tc(1.0))
+    print(Tc(1.0))
+    print(Tc(1.0)) """
+
+    from pnjl.thermo.gcp_sea_lattice import Tc
+    print(Tc.cache)
 
     print("END")

@@ -30,13 +30,17 @@ sdensity
 
 
 import math
+import functools
 
 import scipy.integrate
 
-import pnjl.thermo.distributions
+import utils
 import pnjl.defaults
+import pnjl.thermo.distributions
 
-
+#@utils.memcached(defs = pnjl.defaults.get_all_defaults(split_dict=True))
+@utils.simple_cache
+#@functools.lru_cache
 def Tc(mu: float) -> float:
     """Pseudo-critical temperature ansatz.
 
