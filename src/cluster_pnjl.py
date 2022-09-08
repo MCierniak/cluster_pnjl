@@ -4826,21 +4826,16 @@ def pnjl_with_sigma_test():
 """
 
 
+import pnjl.thermo.gcp_pl_polynomial
+import pnjl.thermo.gcp_sea_lattice
+import pnjl.defaults
+import utils
+
+
 if __name__ == '__main__':
 
     #cumulant_test()
 
-    import timeit
-
-    print(timeit.timeit("Tc(2.0)", "from pnjl.thermo.gcp_sea_lattice import Tc", number=1000000))
-
-    """ from pnjl.thermo.gcp_sea_lattice import Tc
-
-    print(Tc(1.0))
-    print(Tc(1.0))
-    print(Tc(1.0)) """
-
-    from pnjl.thermo.gcp_sea_lattice import Tc
-    print(Tc.cache)
+    print(pnjl.thermo.gcp_sea_lattice.pressure(1.0, 1.0, 'l'))
 
     print("END")

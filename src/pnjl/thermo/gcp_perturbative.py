@@ -13,11 +13,16 @@ import math
 
 import scipy.integrate
 
-import pnjl.thermo.gcp_sea_lattice
-import pnjl.thermo.distributions
+import utils
 import pnjl.defaults
+import pnjl.thermo.distributions
+import pnjl.thermo.gcp_sea_lattice
 
 
+utils.verify_checksum()
+
+
+@utils.cached
 def alpha_s(T : float, mu : float) -> float:
     """QCD running coupling.
 

@@ -20,9 +20,14 @@ sdensity
 import typing
 import math
 
+import utils
 import pnjl.defaults
 
 
+utils.verify_checksum()
+
+
+@utils.cached
 def b2(T : float) -> float:
     """B2 coeficient of the Polyakov-loop potential.
 
@@ -44,6 +49,7 @@ def b2(T : float) -> float:
     return math.fsum([A0, A1*(T0/T), A2*((T0/T)**2), A3*((T0/T)**3)])
 
 
+@utils.cached
 def U(T : float, phi_re : float, phi_im : float) -> float:
     """Polyakov-loop grandcanonical thermodynamic potential.
 
@@ -75,6 +81,7 @@ def U(T : float, phi_re : float, phi_im : float) -> float:
     return ((T**4)/12.0)*math.fsum(phi_sum)
 
 
+@utils.cached
 def pressure(T : float, phi_re : float, phi_im : float) -> float:
     """Polyakov-loop pressure.
 
@@ -94,6 +101,7 @@ def pressure(T : float, phi_re : float, phi_im : float) -> float:
     return -U(T, phi_re, phi_im)
 
 
+@utils.cached
 def bdensity(
     T: float, mu: float, phi_re : float, phi_im : float,
     phi_solver: typing.Callable[
@@ -137,8 +145,8 @@ def bdensity(
     if math.fsum([mu, -2*h]) > 0.0:
 
         mu_vec = [
-            math.fsum(mu, 2*h), math.fsum(mu, h),
-            math.fsum(mu, -h), math.fsum(mu, -2*h)
+            math.fsum([mu, 2*h]), math.fsum([mu, h]),
+            math.fsum([mu, -h]), math.fsum([mu, -2*h])
         ]
         deriv_coef = [
             -1.0/(12.0*h), 8.0/(12.0*h),
@@ -177,6 +185,7 @@ def bdensity(
         )
 
 
+@utils.cached
 def qnumber_cumulant(
     rank: int, T: float, mu: float, phi_re : float, phi_im : float,
     phi_solver: typing.Callable[
@@ -274,6 +283,7 @@ def qnumber_cumulant(
             )
 
 
+@utils.cached
 def sdensity(
     T: float, mu: float, phi_re : float, phi_im : float,
     phi_solver: typing.Callable[
@@ -355,4 +365,3 @@ def sdensity(
             new_T, mu, new_phi_re, new_phi_im, 
             phi_solver, fast_calc=fast_calc
         )
-

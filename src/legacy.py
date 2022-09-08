@@ -3285,3 +3285,52 @@ def phase_shift_test():
             print("Jak żyć?")
             input()
     #end"""
+
+""" def main():
+
+    import utils, pickle
+
+    @utils.cached
+    def func1(a, b):
+        print("I used func1!")
+        return a+b
+
+    @utils.cached
+    def func2(a, b):
+        print("I used func2!")
+        return a-b
+
+    print(func1(1,1))
+    print(func1(1,1))
+    print(func2(1,1))
+    print(func2(1,1))
+
+    with (
+        open(".cache/__main__.func1.cache", "rb") as file1,
+        open(".cache/__main__.func2.cache", "rb") as file2
+    ):
+        print(pickle.load(file1))
+        print(pickle.load(file2))
+
+    import timeit, utils, pickle
+
+    #utils.flush_cache()
+
+    print("Tc time", timeit.timeit("Tc(2.0)", "from pnjl.thermo.gcp_sea_lattice import Tc", number=1000000))
+    print("Delta_ls time", timeit.timeit("Delta_ls(1.0, 2.0)", "from pnjl.thermo.gcp_sea_lattice import Delta_ls", number=1000000))
+    print("Pressure time", timeit.timeit("pressure(2.0, 2.0, 'l', no_sea = False)", "from pnjl.thermo.gcp_sea_lattice import pressure", number=100000))
+
+    #main()
+
+    with (
+        open(".cache/pnjl.thermo.distributions.f_boson_triplet.cache", "rb") as file1,
+        open(".cache/pnjl.thermo.distributions.f_fermion_triplet.cache", "rb") as file2,
+        open(".cache/pnjl.thermo.gcp_sea_lattice.pressure.cache", "rb") as file3
+    ):
+        print(pickle.load(file1))
+        print(pickle.load(file2))
+        print(pickle.load(file3))
+
+    import gc, utils;
+    gc.collect()
+    print(len([obj for obj in gc.get_objects() if isinstance(obj, utils.cached)])) """

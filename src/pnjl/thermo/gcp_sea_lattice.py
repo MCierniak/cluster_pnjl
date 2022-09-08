@@ -30,7 +30,6 @@ sdensity
 
 
 import math
-import functools
 
 import scipy.integrate
 
@@ -38,9 +37,11 @@ import utils
 import pnjl.defaults
 import pnjl.thermo.distributions
 
-#@utils.memcached(defs = pnjl.defaults.get_all_defaults(split_dict=True))
-@utils.simple_cache
-#@functools.lru_cache
+
+utils.verify_checksum()
+
+
+@utils.cached
 def Tc(mu: float) -> float:
     """Pseudo-critical temperature ansatz.
 
@@ -59,6 +60,7 @@ def Tc(mu: float) -> float:
     return math.fsum([TC0, -TC0*KAPPA*((mu/TC0)**2)])
 
 
+@utils.cached
 def Delta_ls(T: float, mu: float) -> float:
     """LQCD-fit ansatz for the 2+1 Nf normalized chiral condensate.
 
@@ -80,6 +82,7 @@ def Delta_ls(T: float, mu: float) -> float:
     return math.fsum([0.5, -0.5*math.tanh(tanh_internal)])
 
 
+@utils.cached
 def Ml(T: float, mu: float) -> float:
     """Mass of up / down quarks (ansatz).
 
@@ -100,6 +103,7 @@ def Ml(T: float, mu: float) -> float:
     return math.fsum([M0*Delta_ls(T, mu), ML])
 
 
+@utils.cached
 def Ms(T: float, mu: float) -> float:
     """Mass of the strange quarks (ansatz).
 
@@ -120,6 +124,7 @@ def Ms(T: float, mu: float) -> float:
     return math.fsum([M0*Delta_ls(T, mu), MS])
 
 
+@utils.cached
 def V(T: float, mu: float) -> float:
     """Sigma mean-field grandcanonical thermodynamic potential.
 
@@ -143,7 +148,8 @@ def V(T: float, mu: float) -> float:
     ])
 
 
-def gcp_real_l_integrand(p: float, mass: float) -> float:   
+@utils.cached
+def gcp_l_integrand(p: float, mass: float) -> float:   
 
     M_L_VAC = pnjl.defaults.M_L_VAC
 
@@ -155,7 +161,8 @@ def gcp_real_l_integrand(p: float, mass: float) -> float:
     return (p**2)*energy_norm
 
 
-def gcp_real_l(T: float, mu: float) -> float:
+@utils.cached
+def gcp_l(T: float, mu: float) -> float:
     """Fermi sea grandcanonical thermodynamic potential of a single light quark flavor.
 
     ### Parameters
@@ -174,12 +181,13 @@ def gcp_real_l(T: float, mu: float) -> float:
 
     mass = Ml(T, mu)
     
-    integral, error = scipy.integrate.quad(gcp_real_l_integrand, 0.0, LAMBDA, args=(mass,))
+    integral, error = scipy.integrate.quad(gcp_l_integrand, 0.0, LAMBDA, args=(mass,))
     
     return (1.0/(math.pi**2))*(NC/3.0)*integral
 
 
-def gcp_real_s_integrand(p: float, mass: float) -> float:   
+@utils.cached
+def gcp_s_integrand(p: float, mass: float) -> float:   
 
     M_S_VAC = pnjl.defaults.M_S_VAC
 
@@ -191,7 +199,8 @@ def gcp_real_s_integrand(p: float, mass: float) -> float:
     return (p**2)*energy_norm
 
 
-def gcp_real_s(T: float, mu: float) -> float:
+@utils.cached
+def gcp_s(T: float, mu: float) -> float:
     """Fermi sea grandcanonical thermodynamic potential of a single strange quark flavor.
 
     ### Parameters
@@ -210,19 +219,21 @@ def gcp_real_s(T: float, mu: float) -> float:
 
     mass = Ms(T, mu)
     
-    integral, error = scipy.integrate.quad(gcp_real_s_integrand, 0.0, LAMBDA, args=(mass,))
+    integral, error = scipy.integrate.quad(gcp_s_integrand, 0.0, LAMBDA, args=(mass,))
     
     return (1.0/(math.pi**2))*(NC/3.0)*integral
 
 
 gcp_hash = {
-    'l' : gcp_real_l,
-    's' : gcp_real_s,
+    'l' : gcp_l,
+    's' : gcp_s,
     'sigma' : V
 }
 
 
+@utils.cached
 def pressure(T: float, mu: float, typ: str, no_sea: bool = True) -> float:
+    print("I am being calculated!")
     """Fermi sea pressure of a single quark flavor.
 
     ### Parameters
@@ -249,6 +260,7 @@ def pressure(T: float, mu: float, typ: str, no_sea: bool = True) -> float:
         return -gcp_hash[typ](T, mu)
 
 
+@utils.cached
 def bdensity(T: float, mu: float, typ: str, no_sea: bool = True) -> float:
     """Fermi sea baryon density of a single quark flavor.
 
@@ -298,6 +310,7 @@ def bdensity(T: float, mu: float, typ: str, no_sea: bool = True) -> float:
             return bdensity(T, math.fsum([mu, h]), typ, no_sea=no_sea)
 
 
+@utils.cached
 def qnumber_cumulant(rank: int, T: float, mu: float, typ: str, no_sea: bool = True) -> float:
     """Fermi sea quark number cumulant chi_q of a single quark flavor. Based on Eq.29 of
     https://arxiv.org/pdf/2012.12894.pdf and the subsequent inline definition.
@@ -354,6 +367,7 @@ def qnumber_cumulant(rank: int, T: float, mu: float, typ: str, no_sea: bool = Tr
                 return qnumber_cumulant(rank, T, math.fsum([mu, h]), typ, no_sea=no_sea)
 
 
+@utils.cached
 def sdensity(T: float, mu: float, typ: str, no_sea: bool = True):
     """Fermi sea entropy density of a single quark flavor.
 
@@ -401,4 +415,3 @@ def sdensity(T: float, mu: float, typ: str, no_sea: bool = True):
 
         else:
             return sdensity(math.fsum([T, h]), mu, typ, no_sea=no_sea)
-

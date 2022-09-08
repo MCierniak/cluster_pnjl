@@ -130,8 +130,11 @@ S : dict[str, float]
 
 
 import math
-import numpy
-import typing
+
+import utils
+
+
+utils.verify_checksum()
 
 
 TC0 = 154.#170.
@@ -234,4 +237,3 @@ S = {
     'Q': 0,
     'H': 0
 }
-

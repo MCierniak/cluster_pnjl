@@ -13,15 +13,19 @@ data_append
 
 import os
 import csv
+import sty
 import glob
-import shelve
 import typing
-import sqlite3
+import pickle
+import atexit
+import hashlib
+import inspect
 import functools
-import collections
-import _thread
 
 
+EXP_LIMIT = 709.78271
+MAX_REAL_CALLS = 1000
+CACHE_FOLDER = ".cache/"
 cast_hash = {
     "float": float,
     "str": str,
@@ -121,206 +125,105 @@ def data_append(path: str, *columns: typing.Sequence) -> None:
         writer.writerows([[*els] for els in zip(*columns)])
 
 
-def simple_cache(func):
-    func.cache = {}
-    #@functools.wraps(func)
-    def wrapper(*args, **kwds):
-        key = args
-        result = func.cache.get(key)
-        if result:
+def flush_cache():
+    for file in glob.glob(CACHE_FOLDER+'*.cache'):
+            os.remove(file)
+
+
+class cached:
+    """### Description
+    Persistent cache decorator. Warning! Instances will not get garbage 
+    collected, use only as toplevel function decorator!
+    """
+
+    def __init__(self, func):
+        self.real_calls = 0
+        self.func = func
+        self.filepath = CACHE_FOLDER \
+                        +self.func.__module__ \
+                        +'.' \
+                        +self.func.__name__ \
+                        +'.cache'
+        try:
+            with open(self.filepath, "rb") as file:
+                self.cache = pickle.load(file)
+        except FileNotFoundError as e:
+            self.cache = {}
+
+        def cleanup():
+            with open(self.filepath, "wb") as file:
+                pickle.dump(self.cache, file)
+
+        atexit.register(cleanup)
+
+    @functools.lru_cache
+    def __call__(self, *args, **kwds):
+        key = ""
+        if args:
+            for arg in args:
+                if not callable(arg):
+                    key += str(arg) + ", "
+        key += str(kwds)
+        try:
+            return self.cache[key]
+        except KeyError:
+            if self.real_calls >= MAX_REAL_CALLS:
+                self.cleanup()
+                self.real_calls = 0
+            else:
+                self.real_calls += 1
+            self.cache[key] = result = self.func(*args, **kwds)
             return result
-        func.cache[key] = result = func(*args, **kwds)
-        return result
-    return wrapper
 
 
-#implement this as function decorator!
-#https://www.datacamp.com/tutorial/decorators-python
-#https://stackoverflow.com/questions/2392017/sqlite-or-flat-text-file
-#use sqlite for cached data storage
-#class cache_nokwargs:
-#    def __init__(self, func):
-#        self.func = func
-#        self.eval_points = {}
-#    def __call__(self, *args):
-#        if args not in self.eval_points:
-#            self.eval_points[args] = self.func(*args)
-#        return self.eval_points[args]
+def md5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
-#remake as class... finish this...
-#def cached(defs: typing.Optional[dict] = None):
-#
-#    def decorator(func):
-#
-#        defs = {} if not defs else defs
-#
-#        cached_defs = {}
-#        for key, val in data_collect(".cache/defs.dat", 0, 1):
-#            cached_defs[key] = val
-#
-#        if not defs == cached_defs:
-#
-#            for file in glob.glob('.cache/*'): os.remove(file)
-#            
-#            with open(".cache/defs.dat", 'w', newline = '') as file:
-#                writer = csv.writer(file, delimiter = '\t')
-#                writer.writerows([[key, val] for key, val in defs])
-#
-#        def wrapper(*fargs, **fkwargs):
-#            return func(*fargs, **fkwargs)
-#
-#        return wrapper
-#
-#    return decorator
-#
-#class _cached:
-#
-#    def __init__(self, func, defs: typing.Optional[dict] = None):
-#
-#        self.func = func
-#        self.filename = ".cache/"+self.func.__module__+'.'+self.func.__name__
-#
-#        defs = {} if not defs else defs
-#
-#        cached_defs = {}
-#        for key, val in zip(
-#            *data_load(self.filename+".defs", 0, 1, cast = ["str", "float"])
-#        ):
-#            cached_defs[key] = val
-#
-#        if  (not defs == cached_defs) or \
-#            (not os.path.exists(self.filename+".defs")) or \
-#            (not os.path.exists(self.filename+".db")):
-#
-#            for file in glob.glob(self.filename+".*"):
-#                os.remove(file)
-#
-#            data_save(
-#                self.filename+".defs",
-#                tuple(defs.keys()),
-#                tuple(defs.values())
-#            )
-#
-#            self.db_con = sqlite3.connect(self.filename+".db")
-#            self.db_cur = self.db_con.cursor()
-#
-#            self.db_cur.executescript("""
-#                DROP TABLE IF EXISTS cache;
-#                CREATE TABLE IF NOT EXISTS cache (
-#                    record_id INTEGER PRIMARY KEY,
-#                    args VARCHAR(255),
-#                    kwds VARCHAR(255),
-#                    output DOUBLE
-#            )""")
-#
-#        else:
-#            self.db_con = sqlite3.connect(self.filename+".db")
-#            self.db_cur = self.db_con.cursor()
-#
-#    def __call__(self, *args, **kwds):
-#        self.db_cur.execute("SELECT output FROM cache WHERE args=? AND kwds=?", (str(args), str(kwds)))
-#        cached_data = self.db_cur.fetchall()
-#        if len(cached_data)>0:
-#            return float(cached_data[0][0])
-#        else:
-#            output = self.func(*args, **kwds)
-#            self.db_cur.execute("INSERT INTO cache(args, kwds, output) VALUES (?, ?, ?)", (str(args), str(kwds), output))
-#            return output
-#
-#    def __del__(self):
-#        self.db_con.commit()
-#        self.db_con.close()
-#
-#
-#def cached(func: typing.Optional[typing.Callable] = None, defs: typing.Optional[dict] = None):
-#    """### Description
-#    Decorator for caching function output. If the function was previously 
-#    called with the same args and kwds, the result will be read from memory
-#    instead of performing a repeat calculation. The cache will be reset on
-#    change of global parameters.
-#
-#    ### Parameters
-#    func: callable
-#        Decorated function
-#    defs: dict, optional
-#        Dictionary of global parameters.
-#
-#    ### Returns
-#    decorated_func:
-#        Output of the decorated function.
-#
-#    ### Examples
-#
-#    Function accessing global parameters:
-#    >>> @utils.cached(defs = pnjl.defaults.get_all_defaults(split_dict=True))
-#        def Tc(mu: float) -> float:
-#            TC0 = pnjl.defaults.TC0
-#            KAPPA = pnjl.defaults.KAPPA
-#            return math.fsum([TC0, -TC0*KAPPA*((mu/TC0)**2)])
-#
-#    Function independent of any global parameters (check if the function doesn't 
-#    internaly call another function that does depend on globals!)
-#    >>> @utils.cached
-#        def En(p: float, mass: float) -> float:
-#            body = math.fsum([p**2, mass**2])
-#            return math.sqrt(body)
-#    """
-#
-#    if func:
-#        return _cached(func, defs)
-#    else:
-#        def wrapper(func):
-#            return _cached(func, defs)
-#        return wrapper
-#
-#
-#class _memcached:
-#
-#    def __init__(self, func, defs: typing.Optional[dict] = None):
-#
-#        self.func = func
-#        self.filename = ".memcache/"+self.func.__module__+'.'+self.func.__name__
-#        self.mem = {}
-#
-#        defs = {} if not defs else defs
-#
-#        cached_defs = {}
-#        for key, val in zip(
-#            *data_load(self.filename+".defs", 0, 1, cast = ["str", "float"])
-#        ):
-#            cached_defs[key] = val
-#
-#        for key, val in zip(
-#            *data_load(self.filename+".db", 0, 1, cast = ["str", "float"])
-#        ):
-#            self.mem[key] = val
-#
-#        if  (not defs == cached_defs) or \
-#            (not os.path.exists(self.filename+".defs")) or \
-#            (not os.path.exists(self.filename+".db")):
-#
-#            for file in glob.glob(self.filename+".*"):
-#                os.remove(file)
-#
-#            data_save(
-#                self.filename+".defs",
-#                tuple(defs.keys()),
-#                tuple(defs.values())
-#            )
-#
-#    def __call__(self, *args, **kwds):
-#        input = str(tuple([str(args), str(kwds)]))
-#        if input not in self.mem:
-#            output = self.func(*args, **kwds)
-#            data_append(self.filename+".db", [input], [output])
-#            self.mem[input] = output
-#        return self.mem[input]
-#
-#
-#def memcached(func: typing.Optional[typing.Callable] = None, defs: typing.Optional[dict] = None):
-#    if func:
-#        return _memcached(func, defs)
-#    else:
-#        def wrapper(func):
-#            return _memcached(func, defs)
-#        return wrapper
+
+def verify_checksum():
+
+    file_path = inspect.stack()[1].filename
+    file_base_name = os.path.basename(file_path)
+    hash_savefile_path = CACHE_FOLDER+file_base_name+".checksum"
+
+    current_hash = md5(file_path)
+    
+    if os.path.exists(hash_savefile_path):
+
+        with open(hash_savefile_path, "rb") as file:
+            saved_hash = pickle.load(file)
+
+        if saved_hash != current_hash:
+
+            print(
+                sty.bg.red+file_base_name,
+                "changed, flushing cache.",
+                sty.rs.all
+            )
+
+            flush_cache()
+
+            with open(hash_savefile_path, "wb") as file:
+                pickle.dump(current_hash, file) 
+
+        else:
+            print(
+                sty.bg.green + sty.fg.black + file_base_name,
+                "unchanged." + sty.rs.all
+            )
+
+    else:
+
+        print(file_base_name, "changed, flushing cache.")
+
+        flush_cache()
+
+        with open(hash_savefile_path, "wb") as file:
+            pickle.dump(current_hash, file)
+
+
+verify_checksum()
