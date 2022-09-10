@@ -1,158 +1,547 @@
-import scipy.integrate
-import numpy
+"""### Description
+PNJL grandcanonical thermodynamic potential and associated functions.
+
+### Functions
+gcp_l_real
+    PNJL grandcanonical thermodynamic potential of a single light quark flavor 
+    (real part).
+gcp_l_imag
+    PNJL grandcanonical thermodynamic potential of a single light quark flavor 
+    (imaginary part).
+gcp_s_real
+    PNJL grandcanonical thermodynamic potential of a single strange quark 
+    flavor (real part).
+gcp_s_imag
+    PNJL grandcanonical thermodynamic potential of a single strange quark 
+    flavor (imaginary part).
+pressure
+    PNJL pressure of a single quark flavor.
+bdensity
+    PNJL baryon density of a single quark flavor.
+qnumber_cumulant
+    PNJL quark number cumulant chi_q of a single quark flavor. Based on 
+    Eq.29 of https://arxiv.org/pdf/2012.12894.pdf and the subsequent inline 
+    definition.
+sdensity
+    PNJL entropy density of a single quark flavor.
+"""
+
+
 import math
+import typing
 
-import pnjl.thermo.gcp_sea_lattice
-import pnjl.thermo.distributions
-import pnjl.aux_functions
+import scipy.integrate
+
+import utils
 import pnjl.defaults
+import pnjl.thermo.distributions
+import pnjl.thermo.gcp_sigma_lattice
 
-#Grandcanonical potential (PNJL quark part)
 
-def gcp_real(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
+utils.verify_checksum()
 
-    options = {'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.NC, 'gcp_quark_debug_flag' : False}
-    options.update(kwargs)
 
-    Nf = options['Nf']
-    Nc = options['Nc']
-    debug_flag = options['gcp_quark_debug_flag']
+@utils.cached
+def gcp_l_integrand_real(
+    p: float, T: float, mu: float, phi_re: float, phi_im: float
+) -> float:
 
-    def integrand(p, _T, _mu, _Phi, _Phib, _mass, key):
-        yp1 = {}
-        yp2 = {}
-        yp3 = {}
-        ym1 = {}
-        ym2 = {}
-        ym3 = {}
-        yp1["y_1_val"], yp1["y_1_status"] = pnjl.aux_functions.y_plus(p, _T, _mu, _mass, 1.0, 1.0, **key)
-        yp2["y_2_val"], yp2["y_2_status"] = pnjl.aux_functions.y_plus(p, _T, _mu, _mass, 1.0, 2.0, **key)
-        yp3["y_3_val"], yp3["y_3_status"] = pnjl.aux_functions.y_plus(p, _T, _mu, _mass, 1.0, 3.0, **key)
-        ym1["y_1_val"], ym1["y_1_status"] = pnjl.aux_functions.y_minus(p, _T, _mu, _mass, 1.0, 1.0, **key)
-        ym2["y_2_val"], ym2["y_2_status"] = pnjl.aux_functions.y_minus(p, _T, _mu, _mass, 1.0, 2.0, **key)
-        ym3["y_3_val"], ym3["y_3_status"] = pnjl.aux_functions.y_minus(p, _T, _mu, _mass, 1.0, 3.0, **key)
-        fp = pnjl.thermo.distributions.f_fermion_triplet(_Phi, _Phib, **yp1, **yp2, **yp3)
-        fm = pnjl.thermo.distributions.f_fermion_antitriplet(_Phi, _Phib, **ym1, **ym2, **ym3)
-        return ((p ** 4) / pnjl.aux_functions.En(p, _mass)) * (fp.real + fm.real)
+        mass = pnjl.thermo.gcp_sigma_lattice.Ml(T, mu)
+        En = pnjl.thermo.distributions.En(p, mass)
 
-    mass = pnjl.thermo.gcp_sea_lattice.M(T, mu, **kwargs)
+        fp = pnjl.thermo.distributions.f_fermion_triplet(
+            p, T, mu, phi_re, phi_im, mass, 1, '+'
+        )
+        fm = pnjl.thermo.distributions.f_fermion_antitriplet(
+            p, T, mu, phi_re, phi_im, mass, 1, '-'
+        )
 
-    integral, error = scipy.integrate.quad(integrand, 0.0, math.inf, args = (T, mu, Phi, Phib, mass, kwargs))
+        return ((p**4)/En)*math.fsum([fp.real, fm.real])
 
-    return -(Nf / (math.pi ** 2)) * (Nc / 3.0) * integral / 3.0
-def gcp_imag(T : float, mu : float, Phi : complex, Phib : complex, **kwargs) -> float:
+
+@utils.cached
+def gcp_l_integrand_imag(
+    p: float, T: float, mu: float, phi_re: float, phi_im: float
+) -> float:
+
+        mass = pnjl.thermo.gcp_sigma_lattice.Ml(T, mu)
+        En = pnjl.thermo.distributions.En(p, mass)
+        
+        fp = pnjl.thermo.distributions.f_fermion_triplet(
+            p, T, mu, phi_re, phi_im, mass, 1, '+'
+        )
+        fm = pnjl.thermo.distributions.f_fermion_antitriplet(
+            p, T, mu, phi_re, phi_im, mass, 1, '-'
+        )
+
+        return ((p**4)/En)*math.fsum([fp.imag, fm.imag])
+
+
+@utils.cached
+def gcp_s_integrand_real(
+    p: float, T: float, mu: float, phi_re: float, phi_im: float
+) -> float:
+
+        mass = pnjl.thermo.gcp_sigma_lattice.Ms(T, mu)
+        En = pnjl.thermo.distributions.En(p, mass)
+
+        fp = pnjl.thermo.distributions.f_fermion_triplet(
+            p, T, mu, phi_re, phi_im, mass, 1, '+'
+        )
+        fm = pnjl.thermo.distributions.f_fermion_antitriplet(
+            p, T, mu, phi_re, phi_im, mass, 1, '-'
+        )
+
+        return ((p**4)/En)*math.fsum([fp.real, fm.real])
+
+
+@utils.cached
+def gcp_s_integrand_imag(
+    p: float, T: float, mu: float, phi_re: float, phi_im: float
+) -> float:
+
+        mass = pnjl.thermo.gcp_sigma_lattice.Ms(T, mu)
+        En = pnjl.thermo.distributions.En(p, mass)
+
+        fp = pnjl.thermo.distributions.f_fermion_triplet(
+            p, T, mu, phi_re, phi_im, mass, 1, '+'
+        )
+        fm = pnjl.thermo.distributions.f_fermion_antitriplet(
+            p, T, mu, phi_re, phi_im, mass, 1, '-'
+        )
+
+        return ((p**4)/En)*math.fsum([fp.imag, fm.imag])
+
+
+@utils.cached
+def gcp_l_real(T : float, mu : float, phi_re : float, phi_im : float) -> float:
+    """### Description
+    PNJL grandcanonical thermodynamic potential of a single light quark flavor 
+    (real part).
     
-    options = {'Nf' : pnjl.defaults.default_Nf, 'Nc' : pnjl.defaults.NC, 'gcp_quark_debug_flag' : False}
-    options.update(kwargs)
-
-    Nf = options['Nf']
-    Nc = options['Nc']
-    debug_flag = options['gcp_quark_debug_flag']
-
-    def integrand(p, _T, _mu, _Phi, _Phib, _mass, key):
-        yp1 = {}
-        yp2 = {}
-        yp3 = {}
-        ym1 = {}
-        ym2 = {}
-        ym3 = {}
-        yp1["y_1_val"], yp1["y_1_status"] = pnjl.aux_functions.y_plus(p, _T, _mu, _mass, 1.0, 1.0, **key)
-        yp2["y_2_val"], yp2["y_2_status"] = pnjl.aux_functions.y_plus(p, _T, _mu, _mass, 1.0, 2.0, **key)
-        yp3["y_3_val"], yp3["y_3_status"] = pnjl.aux_functions.y_plus(p, _T, _mu, _mass, 1.0, 3.0, **key)
-        ym1["y_1_val"], ym1["y_1_status"] = pnjl.aux_functions.y_minus(p, _T, _mu, _mass, 1.0, 1.0, **key)
-        ym2["y_2_val"], ym2["y_2_status"] = pnjl.aux_functions.y_minus(p, _T, _mu, _mass, 1.0, 2.0, **key)
-        ym3["y_3_val"], ym3["y_3_status"] = pnjl.aux_functions.y_minus(p, _T, _mu, _mass, 1.0, 3.0, **key)
-        fp = pnjl.thermo.distributions.f_fermion_triplet(_Phi, _Phib, **yp1, **yp2, **yp3)
-        fm = pnjl.thermo.distributions.f_fermion_antitriplet(_Phi, _Phib, **ym1, **ym2, **ym3)
-        return ((p ** 4) / pnjl.aux_functions.En(p, _mass)) * (fp.imag + fm.imag)
-
-    mass = pnjl.thermo.gcp_sea_lattice.M(T, mu, **kwargs)
-    integral, error = scipy.integrate.quad(integrand, 0.0, math.inf, args = (T, mu, Phi, Phib, mass, kwargs))
-
-    return -(Nf / (math.pi ** 2)) * (Nc / 3.0) * integral / 3.0
-
-#Extensive thermodynamic properties
-
-def pressure(T : float, mu : float, Phi : complex, Phib : complex, **kwargs):
-    #
-    return -gcp_real(T, mu, Phi, Phib, **kwargs)
-
-def bdensity(T : float, mu : float, Phi : complex, Phib : complex, **kwargs):
+    ### Prameters
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re : float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im : float
+        Imaginary part of the traced Polyakov-loop in MeV.
     
+    ### Returns
+    gcp_l_real : float
+        Value of the thermodynamic potential in MeV^4.
+    """
+
+    NC = pnjl.defaults.NC
+
+    integral, error = scipy.integrate.quad(
+        gcp_l_integrand_real, 0.0, math.inf, args=(T, mu, phi_re, phi_im)
+    )
+
+    return -(NC/3.0)*(1.0/(math.pi**2))*integral
+
+
+@utils.cached
+def gcp_l_imag(T : float, mu : float, phi_re : float, phi_im : float) -> float:
+    """### Description
+    PNJL grandcanonical thermodynamic potential of a single light quark flavor 
+    (imaginary part).
+    
+    ### Prameters
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re : float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im : float
+        Imaginary part of the traced Polyakov-loop in MeV.
+    
+    ### Returns
+    gcp_l_imag : float
+        Value of the thermodynamic potential in MeV^4.
+    """
+
+    NC = pnjl.defaults.NC
+
+    integral, error = scipy.integrate.quad(
+        gcp_l_integrand_imag, 0.0, math.inf, args=(T, mu, phi_re, phi_im)
+    )
+
+    return -(NC/3.0)*(1.0/(math.pi**2))*integral
+
+
+@utils.cached
+def gcp_s_real(T : float, mu : float, phi_re : float, phi_im : float) -> float:
+    """### Description
+    PNJL grandcanonical thermodynamic potential of a single strange quark 
+    flavor (real part).
+    
+    ### Prameters
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re : float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im : float
+        Imaginary part of the traced Polyakov-loop in MeV.
+    
+    ### Returns
+    gcp_s_real : float
+        Value of the thermodynamic potential in MeV^4.
+    """
+
+    NC = pnjl.defaults.NC
+
+    integral, error = scipy.integrate.quad(
+        gcp_s_integrand_real, 0.0, math.inf, args=(T, mu, phi_re, phi_im)
+    )
+
+    return -(NC/3.0)*(1.0/(math.pi**2))*integral
+
+
+@utils.cached
+def gcp_s_imag(T : float, mu : float, phi_re : float, phi_im : float) -> float:
+    """### Description
+    PNJL grandcanonical thermodynamic potential of a single strange quark 
+    flavor (imaginary part).
+    
+    ### Prameters
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re : float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im : float
+        Imaginary part of the traced Polyakov-loop in MeV.
+    
+    ### Returns
+    gcp_s_imag : float
+        Value of the thermodynamic potential in MeV^4.
+    """
+
+    NC = pnjl.defaults.NC
+
+    integral, error = scipy.integrate.quad(
+        gcp_s_integrand_imag, 0.0, math.inf, args=(T, mu, phi_re, phi_im)
+    )
+
+    return -(NC/3.0)*(1.0/(math.pi**2))*integral
+
+
+gcp_hash = {
+    'l': gcp_l_real,
+    's': gcp_s_real
+}
+
+
+@utils.cached
+def pressure(
+    T: float, mu: float, phi_re: float, phi_im: float, typ: str
+) -> float:
+    """### Description
+    PNJL pressure of a single quark flavor.
+    
+    ### Prameters
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re : float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im : float
+        Imaginary part of the traced Polyakov-loop in MeV.
+    typ : str
+        Type of quark
+            'l' : up / down quark
+            's' : strange quark
+    
+    ### Returns
+    pressure : float
+        Value of the thermodynamic pressure in MeV^4.
+    """
+
+    return -gcp_hash[typ](T, mu, phi_re, phi_im),
+
+
+@utils.cached
+def bdensity(
+    T: float, mu: float, phi_re: float, phi_im: float,
+    phi_solver: typing.Callable[
+                    [float, float, float, float],
+                    typing.Tuple[float, float]
+                ],
+    typ: str, fast_calc: bool = False
+) -> float:
+    """### Description
+    PNJL baryon density of a single quark flavor.
+    
+    ### Prameters
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re : float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im : float
+        Imaginary part of the traced Polyakov-loop in MeV.
+    phi_solver : Callable
+        Function calculating the traced Polyakov-loop for given
+        T and mu. Must be of the form
+            (T: float, mu: float,
+            phi_re0: float, phi_im0: float) -> Tuple[float, float],
+            where
+                T : temperature in MeV
+                mu : quark chemical potential in MeV
+                phi_re0 : initial guess for phi_re
+                phi_im0 : initial guess for phi_im
+    typ : str
+        Type of quark
+            'l' : up / down quark
+            's' : strange quark
+    fast_calc : bool, optional
+        Increase calculation speed by assuming phi(mu) ~= const. 
+        Defaults to False.
+    
+    ### Returns
+    bdensity : float
+        Value of the thermodynamic baryon density in MeV^3.
+    """
+
     h = 1e-2
-    mu_vec = []
-    Phi_vec = []
-    Phib_vec = []
-    if mu - 2 * h > 0.0:
-        mu_vec = [mu + 2 * h, mu + h, mu - h, mu - 2 * h]
-    else:
-        mu_vec = [mu + h, mu]
-        if numpy.any([el < 0.0 for el in mu_vec]):
-            return bdensity(T, mu + h, Phi, Phib, **kwargs)
-    Phi_vec = [Phi for el in mu_vec]
-    Phib_vec = [Phib for el in mu_vec]
 
-    if len(mu_vec) == len(Phi_vec) and len(mu_vec) == len(Phib_vec):
-        if len(mu_vec) == 4 and numpy.all(mu_vec[i] > mu_vec[i + 1] for i, el in enumerate(mu_vec[:-1])):
-            p_vec = [pressure(T, mu_el, Phi_el, Phib_el, **kwargs) for mu_el, Phi_el, Phib_el in zip(mu_vec, Phi_vec, Phib_vec)]
-            return (1.0 / 3.0) * (p_vec[3] - 8.0 * p_vec[2] + 8.0 * p_vec[1] - p_vec[0]) / (12.0 * h)
-        elif len(mu_vec) == 2 and mu_vec[0] > mu_vec[1]:
-            p_vec = [pressure(T, mu_el, Phi_el, Phib_el, **kwargs) for mu_el, Phi_el, Phib_el in zip(mu_vec, Phi_vec, Phib_vec)]
-            return (1.0 / 3.0) * (p_vec[0] - p_vec[1]) / h
+    if math.fsum([mu, -2*h]) > 0.0:
+
+        mu_vec = [
+            math.fsum([mu, 2*h]), math.fsum([mu, h]),
+            math.fsum([mu, -h]), math.fsum([mu, -2*h])
+        ]
+        deriv_coef = [
+            -1.0/(12.0*h), 8.0/(12.0*h),
+            -8.0/(12.0*h), 1.0/(12.0*h)
+        ]
+        phi_vec = []
+        if fast_calc:
+            phi_vec = [
+                tuple([phi_re, phi_im])
+                for _ in mu_vec
+            ]
         else:
-            raise RuntimeError("Vectors have wrong size or are not strictly decreasing!")
-    else:
-        raise RuntimeError("Value vectors don't match!")
+            phi_vec = [
+                phi_solver(T, mu_el, phi_re, phi_im)
+                for mu_el in mu_vec
+            ]
 
-def bnumber_cumulant(rank : int, T : float, mu : float, Phi : complex, Phib : complex, **kwargs):
+        p_vec = [
+            coef*pressure(T, mu, phi_el[0], phi_el[1], typ)/3.0
+            for coef, phi_el in zip(deriv_coef, phi_vec)
+        ]
+
+        return math.fsum(p_vec)
+
+    else:
+
+        new_mu = math.fsum([mu, h])
+        new_phi_re, new_phi_im = phi_re, phi_im
+            
+        if not fast_calc:
+            new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
+
+        return bdensity(
+            T, new_mu, new_phi_re, new_phi_im, 
+            phi_solver, typ, fast_calc=fast_calc
+        )
+
+
+@utils.cached
+def qnumber_cumulant(
+    rank: int, T: float, mu: float, phi_re: float, phi_im: float,
+    phi_solver: typing.Callable[
+                    [float, float, float, float],
+                    typing.Tuple[float, float]
+                ],
+    typ: str, fast_calc: bool = False
+) -> float:
+    """### Description
+    PNJL quark number cumulant chi_q of a single quark flavor. Based on 
+    Eq.29 of https://arxiv.org/pdf/2012.12894.pdf and the subsequent inline definition.
+    
+    ### Prameters
+    rank : int
+        Cumulant rank. Rank 1 equals to 3 times the baryon density.
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re : float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im : float
+        Imaginary part of the traced Polyakov-loop in MeV.
+    phi_solver : typing.Callable[ [float, float, float, float], typing.Tuple[float, float] ]
+        Function calculating the traced Polyakov-loop for given
+        T and mu. Must be of the form
+            (T: float, mu: float,
+            phi_re0: float, phi_im0: float) -> Tuple[float, float],
+            where
+                T : temperature in MeV
+                mu : quark chemical potential in MeV
+                phi_re0 : initial guess for phi_re
+                phi_im0 : initial guess for phi_im
+    typ : str
+        Type of quark
+            'l' : up / down quark
+            's' : strange quark
+    fast_calc : bool, optional
+        Increase calculation speed by assuming phi(mu) ~= const. Defaults to False.
+    
+    ### Returns
+    qnumber_cumulant : float
+        Value of the thermodynamic quark number cumulant in MeV^3.
+    """
 
     if rank == 1:
-        #return bdensity(T, mu, Phi, Phib, **kwargs) / (T ** 4)
-        return bdensity(T, mu, Phi, Phib, **kwargs)
-    elif rank < 1:
-        raise RuntimeError("Cumulant rank lower than 1!")
+
+        return 3.0 * bdensity(
+            T, mu, phi_re, phi_im,  phi_solver,
+            typ, fast_calc=fast_calc
+        )
+
     else:
+
         h = 1e-2
-        mu_vec = []
-        Phi_vec = []
-        Phib_vec = []
-        if mu - 2 * h > 0.0:
-            mu_vec = [mu + 2 * h, mu + h, mu - h, mu - 2 * h]
-        else:
-            mu_vec = [mu + h, mu]
-            if numpy.any([el < 0.0 for el in mu_vec]):
-                return bnumber_cumulant(rank, T, mu + h, Phi, Phib, **kwargs)
-        Phi_vec = [Phi for el in mu_vec]
-        Phib_vec = [Phib for el in mu_vec]
 
-        if len(mu_vec) == len(Phi_vec) and len(mu_vec) == len(Phib_vec):
-            if len(mu_vec) == 4 and numpy.all(mu_vec[i] > mu_vec[i + 1] for i, el in enumerate(mu_vec[:-1])):
-                out_vec = [bnumber_cumulant(rank - 1, T, mu_el, Phi_el, Phib_el, **kwargs) for mu_el, Phi_el, Phib_el in zip(mu_vec, Phi_vec, Phib_vec)]
-                #return (T / 3.0) * (out_vec[3] - 8.0 * out_vec[2] + 8.0 * out_vec[1] - out_vec[0]) / (12.0 * h)
-                return (1.0 / 3.0) * (out_vec[3] - 8.0 * out_vec[2] + 8.0 * out_vec[1] - out_vec[0]) / (12.0 * h)
-            elif len(mu_vec) == 2 and mu_vec[0] > mu_vec[1]:
-                out_vec = [bnumber_cumulant(rank - 1, T, mu_el, Phi_el, Phib_el, **kwargs) for mu_el, Phi_el, Phib_el in zip(mu_vec, Phi_vec, Phib_vec)]
-                #return (T / 3.0) * (out_vec[0] - out_vec[1]) / h
-                return (1.0 / 3.0) * (out_vec[0] - out_vec[1]) / h
+        if math.fsum([mu, -2*h]) > 0.0:
+
+            mu_vec = [
+                math.fsum(mu, 2*h), math.fsum(mu, h),
+                math.fsum(mu, -h), math.fsum(mu, -2*h)
+            ]
+            deriv_coef = [
+                -1.0/(12.0*h), 8.0/(12.0*h),
+                -8.0/(12.0*h), 1.0/(12.0*h)
+            ]
+            phi_vec = []
+            if fast_calc:
+                phi_vec = [
+                    tuple([phi_re, phi_im])
+                    for _ in mu_vec
+                ]
             else:
-                raise RuntimeError("Vectors have wrong size or are not strictly decreasing!")
-        else:
-            raise RuntimeError("Value vectors don't match!")
+                phi_vec = [
+                    phi_solver(T, mu_el, phi_re, phi_im)
+                    for mu_el in mu_vec
+                ]
 
-#correct form of the T vector would be T_vec = [T + 2 * h, T + h, T - h, T - 2 * h] with some interval h
-#Phi/Phib vectors should correspond to Phi/Phib at the appropriate values of T!
-def sdensity(T_vec : list, mu : float, Phi_vec : list, Phib_vec : list, **kwargs):
-    
-    if len(T_vec) == len(Phi_vec) and len(T_vec) == len(Phib_vec):
-        if len(T_vec) == 4 and numpy.all(T_vec[i] > T_vec[i + 1] for i, el in enumerate(T_vec[:-1])):
-            h = T_vec[0] - T_vec[1]
-            p_vec = [pressure(T_el, mu, Phi_el, Phib_el, **kwargs) for T_el, Phi_el, Phib_el in zip(T_vec, Phi_vec, Phib_vec)]
-            return (1.0 / 3.0) * (p_vec[3] - 8.0 * p_vec[2] + 8.0 * p_vec[1] - p_vec[0]) / (12.0 * h)
-        elif len(T_vec) == 2 and T_vec[0] > T_vec[1]:
-            h = T_vec[0]
-            p_vec = [pressure(T_el, mu, Phi_el, Phib_el, **kwargs) for T_el, Phi_el, Phib_el in zip(T_vec, Phi_vec, Phib_vec)]
-            return (1.0 / 3.0) * (p_vec[0] - p_vec[1]) / h
+            out_vec = [
+                coef*qnumber_cumulant(
+                    rank-1, T, mu_el, phi_el[0], phi_el[1], 
+                    phi_solver, typ, fast_calc=fast_calc)
+                for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
+            ]
+
+            return math.fsum(out_vec)
+
         else:
-            raise RuntimeError("Vectors have wrong size or are not strictly decreasing!")
+
+            new_mu = math.fsum([mu, h])
+            new_phi_re, new_phi_im = phi_re, phi_im
+            
+            if not fast_calc:
+                new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
+
+            return qnumber_cumulant(
+                rank, T, new_mu, new_phi_re, new_phi_im, 
+                phi_solver, typ, fast_calc=fast_calc
+            )
+
+
+@utils.cached
+def sdensity(
+    T: float, mu: float, phi_re : float, phi_im : float,
+    phi_solver: typing.Callable[
+                    [float, float, float, float],
+                    typing.Tuple[float, float]
+                ],
+    typ: str, fast_calc: bool = False
+) -> float:
+    """### Description
+    PNJL entropy density of a single quark flavor.
+    
+    ### Prameters
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re : float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im : float
+        Imaginary part of the traced Polyakov-loop in MeV.
+    phi_solver : Callable
+        Function calculating the traced Polyakov-loop for given
+        T and mu. Must be of the form
+            (T: float, mu: float,
+            phi_re0: float, phi_im0: float) -> Tuple[float, float],
+            where
+                T : temperature in MeV
+                mu : quark chemical potential in MeV
+                phi_re0 : initial guess for phi_re
+                phi_im0 : initial guess for phi_im
+    typ : str
+        Type of quark
+            'l' : up / down quark
+            's' : strange quark
+    fast_calc : bool, optional
+        Increase calculation speed by assuming phi(T) ~= const. Defaults to False.
+    
+    ### Returns
+    sdensity : float
+        _description_
+    """
+
+    h = 1e-2
+
+    if math.fsum([T, -2*h]) > 0.0:
+
+        T_vec = [
+            math.fsum(T, 2*h), math.fsum(T, h),
+            math.fsum(T, -h), math.fsum(T, -2*h)
+        ]
+        deriv_coef = [
+            -1.0/(12.0*h), 8.0/(12.0*h),
+            -8.0/(12.0*h), 1.0/(12.0*h)
+        ]
+        phi_vec = []
+        if fast_calc:
+            phi_vec = [
+                tuple([phi_re, phi_im])
+                for _ in T_vec
+            ]
+        else:
+            phi_vec = [
+                phi_solver(T_el, mu, phi_re, phi_im)
+                for T_el in T_vec
+            ]
+
+        p_vec = [
+            coef*pressure(T_el, mu, phi_el[0], phi_el[1], typ)
+            for T_el, coef, phi_el in zip(T_vec, deriv_coef, phi_vec)
+        ]
+
+        return math.fsum(p_vec)
+
     else:
-        raise RuntimeError("Value vectors don't match!")
+
+        new_T = math.fsum([T, h])
+        new_phi_re, new_phi_im = phi_re, phi_im
+            
+        if not fast_calc:
+            new_phi_re, new_phi_im = phi_solver(new_T, mu, phi_re, phi_im)
+
+        return sdensity(
+            new_T, mu, new_phi_re, new_phi_im, 
+            phi_solver, typ, fast_calc=fast_calc
+        )

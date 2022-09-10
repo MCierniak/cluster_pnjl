@@ -126,6 +126,10 @@ def data_append(path: str, *columns: typing.Sequence) -> None:
 
 
 def flush_cache():
+    """### Description
+    Remove all .cache files.
+    """
+    
     for file in glob.glob(CACHE_FOLDER+'*.cache'):
             os.remove(file)
 
@@ -176,7 +180,19 @@ class cached:
             return result
 
 
-def md5(fname):
+def md5(fname: str) -> str:
+    """### Description
+    Calculate the md5 checksum of a file.
+
+    ### Parameters
+    fname : str
+        Path to file.
+
+    ### Returns
+    md5 : str
+        Md5 checksum.
+    """
+
     hash_md5 = hashlib.md5()
     with open(fname, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
@@ -185,6 +201,10 @@ def md5(fname):
 
 
 def verify_checksum():
+    """### Description
+    Verify checksum of the calling script againts an existing pickled value. 
+    Flush cache if failed.
+    """
 
     file_path = inspect.stack()[1].filename
     file_base_name = os.path.basename(file_path)
@@ -218,7 +238,11 @@ def verify_checksum():
 
     else:
 
-        print(file_base_name, "changed, flushing cache.")
+        print(
+            sty.bg.red+file_base_name,
+            "changed, flushing cache.",
+            sty.rs.all
+        )
 
         flush_cache()
 

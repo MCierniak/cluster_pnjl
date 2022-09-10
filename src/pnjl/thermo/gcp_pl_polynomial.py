@@ -1,4 +1,5 @@
-"""Polyakov-loop grandcanonical thermodynamic potential and associated functions.
+"""### Description
+Polyakov-loop grandcanonical thermodynamic potential and associated functions.
 Polynomial approximation from https://arxiv.org/pdf/hep-ph/0506234.pdf .
 
 ### Functions
@@ -29,7 +30,8 @@ utils.verify_checksum()
 
 @utils.cached
 def b2(T : float) -> float:
-    """B2 coeficient of the Polyakov-loop potential.
+    """### Description
+    B2 coeficient of the Polyakov-loop potential.
 
     ### Parameters
     T : float
@@ -51,7 +53,8 @@ def b2(T : float) -> float:
 
 @utils.cached
 def U(T : float, phi_re : float, phi_im : float) -> float:
-    """Polyakov-loop grandcanonical thermodynamic potential.
+    """### Description
+    Polyakov-loop grandcanonical thermodynamic potential.
 
     ### Parameters
     T : float
@@ -82,12 +85,15 @@ def U(T : float, phi_re : float, phi_im : float) -> float:
 
 
 @utils.cached
-def pressure(T : float, phi_re : float, phi_im : float) -> float:
-    """Polyakov-loop pressure.
+def pressure(T: float, mu: float, phi_re: float, phi_im: float) -> float:
+    """### Description
+    Polyakov-loop pressure.
 
     ### Parameters
     T : float
         Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
     phi_re : float
         Real part of the traced Polyakov-loop in MeV.
     phi_im : float
@@ -110,7 +116,8 @@ def bdensity(
                 ],
     fast_calc : bool = False
 ) -> float:
-    """Polyakov-loop baryon density.
+    """### Description
+    Polyakov-loop baryon density.
 
     ### Parameters
     T : float
@@ -165,8 +172,8 @@ def bdensity(
             ]
 
         p_vec = [
-            coef*pressure(T, phi_el[0], phi_el[1])/3.0
-            for coef, phi_el in zip(deriv_coef, phi_vec)
+            coef*pressure(T, mu_el, phi_el[0], phi_el[1])/3.0
+            for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
         ]
 
         return math.fsum(p_vec)
@@ -194,7 +201,8 @@ def qnumber_cumulant(
                 ],
     fast_calc : bool = False
 ) -> float:
-    """Polyakov-loop quark number cumulant chi_q of a single quark flavor. Based on Eq.29 of
+    """### Description
+    Polyakov-loop quark number cumulant chi_q. Based on Eq.29 of
     https://arxiv.org/pdf/2012.12894.pdf and the subsequent inline definition.
 
     ### Parameters
@@ -292,7 +300,8 @@ def sdensity(
                 ],
     fast_calc : bool = False
 ) -> float:
-    """Polyakov-loop entropy density.
+    """### Description
+    Polyakov-loop entropy density.
 
     ### Parameters
     T : float

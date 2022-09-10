@@ -1,4 +1,5 @@
-"""Particle and cluster distribution functions
+"""### Description
+Particle and cluster distribution functions
 
 ### Functions
 En
@@ -40,7 +41,8 @@ log_y_hash = {
 
 @utils.cached
 def En(p: float, mass: float) -> float:
-    """Relativistic energy.
+    """### Description
+    Relativistic energy.
 
     ### Parameters
     p : float
@@ -61,7 +63,8 @@ def En(p: float, mass: float) -> float:
 def log_y(
         p: float, T: float, mu: float, mass: float,
         mu_factor: int, en_factor: int, typ: str) -> float:
-    """Relativistic particle/antiparticle energy exponent logaritm.
+    """### Description
+    Relativistic particle/antiparticle energy exponent logaritm.
 
     ### Parameters
     p : float
@@ -95,7 +98,8 @@ def log_y(
 def f_fermion_singlet(
         p: float, T: float, mu: float,
         mass: float, mu_factor: int, typ: str) -> float:
-    """Color-singlet fermion distribution function.
+    """### Description
+    Color-singlet fermion distribution function.
 
     ### Parameters
     p : float
@@ -130,7 +134,8 @@ def f_fermion_singlet(
 def f_boson_singlet(
         p: float, T: float, mu: float, 
         mass: float, mu_factor: int, typ: str) -> float:
-    """Color-singlet boson distribution function.
+    """### Description
+    Color-singlet boson distribution function.
 
     ### Parameters
     p : float
@@ -248,7 +253,8 @@ f_fermion_triplet_hash = {
 def f_fermion_triplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str) -> complex:
-    """Color-triplet fermion distribution function.
+    """### Description
+    Color-triplet fermion distribution function.
 
     ### Parameters
     p : float
@@ -288,7 +294,8 @@ def f_fermion_triplet(
 def f_fermion_antitriplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str) -> complex:
-    """Color-antitriplet fermion distribution function.
+    """### Description
+    Color-antitriplet fermion distribution function.
 
     ### Parameters
     p : float
@@ -399,7 +406,8 @@ f_boson_triplet_hash = {
 def f_boson_triplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str) -> complex:
-    """Color-triplet boson distribution function.
+    """### Description
+    Color-triplet boson distribution function.
 
     ### Parameters
     p : float
@@ -439,7 +447,8 @@ def f_boson_triplet(
 def f_boson_antitriplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str) -> complex:
-    """Color-antitriplet boson distribution function.
+    """### Description
+    Color-antitriplet boson distribution function.
 
     ### Parameters
     p : float

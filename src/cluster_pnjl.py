@@ -4836,6 +4836,4 @@ if __name__ == '__main__':
 
     #cumulant_test()
 
-    print(pnjl.thermo.gcp_sea_lattice.pressure(1.0, 1.0, 'l'))
-
     print("END")

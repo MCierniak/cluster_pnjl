@@ -1,34 +1,158 @@
-import scipy.integrate
+"""### Description
+Generalized Beth-Uhlenbeck cluster grandcanonical thermodynamic potential and 
+associated functions based on https://arxiv.org/pdf/2012.12894.pdf .
+
+### Functions
+"""
+
+
 import math
 
+import scipy.integrate
+
+import utils
+import pnjl.defaults
 import pnjl.thermo.distributions
-import pnjl.aux_functions
+import pnjl.thermo.gcp_sigma_lattice
 
-#Mott-hadron resonance gas contribution to the GCP from https://arxiv.org/pdf/2012.12894.pdf
 
-def gcp_real_a0(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, d : float, **kwargs):
+utils.verify_checksum()
 
-    options = {'gcp_cluster_debug_flag' : False}
-    options.update(kwargs)
 
-    debug_flag = options['gcp_cluster_debug_flag']
+@utils.cached
+def gcp_boson_singlet_inner_integrand(
+    M: float, p: float, T: float, mu: float, a: int
+) -> float:
 
-    def mass_integrand(_m, _p, _T2, key2):
-        yp = {}
-        yp["y_val"], yp["y_status"] = pnjl.aux_functions.y_plus(_p, _T2, 0.0, _m, 0.0, 1.0, **key2)
-        return (_m / pnjl.aux_functions.En(_p, _m)) * pnjl.thermo.distributions.f_boson_singlet(**yp)
-    def integrand(p, _T, _M, _Mth, key):
-        inner_int, _ = scipy.integrate.quad(mass_integrand, _M, _Mth, args = (p, _T, key))
-        return (p ** 2) * inner_int
+    En = pnjl.thermo.distributions.En(p, M)
+    fp = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '+')
+    fm = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '-')
+
+    return (M/En)*math.fsum([fp, fm])
+
+
+@utils.cached
+def gcp_fermion_singlet_inner_integrand(
+    M: float, p: float, T: float, mu: float, a: int
+) -> float:
+
+    En = pnjl.thermo.distributions.En(p, M)
+    fp = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '+')
+    fm = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '-')
+
+    return (M/En)*math.fsum([fp, fm])
+
+
+@utils.cached
+def gcp_boson_singlet_integrand(
+    p: float, T: float, mu: float, phi_re: float, phi_im: float,
+    M_I: float, M_TH_I: float, a: int
+) -> float:
+
+    integral, error = scipy.integrate.quad(
+        gcp_boson_singlet_inner_integrand, M_I, M_TH_I, args = (p, T, mu, a)
+    )
+
+    return (p**2)*integral
+
+
+@utils.cached
+def gcp_fermion_singlet_integrand(
+    p: float, T: float, mu: float, phi_re: float, phi_im: float,
+    M_I: float, M_TH_I: float, a: int
+) -> float:
+
+    integral, error = scipy.integrate.quad(
+        gcp_fermion_singlet_inner_integrand, M_I, M_TH_I, args = (p, T, mu, a)
+    )
+
+    return (p**2)*integral
+
+
+@utils.cached
+def gcp_boson_triplet_integrand(
+    p: float, T: float, mu: float, phi_re: float, phi_im: float,
+    M_I: float, M_TH_I: float, a: int
+) -> float:
+
+    integral, error = scipy.integrate.quad(
+        gcp_boson_triplet_inner_integrand, M_I, M_TH_I,
+        args = (p, T, mu, phi_re, phi_im, a)
+    )
+
+    return (p**2)*integral
+
+
+@utils.cached
+def gcp_boson_antitriplet_integrand(
+    p: float, T: float, mu: float, phi_re: float, phi_im: float,
+    M_I: float, M_TH_I: float, a: int
+) -> float:
+
+    integral, error = scipy.integrate.quad(
+        gcp_boson_antitriplet_inner_integrand, M_I, M_TH_I,
+        args = (p, T, mu, phi_re, phi_im, a)
+    )
+
+    return (p**2)*integral
+
+
+@utils.cached
+def gcp_fermion_triplet_integrand(
+    p: float, T: float, mu: float, phi_re: float, phi_im: float,
+    M_I: float, M_TH_I: float, a: int
+) -> float:
+
+    integral, error = scipy.integrate.quad(
+        gcp_fermion_triplet_inner_integrand, M_I, M_TH_I,
+        args = (p, T, mu, phi_re, phi_im, a)
+    )
+
+    return (p**2)*integral
+
+
+@utils.cached
+def gcp_fermion_antitriplet_integrand(
+    p: float, T: float, mu: float, phi_re: float, phi_im: float,
+    M_I: float, M_TH_I: float, a: int
+) -> float:
+
+    integral, error = scipy.integrate.quad(
+        gcp_fermion_antitriplet_inner_integrand, M_I, M_TH_I,
+        args = (p, T, mu, phi_re, phi_im, a)
+    )
+
+    return (p**2)*integral
+
+
+
+
+
+
+
+
+@utils.cached
+def gcp_a0(
+    T: float, mu: float, phi_re: float, phi_im: float, cluster: str
+) -> float:
+
+    M_I = pnjl.defaults.MI[cluster]
+    N_I = pnjl.defaults.NI[cluster]
+    S_I = pnjl.defaults.S[cluster]
+    M_th_i = math.fsum([
+        math.fsum([N_I,-S_I])*pnjl.thermo.gcp_sigma_lattice.Ml(T, mu),
+        S_I*pnjl.thermo.gcp_sigma_lattice.Ms(T, mu)
+    ])
+    D_I = pnjl.defaults.DI[cluster]
 
     integral = 0.0
-    if thmass > bmass:
-        integral, _ = scipy.integrate.quad(integrand, 0.0, math.inf, args = (T, bmass, thmass, kwargs))
+    if M_th_i > M_I:
+        integral, error = scipy.integrate.quad(
+            gcp_a0_integrand, 0.0, math.inf, args = (T, mu, M_I, M_th_i)
+        )
 
-    return -(d / (2.0 * (math.pi ** 2))) * integral
-def gcp_imag_a0(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, d : float, **kwargs):
-    #
-    return 0.0
+    return -((D_I*3.0)/(2.0*(math.pi**2)))*integral
+
 
 def gcp_real_a1_bm1(T : float, mu : float, Phi : complex, Phib : complex, bmass : float, thmass : float, d : float, **kwargs):
     
