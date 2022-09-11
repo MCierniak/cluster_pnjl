@@ -126,15 +126,20 @@ S : dict[str, float]
         'P': pentaquark
         'Q': five-quark
         'H': hexaquark
+D_PHI_D_MU_0 : bool
+    Fast calculation flag for bdensity and bnumber/qnumber cumulants by 
+    assuming phi(mu) ~= const.
+D_PHI_D_T_0 : bool
+    Fast calculation flag for sdensity and temperature cumulants by 
+    assuming phi(T) ~= const.
+PERTURBATIVE_GLUON_CORRECTION : bool
+    Pertrubative gluon correction flag.
+NO_SEA : bool
+    No-sea approximation flag.
 """
 
 
 import math
-
-import utils
-
-
-utils.verify_checksum()
 
 
 TC0 = 154.#170.
@@ -237,3 +242,8 @@ S = {
     'Q': 0,
     'H': 0
 }
+D_PHI_D_MU_0 = bool(False)
+D_PHI_D_T_0 = bool(False)
+PERTURBATIVE_GLUON_CORRECTION = bool(True)
+NO_SEA = bool(True)
+NO_SIGMA = bool(True)

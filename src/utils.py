@@ -19,12 +19,10 @@ import typing
 import pickle
 import atexit
 import hashlib
-import inspect
 import functools
 
 
 EXP_LIMIT = 709.78271
-MAX_REAL_CALLS = 1000
 CACHE_FOLDER = ".cache/"
 cast_hash = {
     "float": float,
@@ -141,7 +139,6 @@ class cached:
     """
 
     def __init__(self, func):
-        self.real_calls = 0
         self.func = func
         self.filepath = CACHE_FOLDER \
                         +self.func.__module__ \
@@ -154,11 +151,7 @@ class cached:
         except FileNotFoundError as e:
             self.cache = {}
 
-        def cleanup():
-            with open(self.filepath, "wb") as file:
-                pickle.dump(self.cache, file)
-
-        atexit.register(cleanup)
+        atexit.register(self.cleanup)
 
     @functools.lru_cache
     def __call__(self, *args, **kwds):
@@ -171,13 +164,12 @@ class cached:
         try:
             return self.cache[key]
         except KeyError:
-            if self.real_calls >= MAX_REAL_CALLS:
-                self.cleanup()
-                self.real_calls = 0
-            else:
-                self.real_calls += 1
             self.cache[key] = result = self.func(*args, **kwds)
             return result
+
+    def cleanup(self):
+        with open(self.filepath, "wb") as file:
+            pickle.dump(self.cache, file)
 
 
 def md5(fname: str) -> str:
@@ -200,14 +192,13 @@ def md5(fname: str) -> str:
     return hash_md5.hexdigest()
 
 
-def verify_checksum():
+def verify_checksum(file_path: str):
     """### Description
-    Verify checksum of the calling script againts an existing pickled value. 
+    Verify checksum of a file againts an existing pickled value. 
     Flush cache if failed.
     """
 
-    file_path = inspect.stack()[1].filename
-    file_base_name = os.path.basename(file_path)
+    file_base_name = os.path.relpath(file_path).replace("\\", ".")
     hash_savefile_path = CACHE_FOLDER+file_base_name+".checksum"
 
     current_hash = md5(file_path)
@@ -248,6 +239,3 @@ def verify_checksum():
 
         with open(hash_savefile_path, "wb") as file:
             pickle.dump(current_hash, file)
-
-
-verify_checksum()

@@ -43,19 +43,16 @@ sdensity
 
 import math
 import typing
+import functools
 
 import scipy.integrate
 
-import utils
 import pnjl.defaults
 import pnjl.thermo.distributions
-import pnjl.thermo.gcp_sea_lattice
+import pnjl.thermo.gcp_sigma_lattice
 
 
-utils.verify_checksum()
-
-
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def alpha_s(T : float, mu : float) -> float:
     """### Description
     QCD running coupling.
@@ -101,7 +98,7 @@ boson_hash = {
 }
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def I_fermion_integrand_real(
     p: float, T: float, mu: float, mass: float,
     phi_re: float, phi_im: float, typ: str
@@ -114,7 +111,7 @@ def I_fermion_integrand_real(
     return p * distr
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def I_fermion_integrand_imag(
     p: float, T: float, mu: float, mass: float,
     phi_re: float, phi_im: float, typ: str
@@ -127,7 +124,7 @@ def I_fermion_integrand_imag(
     return p * distr
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def I_boson_integrand_real(
     p: float, T: float, mu: float, mass: float,
     phi_re: float, phi_im: float, typ: str
@@ -140,7 +137,7 @@ def I_boson_integrand_real(
     return p * distr
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def I_boson_integrand_imag(
     p: float, T: float, mu: float, mass: float,
     phi_re: float, phi_im: float, typ: str
@@ -153,7 +150,7 @@ def I_boson_integrand_imag(
     return p * distr
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def I_fermion(
     T: float, mu: float, mass: float,
     phi_re: float, phi_im: float, en_typ: str,
@@ -189,10 +186,10 @@ def I_fermion(
         args = (T, mu, mass, phi_re, phi_im, en_typ)
     )
 
-    return complex(integral_real, integral_imag)
+    return complex(integral_real, integral_imag)/(T**2)
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def I_boson(
     T: float, mu: float, mass: float,
     phi_re: float, phi_im: float, en_typ: str,
@@ -228,10 +225,10 @@ def I_boson(
         args = (T, mu, mass, phi_re, phi_im, en_typ)
     )
 
-    return complex(integral_real, integral_imag)
+    return complex(integral_real, integral_imag)/(T**2)
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def gcp_fermion_l_real(
     T: float, mu: float, phi_re: float, phi_im: float
 ) -> float:
@@ -254,7 +251,7 @@ def gcp_fermion_l_real(
         Value of the thermodynamic potential in MeV^4.
     """
 
-    mass = pnjl.thermo.gcp_sea_lattice.Ml(T, mu)
+    mass = pnjl.thermo.gcp_sigma_lattice.Ml(T, mu)
 
     Ip = I_fermion(T, mu, mass, phi_re, phi_im, '+')
     Im = I_fermion(T, mu, mass, phi_re, phi_im, '-')
@@ -268,7 +265,7 @@ def gcp_fermion_l_real(
     return (4.0/(3.0*math.pi))*alpha*(T**4)*par_real
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def gcp_fermion_l_imag(
     T: float, mu: float, phi_re: float, phi_im: float
 ) -> float:
@@ -291,7 +288,7 @@ def gcp_fermion_l_imag(
         Value of the thermodynamic potential in MeV^4.
     """
 
-    mass = pnjl.thermo.gcp_sea_lattice.Ml(T, mu)
+    mass = pnjl.thermo.gcp_sigma_lattice.Ml(T, mu)
 
     Ip = I_fermion(T, mu, mass, phi_re, phi_im, '+')
     Im = I_fermion(T, mu, mass, phi_re, phi_im, '-')
@@ -305,7 +302,7 @@ def gcp_fermion_l_imag(
     return (4.0/(3.0*math.pi))*alpha*(T**4)*par_imag
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def gcp_fermion_s_real(
     T: float, mu: float, phi_re: float, phi_im: float
 ) -> float:
@@ -328,7 +325,7 @@ def gcp_fermion_s_real(
         Value of the thermodynamic potential in MeV^4.
     """
 
-    mass = pnjl.thermo.gcp_sea_lattice.Ms(T, mu)
+    mass = pnjl.thermo.gcp_sigma_lattice.Ms(T, mu)
 
     Ip = I_fermion(T, mu, mass, phi_re, phi_im, '+')
     Im = I_fermion(T, mu, mass, phi_re, phi_im, '-')
@@ -342,7 +339,7 @@ def gcp_fermion_s_real(
     return (4.0/(3.0*math.pi))*alpha*(T**4)*par_real
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def gcp_fermion_s_imag(
     T: float, mu: float, phi_re: float, phi_im: float
 ) -> float:
@@ -365,7 +362,7 @@ def gcp_fermion_s_imag(
         Value of the thermodynamic potential in MeV^4.
     """
 
-    mass = pnjl.thermo.gcp_sea_lattice.Ms(T, mu)
+    mass = pnjl.thermo.gcp_sigma_lattice.Ms(T, mu)
 
     Ip = I_fermion(T, mu, mass, phi_re, phi_im, '+')
     Im = I_fermion(T, mu, mass, phi_re, phi_im, '-')
@@ -379,7 +376,7 @@ def gcp_fermion_s_imag(
     return (4.0/(3.0*math.pi))*alpha*(T**4)*par_imag
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def gcp_boson_real(
     T: float, mu: float, phi_re: float, phi_im: float
 ) -> float:
@@ -412,7 +409,7 @@ def gcp_boson_real(
     return (9.0/(math.pi**3))*alpha*(T**4)*IpIm2.real
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def gcp_boson_imag(
     T: float, mu: float, phi_re: float, phi_im: float
 ) -> float:
@@ -451,10 +448,9 @@ gcp_hash = {
 }
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def pressure(
-    T: float, mu: float, phi_re: float, phi_im: float,
-    typ: str, gluon: bool = False
+    T: float, mu: float, phi_re: float, phi_im: float, typ: str
 ) -> float:
     """### Description
     Pertrubative correction to the pressure of a single quark flavor.
@@ -472,16 +468,13 @@ def pressure(
         Type of quark
             'l' : up / down quark
             's' : strange quark
-    gluon : bool, optional
-        Should the perturbative gluon/ghost correction also be included. 
-        Defaults to False.
     
     ### Returns
     pressure : float
         Value of the thermodynamic pressure in MeV^4.
     """
 
-    if gluon:
+    if pnjl.defaults.PERTURBATIVE_GLUON_CORRECTION:
         return math.fsum([
             -gcp_hash[typ](T, mu, phi_re, phi_im),
             -gcp_boson_real(T, mu, phi_re, phi_im)
@@ -490,14 +483,14 @@ def pressure(
         return -gcp_hash[typ](T, mu, phi_re, phi_im)
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def bdensity(
     T: float, mu: float, phi_re: float, phi_im: float,
     phi_solver: typing.Callable[
                     [float, float, float, float],
                     typing.Tuple[float, float]
                 ],
-    typ: str, fast_calc: bool = False, gluon: bool = False
+    typ: str
 ) -> float:
     """### Description
     Pertrubative correction to the baryon density of a single quark flavor.
@@ -525,12 +518,6 @@ def bdensity(
         Type of quark
             'l' : up / down quark
             's' : strange quark
-    fast_calc : bool, optional
-        Increase calculation speed by assuming phi(mu) ~= const.
-        Defaults to False.
-    gluon : bool, optional
-        Should the perturbative gluon/ghost correction also be included. 
-        Defaults to False.
 
     ### Returns
     bdensity : float
@@ -550,7 +537,7 @@ def bdensity(
             -8.0/(12.0*h), 1.0/(12.0*h)
         ]
         phi_vec = []
-        if fast_calc:
+        if pnjl.defaults.D_PHI_D_MU_0:
             phi_vec = [
                 tuple([phi_re, phi_im])
                 for _ in mu_vec
@@ -562,8 +549,8 @@ def bdensity(
             ]
 
         p_vec = [
-            coef*pressure(T, mu, phi_el[0], phi_el[1], typ, gluon=gluon)/3.0
-            for coef, phi_el in zip(deriv_coef, phi_vec)
+            coef*pressure(T, mu_el, phi_el[0], phi_el[1], typ)/3.0
+            for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
         ]
 
         return math.fsum(p_vec)
@@ -573,23 +560,23 @@ def bdensity(
         new_mu = math.fsum([mu, h])
         new_phi_re, new_phi_im = phi_re, phi_im
             
-        if not fast_calc:
+        if not pnjl.defaults.D_PHI_D_MU_0:
             new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
 
         return bdensity(
             T, new_mu, new_phi_re, new_phi_im, 
-            phi_solver, typ, fast_calc=fast_calc, gluon=gluon
+            phi_solver, typ
         )
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def qnumber_cumulant(
     rank: int, T: float, mu: float, phi_re: float, phi_im: float,
     phi_solver: typing.Callable[
                     [float, float, float, float],
                     typing.Tuple[float, float]
                 ],
-    typ: str, fast_calc: bool = False, gluon: bool = False
+    typ: str
 ) -> float:
     """### Description
     Pertrubative correction to the quark number cumulant chi_q of a single 
@@ -621,12 +608,6 @@ def qnumber_cumulant(
         Type of quark
             'l' : up / down quark
             's' : strange quark
-    fast_calc : bool, optional
-        Increase calculation speed by assuming phi(mu) ~= const.
-        Defaults to False.
-    gluon : bool, optional
-        Should the perturbative gluon/ghost correction also be included. 
-        Defaults to False.
 
     ### Returns
     qnumber_cumulant : float
@@ -635,10 +616,7 @@ def qnumber_cumulant(
 
     if rank == 1:
 
-        return 3.0 * bdensity(
-            T, mu, phi_re, phi_im,  phi_solver,
-            typ, fast_calc=fast_calc, gluon=gluon
-        )
+        return 3.0 * bdensity(T, mu, phi_re, phi_im,  phi_solver, typ)
 
     else:
 
@@ -655,7 +633,7 @@ def qnumber_cumulant(
                 -8.0/(12.0*h), 1.0/(12.0*h)
             ]
             phi_vec = []
-            if fast_calc:
+            if pnjl.defaults.D_PHI_D_MU_0:
                 phi_vec = [
                     tuple([phi_re, phi_im])
                     for _ in mu_vec
@@ -669,7 +647,7 @@ def qnumber_cumulant(
             out_vec = [
                 coef*qnumber_cumulant(
                     rank-1, T, mu_el, phi_el[0], phi_el[1], 
-                    phi_solver, typ, fast_calc=fast_calc, gluon=gluon)
+                    phi_solver, typ)
                 for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
             ]
 
@@ -680,23 +658,23 @@ def qnumber_cumulant(
             new_mu = math.fsum([mu, h])
             new_phi_re, new_phi_im = phi_re, phi_im
             
-            if not fast_calc:
+            if not pnjl.defaults.D_PHI_D_MU_0:
                 new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
 
             return qnumber_cumulant(
                 rank, T, new_mu, new_phi_re, new_phi_im, 
-                phi_solver, typ, fast_calc=fast_calc, gluon=gluon
+                phi_solver, typ
             )
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def sdensity(
     T: float, mu: float, phi_re : float, phi_im : float,
     phi_solver: typing.Callable[
                     [float, float, float, float],
                     typing.Tuple[float, float]
                 ],
-    typ: str, fast_calc: bool = False, gluon: bool = False
+    typ: str
 ) -> float:
     """### Description
     Pertrubative correction to the entropy density of a single quark flavor.
@@ -724,12 +702,6 @@ def sdensity(
         Type of quark
             'l' : up / down quark
             's' : strange quark
-    fast_calc : bool, optional
-        Increase calculation speed by assuming phi(T) ~= const.
-        Defaults to False.
-    gluon : bool, optional
-        Should the perturbative gluon/ghost correction also be included. 
-        Defaults to False.
 
     ### Returns
     sdensity : float
@@ -749,7 +721,7 @@ def sdensity(
             -8.0/(12.0*h), 1.0/(12.0*h)
         ]
         phi_vec = []
-        if fast_calc:
+        if pnjl.defaults.D_PHI_D_T_0:
             phi_vec = [
                 tuple([phi_re, phi_im])
                 for _ in T_vec
@@ -761,7 +733,7 @@ def sdensity(
             ]
 
         p_vec = [
-            coef*pressure(T_el, mu, phi_el[0], phi_el[1], typ, gluon=gluon)
+            coef*pressure(T_el, mu, phi_el[0], phi_el[1], typ)
             for T_el, coef, phi_el in zip(T_vec, deriv_coef, phi_vec)
         ]
 
@@ -772,10 +744,10 @@ def sdensity(
         new_T = math.fsum([T, h])
         new_phi_re, new_phi_im = phi_re, phi_im
             
-        if not fast_calc:
+        if not pnjl.defaults.D_PHI_D_T_0:
             new_phi_re, new_phi_im = phi_solver(new_T, mu, phi_re, phi_im)
 
         return sdensity(
             new_T, mu, new_phi_re, new_phi_im, 
-            phi_solver, typ, fast_calc=fast_calc, gluon=gluon
+            phi_solver, typ
         )

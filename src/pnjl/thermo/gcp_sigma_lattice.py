@@ -27,15 +27,12 @@ sdensity
 
 
 import math
+import functools
 
-import utils
 import pnjl.defaults
 
 
-utils.verify_checksum()
-
-
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def Tc(mu: float) -> float:
     """### Description
     Pseudo-critical temperature ansatz.
@@ -55,7 +52,7 @@ def Tc(mu: float) -> float:
     return math.fsum([TC0, -TC0*KAPPA*((mu/TC0)**2)])
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def Delta_ls(T: float, mu: float) -> float:
     """### Description
     LQCD-fit ansatz for the 2+1 Nf normalized chiral condensate.
@@ -78,7 +75,7 @@ def Delta_ls(T: float, mu: float) -> float:
     return math.fsum([0.5, -0.5*math.tanh(tanh_internal)])
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def Ml(T: float, mu: float) -> float:
     """### Description
     Mass of up / down quarks (ansatz).
@@ -100,7 +97,7 @@ def Ml(T: float, mu: float) -> float:
     return math.fsum([M0*Delta_ls(T, mu), ML])
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def Ms(T: float, mu: float) -> float:
     """### Description
     Mass of the strange quarks (ansatz).
@@ -122,7 +119,7 @@ def Ms(T: float, mu: float) -> float:
     return math.fsum([M0*Delta_ls(T, mu), MS])
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def gcp(T: float, mu: float) -> float:
     """### Description
     Sigma mean-field grandcanonical thermodynamic potential.
@@ -141,13 +138,16 @@ def gcp(T: float, mu: float) -> float:
     M0 = pnjl.defaults.M0
     GS = pnjl.defaults.GS
 
-    return math.fsum([
-        ((Delta_ls(T, mu)**2) * (M0**2)) / (4.0*GS),
-        -((Delta_ls(0.0, 0.0)**2) * (M0**2)) / (4.0*GS)
-    ])
+    if pnjl.defaults.NO_SIGMA:
+        return 0.0
+    else:
+        return math.fsum([
+            ((Delta_ls(T, mu)**2)*(M0**2))/(4.0*GS),
+            -((Delta_ls(0.0, 0.0)**2)*(M0**2))/(4.0*GS)
+        ])
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def pressure(T: float, mu: float) -> float:
     """### Description
     Sigma mean-field pressure.
@@ -166,7 +166,7 @@ def pressure(T: float, mu: float) -> float:
     return -gcp(T, mu)
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def bdensity(T: float, mu: float) -> float:
     """### Description
     Sigma mean-field baryon density.
@@ -206,7 +206,7 @@ def bdensity(T: float, mu: float) -> float:
         return bdensity(T, math.fsum([mu, h]))
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def qnumber_cumulant(rank: int, T: float, mu: float) -> float:
     """### Description
     Sigma mean-field quark number cumulant chi_q. Based on Eq.29 of 
@@ -253,7 +253,7 @@ def qnumber_cumulant(rank: int, T: float, mu: float) -> float:
             return qnumber_cumulant(rank, T, math.fsum([mu, h]))
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def sdensity(T: float, mu: float) -> float:
     """### Description
     Sigma mean-field entropy density.

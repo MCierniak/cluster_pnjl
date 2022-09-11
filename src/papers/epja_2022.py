@@ -4,7 +4,6 @@ import math
 
 from matplotlib.patches import Polygon, FancyArrowPatch
 
-import pnjl.aux_functions
 import pnjl.defaults
 import utils
 

@@ -3334,3 +3334,63 @@ def phase_shift_test():
     import gc, utils;
     gc.collect()
     print(len([obj for obj in gc.get_objects() if isinstance(obj, utils.cached)])) """
+
+
+import numpy
+import pickle
+
+import utils
+
+
+def pickle_lattice_data():
+
+    (low_1204_6710v2_mu0_x, low_1204_6710v2_mu0_y) = utils.data_load(
+        "D:/EoS/epja/lattice_data_raw/1204_6710v2_table4_pressure_mu0_low.dat", 0, 1
+    )
+    (high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y) = utils.data_load(
+        "D:/EoS/epja/lattice_data_raw/1204_6710v2_table4_pressure_mu0_high.dat", 0, 1
+    )
+    (high_1407_6387_mu0_x, high_1407_6387_mu0_y) = utils.data_load(
+        "D:/EoS/epja/lattice_data_raw/1407_6387_table1_pressure_mu0.dat", 0, 3
+    )
+    (low_1407_6387_mu0_x, low_1407_6387_mu0_y) = utils.data_load(
+        "D:/EoS/epja/lattice_data_raw/1407_6387_table1_pressure_mu0.dat", 0, 2
+    )
+    (high_1309_5258_mu0_x, high_1309_5258_mu0_y) = utils.data_load(
+        "D:/EoS/epja/lattice_data_raw/1309_5258_figure6_pressure_mu0_high.dat", 0, 1
+    )
+    (low_1309_5258_mu0_x, low_1309_5258_mu0_y) = utils.data_load(
+        "D:/EoS/epja/lattice_data_raw/1309_5258_figure6_pressure_mu0_low.dat", 0, 1
+    )
+    (high_1710_05024_mu0_x, high_1710_05024_mu0_y) = utils.data_load(
+        "D:/EoS/epja/lattice_data_raw/1710_05024_figure8_pressure_mu0_high.dat", 0, 1
+    )
+    (low_1710_05024_mu0_x, low_1710_05024_mu0_y) = utils.data_load(
+        "D:/EoS/epja/lattice_data_raw/1710_05024_figure8_pressure_mu0_low.dat", 0, 1
+    )
+
+    borsanyi_1204_6710v2_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu0_x[::-1], low_1204_6710v2_mu0_y[::-1]):
+        borsanyi_1204_6710v2_mu0.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu0 = numpy.array(borsanyi_1204_6710v2_mu0)
+    bazavov_1407_6387_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1407_6387_mu0_x, high_1407_6387_mu0_y)]
+    for x_el, y_el in zip(low_1407_6387_mu0_x[::-1], low_1407_6387_mu0_y[::-1]):
+        bazavov_1407_6387_mu0.append(numpy.array([x_el, y_el]))
+    bazavov_1407_6387_mu0 = numpy.array(bazavov_1407_6387_mu0)
+    borsanyi_1309_5258_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1309_5258_mu0_x, high_1309_5258_mu0_y)]
+    for x_el, y_el in zip(low_1309_5258_mu0_x[::-1], low_1309_5258_mu0_y[::-1]):
+        borsanyi_1309_5258_mu0.append(numpy.array([x_el, y_el]))
+    borsanyi_1309_5258_mu0 = numpy.array(borsanyi_1309_5258_mu0)
+    bazavov_1710_05024_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1710_05024_mu0_x, high_1710_05024_mu0_y)]
+    for x_el, y_el in zip(low_1710_05024_mu0_x[::-1], low_1710_05024_mu0_y[::-1]):
+        bazavov_1710_05024_mu0.append(numpy.array([x_el, y_el]))
+    bazavov_1710_05024_mu0 = numpy.array(bazavov_1710_05024_mu0)
+
+    with open("D:/EoS/epja/lattice_data_pickled/bazavov_1407_6387_mu0.pickle", "wb") as file:
+        pickle.dump(bazavov_1407_6387_mu0, file)
+    with open("D:/EoS/epja/lattice_data_pickled/borsanyi_1309_5258_mu0.pickle", "wb") as file:
+        pickle.dump(borsanyi_1309_5258_mu0, file)
+    with open("D:/EoS/epja/lattice_data_pickled/bazavov_1710_05024_mu0.pickle", "wb") as file:
+        pickle.dump(bazavov_1710_05024_mu0, file)
+    with open("D:/EoS/epja/lattice_data_pickled/borsanyi_1204_6710v2_mu0.pickle", "wb") as file:
+        pickle.dump(borsanyi_1204_6710v2_mu0, file)

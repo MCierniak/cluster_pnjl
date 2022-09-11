@@ -18,17 +18,14 @@ sdensity
 """
 
 
-import typing
 import math
+import typing
+import functools
 
-import utils
 import pnjl.defaults
 
 
-utils.verify_checksum()
-
-
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def b2(T : float) -> float:
     """### Description
     B2 coeficient of the Polyakov-loop potential.
@@ -51,7 +48,7 @@ def b2(T : float) -> float:
     return math.fsum([A0, A1*(T0/T), A2*((T0/T)**2), A3*((T0/T)**3)])
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def U(T : float, phi_re : float, phi_im : float) -> float:
     """### Description
     Polyakov-loop grandcanonical thermodynamic potential.
@@ -84,7 +81,7 @@ def U(T : float, phi_re : float, phi_im : float) -> float:
     return ((T**4)/12.0)*math.fsum(phi_sum)
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def pressure(T: float, mu: float, phi_re: float, phi_im: float) -> float:
     """### Description
     Polyakov-loop pressure.
@@ -107,14 +104,13 @@ def pressure(T: float, mu: float, phi_re: float, phi_im: float) -> float:
     return -U(T, phi_re, phi_im)
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def bdensity(
     T: float, mu: float, phi_re : float, phi_im : float,
     phi_solver: typing.Callable[
                     [float, float, float, float],
                     typing.Tuple[float, float]
-                ],
-    fast_calc : bool = False
+                ]
 ) -> float:
     """### Description
     Polyakov-loop baryon density.
@@ -138,9 +134,6 @@ def bdensity(
                 mu : quark chemical potential in MeV
                 phi_re0 : initial guess for phi_re
                 phi_im0 : initial guess for phi_im
-    fast_calc : bool, optional
-        Increase calculation speed by assuming phi(mu) ~= const.
-        Defaults to False.
 
     ### Returns
     bdensity : float
@@ -160,7 +153,7 @@ def bdensity(
             -8.0/(12.0*h), 1.0/(12.0*h)
         ]
         phi_vec = []
-        if fast_calc:
+        if pnjl.defaults.D_PHI_D_MU_0:
             phi_vec = [
                 tuple([phi_re, phi_im])
                 for _ in mu_vec
@@ -183,23 +176,22 @@ def bdensity(
         new_mu = math.fsum([mu, h])
         new_phi_re, new_phi_im = phi_re, phi_im
             
-        if not fast_calc:
+        if not pnjl.defaults.D_PHI_D_MU_0:
             new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
 
         return bdensity(
             T, new_mu, new_phi_re, new_phi_im, 
-            phi_solver, fast_calc=fast_calc
+            phi_solver
         )
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def qnumber_cumulant(
     rank: int, T: float, mu: float, phi_re : float, phi_im : float,
     phi_solver: typing.Callable[
                     [float, float, float, float],
                     typing.Tuple[float, float]
-                ],
-    fast_calc : bool = False
+                ]
 ) -> float:
     """### Description
     Polyakov-loop quark number cumulant chi_q. Based on Eq.29 of
@@ -226,9 +218,6 @@ def qnumber_cumulant(
                 mu : quark chemical potential in MeV
                 phi_re0 : initial guess for phi_re
                 phi_im0 : initial guess for phi_im
-    fast_calc : bool, optional
-        Increase calculation speed by assuming phi(mu) ~= const.
-        Defaults to False.
 
     ### Returns
     qnumber_cumulant : float
@@ -237,10 +226,7 @@ def qnumber_cumulant(
 
     if rank == 1:
 
-        return 3.0 * bdensity(
-            T, mu, phi_re, phi_im, 
-            phi_solver, fast_calc=fast_calc
-        )
+        return 3.0 * bdensity(T, mu, phi_re, phi_im, phi_solver)
 
     else:
 
@@ -257,7 +243,7 @@ def qnumber_cumulant(
                 -8.0/(12.0*h), 1.0/(12.0*h)
             ]
             phi_vec = []
-            if fast_calc:
+            if pnjl.defaults.D_PHI_D_MU_0:
                 phi_vec = [
                     tuple([phi_re, phi_im])
                     for _ in mu_vec
@@ -271,7 +257,7 @@ def qnumber_cumulant(
             out_vec = [
                 coef*qnumber_cumulant(
                     rank-1, T, mu_el, phi_el[0], phi_el[1], 
-                    phi_solver, fast_calc=fast_calc)
+                    phi_solver)
                 for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
             ]
 
@@ -282,23 +268,22 @@ def qnumber_cumulant(
             new_mu = math.fsum([mu, h])
             new_phi_re, new_phi_im = phi_re, phi_im
             
-            if not fast_calc:
+            if not pnjl.defaults.D_PHI_D_MU_0:
                 new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
 
             return qnumber_cumulant(
                 rank, T, new_mu, new_phi_re, new_phi_im, 
-                phi_solver, fast_calc=fast_calc
+                phi_solver
             )
 
 
-@utils.cached
+@functools.lru_cache(maxsize=1024)
 def sdensity(
     T: float, mu: float, phi_re : float, phi_im : float,
     phi_solver: typing.Callable[
                     [float, float, float, float],
                     typing.Tuple[float, float]
-                ],
-    fast_calc : bool = False
+                ]
 ) -> float:
     """### Description
     Polyakov-loop entropy density.
@@ -322,9 +307,6 @@ def sdensity(
                 mu : quark chemical potential in MeV
                 phi_re0 : initial guess for phi_re
                 phi_im0 : initial guess for phi_im
-    fast_calc : bool, optional
-        Increase calculation speed by assuming phi(T) ~= const.
-        Defaults to False.
 
     ### Returns
     sdensity : float
@@ -344,7 +326,7 @@ def sdensity(
             -8.0/(12.0*h), 1.0/(12.0*h)
         ]
         phi_vec = []
-        if fast_calc:
+        if pnjl.defaults.D_PHI_D_T_0:
             phi_vec = [
                 tuple([phi_re, phi_im])
                 for _ in T_vec
@@ -367,10 +349,10 @@ def sdensity(
         new_T = math.fsum([T, h])
         new_phi_re, new_phi_im = phi_re, phi_im
             
-        if not fast_calc:
+        if not pnjl.defaults.D_PHI_D_T_0:
             new_phi_re, new_phi_im = phi_solver(new_T, mu, phi_re, phi_im)
 
         return sdensity(
             new_T, mu, new_phi_re, new_phi_im, 
-            phi_solver, fast_calc=fast_calc
+            phi_solver
         )
