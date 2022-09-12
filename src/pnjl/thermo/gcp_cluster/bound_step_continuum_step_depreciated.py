@@ -38,22 +38,176 @@ import pnjl.thermo.gcp_pl_polynomial
 
 
 @functools.lru_cache(maxsize=1024)
+def gcp_boson_singlet_inner_integrand(
+    M: float, p: float, T: float, mu: float, a: int
+) -> float:
+
+    En = pnjl.thermo.distributions.En(p, M)
+    fp = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '+')
+    fm = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '-')
+
+    return (M/En)*math.fsum([fp, fm])
+
+
+@functools.lru_cache(maxsize=1024)
+def gcp_fermion_singlet_inner_integrand(
+    M: float, p: float, T: float, mu: float, a: int
+) -> float:
+
+    En = pnjl.thermo.distributions.En(p, M)
+    fp = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '+')
+    fm = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '-')
+
+    return (M/En)*math.fsum([fp, fm])
+
+
+@functools.lru_cache(maxsize=1024)
+def gcp_fermion_triplet_inner_integrand_real(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+
+    En = pnjl.thermo.distributions.En(p, M)
+    fp = pnjl.thermo.distributions.f_fermion_triplet(
+        p, T, mu, phi_re, phi_im, M, a, '+'
+    ).real
+    fm = pnjl.thermo.distributions.f_fermion_antitriplet(
+        p, T, mu, phi_re, phi_im, M, a, '-'
+    ).real
+
+    return (M/En)*math.fsum([fp, fm])
+
+
+@functools.lru_cache(maxsize=1024)
+def gcp_fermion_antitriplet_inner_integrand_real(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+
+    En = pnjl.thermo.distributions.En(p, M)
+    fp = pnjl.thermo.distributions.f_fermion_antitriplet(
+        p, T, mu, phi_re, phi_im, M, a, '+'
+    ).real
+    fm = pnjl.thermo.distributions.f_fermion_triplet(
+        p, T, mu, phi_re, phi_im, M, a, '-'
+    ).real
+
+    return (M/En)*math.fsum([fp, fm])
+
+
+@functools.lru_cache(maxsize=1024)
+def gcp_fermion_triplet_inner_integrand_imag(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+
+    En = pnjl.thermo.distributions.En(p, M)
+    fp = pnjl.thermo.distributions.f_fermion_triplet(
+        p, T, mu, phi_re, phi_im, M, a, '+'
+    ).imag
+    fm = pnjl.thermo.distributions.f_fermion_antitriplet(
+        p, T, mu, phi_re, phi_im, M, a, '-'
+    ).imag
+
+    return (M/En)*math.fsum([fp, fm])
+
+
+@functools.lru_cache(maxsize=1024)
+def gcp_fermion_antitriplet_inner_integrand_imag(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+
+    En = pnjl.thermo.distributions.En(p, M)
+    fp = pnjl.thermo.distributions.f_fermion_antitriplet(
+        p, T, mu, phi_re, phi_im, M, a, '+'
+    ).imag
+    fm = pnjl.thermo.distributions.f_fermion_triplet(
+        p, T, mu, phi_re, phi_im, M, a, '-'
+    ).imag
+
+    return (M/En)*math.fsum([fp, fm])
+
+
+@functools.lru_cache(maxsize=1024)
+def gcp_boson_triplet_inner_integrand_real(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+
+    En = pnjl.thermo.distributions.En(p, M)
+    fp = pnjl.thermo.distributions.f_boson_triplet(
+        p, T, mu, phi_re, phi_im, M, a, '+'
+    ).real
+    fm = pnjl.thermo.distributions.f_boson_antitriplet(
+        p, T, mu, phi_re, phi_im, M, a, '-'
+    ).real
+
+    return (M/En)*math.fsum([fp, fm])
+
+
+@functools.lru_cache(maxsize=1024)
+def gcp_boson_antitriplet_inner_integrand_real(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+
+    En = pnjl.thermo.distributions.En(p, M)
+    fp = pnjl.thermo.distributions.f_boson_antitriplet(
+        p, T, mu, phi_re, phi_im, M, a, '+'
+    ).real
+    fm = pnjl.thermo.distributions.f_boson_triplet(
+        p, T, mu, phi_re, phi_im, M, a, '-'
+    ).real
+
+    return (M/En)*math.fsum([fp, fm])
+
+
+@functools.lru_cache(maxsize=1024)
+def gcp_boson_triplet_inner_integrand_imag(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+
+    En = pnjl.thermo.distributions.En(p, M)
+    fp = pnjl.thermo.distributions.f_boson_triplet(
+        p, T, mu, phi_re, phi_im, M, a, '+'
+    ).imag
+    fm = pnjl.thermo.distributions.f_boson_antitriplet(
+        p, T, mu, phi_re, phi_im, M, a, '-'
+    ).imag
+
+    return (M/En)*math.fsum([fp, fm])
+
+
+@functools.lru_cache(maxsize=1024)
+def gcp_boson_antitriplet_inner_integrand_imag(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+
+    En = pnjl.thermo.distributions.En(p, M)
+    fp = pnjl.thermo.distributions.f_boson_antitriplet(
+        p, T, mu, phi_re, phi_im, M, a, '+'
+    ).imag
+    fm = pnjl.thermo.distributions.f_boson_triplet(
+        p, T, mu, phi_re, phi_im, M, a, '-'
+    ).imag
+
+    return (M/En)*math.fsum([fp, fm])
+
+
+@functools.lru_cache(maxsize=1024)
 def gcp_boson_singlet_integrand(
     p: float, T: float, mu: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: int
 ) -> float:
 
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M_I, a, '+')
-    fm_i = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M_I, a, '-')
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
+    integral, error = scipy.integrate.quad(
+        gcp_boson_singlet_inner_integrand, M_I, M_TH_I, args = (p, T, mu, a)
+    )
 
-    En_th = pnjl.thermo.distributions.En(p, M_TH_I)
-    fp_th = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M_TH_I, a, '+')
-    fm_th = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M_TH_I, a, '-')
-    integ_th = (1.0/En_th)*math.fsum([fp_th, fm_th])
-
-    return (p**4)*math.fsum([integ_i, -integ_th])
+    return (p**2)*integral
 
 
 @functools.lru_cache(maxsize=1024)
@@ -62,17 +216,11 @@ def gcp_fermion_singlet_integrand(
     M_I: float, M_TH_I: float, a: int
 ) -> float:
 
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M_I, a, '+')
-    fm_i = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M_I, a, '-')
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
+    integral, error = scipy.integrate.quad(
+        gcp_fermion_singlet_inner_integrand, M_I, M_TH_I, args = (p, T, mu, a)
+    )
 
-    En_th = pnjl.thermo.distributions.En(p, M_TH_I)
-    fp_th = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M_TH_I, a, '+')
-    fm_th = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M_TH_I, a, '-')
-    integ_th = (1.0/En_th)*math.fsum([fp_th, fm_th])
-
-    return (p**4)*math.fsum([integ_i, -integ_th])
+    return (p**2)*integral
 
 
 @functools.lru_cache(maxsize=1024)
@@ -81,25 +229,12 @@ def gcp_boson_triplet_integrand_real(
     M_I: float, M_TH_I: float, a: int
 ) -> float:
 
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_boson_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).real
-    fm_i = pnjl.thermo.distributions.f_boson_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).real
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
+    integral, error = scipy.integrate.quad(
+        gcp_boson_triplet_inner_integrand_real, M_I, M_TH_I,
+        args = (p, T, mu, phi_re, phi_im, a)
+    )
 
-    En_th = pnjl.thermo.distributions.En(p, M_TH_I)
-    fp_th = pnjl.thermo.distributions.f_boson_triplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '+'
-    ).real
-    fm_th = pnjl.thermo.distributions.f_boson_antitriplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '-'
-    ).real
-    integ_th = (1.0/En_th)*math.fsum([fp_th, fm_th])
-
-    return (p**4)*math.fsum([integ_i, -integ_th])
+    return (p**2)*integral
 
 
 @functools.lru_cache(maxsize=1024)
@@ -108,25 +243,12 @@ def gcp_boson_antitriplet_integrand_real(
     M_I: float, M_TH_I: float, a: int
 ) -> float:
 
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_boson_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).real
-    fm_i = pnjl.thermo.distributions.f_boson_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).real
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
+    integral, error = scipy.integrate.quad(
+        gcp_boson_antitriplet_inner_integrand_real, M_I, M_TH_I,
+        args = (p, T, mu, phi_re, phi_im, a)
+    )
 
-    En_th = pnjl.thermo.distributions.En(p, M_TH_I)
-    fp_th = pnjl.thermo.distributions.f_boson_antitriplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '+'
-    ).real
-    fm_th = pnjl.thermo.distributions.f_boson_triplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '-'
-    ).real
-    integ_th = (1.0/En_th)*math.fsum([fp_th, fm_th])
-
-    return (p**4)*math.fsum([integ_i, -integ_th])
+    return (p**2)*integral
 
 
 @functools.lru_cache(maxsize=1024)
@@ -135,25 +257,12 @@ def gcp_fermion_triplet_integrand_real(
     M_I: float, M_TH_I: float, a: int
 ) -> float:
 
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_fermion_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).real
-    fm_i = pnjl.thermo.distributions.f_fermion_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).real
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
+    integral, error = scipy.integrate.quad(
+        gcp_fermion_triplet_inner_integrand_real, M_I, M_TH_I,
+        args = (p, T, mu, phi_re, phi_im, a)
+    )
 
-    En_th = pnjl.thermo.distributions.En(p, M_TH_I)
-    fp_th = pnjl.thermo.distributions.f_fermion_triplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '+'
-    ).real
-    fm_th = pnjl.thermo.distributions.f_fermion_antitriplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '-'
-    ).real
-    integ_th = (1.0/En_th)*math.fsum([fp_th, fm_th])
-
-    return (p**4)*math.fsum([integ_i, -integ_th])
+    return (p**2)*integral
 
 
 @functools.lru_cache(maxsize=1024)
@@ -162,25 +271,12 @@ def gcp_fermion_antitriplet_integrand_real(
     M_I: float, M_TH_I: float, a: int
 ) -> float:
 
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_fermion_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).real
-    fm_i = pnjl.thermo.distributions.f_fermion_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).real
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
+    integral, error = scipy.integrate.quad(
+        gcp_fermion_antitriplet_inner_integrand_real, M_I, M_TH_I,
+        args = (p, T, mu, phi_re, phi_im, a)
+    )
 
-    En_th = pnjl.thermo.distributions.En(p, M_TH_I)
-    fp_th = pnjl.thermo.distributions.f_fermion_antitriplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '+'
-    ).real
-    fm_th = pnjl.thermo.distributions.f_fermion_triplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '-'
-    ).real
-    integ_th = (1.0/En_th)*math.fsum([fp_th, fm_th])
-
-    return (p**4)*math.fsum([integ_i, -integ_th])
+    return (p**2)*integral
 
 
 @functools.lru_cache(maxsize=1024)
@@ -189,25 +285,12 @@ def gcp_boson_triplet_integrand_imag(
     M_I: float, M_TH_I: float, a: int
 ) -> float:
 
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_boson_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).imag
-    fm_i = pnjl.thermo.distributions.f_boson_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).imag
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
+    integral, error = scipy.integrate.quad(
+        gcp_boson_triplet_inner_integrand_imag, M_I, M_TH_I,
+        args = (p, T, mu, phi_re, phi_im, a)
+    )
 
-    En_th = pnjl.thermo.distributions.En(p, M_TH_I)
-    fp_th = pnjl.thermo.distributions.f_boson_triplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '+'
-    ).imag
-    fm_th = pnjl.thermo.distributions.f_boson_antitriplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '-'
-    ).imag
-    integ_th = (1.0/En_th)*math.fsum([fp_th, fm_th])
-
-    return (p**4)*math.fsum([integ_i, -integ_th])
+    return (p**2)*integral
 
 
 @functools.lru_cache(maxsize=1024)
@@ -216,25 +299,12 @@ def gcp_boson_antitriplet_integrand_imag(
     M_I: float, M_TH_I: float, a: int
 ) -> float:
 
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_boson_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).imag
-    fm_i = pnjl.thermo.distributions.f_boson_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).imag
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
+    integral, error = scipy.integrate.quad(
+        gcp_boson_antitriplet_inner_integrand_imag, M_I, M_TH_I,
+        args = (p, T, mu, phi_re, phi_im, a)
+    )
 
-    En_th = pnjl.thermo.distributions.En(p, M_TH_I)
-    fp_th = pnjl.thermo.distributions.f_boson_antitriplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '+'
-    ).imag
-    fm_th = pnjl.thermo.distributions.f_boson_triplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '-'
-    ).imag
-    integ_th = (1.0/En_th)*math.fsum([fp_th, fm_th])
-
-    return (p**4)*math.fsum([integ_i, -integ_th])
+    return (p**2)*integral
 
 
 @functools.lru_cache(maxsize=1024)
@@ -243,25 +313,12 @@ def gcp_fermion_triplet_integrand_imag(
     M_I: float, M_TH_I: float, a: int
 ) -> float:
 
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_fermion_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).imag
-    fm_i = pnjl.thermo.distributions.f_fermion_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).imag
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
+    integral, error = scipy.integrate.quad(
+        gcp_fermion_triplet_inner_integrand_imag, M_I, M_TH_I,
+        args = (p, T, mu, phi_re, phi_im, a)
+    )
 
-    En_th = pnjl.thermo.distributions.En(p, M_TH_I)
-    fp_th = pnjl.thermo.distributions.f_fermion_triplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '+'
-    ).imag
-    fm_th = pnjl.thermo.distributions.f_fermion_antitriplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '-'
-    ).imag
-    integ_th = (1.0/En_th)*math.fsum([fp_th, fm_th])
-
-    return (p**4)*math.fsum([integ_i, -integ_th])
+    return (p**2)*integral
 
 
 @functools.lru_cache(maxsize=1024)
@@ -270,25 +327,12 @@ def gcp_fermion_antitriplet_integrand_imag(
     M_I: float, M_TH_I: float, a: int
 ) -> float:
 
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_fermion_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).imag
-    fm_i = pnjl.thermo.distributions.f_fermion_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).imag
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
+    integral, error = scipy.integrate.quad(
+        gcp_fermion_antitriplet_inner_integrand_imag, M_I, M_TH_I,
+        args = (p, T, mu, phi_re, phi_im, a)
+    )
 
-    En_th = pnjl.thermo.distributions.En(p, M_TH_I)
-    fp_th = pnjl.thermo.distributions.f_fermion_antitriplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '+'
-    ).imag
-    fm_th = pnjl.thermo.distributions.f_fermion_triplet(
-        p, T, mu, phi_re, phi_im, M_TH_I, a, '-'
-    ).imag
-    integ_th = (1.0/En_th)*math.fsum([fp_th, fm_th])
-
-    return (p**4)*math.fsum([integ_i, -integ_th])
+    return (p**2)*integral
 
 
 gcp_real_hash = {
@@ -369,7 +413,7 @@ def gcp_real(
             args = (T, mu, phi_re, phi_im, M_I, M_th_i, A_I)
         )
 
-    return -(D_I/(2.0*(math.pi**2)))*integral
+    return -((D_I*3.0)/(2.0*(math.pi**2)))*integral
 
 
 @functools.lru_cache(maxsize=1024)
@@ -428,7 +472,7 @@ def gcp_imag(
             args = (T, mu, phi_re, phi_im, M_I, M_th_i, A_I)
         )
 
-    return -(D_I/(2.0*(math.pi**2)))*integral
+    return -((D_I*3.0)/(2.0*(math.pi**2)))*integral
 
 
 @functools.lru_cache(maxsize=1024)

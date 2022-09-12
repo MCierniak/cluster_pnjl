@@ -244,6 +244,6 @@ S = {
 }
 D_PHI_D_MU_0 = bool(False)
 D_PHI_D_T_0 = bool(False)
-PERTURBATIVE_GLUON_CORRECTION = bool(True)
+PERTURBATIVE_GLUON_CORRECTION = bool(False)
 NO_SEA = bool(True)
 NO_SIGMA = bool(True)

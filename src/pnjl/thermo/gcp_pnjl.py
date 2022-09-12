@@ -263,7 +263,7 @@ def pressure(
         Value of the thermodynamic pressure in MeV^4.
     """
 
-    return -gcp_hash[typ](T, mu, phi_re, phi_im),
+    return -gcp_hash[typ](T, mu, phi_re, phi_im)
 
 
 @functools.lru_cache(maxsize=1024)
