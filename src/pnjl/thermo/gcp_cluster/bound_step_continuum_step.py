@@ -352,7 +352,7 @@ def gcp_real(
     M_I = pnjl.defaults.MI[cluster]
     N_I = pnjl.defaults.NI[cluster]
     S_I = pnjl.defaults.S[cluster]
-    M_th_i = math.fsum([
+    M_th_i = math.sqrt(2.0)*math.fsum([
         math.fsum([N_I,-S_I])*pnjl.thermo.gcp_sigma_lattice.Ml(T, mu),
         S_I*pnjl.thermo.gcp_sigma_lattice.Ms(T, mu)
     ])
@@ -411,7 +411,7 @@ def gcp_imag(
     M_I = pnjl.defaults.MI[cluster]
     N_I = pnjl.defaults.NI[cluster]
     S_I = pnjl.defaults.S[cluster]
-    M_th_i = math.fsum([
+    M_th_i = math.sqrt(2.0)*math.fsum([
         math.fsum([N_I,-S_I])*pnjl.thermo.gcp_sigma_lattice.Ml(T, mu),
         S_I*pnjl.thermo.gcp_sigma_lattice.Ms(T, mu)
     ])
