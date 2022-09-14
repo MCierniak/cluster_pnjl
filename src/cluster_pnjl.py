@@ -4856,6 +4856,8 @@ def epja_figure5():
 
     warnings.filterwarnings("ignore")
 
+    calc_nog = True
+
     files = "D:/EoS/epja/figure5/"
 
     T = numpy.linspace(1.0, 2000.0, 200)
@@ -4877,8 +4879,6 @@ def epja_figure5():
     pnjl_u_v_nog = list()
     pnjl_d_v_nog = list()
     pnjl_s_v_nog = list()
-
-    calc_nog = True
 
     if calc_nog:
 
@@ -5116,6 +5116,11 @@ def epja_figure7():
 
     warnings.filterwarnings("ignore")
     
+    calc_1 = False
+    calc_2 = False
+
+    files = "D:/EoS/epja/figure7/"
+
     T_1 = numpy.linspace(1.0, 400.0, 200)
     T_2 = numpy.linspace(1.0, 400.0, 200)
 
@@ -5177,11 +5182,6 @@ def epja_figure7():
     P_v_2 = list()
     Q_v_2 = list()
     H_v_2 = list()
-
-    calc_1 = True
-    calc_2 = True
-
-    files = "D:/EoS/epja/figure7/"
 
     if calc_1:
 
@@ -5344,7 +5344,7 @@ def epja_figure7():
             pickle.dump(sigma_v_2, file)
 
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
+            zip(T_2, mu_2, phi_re_v_1, phi_im_v_1),
             desc="Gluon pressure #2", total=len(T_2), ncols= 100
         ):
             gluon_v_2.append(
@@ -5918,7 +5918,6 @@ def epja_figure7():
 
     ax1.fill_between(T_1, total_cluster_1, color = 'green')
     ax1.plot(T_1, total_1, '-', c = 'black')
-    ax1.plot(T_1, total_2, '--', c = 'black')
     ax1.plot(T_1, total_qgp_1, '--', c = 'blue')
 
     for tick in ax1.xaxis.get_major_ticks():
@@ -6028,6 +6027,7 @@ def epja_figure7():
     ax5.plot(T_1, P_v_1, '-', c = '#78BC61')
     ax5.plot(T_1, Q_v_1, '--', c = '#55DBCB')
     ax5.plot(T_1, H_v_1, '-', c = '#A846A0')
+    ax5.plot(T_1, total_cluster_1, '-', c = 'black')
 
     for tick in ax5.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -6069,367 +6069,732 @@ def epja_figure7():
 
 def cumulant_test():
 
-    phi_re_1, phi_im_1 = [], []
+    import tqdm
+    import numpy
+    import pickle
+    import warnings
 
-    Chi2_Q_1, Chi2_pert_1 = [], []
+    import matplotlib.pyplot
 
-    Chi2_pi_1, Chi2_K_1, Chi2_rho_1 = [], [], []
-    Chi2_omega_1, Chi2_D_1, Chi2_N_1 = [], [], []
-    Chi2_T_1, Chi2_F_1, Chi2_P_1 = [], [], []
-    Chi2_Q5_1, Chi2_H_1 = [], []
+    import utils
+    import pnjl.defaults
+    import pnjl.thermo.gcp_pnjl
+    import pnjl.thermo.gcp_sea_lattice
+    import pnjl.thermo.gcp_perturbative
+    import pnjl.thermo.gcp_sigma_lattice
+    import pnjl.thermo.gcp_pl_polynomial
+    import pnjl.thermo.gcp_cluster.bound_step_continuum_step as cluster
 
-    Pres_Q_1, Pres_pert_1, Pres_g_1 = [], [], []
+    import pnjl.thermo.solvers.\
+        sigma_lattice.\
+        sea_lattice.\
+        pl_polynomial.\
+        pnjl.\
+        perturbative.\
+        no_clusters \
+    as solver
 
-    Pres_pi_1, Pres_K_1, Pres_rho_1 = [], [], []
-    Pres_omega_1, Pres_D_1, Pres_N_1 = [], [], []
-    Pres_T_1, Pres_F_1, Pres_P_1 = [], [], []
-    Pres_Q5_1, Pres_H_1 = [], []
-
-    BDen_Q_1, BDen_pert_1 = [], []
-
-    BDen_pi_1, BDen_K_1, BDen_rho_1 = [], [], []
-    BDen_omega_1, BDen_D_1, BDen_N_1 = [], [], []
-    BDen_T_1, BDen_F_1, BDen_P_1 = [], [], []
-    BDen_Q5_1, BDen_H_1 = [], []
-
-    T_1 = numpy.linspace(1.0, 320.0, 200)
-
-    mu_1 = [0.4 * el for el in T_1]
+    warnings.filterwarnings("ignore")
 
     calc_1 = False
 
-    cluster_backreaction = False
+    files = "D:/EoS/epja/cumulant_test/"
 
-    pl_1_file = "D:/EoS/epja/cumulant_test/pl_1.dat"
-    thermo_1_file = "D:/EoS/epja/cumulant_test/thermo_1.dat"
+    T_1 = numpy.linspace(1.0, 400.0, 200)
 
-    if False:
-        phi_re_1.append(1e-15)
-        phi_im_1.append(2e-15)
-        lT = len(T_1)
-        for T_el, mu_el in tqdm.tqdm(zip(T_1, mu_1), desc = "Traced Polyakov loop (calc #1)", total = lT, ascii = True):
-            temp_phi_re, temp_phi_im = calc_PL_c(T_el, mu_el, phi_re_1[-1], phi_im_1[-1], with_clusters = cluster_backreaction)
-            phi_re_1.append(temp_phi_re)
-            phi_im_1.append(temp_phi_im)
-        phi_re_1 = phi_re_1[1:]
-        phi_im_1 = phi_im_1[1:]
-        with open(pl_1_file, 'w', newline = '') as file:
-            writer = csv.writer(file, delimiter = '\t')
-            writer.writerows([[T_el, mu_el, phi_re_el, phi_im_el] for T_el, mu_el, phi_re_el, phi_im_el in zip(T_1, mu_1, phi_re_1, phi_im_1)])
-    else:
-        T_1, mu_1 = utils.data_collect(0, 1, pl_1_file)
-        phi_re_1, phi_im_1 = utils.data_collect(2, 3, pl_1_file)
+    mu_1 = [0.4 * el for el in T_1]
+
+    phi_re_v_1 = list()
+    phi_im_v_1 = list()
+
+    chi_sigma_v_1 = list()
+    chi_gluon_v_1 = list()
+    chi_sea_u_v_1 = list()
+    chi_sea_d_v_1 = list()
+    chi_sea_s_v_1 = list()
+    chi_perturbative_u_v_1 = list()
+    chi_perturbative_d_v_1 = list()
+    chi_perturbative_s_v_1 = list()
+    chi_perturbative_gluon_v_1 = list()
+    chi_pnjl_u_v_1 = list()
+    chi_pnjl_d_v_1 = list()
+    chi_pnjl_s_v_1 = list()
+
+    chi_pi_v_1 = list()
+    chi_K_v_1 = list()
+    chi_rho_v_1 = list()
+    chi_omega_v_1 = list()
+    chi_D_v_1 = list()
+    chi_N_v_1 = list()
+    chi_T_v_1 = list()
+    chi_F_v_1 = list()
+    chi_P_v_1 = list()
+    chi_Q_v_1 = list()
+    chi_H_v_1 = list()
+
+    bden_sigma_v_1 = list()
+    bden_gluon_v_1 = list()
+    bden_sea_u_v_1 = list()
+    bden_sea_d_v_1 = list()
+    bden_sea_s_v_1 = list()
+    bden_perturbative_u_v_1 = list()
+    bden_perturbative_d_v_1 = list()
+    bden_perturbative_s_v_1 = list()
+    bden_perturbative_gluon_v_1 = list()
+    bden_pnjl_u_v_1 = list()
+    bden_pnjl_d_v_1 = list()
+    bden_pnjl_s_v_1 = list()
+
+    bden_pi_v_1 = list()
+    bden_K_v_1 = list()
+    bden_rho_v_1 = list()
+    bden_omega_v_1 = list()
+    bden_D_v_1 = list()
+    bden_N_v_1 = list()
+    bden_T_v_1 = list()
+    bden_F_v_1 = list()
+    bden_P_v_1 = list()
+    bden_Q_v_1 = list()
+    bden_H_v_1 = list()
 
     if calc_1:
-        if os.path.exists("D:/EoS/epja/cumulant_test/temp_Q_1.dat"):
-            Pres_Q_1, BDen_Q_1 = utils.data_collect(0, 1, "D:/EoS/epja/cumulant_test/temp_Q_1.dat")
-            Chi2_Q_1, _ = utils.data_collect(2, 2, "D:/EoS/epja/cumulant_test/temp_Q_1.dat")
-        else:
-            Chi2_Q_1 = [
-                pnjl.thermo.gcp_quark.bnumber_cumulant(2, T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) + pnjl.thermo.gcp_quark.bnumber_cumulant(2, T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms)
-                for T_el, mu_el, phi_re_el, phi_im_el 
-                in tqdm.tqdm(zip(T_1, mu_1, phi_re_1, phi_im_1), 
-                    desc = "Quark chiB2 (calc #1)", 
-                    total = len(T_1), 
-                    ascii = True)]
-            Pres_Q_1 = [
-                pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) + pnjl.thermo.gcp_quark.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms)
-                for T_el, mu_el, phi_re_el, phi_im_el 
-                in tqdm.tqdm(zip(T_1, mu_1, phi_re_1, phi_im_1), 
-                    desc = "Quark pressure (calc #1)", 
-                    total = len(T_1), 
-                    ascii = True)]
-            BDen_Q_1 = [
-                pnjl.thermo.gcp_quark.bdensity(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) + pnjl.thermo.gcp_quark.bdensity(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 1.0, ml = pnjl.defaults.default_ms)
-                for T_el, mu_el, phi_re_el, phi_im_el 
-                in tqdm.tqdm(zip(T_1, mu_1, phi_re_1, phi_im_1), 
-                    desc = "Quark baryon density (calc #1)", 
-                    total = len(T_1), 
-                    ascii = True)]
-            with open("D:/EoS/epja/cumulant_test/temp_Q_1.dat", 'w', newline = '') as file:
-                writer = csv.writer(file, delimiter = '\t')
-                writer.writerows([[p_el, bd_el, chi_el] for p_el, bd_el, chi_el in zip(Pres_Q_1, BDen_Q_1, Chi2_Q_1)])
-        if os.path.exists("D:/EoS/epja/cumulant_test/temp_g_1.dat"):
-            Pres_g_1, _ = utils.data_collect(0, 0, "D:/EoS/epja/cumulant_test/temp_g_1.dat")
-        else:
-            Pres_g_1 = [
-                pnjl.thermo.gcp_pl_polynomial.pressure(T_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el)) 
-                for T_el, phi_re_el, phi_im_el 
-                in tqdm.tqdm(zip(T_1, phi_re_1, phi_im_1), 
-                    desc = "Gluon pressure (calc #1)", 
-                    total = len(T_1),
-                    ascii = True)]
-            with open("D:/EoS/epja/cumulant_test/temp_g_1.dat", 'w', newline = '') as file:
-                writer = csv.writer(file, delimiter = '\t')
-                writer.writerows([[p_el] for p_el in Pres_g_1])
-        if os.path.exists("D:/EoS/epja/cumulant_test/temp_pert_1.dat"):
-            Pres_pert_1, BDen_pert_1 = utils.data_collect(0, 1, "D:/EoS/epja/cumulant_test/temp_pert_1.dat")
-            Chi2_pert_1, _ = utils.data_collect(2, 2, "D:/EoS/epja/cumulant_test/temp_pert_1.dat")
-        else:
-            Chi2_pert_1 = [
-                pnjl.thermo.gcp_perturbative.bnumber_cumulant(2, T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0)
-                for T_el, mu_el, phi_re_el, phi_im_el 
-                in tqdm.tqdm(zip(T_1, mu_1, phi_re_1, phi_im_1), 
-                    desc = "Perturbative chiB2 (calc #1)", 
-                    total = len(T_1), 
-                    ascii = True)]
-            Pres_pert_1 = [
-                pnjl.thermo.gcp_perturbative.pressure(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0)
-                for T_el, mu_el, phi_re_el, phi_im_el 
-                in tqdm.tqdm(zip(T_1, mu_1, phi_re_1, phi_im_1), 
-                    desc = "Perturbative pressure (calc #1)", 
-                    total = len(T_1), 
-                    ascii = True)]
-            BDen_pert_1 = [
-                pnjl.thermo.gcp_perturbative.bdensity(T_el, mu_el, complex(phi_re_el, phi_im_el), complex(phi_re_el, -phi_im_el), Nf = 3.0)
-                for T_el, mu_el, phi_re_el, phi_im_el 
-                in tqdm.tqdm(zip(T_1, mu_1, phi_re_1, phi_im_1), 
-                    desc = "Perturbative baryon density (calc #1)", 
-                    total = len(T_1), 
-                    ascii = True)]
-            with open("D:/EoS/epja/cumulant_test/temp_pert_1.dat", 'w', newline = '') as file:
-                writer = csv.writer(file, delimiter = '\t')
-                writer.writerows([[p_el, bd_el, chi_el] for p_el, bd_el, chi_el in zip(Pres_pert_1, BDen_pert_1, Chi2_pert_1)])
 
-        for i, (T_el, mu_el, phi_re_el, phi_im_el) in enumerate(zip(T_1, mu_1, phi_re_1, phi_im_1)):
-            print(i + 1, "/", len(T_1))
-            (regulator_N, regulator_N2, regulator_P, regulator_P2, regulator_H, regulator_H2, regulator_pi, regulator_pi2,
-             regulator_K, regulator_K2, regulator_rho, regulator_rho2, regulator_omega, regulator_omega2,
-             regulator_T, regulator_T2, regulator_D, regulator_D2, regulator_F, regulator_F2, regulator_Q5, regulator_Q52) = cluster_regulator_calc(mu_el)
-            (Chi2_pi_1_tmp, Chi2_rho_1_tmp, Chi2_omega_1_tmp, Chi2_K_1_tmp, Chi2_D_1_tmp, Chi2_N_1_tmp, Chi2_T_1_tmp, Chi2_F_1_tmp, 
-             Chi2_P_1_tmp, Chi2_Q5_1_tmp, Chi2_H_1_tmp) = cumulants_c("D:/EoS/epja/cumulant_test/temp_chi2_1", 2, [T_el], [mu_el], [phi_re_el], [phi_im_el], regulator_N, regulator_N2, regulator_P, regulator_P2, regulator_H, regulator_H2, regulator_pi, regulator_pi2, regulator_K, regulator_K2, regulator_rho, regulator_rho2, regulator_omega, regulator_omega2, regulator_T, regulator_T2, regulator_D, regulator_D2, regulator_F, regulator_F2, regulator_Q5, regulator_Q52)
-            ((Pres_pi_1_tmp, Pres_rho_1_tmp, Pres_omega_1_tmp, Pres_K_1_tmp, Pres_D_1_tmp, Pres_N_1_tmp, Pres_T_1_tmp, Pres_F_1_tmp, Pres_P_1_tmp, 
-                 Pres_Q5_1_tmp, Pres_H_1_tmp),
-                (BDen_pi_1_tmp, BDen_rho_1_tmp, BDen_omega_1_tmp, BDen_K_1_tmp, BDen_D_1_tmp, BDen_N_1_tmp, BDen_T_1_tmp, BDen_F_1_tmp, BDen_P_1_tmp, 
-                 BDen_Q5_1_tmp, BDen_H_1_tmp),
-                (_, _, _, _, _, _, _, _, _, _, _)) = clusters_c("D:/EoS/epja/cumulant_test/temp_thermo_1", [T_el], [mu_el], [phi_re_el], [phi_im_el], regulator_N, regulator_N2, regulator_P, regulator_P2, regulator_H, regulator_H2, regulator_pi, regulator_pi2, regulator_K, regulator_K2, regulator_rho, regulator_rho2, regulator_omega, regulator_omega2, regulator_T, regulator_T2, regulator_D, regulator_D2, regulator_F, regulator_F2, regulator_Q5, regulator_Q52)
-            
-            Chi2_pi_1.append(Chi2_pi_1_tmp[0])
-            Chi2_rho_1.append(Chi2_rho_1_tmp[0])
-            Chi2_omega_1.append(Chi2_omega_1_tmp[0])
-            Chi2_K_1.append(Chi2_K_1_tmp[0])
-            Chi2_D_1.append(Chi2_D_1_tmp[0])
-            Chi2_N_1.append(Chi2_N_1_tmp[0])
-            Chi2_T_1.append(Chi2_T_1_tmp[0])
-            Chi2_F_1.append(Chi2_F_1_tmp[0])
-            Chi2_P_1.append(Chi2_P_1_tmp[0])
-            Chi2_Q5_1.append(Chi2_Q5_1_tmp[0])
-            Chi2_H_1.append(Chi2_H_1_tmp[0])
+        phi_re_0 = 1e-5
+        phi_im_0 = 2e-5
+        for T_el, mu_el in tqdm.tqdm(
+            zip(T_1, mu_1), desc="Traced Polyakov loop #1",
+            total=len(T_1), ncols= 100
+        ):
+            phi_result = solver.Polyakov_loop(T_el, mu_el, phi_re_0, phi_im_0)
+            phi_re_v_1.append(phi_result[0])
+            phi_im_v_1.append(phi_result[1])
+            phi_re_0 = phi_result[0]
+            phi_im_0 = phi_result[1]
+        with open(files+"phi_re_v_1.pickle", "wb") as file:
+            pickle.dump(phi_re_v_1, file)
+        with open(files+"phi_im_v_1.pickle", "wb") as file:
+            pickle.dump(phi_im_v_1, file)
 
-            Pres_pi_1.append(Pres_pi_1_tmp[0])
-            Pres_rho_1.append(Pres_rho_1_tmp[0])
-            Pres_omega_1.append(Pres_omega_1_tmp[0])
-            Pres_K_1.append(Pres_K_1_tmp[0])
-            Pres_D_1.append(Pres_D_1_tmp[0])
-            Pres_N_1.append(Pres_N_1_tmp[0])
-            Pres_T_1.append(Pres_T_1_tmp[0])
-            Pres_F_1.append(Pres_F_1_tmp[0])
-            Pres_P_1.append(Pres_P_1_tmp[0])
-            Pres_Q5_1.append(Pres_Q5_1_tmp[0])
-            Pres_H_1.append(Pres_H_1_tmp[0])
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Sigma chi_q #1", total=len(T_1), ncols= 100
+        ):
+            chi_sigma_v_1.append(
+                pnjl.thermo.gcp_sigma_lattice.qnumber_cumulant(2, T_el, mu_el)
+            )
+        with open(files+"chi_sigma_v_1.pickle", "wb") as file:
+            pickle.dump(chi_sigma_v_1, file)
 
-            BDen_pi_1.append(BDen_pi_1_tmp[0])
-            BDen_rho_1.append(BDen_rho_1_tmp[0])
-            BDen_omega_1.append(BDen_omega_1_tmp[0])
-            BDen_K_1.append(BDen_K_1_tmp[0])
-            BDen_D_1.append(BDen_D_1_tmp[0])
-            BDen_N_1.append(BDen_N_1_tmp[0])
-            BDen_T_1.append(BDen_T_1_tmp[0])
-            BDen_F_1.append(BDen_F_1_tmp[0])
-            BDen_P_1.append(BDen_P_1_tmp[0])
-            BDen_Q5_1.append(BDen_Q5_1_tmp[0])
-            BDen_H_1.append(BDen_H_1_tmp[0])
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Gluon chi_q #1", total=len(T_1), ncols= 100
+        ):
+            chi_gluon_v_1.append(
+                pnjl.thermo.gcp_pl_polynomial.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop
+                )
+            )
+        with open(files+"chi_gluon_v_1.pickle", "wb") as file:
+            pickle.dump(chi_gluon_v_1, file)
 
-            for el in glob.glob("D:/EoS/epja/cumulant_test/temp_*.dat"): os.remove(el)
-        with open(thermo_1_file, 'w', newline = '') as file:
-            writer = csv.writer(file, delimiter = '\t')
-            writer.writerows([
-                    [p_g_1,
-                        p_Q_1, b_Q_1, c2_Q_1,
-                        p_pert_1, b_pert_1, c2_pert_1,
-                        p_pi_1, b_pi_1, c2_pi_1,
-                        p_rho_1, b_rho_1, c2_rho_1,
-                        p_omega_1, b_omega_1, c2_omega_1,
-                        p_K_1, b_K_1, c2_K_1,
-                        p_D_1, b_D_1, c2_D_1,
-                        p_N_1, b_N_1, c2_N_1,
-                        p_T_1, b_T_1, c2_T_1,
-                        p_F_1, b_F_1, c2_F_1,
-                        p_P_1, b_P_1, c2_P_1,
-                        p_Q5_1, b_Q5_1, c2_Q5_1,
-                        p_H_1, b_H_1, c2_H_1] 
-                    for p_g_1,
-                        p_Q_1, b_Q_1, c2_Q_1,
-                        p_pert_1, b_pert_1, c2_pert_1,
-                        p_pi_1, b_pi_1, c2_pi_1,
-                        p_rho_1, b_rho_1, c2_rho_1,
-                        p_omega_1, b_omega_1, c2_omega_1,
-                        p_K_1, b_K_1, c2_K_1,
-                        p_D_1, b_D_1, c2_D_1,
-                        p_N_1, b_N_1, c2_N_1,
-                        p_T_1, b_T_1, c2_T_1,
-                        p_F_1, b_F_1, c2_F_1,
-                        p_P_1, b_P_1, c2_P_1,
-                        p_Q5_1, b_Q5_1, c2_Q5_1,
-                        p_H_1, b_H_1, c2_H_1
-                    in zip(Pres_g_1,
-                        Pres_Q_1, BDen_Q_1, Chi2_Q_1,
-                        Pres_pert_1, BDen_pert_1, Chi2_pert_1,
-                        Pres_pi_1, BDen_pi_1, Chi2_pi_1,
-                        Pres_rho_1, BDen_rho_1, Chi2_rho_1,
-                        Pres_omega_1, BDen_omega_1, Chi2_omega_1,
-                        Pres_K_1, BDen_K_1, Chi2_K_1,
-                        Pres_D_1, BDen_D_1, Chi2_D_1,
-                        Pres_N_1, BDen_N_1, Chi2_N_1,
-                        Pres_T_1, BDen_T_1, Chi2_T_1,
-                        Pres_F_1, BDen_F_1, Chi2_F_1,
-                        Pres_P_1, BDen_P_1, Chi2_P_1,
-                        Pres_Q5_1, BDen_Q5_1, Chi2_Q5_1,
-                        Pres_H_1, BDen_H_1, Chi2_H_1)
-                    ])
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Sea chi_q #1", total=len(T_1), ncols= 100
+        ):
+            lq_temp = pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+                2, T_el, mu_el, 'l'
+            )
+            chi_sea_u_v_1.append(lq_temp)
+            chi_sea_d_v_1.append(lq_temp)
+            chi_sea_s_v_1.append(
+                pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+                    2, T_el, mu_el, 's'
+                )
+            )
+        with open(files+"chi_sea_u_v_1.pickle", "wb") as file:
+            pickle.dump(chi_sea_u_v_1, file)
+        with open(files+"chi_sea_d_v_1.pickle", "wb") as file:
+            pickle.dump(chi_sea_d_v_1, file)
+        with open(files+"chi_sea_s_v_1.pickle", "wb") as file:
+            pickle.dump(chi_sea_s_v_1, file)
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Perturbative chi_q #1", total=len(T_1), ncols= 100
+        ):
+            lq_temp = pnjl.thermo.gcp_perturbative.qnumber_cumulant(
+                2, T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 'l'
+            )
+            chi_perturbative_u_v_1.append(lq_temp)
+            chi_perturbative_d_v_1.append(lq_temp)
+            chi_perturbative_s_v_1.append(
+                pnjl.thermo.gcp_perturbative.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 's'
+                )
+            )
+            if pnjl.defaults.PERTURBATIVE_GLUON_CORRECTION:
+                raise RuntimeError("Gluon chi_q not implemented")
+            else:
+                chi_perturbative_gluon_v_1.append(0.0)
+        with open(files+"chi_perturbative_u_v_1.pickle", "wb") as file:
+            pickle.dump(chi_perturbative_u_v_1, file)
+        with open(files+"chi_perturbative_d_v_1.pickle", "wb") as file:
+            pickle.dump(chi_perturbative_d_v_1, file)
+        with open(files+"chi_perturbative_s_v_1.pickle", "wb") as file:
+            pickle.dump(chi_perturbative_s_v_1, file)
+        with open(files+"chi_perturbative_gluon_v_1.pickle", "wb") as file:
+            pickle.dump(chi_perturbative_gluon_v_1, file)
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="PNJL chi_q #1", total=len(T_1), ncols= 100
+        ):
+            lq_temp = pnjl.thermo.gcp_pnjl.qnumber_cumulant(
+                2, T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 'l'
+            )
+            sq_temp = pnjl.thermo.gcp_pnjl.qnumber_cumulant(
+                2, T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 's'
+            )
+            chi_pnjl_u_v_1.append(lq_temp)
+            chi_pnjl_d_v_1.append(lq_temp)
+            chi_pnjl_s_v_1.append(sq_temp)
+        with open(files+"chi_pnjl_u_v_1.pickle", "wb") as file:
+            pickle.dump(chi_pnjl_u_v_1, file)
+        with open(files+"chi_pnjl_d_v_1.pickle", "wb") as file:
+            pickle.dump(chi_pnjl_d_v_1, file)
+        with open(files+"chi_pnjl_s_v_1.pickle", "wb") as file:
+            pickle.dump(chi_pnjl_s_v_1, file)
     else:
-        Pres_g_1, _ = utils.data_collect(0, 0, thermo_1_file)
+        with open(files+"phi_re_v_1.pickle", "rb") as file:
+            phi_re_v_1 = pickle.load(file)
+        with open(files+"phi_im_v_1.pickle", "rb") as file:
+            phi_im_v_1 = pickle.load(file)
+        with open(files+"chi_sigma_v_1.pickle", "rb") as file:
+            chi_sigma_v_1 = pickle.load(file)
+        with open(files+"chi_gluon_v_1.pickle", "rb") as file:
+            chi_gluon_v_1 = pickle.load(file)
+        with open(files+"chi_sea_u_v_1.pickle", "rb") as file:
+            chi_sea_u_v_1 = pickle.load(file)
+        with open(files+"chi_sea_d_v_1.pickle", "rb") as file:
+            chi_sea_d_v_1 = pickle.load(file)
+        with open(files+"chi_sea_s_v_1.pickle", "rb") as file:
+            chi_sea_s_v_1 = pickle.load(file)
+        with open(files+"chi_perturbative_u_v_1.pickle", "rb") as file:
+            chi_perturbative_u_v_1 = pickle.load(file)
+        with open(files+"chi_perturbative_d_v_1.pickle", "rb") as file:
+            chi_perturbative_d_v_1 = pickle.load(file)
+        with open(files+"chi_perturbative_s_v_1.pickle", "rb") as file:
+            chi_perturbative_s_v_1 = pickle.load(file)
+        with open(files+"chi_perturbative_gluon_v_1.pickle", "rb") as file:
+            chi_perturbative_gluon_v_1 = pickle.load(file)
+        with open(files+"chi_pnjl_u_v_1.pickle", "rb") as file:
+            chi_pnjl_u_v_1 = pickle.load(file)
+        with open(files+"chi_pnjl_d_v_1.pickle", "rb") as file:
+            chi_pnjl_d_v_1 = pickle.load(file)
+        with open(files+"chi_pnjl_s_v_1.pickle", "rb") as file:
+            chi_pnjl_s_v_1 = pickle.load(file)
 
-        Pres_Q_1, BDen_Q_1 = utils.data_collect(1, 2, thermo_1_file)
-        Chi2_Q_1, _ = utils.data_collect(3, 3, thermo_1_file)
+    if calc_1:
 
-        Pres_pert_1, BDen_pert_1 = utils.data_collect(4, 5, thermo_1_file)
-        Chi2_pert_1, _ = utils.data_collect(6, 6, thermo_1_file)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Pion chi_q #1", total=len(T_1), ncols=100
+        ):
+            chi_pi_v_1.append(
+                cluster.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'pi'
+                )
+            )
+        with open(files+"chi_pi_v_1.pickle", "wb") as file:
+            pickle.dump(chi_pi_v_1, file)
 
-        Pres_pi_1, BDen_pi_1 = utils.data_collect(7, 8, thermo_1_file)
-        Chi2_pi_1, _ = utils.data_collect(9, 9, thermo_1_file)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Kaon chi_q #1", total=len(T_1), ncols=100
+        ):
+            chi_K_v_1.append(
+                cluster.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'K'
+                )
+            )
+        with open(files+"chi_K_v_1.pickle", "wb") as file:
+            pickle.dump(chi_K_v_1, file)
 
-        Pres_rho_1, BDen_rho_1 = utils.data_collect(10, 11, thermo_1_file)
-        Chi2_rho_1, _ = utils.data_collect(12, 12, thermo_1_file)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Rho chi_q #1", total=len(T_1), ncols=100
+        ):
+            chi_rho_v_1.append(
+                cluster.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'rho'
+                )
+            )
+        with open(files+"chi_rho_v_1.pickle", "wb") as file:
+            pickle.dump(chi_rho_v_1, file)
 
-        Pres_omega_1, BDen_omega_1 = utils.data_collect(13, 14, thermo_1_file)
-        Chi2_omega_1, _ = utils.data_collect(15, 15, thermo_1_file)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Omega chi_q #1", total=len(T_1), ncols=100
+        ):
+            chi_omega_v_1.append(
+                cluster.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'omega'
+                )
+            )
+        with open(files+"chi_omega_v_1.pickle", "wb") as file:
+            pickle.dump(chi_omega_v_1, file)
 
-        Pres_K_1, BDen_K_1 = utils.data_collect(16, 17, thermo_1_file)
-        Chi2_K_1, _ = utils.data_collect(18, 18, thermo_1_file)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Diquark chi_q #1", total=len(T_1), ncols=100
+        ):
+            chi_D_v_1.append(
+                cluster.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'D'
+                )
+            )
+        with open(files+"chi_D_v_1.pickle", "wb") as file:
+            pickle.dump(chi_D_v_1, file)
 
-        Pres_D_1, BDen_D_1 = utils.data_collect(19, 20, thermo_1_file)
-        Chi2_D_1, _ = utils.data_collect(21, 21, thermo_1_file)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Nucleon chi_q #1", total=len(T_1), ncols=100
+        ):
+            chi_N_v_1.append(
+                cluster.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'N'
+                )
+            )
+        with open(files+"chi_N_v_1.pickle", "wb") as file:
+            pickle.dump(chi_N_v_1, file)
 
-        Pres_N_1, BDen_N_1 = utils.data_collect(22, 23, thermo_1_file)
-        Chi2_N_1, _ = utils.data_collect(24, 24, thermo_1_file)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Tetraquark chi_q #1", total=len(T_1), ncols=100
+        ):
+            chi_T_v_1.append(
+                cluster.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'T'
+                )
+            )
+        with open(files+"chi_T_v_1.pickle", "wb") as file:
+            pickle.dump(chi_T_v_1, file)
 
-        Pres_T_1, BDen_T_1 = utils.data_collect(25, 26, thermo_1_file)
-        Chi2_T_1, _ = utils.data_collect(27, 27, thermo_1_file)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="F-quark chi_q #1", total=len(T_1), ncols=100
+        ):
+            chi_F_v_1.append(
+                cluster.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'F'
+                )
+            )
+        with open(files+"chi_F_v_1.pickle", "wb") as file:
+            pickle.dump(chi_F_v_1, file)
 
-        Pres_F_1, BDen_F_1 = utils.data_collect(28, 29, thermo_1_file)
-        Chi2_F_1, _ = utils.data_collect(30, 30, thermo_1_file)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Pentaquark chi_q #1", total=len(T_1), ncols=100
+        ):
+            chi_P_v_1.append(
+                cluster.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'P'
+                )
+            )
+        with open(files+"chi_P_v_1.pickle", "wb") as file:
+            pickle.dump(chi_P_v_1, file)
 
-        Pres_P_1, BDen_P_1 = utils.data_collect(31, 32, thermo_1_file)
-        Chi2_P_1, _ = utils.data_collect(33, 33, thermo_1_file)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Q-quark chi_q #1", total=len(T_1), ncols=100
+        ):
+            chi_Q_v_1.append(
+                cluster.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'Q'
+                )
+            )
+        with open(files+"chi_Q_v_1.pickle", "wb") as file:
+            pickle.dump(chi_Q_v_1, file)
 
-        Pres_Q5_1, BDen_Q5_1 = utils.data_collect(34, 35, thermo_1_file)
-        Chi2_Q5_1, _ = utils.data_collect(36, 36, thermo_1_file)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Hexaquark chi_q #1", total=len(T_1), ncols=100
+        ):
+            chi_H_v_1.append(
+                cluster.qnumber_cumulant(
+                    2, T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'H'
+                )
+            )
+        with open(files+"chi_H_v_1.pickle", "wb") as file:
+            pickle.dump(chi_H_v_1, file)
+    else:
+        with open(files+"chi_pi_v_1.pickle", "rb") as file:
+            chi_pi_v_1 = pickle.load(file)
+        with open(files+"chi_K_v_1.pickle", "rb") as file:
+            chi_K_v_1 = pickle.load(file)
+        with open(files+"chi_rho_v_1.pickle", "rb") as file:
+            chi_rho_v_1 = pickle.load(file)
+        with open(files+"chi_omega_v_1.pickle", "rb") as file:
+            chi_omega_v_1 = pickle.load(file)
+        with open(files+"chi_D_v_1.pickle", "rb") as file:
+            chi_D_v_1 = pickle.load(file)
+        with open(files+"chi_N_v_1.pickle", "rb") as file:
+            chi_N_v_1 = pickle.load(file)
+        with open(files+"chi_T_v_1.pickle", "rb") as file:
+            chi_T_v_1 = pickle.load(file)
+        with open(files+"chi_F_v_1.pickle", "rb") as file:
+            chi_F_v_1 = pickle.load(file)
+        with open(files+"chi_P_v_1.pickle", "rb") as file:
+            chi_P_v_1 = pickle.load(file)
+        with open(files+"chi_Q_v_1.pickle", "rb") as file:
+            chi_Q_v_1 = pickle.load(file)
+        with open(files+"chi_H_v_1.pickle", "rb") as file:
+            chi_H_v_1 = pickle.load(file)
 
-        Pres_H_1, BDen_H_1 = utils.data_collect(37, 38, thermo_1_file)
-        Chi2_H_1, _ = utils.data_collect(39, 39, thermo_1_file)
+    if calc_1:
 
-    #for i, el in enumerate(Pres_H_1):
-    #    print("Checking Pres_H", i + 1, "/", 200)
-    #    if el == math.inf or el == -math.inf or numpy.isnan(el):
-    #        print("Found inf or nan!  Correcting...")
-    #        j = 1
-    #        k = 1
-    #        while Pres_H_1[i - j] == math.inf or Pres_H_1[i - j] == -math.inf
-    #        or numpy.isnan(Pres_H_1[i - j]): j+= 1
-    #        while Pres_H_1[i + k] == math.inf or Pres_H_1[i + k] == -math.inf
-    #        or numpy.isnan(Pres_H_1[i + k]): k+= 1
-    #        x0 = T_1[i - j]
-    #        x = T_1[i]
-    #        x1 = T_1[i + k]
-    #        y0 = Pres_H_1[i - j]
-    #        y1 = Pres_H_1[i + k]
-    #        Pres_H_1[i] = (y0 * (x1 - x) + y1 * (x - x0)) / (x1 - x0)
-    #
-    #for i, el in enumerate(BDen_H_1):
-    #    print("Checking BDen_H", i + 1, "/", 200)
-    #    if el == math.inf or el == -math.inf or numpy.isnan(el):
-    #        print("Found inf or nan!  Correcting...")
-    #        j = 1
-    #        k = 1
-    #        while BDen_H_1[i - j] == math.inf or BDen_H_1[i - j] == -math.inf
-    #        or numpy.isnan(BDen_H_1[i - j]): j+= 1
-    #        while BDen_H_1[i + k] == math.inf or BDen_H_1[i + k] == -math.inf
-    #        or numpy.isnan(BDen_H_1[i + k]): k+= 1
-    #        x0 = T_1[i - j]
-    #        x = T_1[i]
-    #        x1 = T_1[i + k]
-    #        y0 = BDen_H_1[i - j]
-    #        y1 = BDen_H_1[i + k]
-    #        BDen_H_1[i] = (y0 * (x1 - x) + y1 * (x - x0)) / (x1 - x0)
-    #
-    #for i, el in enumerate(Chi2_H_1):
-    #    print("Checking Chi2_H", i + 1, "/", 200)
-    #    if el == math.inf or el == -math.inf or numpy.isnan(el):
-    #        print("Found inf or nan!  Correcting...")
-    #        j = 1
-    #        k = 1
-    #        while Chi2_H_1[i - j] == math.inf or Chi2_H_1[i - j] == -math.inf
-    #        or numpy.isnan(Chi2_H_1[i - j]): j+= 1
-    #        while Chi2_H_1[i + k] == math.inf or Chi2_H_1[i + k] == -math.inf
-    #        or numpy.isnan(Chi2_H_1[i + k]): k+= 1
-    #        x0 = T_1[i - j]
-    #        x = T_1[i]
-    #        x1 = T_1[i + k]
-    #        y0 = Chi2_H_1[i - j]
-    #        y1 = Chi2_H_1[i + k]
-    #        Chi2_H_1[i] = (y0 * (x1 - x) + y1 * (x - x0)) / (x1 - x0)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Sigma bdensity #1", total=len(T_1), ncols= 100
+        ):
+            bden_sigma_v_1.append(
+                pnjl.thermo.gcp_sigma_lattice.bdensity(T_el, mu_el)
+            )
+        with open(files+"bden_sigma_v_1.pickle", "wb") as file:
+            pickle.dump(bden_sigma_v_1, file)
 
-    T_R12_pred, R12_pred = utils.data_collect(0, 1, "D:/EoS/epja/cumulant_test/R12_prediction.dat")
-    T_lQCD_R12_0p4_high, lQCD_R12_0p4_high = utils.data_collect(0, 1, "D:/EoS/epja/cumulant_test/lQCD_0p4_high.dat")
-    T_lQCD_R12_0p4_low, lQCD_R12_0p4_low = utils.data_collect(0, 1, "D:/EoS/epja/cumulant_test/lQCD_0p4_low.dat")
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Gluon bdensity #1", total=len(T_1), ncols= 100
+        ):
+            bden_gluon_v_1.append(
+                pnjl.thermo.gcp_pl_polynomial.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop
+                )
+            )
+        with open(files+"bden_gluon_v_1.pickle", "wb") as file:
+            pickle.dump(bden_gluon_v_1, file)
 
-    lQCD_0p4 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(T_lQCD_R12_0p4_high, lQCD_R12_0p4_high)]
-    for x_el, y_el in zip(T_lQCD_R12_0p4_low[::-1], lQCD_R12_0p4_low[::-1]):
-        lQCD_0p4.append(numpy.array([x_el, y_el]))
-    lQCD_0p4 = numpy.array(lQCD_0p4)
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Sea bdensity #1", total=len(T_1), ncols= 100
+        ):
+            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+                T_el, mu_el, 'l'
+            )
+            bden_sea_u_v_1.append(lq_temp)
+            bden_sea_d_v_1.append(lq_temp)
+            bden_sea_s_v_1.append(
+                pnjl.thermo.gcp_sea_lattice.bdensity(
+                    T_el, mu_el, 's'
+                )
+            )
+        with open(files+"bden_sea_u_v_1.pickle", "wb") as file:
+            pickle.dump(bden_sea_u_v_1, file)
+        with open(files+"bden_sea_d_v_1.pickle", "wb") as file:
+            pickle.dump(bden_sea_d_v_1, file)
+        with open(files+"bden_sea_s_v_1.pickle", "wb") as file:
+            pickle.dump(bden_sea_s_v_1, file)
 
-    Nf = 3.0
-    Nc = 3.0
-    pT4_SB = [((Nf * Nc) / 6.0) * (((7.0 * (math.pi ** 2)) / 30.0) + ((mu_el / T_el) ** 2) + (1.0 / (2.0 * (math.pi ** 2))) * ((mu_el / T_el) ** 4)) + ((Nc ** 2) - 1.0) * ((math.pi ** 2) / 45.0) for T_el, mu_el in zip(T_1, mu_1)]
-    bdenT3_SB = [((Nf * Nc) / 3.0) * ((mu_el / T_el) + (1.0 / (math.pi ** 2)) * ((mu_el / T_el) ** 3)) for T_el, mu_el in zip(T_1, mu_1)]
-    Chi2_SB = [((Nf * Nc) / 3.0) * (1.0 + (3.0 / (math.pi ** 2)) * ((mu_el / T_el) ** 2)) for T_el, mu_el in zip(T_1, mu_1)]
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Perturbative bdensity #1", total=len(T_1), ncols= 100
+        ):
+            lq_temp = pnjl.thermo.gcp_perturbative.bdensity(
+                T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 'l'
+            )
+            bden_perturbative_u_v_1.append(lq_temp)
+            bden_perturbative_d_v_1.append(lq_temp)
+            bden_perturbative_s_v_1.append(
+                pnjl.thermo.gcp_perturbative.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 's'
+                )
+            )
+            if pnjl.defaults.PERTURBATIVE_GLUON_CORRECTION:
+                raise RuntimeError("Gluon bdensity not implemented")
+            else:
+                bden_perturbative_gluon_v_1.append(0.0)
+        with open(files+"bden_perturbative_u_v_1.pickle", "wb") as file:
+            pickle.dump(bden_perturbative_u_v_1, file)
+        with open(files+"bden_perturbative_d_v_1.pickle", "wb") as file:
+            pickle.dump(bden_perturbative_d_v_1, file)
+        with open(files+"bden_perturbative_s_v_1.pickle", "wb") as file:
+            pickle.dump(bden_perturbative_s_v_1, file)
+        with open(files+"bden_perturbative_gluon_v_1.pickle", "wb") as file:
+            pickle.dump(bden_perturbative_gluon_v_1, file)
 
-    Chi2_tot = [sum(el) for el in zip(Chi2_Q_1, Chi2_pert_1, Chi2_pi_1, Chi2_rho_1, Chi2_omega_1, Chi2_K_1, Chi2_D_1, Chi2_N_1, Chi2_T_1, Chi2_F_1, Chi2_P_1, Chi2_Q5_1)]
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="PNJL bdensity #1", total=len(T_1), ncols= 100
+        ):
+            lq_temp = pnjl.thermo.gcp_pnjl.bdensity(
+                T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 'l'
+            )
+            sq_temp = pnjl.thermo.gcp_pnjl.bdensity(
+                T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 's'
+            )
+            bden_pnjl_u_v_1.append(lq_temp)
+            bden_pnjl_d_v_1.append(lq_temp)
+            bden_pnjl_s_v_1.append(sq_temp)
+        with open(files+"bden_pnjl_u_v_1.pickle", "wb") as file:
+            pickle.dump(bden_pnjl_u_v_1, file)
+        with open(files+"bden_pnjl_d_v_1.pickle", "wb") as file:
+            pickle.dump(bden_pnjl_d_v_1, file)
+        with open(files+"bden_pnjl_s_v_1.pickle", "wb") as file:
+            pickle.dump(bden_pnjl_s_v_1, file)
+    else:
+        with open(files+"bden_sigma_v_1.pickle", "rb") as file:
+            bden_sigma_v_1 = pickle.load(file)
+        with open(files+"bden_gluon_v_1.pickle", "rb") as file:
+            bden_gluon_v_1 = pickle.load(file)
+        with open(files+"bden_sea_u_v_1.pickle", "rb") as file:
+            bden_sea_u_v_1 = pickle.load(file)
+        with open(files+"bden_sea_d_v_1.pickle", "rb") as file:
+            bden_sea_d_v_1 = pickle.load(file)
+        with open(files+"bden_sea_s_v_1.pickle", "rb") as file:
+            bden_sea_s_v_1 = pickle.load(file)
+        with open(files+"bden_perturbative_u_v_1.pickle", "rb") as file:
+            bden_perturbative_u_v_1 = pickle.load(file)
+        with open(files+"bden_perturbative_d_v_1.pickle", "rb") as file:
+            bden_perturbative_d_v_1 = pickle.load(file)
+        with open(files+"bden_perturbative_s_v_1.pickle", "rb") as file:
+            bden_perturbative_s_v_1 = pickle.load(file)
+        with open(files+"bden_perturbative_gluon_v_1.pickle", "rb") as file:
+            bden_perturbative_gluon_v_1 = pickle.load(file)
+        with open(files+"bden_pnjl_u_v_1.pickle", "rb") as file:
+            bden_pnjl_u_v_1 = pickle.load(file)
+        with open(files+"bden_pnjl_d_v_1.pickle", "rb") as file:
+            bden_pnjl_d_v_1 = pickle.load(file)
+        with open(files+"bden_pnjl_s_v_1.pickle", "rb") as file:
+            bden_pnjl_s_v_1 = pickle.load(file)
+
+    if calc_1:
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Pion bdensity #1", total=len(T_1), ncols=100
+        ):
+            bden_pi_v_1.append(
+                cluster.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'pi'
+                )
+            )
+        with open(files+"bden_pi_v_1.pickle", "wb") as file:
+            pickle.dump(bden_pi_v_1, file)
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Kaon bdensity #1", total=len(T_1), ncols=100
+        ):
+            bden_K_v_1.append(
+                cluster.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'K'
+                )
+            )
+        with open(files+"bden_K_v_1.pickle", "wb") as file:
+            pickle.dump(bden_K_v_1, file)
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Rho bdensity #1", total=len(T_1), ncols=100
+        ):
+            bden_rho_v_1.append(
+                cluster.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'rho'
+                )
+            )
+        with open(files+"bden_rho_v_1.pickle", "wb") as file:
+            pickle.dump(bden_rho_v_1, file)
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Omega bdensity #1", total=len(T_1), ncols=100
+        ):
+            bden_omega_v_1.append(
+                cluster.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'omega'
+                )
+            )
+        with open(files+"bden_omega_v_1.pickle", "wb") as file:
+            pickle.dump(bden_omega_v_1, file)
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Diquark bdensity #1", total=len(T_1), ncols=100
+        ):
+            bden_D_v_1.append(
+                cluster.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'D'
+                )
+            )
+        with open(files+"bden_D_v_1.pickle", "wb") as file:
+            pickle.dump(bden_D_v_1, file)
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Nucleon bdensity #1", total=len(T_1), ncols=100
+        ):
+            bden_N_v_1.append(
+                cluster.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'N'
+                )
+            )
+        with open(files+"bden_N_v_1.pickle", "wb") as file:
+            pickle.dump(bden_N_v_1, file)
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Tetraquark bdensity #1", total=len(T_1), ncols=100
+        ):
+            bden_T_v_1.append(
+                cluster.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'T'
+                )
+            )
+        with open(files+"bden_T_v_1.pickle", "wb") as file:
+            pickle.dump(bden_T_v_1, file)
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="F-quark bdensity #1", total=len(T_1), ncols=100
+        ):
+            bden_F_v_1.append(
+                cluster.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'F'
+                )
+            )
+        with open(files+"bden_F_v_1.pickle", "wb") as file:
+            pickle.dump(bden_F_v_1, file)
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Pentaquark bdensity #1", total=len(T_1), ncols=100
+        ):
+            bden_P_v_1.append(
+                cluster.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'P'
+                )
+            )
+        with open(files+"bden_P_v_1.pickle", "wb") as file:
+            pickle.dump(bden_P_v_1, file)
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Q-quark bdensity #1", total=len(T_1), ncols=100
+        ):
+            bden_Q_v_1.append(
+                cluster.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'Q'
+                )
+            )
+        with open(files+"bden_Q_v_1.pickle", "wb") as file:
+            pickle.dump(bden_Q_v_1, file)
+
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            desc="Hexaquark bdensity #1", total=len(T_1), ncols=100
+        ):
+            bden_H_v_1.append(
+                cluster.bdensity(
+                    T_el, mu_el, phi_re_el, phi_im_el,
+                    solver.Polyakov_loop, 'H'
+                )
+            )
+        with open(files+"bden_H_v_1.pickle", "wb") as file:
+            pickle.dump(bden_H_v_1, file)
+    else:
+        with open(files+"bden_pi_v_1.pickle", "rb") as file:
+            bden_pi_v_1 = pickle.load(file)
+        with open(files+"bden_K_v_1.pickle", "rb") as file:
+            bden_K_v_1 = pickle.load(file)
+        with open(files+"bden_rho_v_1.pickle", "rb") as file:
+            bden_rho_v_1 = pickle.load(file)
+        with open(files+"bden_omega_v_1.pickle", "rb") as file:
+            bden_omega_v_1 = pickle.load(file)
+        with open(files+"bden_D_v_1.pickle", "rb") as file:
+            bden_D_v_1 = pickle.load(file)
+        with open(files+"bden_N_v_1.pickle", "rb") as file:
+            bden_N_v_1 = pickle.load(file)
+        with open(files+"bden_T_v_1.pickle", "rb") as file:
+            bden_T_v_1 = pickle.load(file)
+        with open(files+"bden_F_v_1.pickle", "rb") as file:
+            bden_F_v_1 = pickle.load(file)
+        with open(files+"bden_P_v_1.pickle", "rb") as file:
+            bden_P_v_1 = pickle.load(file)
+        with open(files+"bden_Q_v_1.pickle", "rb") as file:
+            bden_Q_v_1 = pickle.load(file)
+        with open(files+"bden_H_v_1.pickle", "rb") as file:
+            bden_H_v_1 = pickle.load(file)
     
-    BDen_total_1 = [sum(el) for el in zip(BDen_Q_1, BDen_pert_1, BDen_pi_1, BDen_rho_1, BDen_omega_1, BDen_K_1, BDen_D_1, BDen_N_1, BDen_T_1, BDen_F_1, BDen_P_1, BDen_Q5_1)]
-    R12dev = [(1.0 / 3.0) * (bden_sum / (mu_el * chi2_sum)) for chi2_sum, mu_el, bden_sum in zip(Chi2_tot, mu_1, BDen_total_1)]
+    bden_qgp_total_1 = [
+        sum(el) for el in zip(
+            bden_sigma_v_1, bden_gluon_v_1, bden_perturbative_gluon_v_1,
+            bden_sea_u_v_1, bden_sea_d_v_1, bden_sea_s_v_1,
+            bden_perturbative_u_v_1, bden_perturbative_d_v_1,
+            bden_perturbative_s_v_1, bden_pnjl_u_v_1, bden_pnjl_d_v_1,
+            bden_pnjl_s_v_1
+        )
+    ]
 
-    pT4_Q_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_Q_1, T_1)]
-    pT4_g_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_g_1, T_1)]
-    pT4_pert_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_pert_1, T_1)]
-    pT4_pi_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_pi_1, T_1)]
-    pT4_rho_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_rho_1, T_1)]
-    pT4_omega_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_omega_1, T_1)]
-    pT4_K_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_K_1, T_1)]
-    pT4_D_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_D_1, T_1)]
-    pT4_N_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_N_1, T_1)]
-    pT4_T_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_T_1, T_1)]
-    pT4_F_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_F_1, T_1)]
-    pT4_P_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_P_1, T_1)]
-    pT4_Q5_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_Q5_1, T_1)]
-    #pT4_H_1 = [el / (T_el ** 4) for el, T_el in zip(Pres_H_1, T_1)]
-    pT4_tot_1 = [sum(el) for el in zip(pT4_Q_1, pT4_g_1, pT4_pert_1, pT4_pi_1, pT4_rho_1, pT4_omega_1, pT4_K_1, pT4_D_1, pT4_N_1, pT4_T_1, pT4_F_1, pT4_P_1, pT4_Q5_1)]
+    chi_qgp_total_1 = [
+        sum(el) for el in zip(
+            chi_sigma_v_1, chi_gluon_v_1, chi_perturbative_gluon_v_1,
+            chi_sea_u_v_1, chi_sea_d_v_1, chi_sea_s_v_1,
+            chi_perturbative_u_v_1, chi_perturbative_d_v_1,
+            chi_perturbative_s_v_1, chi_pnjl_u_v_1, chi_pnjl_d_v_1,
+            chi_pnjl_s_v_1
+        )
+    ]
 
-    bdenT3_Q_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_Q_1, T_1)]
-    bdenT3_pert_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_pert_1, T_1)]
-    bdenT3_pi_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_pi_1, T_1)]
-    bdenT3_rho_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_rho_1, T_1)]
-    bdenT3_omega_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_omega_1, T_1)]
-    bdenT3_K_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_K_1, T_1)]
-    bdenT3_D_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_D_1, T_1)]
-    bdenT3_N_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_N_1, T_1)]
-    bdenT3_T_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_T_1, T_1)]
-    bdenT3_F_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_F_1, T_1)]
-    bdenT3_P_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_P_1, T_1)]
-    bdenT3_Q5_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_Q5_1, T_1)]
-    #bdenT3_H_1 = [el / (T_el ** 3) for el, T_el in zip(BDen_H_1, T_1)]
-    bdenT3_tot_1 = [sum(el) for el in zip(bdenT3_Q_1, bdenT3_pert_1, bdenT3_pi_1, bdenT3_rho_1, bdenT3_omega_1, bdenT3_K_1, bdenT3_D_1, bdenT3_N_1, bdenT3_T_1, bdenT3_F_1, bdenT3_P_1, bdenT3_Q5_1)]
+    bden_cluster_total_1 = [
+        sum(el) for el in zip(
+            bden_pi_v_1, bden_K_v_1, bden_rho_v_1, bden_omega_v_1,
+            bden_D_v_1, bden_N_v_1, bden_T_v_1, bden_F_v_1, bden_P_v_1,
+            bden_Q_v_1, bden_H_v_1
+        )
+    ]
+
+    chi_cluster_total_1 = [
+        sum(el) for el in zip(
+            chi_pi_v_1, chi_K_v_1, chi_rho_v_1, chi_omega_v_1,
+            chi_D_v_1, chi_N_v_1, chi_T_v_1, chi_F_v_1, chi_P_v_1,
+            chi_Q_v_1, chi_H_v_1
+        )
+    ]
+
+    bden_total_1 = [sum(el) for el in zip(bden_qgp_total_1, bden_cluster_total_1)]
+    
+    chi_total_1 = [sum(el) for el in zip(chi_qgp_total_1, chi_cluster_total_1)]
+
+    R12_calc_1 = [3.0*b_el/(mu_el*chi_el) for b_el, mu_el, chi_el in zip(bden_total_1, mu_1, chi_total_1)]
+
+    T_R12_pred_1, R12_pred_1 = utils.data_load("D:/EoS/epja/cumulant_test/R12_prediction.dat", 0, 1)
+    
+    with open("D:/EoS/epja/lattice_data_pickled/R12_lQCD_0p4.pickle", "rb") as file:
+        R12_lQCD_0p4 = pickle.load(file)
 
     color_pi = '#653239'
     color_rho = '#858AE3'
@@ -6445,87 +6810,82 @@ def cumulant_test():
 
     fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
     ax1 = fig1.add_subplot(1, 1, 1)
-    ax1.axis([min(T_1), max(T_1), min(pT4_tot_1), max(pT4_tot_1)])
-    ax1.plot(T_1, pT4_Q_1, '-', c = 'blue')
-    ax1.plot(T_1, pT4_g_1, '-', c = 'pink')
-    ax1.plot(T_1, pT4_pert_1, '-', c = 'cyan')
-    ax1.plot(T_1, pT4_pi_1, '-', c = color_pi)
-    ax1.plot(T_1, pT4_rho_1, '-', c = color_rho)
-    ax1.plot(T_1, pT4_omega_1, '-', c = color_omega)
-    ax1.plot(T_1, pT4_K_1, '-', c = color_K)
-    ax1.plot(T_1, pT4_D_1, '-', c = color_D)
-    ax1.plot(T_1, pT4_N_1, '-', c = color_N)
-    ax1.plot(T_1, pT4_T_1, '-', c = color_T)
-    ax1.plot(T_1, pT4_F_1, '-', c = color_F)
-    ax1.plot(T_1, pT4_P_1, '-', c = color_P)
-    ax1.plot(T_1, pT4_Q5_1, '-', c = color_Q5)
-    #ax1.plot(T_1, pT4_H_1, '-', c = color_H)
-    ax1.plot(T_1, pT4_tot_1, '-', c = 'black')
-    ax1.plot(T_1, pT4_SB, '--', c = 'black')
+    ax1.axis([min(T_1), max(T_1), min(chi_total_1), max(chi_total_1)])
+
+    ax1.plot(T_1, chi_pnjl_u_v_1, '-', c = 'blue')
+    ax1.plot(T_1, chi_pnjl_d_v_1, '-.', c = 'blue')
+    ax1.plot(T_1, chi_pnjl_s_v_1, '--', c = 'blue')
+    ax1.plot(T_1, chi_gluon_v_1, '-', c = 'pink')
+    ax1.plot(T_1, chi_perturbative_u_v_1, '-', c = 'cyan')
+    ax1.plot(T_1, chi_perturbative_u_v_1, '-.', c = 'cyan')
+    ax1.plot(T_1, chi_perturbative_u_v_1, '--', c = 'cyan')
+    ax1.plot(T_1, chi_perturbative_gluon_v_1, ':', c = 'cyan')
+    ax1.plot(T_1, chi_pi_v_1, '-', c = color_pi)
+    ax1.plot(T_1, chi_rho_v_1, '-', c = color_rho)
+    ax1.plot(T_1, chi_omega_v_1, '-', c = color_omega)
+    ax1.plot(T_1, chi_K_v_1, '-', c = color_K)
+    ax1.plot(T_1, chi_D_v_1, '-', c = color_D)
+    ax1.plot(T_1, chi_N_v_1, '-', c = color_N)
+    ax1.plot(T_1, chi_T_v_1, '-', c = color_T)
+    ax1.plot(T_1, chi_F_v_1, '-', c = color_F)
+    ax1.plot(T_1, chi_P_v_1, '-', c = color_P)
+    ax1.plot(T_1, chi_Q_v_1, '-', c = color_Q5)
+    ax1.plot(T_1, chi_H_v_1, '-', c = color_H)
+    ax1.plot(T_1, chi_qgp_total_1, ':', c = 'black')
+    ax1.plot(T_1, chi_cluster_total_1, '-.', c = 'black')
+    ax1.plot(T_1, chi_total_1, '-', c = 'black')
+
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
     for tick in ax1.yaxis.get_major_ticks():
         tick.label.set_fontsize(16)
     ax1.set_xlabel(r'T [MeV]', fontsize = 16)
-    ax1.set_ylabel(r'P [MeV/fm3]', fontsize = 16)
-
+    ax1.set_ylabel(r'$\mathrm{\chi_q}$', fontsize = 16)
+    
     fig2 = matplotlib.pyplot.figure(num = 2, figsize = (5.9, 5))
     ax2 = fig2.add_subplot(1, 1, 1)
-    ax2.axis([min(T_1), max(T_1), min(bdenT3_tot_1), max(bdenT3_tot_1)])
-    ax2.plot(T_1, bdenT3_Q_1, '-', c = 'blue')
-    ax2.plot(T_1, bdenT3_pert_1, '-', c = 'cyan')
-    ax2.plot(T_1, bdenT3_pi_1, '-', c = color_pi)
-    ax2.plot(T_1, bdenT3_rho_1, '-', c = color_rho)
-    ax2.plot(T_1, bdenT3_omega_1, '-', c = color_omega)
-    ax2.plot(T_1, bdenT3_K_1, '-', c = color_K)
-    ax2.plot(T_1, bdenT3_D_1, '-', c = color_D)
-    ax2.plot(T_1, bdenT3_N_1, '-', c = color_N)
-    ax2.plot(T_1, bdenT3_T_1, '-', c = color_T)
-    ax2.plot(T_1, bdenT3_F_1, '-', c = color_F)
-    ax2.plot(T_1, bdenT3_P_1, '-', c = color_P)
-    ax2.plot(T_1, bdenT3_Q5_1, '-', c = color_Q5)
-    #ax2.plot(T_1, bdenT3_H_1, '-', c = color_H)
-    ax2.plot(T_1, bdenT3_tot_1, '-', c = 'black')
-    ax2.plot(T_1, bdenT3_SB, '--', c = 'black')
+    ax2.axis([min(T_1), max(T_1), min(bden_total_1), max(bden_total_1)])
+
+    ax2.plot(T_1, bden_pnjl_u_v_1, '-', c = 'blue')
+    ax2.plot(T_1, bden_pnjl_d_v_1, '-.', c = 'blue')
+    ax2.plot(T_1, bden_pnjl_s_v_1, '--', c = 'blue')
+    ax2.plot(T_1, bden_gluon_v_1, '-', c = 'pink')
+    ax2.plot(T_1, bden_perturbative_u_v_1, '-', c = 'cyan')
+    ax2.plot(T_1, bden_perturbative_u_v_1, '-.', c = 'cyan')
+    ax2.plot(T_1, bden_perturbative_u_v_1, '--', c = 'cyan')
+    ax2.plot(T_1, bden_perturbative_gluon_v_1, ':', c = 'cyan')
+    ax2.plot(T_1, bden_pi_v_1, '-', c = color_pi)
+    ax2.plot(T_1, bden_rho_v_1, '-', c = color_rho)
+    ax2.plot(T_1, bden_omega_v_1, '-', c = color_omega)
+    ax2.plot(T_1, bden_K_v_1, '-', c = color_K)
+    ax2.plot(T_1, bden_D_v_1, '-', c = color_D)
+    ax2.plot(T_1, bden_N_v_1, '-', c = color_N)
+    ax2.plot(T_1, bden_T_v_1, '-', c = color_T)
+    ax2.plot(T_1, bden_F_v_1, '-', c = color_F)
+    ax2.plot(T_1, bden_P_v_1, '-', c = color_P)
+    ax2.plot(T_1, bden_Q_v_1, '-', c = color_Q5)
+    ax2.plot(T_1, bden_H_v_1, '-', c = color_H)
+    ax2.plot(T_1, bden_qgp_total_1, ':', c = 'black')
+    ax2.plot(T_1, bden_cluster_total_1, '-.', c = 'black')
+    ax2.plot(T_1, bden_total_1, '-', c = 'black')
+
     for tick in ax2.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
     for tick in ax2.yaxis.get_major_ticks():
         tick.label.set_fontsize(16)
     ax2.set_xlabel(r'T [MeV]', fontsize = 16)
-    ax2.set_ylabel(r'$\mathrm{n_B}$ [1/fm3]', fontsize = 16)
-
-    fig3 = matplotlib.pyplot.figure(num = 3, figsize = (5.9, 5))
-    ax3 = fig3.add_subplot(1, 1, 1)
-    ax3.axis([min(T_1), max(T_1), min(Chi2_tot), max(Chi2_tot)])
-    ax3.plot(T_1, Chi2_Q_1, '-', c = 'blue')
-    ax3.plot(T_1, Chi2_pert_1, '-', c = 'cyan')
-    ax3.plot(T_1, Chi2_pi_1, '-', c = color_pi)
-    ax3.plot(T_1, Chi2_rho_1, '-', c = color_rho)
-    ax3.plot(T_1, Chi2_omega_1, '-', c = color_omega)
-    ax3.plot(T_1, Chi2_K_1, '-', c = color_K)
-    ax3.plot(T_1, Chi2_D_1, '-', c = color_D)
-    ax3.plot(T_1, Chi2_N_1, '-', c = color_N)
-    ax3.plot(T_1, Chi2_T_1, '-', c = color_T)
-    ax3.plot(T_1, Chi2_F_1, '-', c = color_F)
-    ax3.plot(T_1, Chi2_P_1, '-', c = color_P)
-    ax3.plot(T_1, Chi2_Q5_1, '-', c = color_Q5)
-    ax3.plot(T_1, Chi2_H_1, '-', c = color_H)
-    ax3.plot(T_1, Chi2_tot, '-', c = 'black')
-    ax3.plot(T_1, Chi2_SB, '--', c = 'black')
-    for tick in ax3.xaxis.get_major_ticks():
-        tick.label.set_fontsize(16) 
-    for tick in ax3.yaxis.get_major_ticks():
-        tick.label.set_fontsize(16)
-    ax3.set_xlabel(r'T [MeV]', fontsize = 16)
-    ax3.set_ylabel(r'$\mathrm{chi^B_2}$', fontsize = 16)
-
+    ax2.set_ylabel(r'$\mathrm{n_b}$ [MeV^3]', fontsize = 16)
+    
     fig4 = matplotlib.pyplot.figure(num = 4, figsize = (5.9, 5))
     ax4 = fig4.add_subplot(1, 1, 1)
-    ax4.axis([min(T_1), max(T_1), min(R12dev), max(R12dev)])
-    ax4.add_patch(matplotlib.patches.Polygon(lQCD_0p4, 
+    ax4.axis([min(T_1), max(T_1), 0.45, 1.25])
+
+    ax4.add_patch(matplotlib.patches.Polygon(R12_lQCD_0p4, 
             closed = True, fill = True, color = 'red', alpha = 0.3))
-    ax4.plot(T_1, R12dev, '-', c = 'red')
-    ax4.plot(T_R12_pred, R12_pred, '--', c = 'red')
+
+    ax4.plot(T_1, R12_calc_1, '-', c = 'red')
+    ax4.plot(T_R12_pred_1, R12_pred_1, '--', c = 'red')
+
     for tick in ax4.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
     for tick in ax4.yaxis.get_major_ticks():
@@ -6535,7 +6895,6 @@ def cumulant_test():
 
     fig1.tight_layout(pad = 0.1)
     fig2.tight_layout(pad = 0.1)
-    fig3.tight_layout(pad = 0.1)
     fig4.tight_layout(pad = 0.1)
 
     matplotlib.pyplot.show()
@@ -6544,6 +6903,6 @@ def cumulant_test():
 
 if __name__ == '__main__':
 
-    epja_figure7()
+    cumulant_test()
 
     print("END")

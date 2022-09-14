@@ -412,8 +412,8 @@ def qnumber_cumulant(
         if math.fsum([mu, -2*h]) > 0.0:
 
             mu_vec = [
-                math.fsum(mu, 2*h), math.fsum(mu, h),
-                math.fsum(mu, -h), math.fsum(mu, -2*h)
+                math.fsum([mu, 2*h]), math.fsum([mu, h]),
+                math.fsum([mu, -h]), math.fsum([mu, -2*h])
             ]
             deriv_coef = [
                 -1.0/(12.0*h), 8.0/(12.0*h),
@@ -500,8 +500,8 @@ def sdensity(
     if math.fsum([T, -2*h]) > 0.0:
 
         T_vec = [
-            math.fsum(T, 2*h), math.fsum(T, h),
-            math.fsum(T, -h), math.fsum(T, -2*h)
+            math.fsum([T, 2*h]), math.fsum([T, h]),
+            math.fsum([T, -h]), math.fsum([T, -2*h])
         ]
         deriv_coef = [
             -1.0/(12.0*h), 8.0/(12.0*h),

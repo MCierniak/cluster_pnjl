@@ -37,6 +37,17 @@ import pnjl.thermo.gcp_sigma_lattice
 import pnjl.thermo.gcp_pl_polynomial
 
 
+def M_th(T: float, mu: float, cluster: str) -> float:
+
+    N_I = pnjl.defaults.NI[cluster]
+    S_I = pnjl.defaults.S[cluster]
+    M_th_i = math.sqrt(2)*math.fsum([
+        math.fsum([N_I,-S_I])*pnjl.thermo.gcp_sigma_lattice.Ml(T, mu),
+        S_I*pnjl.thermo.gcp_sigma_lattice.Ms(T, mu)
+    ])
+
+    return M_th_i
+
 @functools.lru_cache(maxsize=1024)
 def gcp_boson_singlet_integrand(
     p: float, T: float, mu: float, phi_re: float, phi_im: float,
@@ -350,17 +361,13 @@ def gcp_real(
     """
 
     M_I = pnjl.defaults.MI[cluster]
-    N_I = pnjl.defaults.NI[cluster]
-    S_I = pnjl.defaults.S[cluster]
-    M_th_i = math.sqrt(2.0)*math.fsum([
-        math.fsum([N_I,-S_I])*pnjl.thermo.gcp_sigma_lattice.Ml(T, mu),
-        S_I*pnjl.thermo.gcp_sigma_lattice.Ms(T, mu)
-    ])
     D_I = pnjl.defaults.DI[cluster]
     A_I = math.fsum([
         pnjl.defaults.NET_QL[cluster],
         pnjl.defaults.NET_QS[cluster]
     ])
+
+    M_th_i = M_th(T, mu, cluster)
 
     integral = 0.0
     if M_th_i > M_I:
@@ -409,17 +416,13 @@ def gcp_imag(
     """
 
     M_I = pnjl.defaults.MI[cluster]
-    N_I = pnjl.defaults.NI[cluster]
-    S_I = pnjl.defaults.S[cluster]
-    M_th_i = math.sqrt(2.0)*math.fsum([
-        math.fsum([N_I,-S_I])*pnjl.thermo.gcp_sigma_lattice.Ml(T, mu),
-        S_I*pnjl.thermo.gcp_sigma_lattice.Ms(T, mu)
-    ])
     D_I = pnjl.defaults.DI[cluster]
     A_I = math.fsum([
         pnjl.defaults.NET_QL[cluster],
         pnjl.defaults.NET_QS[cluster]
     ])
+    
+    M_th_i = M_th(T, mu, cluster)
 
     integral = 0.0
     if M_th_i > M_I and cluster in gcp_imag_hash:
@@ -521,47 +524,58 @@ def bdensity(
 
     h = 1e-2
 
-    if math.fsum([mu, -2*h]) > 0.0:
+    M_I = pnjl.defaults.MI[cluster]
 
-        mu_vec = [
-            math.fsum([mu, 2*h]), math.fsum([mu, h]),
-            math.fsum([mu, -h]), math.fsum([mu, -2*h])
-        ]
-        deriv_coef = [
-            -1.0/(12.0*h), 8.0/(12.0*h),
-            -8.0/(12.0*h), 1.0/(12.0*h)
-        ]
-        phi_vec = []
-        if pnjl.defaults.D_PHI_D_MU_0:
-            phi_vec = [
-                tuple([phi_re, phi_im])
-                for _ in mu_vec
-            ]
-        else:
-            phi_vec = [
-                phi_solver(T, mu_el, phi_re, phi_im)
-                for mu_el in mu_vec
-            ]
+    M_th_i_min = M_th(T, math.fsum([mu, 2*h]), cluster)
+    M_th_i_max = M_th(T, math.fsum([mu, -2*h]), cluster)
 
-        p_vec = [
-            coef*pressure(T, mu_el, phi_el[0], phi_el[1], cluster)/3.0
-            for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
-        ]
+    if M_th_i_min < M_I and M_th_i_max < M_I:
 
-        return math.fsum(p_vec)
+        return 0.0
 
     else:
 
-        new_mu = math.fsum([mu, h])
-        new_phi_re, new_phi_im = phi_re, phi_im
-            
-        if not pnjl.defaults.D_PHI_D_MU_0:
-            new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
+        if math.fsum([mu, -2*h]) > 0.0:
 
-        return bdensity(
-            T, new_mu, new_phi_re, new_phi_im, 
-            phi_solver, cluster
-        )
+            mu_vec = [
+                math.fsum([mu, 2*h]), math.fsum([mu, h]),
+                math.fsum([mu, -h]), math.fsum([mu, -2*h])
+            ]
+            deriv_coef = [
+                -1.0/(12.0*h), 8.0/(12.0*h),
+                -8.0/(12.0*h), 1.0/(12.0*h)
+            ]
+            phi_vec = []
+            if pnjl.defaults.D_PHI_D_MU_0:
+                phi_vec = [
+                    tuple([phi_re, phi_im])
+                    for _ in mu_vec
+                ]
+            else:
+                phi_vec = [
+                    phi_solver(T, mu_el, phi_re, phi_im)
+                    for mu_el in mu_vec
+                ]
+
+            p_vec = [
+                coef*pressure(T, mu_el, phi_el[0], phi_el[1], cluster)/3.0
+                for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
+            ]
+
+            return math.fsum(p_vec)
+
+        else:
+
+            new_mu = math.fsum([mu, h])
+            new_phi_re, new_phi_im = phi_re, phi_im
+            
+            if not pnjl.defaults.D_PHI_D_MU_0:
+                new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
+
+            return bdensity(
+                T, new_mu, new_phi_re, new_phi_im, 
+                phi_solver, cluster
+            )
 
 
 @functools.lru_cache(maxsize=1024)
@@ -618,57 +632,66 @@ def qnumber_cumulant(
         Value of the thermodynamic quark number cumulant in MeV^3.
     """
 
-    if rank == 1:
+    h = 1e-2
+    
+    M_I = pnjl.defaults.MI[cluster]
 
-        return 3.0 * bdensity(T, mu, phi_re, phi_im,  phi_solver, cluster)
+    M_th_i_min = M_th(T, math.fsum([mu, 2*h]), cluster)
+    M_th_i_max = M_th(T, math.fsum([mu, -2*h]), cluster)
 
+    if M_th_i_min < M_I and M_th_i_max < M_I:
+
+        return 0.0
+        
     else:
 
-        h = 1e-2
-
-        if math.fsum([mu, -2*h]) > 0.0:
-
-            mu_vec = [
-                math.fsum(mu, 2*h), math.fsum(mu, h),
-                math.fsum(mu, -h), math.fsum(mu, -2*h)
-            ]
-            deriv_coef = [
-                -1.0/(12.0*h), 8.0/(12.0*h),
-                -8.0/(12.0*h), 1.0/(12.0*h)
-            ]
-            phi_vec = []
-            if pnjl.defaults.D_PHI_D_MU_0:
-                phi_vec = [
-                    tuple([phi_re, phi_im])
-                    for _ in mu_vec
-                ]
-            else:
-                phi_vec = [
-                    phi_solver(T, mu_el, phi_re, phi_im)
-                    for mu_el in mu_vec
-                ]
-
-            out_vec = [
-                coef*qnumber_cumulant(
-                    rank-1, T, mu_el, phi_el[0], phi_el[1], 
-                    phi_solver, cluster)
-                for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
-            ]
-
-            return math.fsum(out_vec)
-
+        if rank == 1:
+            return 3.0 * bdensity(T, mu, phi_re, phi_im,  phi_solver, cluster)
         else:
 
-            new_mu = math.fsum([mu, h])
-            new_phi_re, new_phi_im = phi_re, phi_im
-            
-            if not pnjl.defaults.D_PHI_D_MU_0:
-                new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
+            if math.fsum([mu, -2*h]) > 0.0:
 
-            return qnumber_cumulant(
-                rank, T, new_mu, new_phi_re, new_phi_im, 
-                phi_solver, cluster
-            )
+                mu_vec = [
+                    math.fsum([mu, 2*h]), math.fsum([mu, h]),
+                    math.fsum([mu, -h]), math.fsum([mu, -2*h])
+                ]
+                deriv_coef = [
+                    -1.0/(12.0*h), 8.0/(12.0*h),
+                    -8.0/(12.0*h), 1.0/(12.0*h)
+                ]
+                phi_vec = []
+                if pnjl.defaults.D_PHI_D_MU_0:
+                    phi_vec = [
+                        tuple([phi_re, phi_im])
+                        for _ in mu_vec
+                    ]
+                else:
+                    phi_vec = [
+                        phi_solver(T, mu_el, phi_re, phi_im)
+                        for mu_el in mu_vec
+                    ]
+
+                out_vec = [
+                    coef*qnumber_cumulant(
+                        rank-1, T, mu_el, phi_el[0], phi_el[1], 
+                        phi_solver, cluster)
+                    for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
+                ]
+
+                return math.fsum(out_vec)
+
+            else:
+
+                new_mu = math.fsum([mu, h])
+                new_phi_re, new_phi_im = phi_re, phi_im
+            
+                if not pnjl.defaults.D_PHI_D_MU_0:
+                    new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
+
+                return qnumber_cumulant(
+                    rank, T, new_mu, new_phi_re, new_phi_im, 
+                    phi_solver, cluster
+                )
 
 
 @functools.lru_cache(maxsize=1024)
@@ -723,44 +746,55 @@ def sdensity(
 
     h = 1e-2
 
-    if math.fsum([T, -2*h]) > 0.0:
+    M_I = pnjl.defaults.MI[cluster]
 
-        T_vec = [
-            math.fsum(T, 2*h), math.fsum(T, h),
-            math.fsum(T, -h), math.fsum(T, -2*h)
-        ]
-        deriv_coef = [
-            -1.0/(12.0*h), 8.0/(12.0*h),
-            -8.0/(12.0*h), 1.0/(12.0*h)
-        ]
-        phi_vec = []
-        if pnjl.defaults.D_PHI_D_T_0:
-            phi_vec = [
-                tuple([phi_re, phi_im])
-                for _ in T_vec
-            ]
-        else:
-            phi_vec = [
-                phi_solver(T_el, mu, phi_re, phi_im)
-                for T_el in T_vec
-            ]
+    M_th_i_min = M_th(math.fsum([T, 2*h]), mu, cluster)
+    M_th_i_max = M_th(math.fsum([T, -2*h]), mu, cluster)
 
-        p_vec = [
-            coef*pressure(T_el, mu, phi_el[0], phi_el[1], cluster)
-            for T_el, coef, phi_el in zip(T_vec, deriv_coef, phi_vec)
-        ]
+    if M_th_i_min < M_I and M_th_i_max < M_I:
 
-        return math.fsum(p_vec)
-
+        return 0.0
+        
     else:
 
-        new_T = math.fsum([T, h])
-        new_phi_re, new_phi_im = phi_re, phi_im
-            
-        if not pnjl.defaults.D_PHI_D_T_0:
-            new_phi_re, new_phi_im = phi_solver(new_T, mu, phi_re, phi_im)
+        if math.fsum([T, -2*h]) > 0.0:
 
-        return sdensity(
-            new_T, mu, new_phi_re, new_phi_im, 
-            phi_solver, cluster
-        )
+            T_vec = [
+                math.fsum([T, 2*h]), math.fsum([T, h]),
+                math.fsum([T, -h]), math.fsum([T, -2*h])
+            ]
+            deriv_coef = [
+                -1.0/(12.0*h), 8.0/(12.0*h),
+                -8.0/(12.0*h), 1.0/(12.0*h)
+            ]
+            phi_vec = []
+            if pnjl.defaults.D_PHI_D_T_0:
+                phi_vec = [
+                    tuple([phi_re, phi_im])
+                    for _ in T_vec
+                ]
+            else:
+                phi_vec = [
+                    phi_solver(T_el, mu, phi_re, phi_im)
+                    for T_el in T_vec
+                ]
+
+            p_vec = [
+                coef*pressure(T_el, mu, phi_el[0], phi_el[1], cluster)
+                for T_el, coef, phi_el in zip(T_vec, deriv_coef, phi_vec)
+            ]
+
+            return math.fsum(p_vec)
+
+        else:
+
+            new_T = math.fsum([T, h])
+            new_phi_re, new_phi_im = phi_re, phi_im
+      
+            if not pnjl.defaults.D_PHI_D_T_0:
+                new_phi_re, new_phi_im = phi_solver(new_T, mu, phi_re, phi_im)
+
+            return sdensity(
+                new_T, mu, new_phi_re, new_phi_im, 
+                phi_solver, cluster
+            )
