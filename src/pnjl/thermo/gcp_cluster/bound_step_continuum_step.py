@@ -37,6 +37,7 @@ import pnjl.thermo.gcp_sigma_lattice
 import pnjl.thermo.gcp_pl_polynomial
 
 
+@functools.lru_cache(maxsize=1024)
 def M_th(T: float, mu: float, cluster: str) -> float:
 
     N_I = pnjl.defaults.NI[cluster]
