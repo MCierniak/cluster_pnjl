@@ -244,8 +244,7 @@ S = {
 }
 HEAVISIDE_ZERO = 0.5
 D_PHI_D_MU_0 = bool(True)
-D_PHI_D_T_0 = bool(False)
+D_PHI_D_T_0 = bool(True)
 PERTURBATIVE_GLUON_CORRECTION = bool(False)
 NO_SEA = bool(True)
 NO_SIGMA = bool(True)
-BOUND_STEP_CONTINUUM_ACOS_COS_REGULATOR = bool(False)

@@ -338,7 +338,7 @@ def sdensity(
             ]
 
         p_vec = [
-            coef*pressure(T_el, phi_el[0], phi_el[1])
+            coef*pressure(T_el, mu, phi_el[0], phi_el[1])
             for T_el, coef, phi_el in zip(T_vec, deriv_coef, phi_vec)
         ]
 
