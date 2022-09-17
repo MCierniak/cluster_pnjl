@@ -3368,33 +3368,34 @@ def pickle_lattice_data():
     (low_1710_05024_mu0_x, low_1710_05024_mu0_y) = utils.data_load(
         "D:/EoS/epja/lattice_data_raw/1710_05024_figure8_pressure_mu0_low.dat", 0, 1
     )
-    #(low_1204_6710v2_mu100_x, low_1204_6710v2_mu100_y) = utils.data_load(
-    #    "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu100_low.dat", 0, 1
-    #)
-    #(high_1204_6710v2_mu100_x, high_1204_6710v2_mu100_y) = utils.data_load(
-    #    "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu100_high.dat", 0, 1
-    #)
-    #(low_1204_6710v2_mu200_x, low_1204_6710v2_mu200_y) = utils.data_load(
-    #    "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu200_low.dat", 0, 1
-    #)
-    #(high_1204_6710v2_mu200_x, high_1204_6710v2_mu200_y) = utils.data_load(
-    #    "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu200_high.dat", 0, 1
-    #)
-    #(low_1204_6710v2_mu300_x, low_1204_6710v2_mu300_y) = utils.data_load(
-    #    "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu300_low.dat", 0, 1
-    #)
-    #(high_1204_6710v2_mu300_x, high_1204_6710v2_mu300_y) = utils.data_load(
-    #    "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu300_high.dat", 0, 1
-    #)
-    #(low_1204_6710v2_mu400_x, low_1204_6710v2_mu400_y) = utils.data_load(
-    #    "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu400_low.dat", 0, 1
-    #)
-    #(high_1204_6710v2_mu400_x, high_1204_6710v2_mu400_y) = utils.data_load(
-    #    "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu400_high.dat", 0, 1
-    #)
-
+    (low_1204_6710v2_mu100_x, low_1204_6710v2_mu100_y) = utils.data_load(
+        "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu100_low.dat", 0, 1
+    )
+    (high_1204_6710v2_mu100_x, high_1204_6710v2_mu100_y) = utils.data_load(
+        "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu100_high.dat", 0, 1
+    )
+    (low_1204_6710v2_mu200_x, low_1204_6710v2_mu200_y) = utils.data_load(
+        "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu200_low.dat", 0, 1
+    )
+    (high_1204_6710v2_mu200_x, high_1204_6710v2_mu200_y) = utils.data_load(
+        "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu200_high.dat", 0, 1
+    )
+    (low_1204_6710v2_mu300_x, low_1204_6710v2_mu300_y) = utils.data_load(
+        "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu300_low.dat", 0, 1
+    )
+    (high_1204_6710v2_mu300_x, high_1204_6710v2_mu300_y) = utils.data_load(
+        "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu300_high.dat", 0, 1
+    )
+    (low_1204_6710v2_mu400_x, low_1204_6710v2_mu400_y) = utils.data_load(
+        "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu400_low.dat", 0, 1
+    )
+    (high_1204_6710v2_mu400_x, high_1204_6710v2_mu400_y) = utils.data_load(
+        "D:/EoS/epja/figure8/1204_6710v2_table4_pressure_mu400_high.dat", 0, 1
+    )
     (T_lQCD_R12_0p4_high, lQCD_R12_0p4_high) = utils.data_load("D:/EoS/epja/lattice_data_raw/lQCD_0p4_high.dat", 0, 1)
     (T_lQCD_R12_0p4_low, lQCD_R12_0p4_low) = utils.data_load("D:/EoS/epja/lattice_data_raw/lQCD_0p4_low.dat", 0, 1)
+    (low_1005_3508_x, low_1005_3508_y) = utils.data_load("D:/EoS/epja/lattice_data_raw/1005_3508_table3_delta.dat", 0, 1)
+    (high_1005_3508_x, high_1005_3508_y) = utils.data_load("D:/EoS/epja/lattice_data_raw/1005_3508_table3_delta.dat", 0, 2)
 
     borsanyi_1204_6710v2_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y)]
     for x_el, y_el in zip(low_1204_6710v2_mu0_x[::-1], low_1204_6710v2_mu0_y[::-1]):
@@ -3412,27 +3413,30 @@ def pickle_lattice_data():
     for x_el, y_el in zip(low_1710_05024_mu0_x[::-1], low_1710_05024_mu0_y[::-1]):
         bazavov_1710_05024_mu0.append(numpy.array([x_el, y_el]))
     bazavov_1710_05024_mu0 = numpy.array(bazavov_1710_05024_mu0)
-    #borsanyi_1204_6710v2_mu100 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu100_x, high_1204_6710v2_mu100_y)]
-    #for x_el, y_el in zip(low_1204_6710v2_mu100_x[::-1], low_1204_6710v2_mu100_y[::-1]):
-    #    borsanyi_1204_6710v2_mu100.append(numpy.array([x_el, y_el]))
-    #borsanyi_1204_6710v2_mu100 = numpy.array(borsanyi_1204_6710v2_mu100)
-    #borsanyi_1204_6710v2_mu200 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu200_x, high_1204_6710v2_mu200_y)]
-    #for x_el, y_el in zip(low_1204_6710v2_mu200_x[::-1], low_1204_6710v2_mu200_y[::-1]):
-    #    borsanyi_1204_6710v2_mu200.append(numpy.array([x_el, y_el]))
-    #borsanyi_1204_6710v2_mu200 = numpy.array(borsanyi_1204_6710v2_mu200)
-    #borsanyi_1204_6710v2_mu300 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu300_x, high_1204_6710v2_mu300_y)]
-    #for x_el, y_el in zip(low_1204_6710v2_mu300_x[::-1], low_1204_6710v2_mu300_y[::-1]):
-    #    borsanyi_1204_6710v2_mu300.append(numpy.array([x_el, y_el]))
-    #borsanyi_1204_6710v2_mu300 = numpy.array(borsanyi_1204_6710v2_mu300)
-    #borsanyi_1204_6710v2_mu400 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu400_x, high_1204_6710v2_mu400_y)]
-    #for x_el, y_el in zip(low_1204_6710v2_mu400_x[::-1], low_1204_6710v2_mu400_y[::-1]):
-    #    borsanyi_1204_6710v2_mu400.append(numpy.array([x_el, y_el]))
-    #borsanyi_1204_6710v2_mu400 = numpy.array(borsanyi_1204_6710v2_mu400)
-
+    borsanyi_1204_6710v2_mu100 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu100_x, high_1204_6710v2_mu100_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu100_x[::-1], low_1204_6710v2_mu100_y[::-1]):
+        borsanyi_1204_6710v2_mu100.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu100 = numpy.array(borsanyi_1204_6710v2_mu100)
+    borsanyi_1204_6710v2_mu200 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu200_x, high_1204_6710v2_mu200_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu200_x[::-1], low_1204_6710v2_mu200_y[::-1]):
+        borsanyi_1204_6710v2_mu200.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu200 = numpy.array(borsanyi_1204_6710v2_mu200)
+    borsanyi_1204_6710v2_mu300 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu300_x, high_1204_6710v2_mu300_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu300_x[::-1], low_1204_6710v2_mu300_y[::-1]):
+        borsanyi_1204_6710v2_mu300.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu300 = numpy.array(borsanyi_1204_6710v2_mu300)
+    borsanyi_1204_6710v2_mu400 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu400_x, high_1204_6710v2_mu400_y)]
+    for x_el, y_el in zip(low_1204_6710v2_mu400_x[::-1], low_1204_6710v2_mu400_y[::-1]):
+        borsanyi_1204_6710v2_mu400.append(numpy.array([x_el, y_el]))
+    borsanyi_1204_6710v2_mu400 = numpy.array(borsanyi_1204_6710v2_mu400)
     lQCD_0p4 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(T_lQCD_R12_0p4_high, lQCD_R12_0p4_high)]
     for x_el, y_el in zip(T_lQCD_R12_0p4_low[::-1], lQCD_R12_0p4_low[::-1]):
         lQCD_0p4.append(numpy.array([x_el, y_el]))
     lQCD_0p4 = numpy.array(lQCD_0p4)
+    borsanyi_1005_3508 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1005_3508_x, high_1005_3508_y)]
+    for x_el, y_el in zip(low_1005_3508_x[::-1], low_1005_3508_y[::-1]):
+        borsanyi_1005_3508.append(numpy.array([x_el, y_el]))
+    borsanyi_1005_3508 = numpy.array(borsanyi_1005_3508)
 
     with open("D:/EoS/epja/lattice_data_pickled/bazavov_1407_6387_mu0.pickle", "wb") as file:
         pickle.dump(bazavov_1407_6387_mu0, file)
@@ -3444,11 +3448,13 @@ def pickle_lattice_data():
         pickle.dump(borsanyi_1204_6710v2_mu0, file)
     with open("D:/EoS/epja/lattice_data_pickled/R12_lQCD_0p4.pickle", "wb") as file:
         pickle.dump(lQCD_0p4, file)
-    #with open("D:/EoS/epja/lattice_data_pickled/borsanyi_1204_6710v2_mu100.pickle", "wb") as file:
-    #    pickle.dump(borsanyi_1204_6710v2_mu100, file)
-    #with open("D:/EoS/epja/lattice_data_pickled/borsanyi_1204_6710v2_mu200.pickle", "wb") as file:
-    #    pickle.dump(borsanyi_1204_6710v2_mu200, file)
-    #with open("D:/EoS/epja/lattice_data_pickled/borsanyi_1204_6710v2_mu300.pickle", "wb") as file:
-    #    pickle.dump(borsanyi_1204_6710v2_mu300, file)
-    #with open("D:/EoS/epja/lattice_data_pickled/borsanyi_1204_6710v2_mu400.pickle", "wb") as file:
-    #    pickle.dump(borsanyi_1204_6710v2_mu400, file)
+    with open("D:/EoS/epja/lattice_data_pickled/borsanyi_1204_6710v2_mu100.pickle", "wb") as file:
+        pickle.dump(borsanyi_1204_6710v2_mu100, file)
+    with open("D:/EoS/epja/lattice_data_pickled/borsanyi_1204_6710v2_mu200.pickle", "wb") as file:
+        pickle.dump(borsanyi_1204_6710v2_mu200, file)
+    with open("D:/EoS/epja/lattice_data_pickled/borsanyi_1204_6710v2_mu300.pickle", "wb") as file:
+        pickle.dump(borsanyi_1204_6710v2_mu300, file)
+    with open("D:/EoS/epja/lattice_data_pickled/borsanyi_1204_6710v2_mu400.pickle", "wb") as file:
+        pickle.dump(borsanyi_1204_6710v2_mu400, file)
+    with open("D:/EoS/epja/lattice_data_pickled/1005_3508_table3_delta.pickle", "wb") as file:
+        pickle.dump(borsanyi_1005_3508, file)

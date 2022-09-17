@@ -4826,6 +4826,548 @@ def pnjl_with_sigma_test():
 """
 
 
+def epja_figure1():
+
+    import numpy
+
+    import matplotlib.pyplot
+    from mpl_toolkits.mplot3d import Axes3D
+    from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+    import pnjl.defaults
+
+    import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
+        as cluster
+
+    def phase(M, T, mu):
+
+        MI_N = pnjl.defaults.MI['N']
+        Mth_N = cluster.M_th(T, mu, 'N')
+
+        if Mth_N > MI_N:
+            if M < MI_N:
+                return 0.0
+            if M >= MI_N and M < Mth_N:
+                return 1.0
+            else:
+                return cluster.continuum_factor1(M, T, mu, 'N')
+        else:
+            return cluster.continuum_factor2(M, T, mu, 'N')
+
+    T_list = numpy.linspace(135, 160, num=17)
+    M_list = numpy.linspace(0.5, 2.5, num=1000)
+
+    phase_list = [
+        [phase(M_el*1000.0, T_el, 0.0) for M_el in M_list]
+        for T_el in T_list
+    ]
+
+    M_I = pnjl.defaults.MI['N']
+    nLambda = pnjl.defaults.NI['N']*pnjl.defaults.L
+
+    Mthi_vec = [
+        cluster.M_th(T_el, 0.0, 'N')/1000.0 for T_el in T_list
+    ]
+
+    Mthi0_vec = [
+        (cluster.M_th(0.0, 0.0, 'N')+nLambda)/1000.0 for _ in T_list
+    ]
+
+    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax1 = fig1.add_subplot(111, projection='3d')
+    fig1.subplots_adjust(left = 0, bottom = 0, right = 1, top = 1)
+
+    ax1.set_ylim3d(max(T_list), min(T_list))
+    ax1.set_xlim3d(min(M_list), max(M_list))
+    ax1.set_zlim3d(0, 1)
+
+    ax1.plot3D(
+        M_list, [T_list[0] for el in M_list], phase_list[0], '-', c = 'black'
+    )
+    ax1.plot3D(
+        M_list, [T_list[2] for el in M_list], phase_list[2], '-', c = 'black'
+    )
+    ax1.plot3D(
+        M_list, [T_list[4] for el in M_list], phase_list[4], '-', c = 'black'
+    )
+    ax1.plot3D(
+        M_list, [T_list[6] for el in M_list], phase_list[6], '-', c = 'black'
+    )
+    ax1.plot3D(
+        M_list, [T_list[8] for el in M_list], phase_list[8], '-', c = 'black'
+    )
+    ax1.plot3D(
+        M_list, [T_list[10] for el in M_list], phase_list[10], '-',
+        c = 'black'
+    )
+    ax1.plot3D(
+        M_list, [T_list[12] for el in M_list], phase_list[12], '-',
+        c = 'black'
+    )
+    ax1.plot3D(
+        M_list, [T_list[14] for el in M_list], phase_list[14], '-',
+        c = 'black'
+    )
+    ax1.plot3D(
+        M_list, [T_list[16] for el in M_list], phase_list[16], '-',
+        c='black'
+    )
+    
+    ax1.plot3D(Mthi0_vec, T_list, [0.0 for el in T_list], '--', c='red')
+    ax1.plot3D(Mthi_vec, T_list, [0.0 for el in T_list], '--', c='green')
+    ax1.plot3D(
+        [M_I/1000.0 for _ in T_list], T_list, [0.0 for el in T_list], '--',
+        c='blue'
+    )
+    ax1.text(
+        0.36, 155, 0.0, r'$\mathrm{M_{thr,i}}$', 'y', color='green',
+        fontsize=16, bbox=dict(color='white', boxstyle='square, pad=0')
+    )
+    ax1.text(
+        1.2, 155, 0.0, r'$\mathrm{M_i}$', 'y', color='blue',
+        fontsize=16, bbox=dict(color='white', boxstyle='square, pad=-0.1')
+    )
+    ax1.text(
+        2.1, 159, 0.0, r'$\mathrm{M_{thr,i,0}+N_i\Lambda}$', 'y',
+        color='red', fontsize=16,
+        bbox=dict(color='white', boxstyle='square, pad=0.0')
+    )
+    
+    ax1.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+    ax1.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+    ax1.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+    ax1.set_xticks([0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5])
+    ax1.set_xticklabels([0.5, '', 1, '', 1.5, '', 2, '', 2.5])
+    ax1.set_yticks([135, 140, 145, 150, 155, 160])
+    ax1.set_yticklabels([135, 140, 145, 150, 155, ''])
+    
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax1.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    for tick in ax1.zaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    
+    ax1.tick_params(axis='x', which='major', pad=-3)
+    ax1.tick_params(axis='y', which='major', pad=-2)
+    ax1.set_xlabel(r'M [GeV]', fontsize = 16)
+    ax1.set_ylabel(r'T [MeV]', fontsize = 16)
+    ax1.set_zlabel(r'$\delta_i$', fontsize = 16)
+
+    fig1.tight_layout(pad = 0.1)
+
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+
+def epja_figure2():
+
+    import numpy
+
+    import matplotlib.pyplot
+    import matplotlib.patches
+
+    import pnjl.defaults
+    import pnjl.thermo.gcp_sigma_lattice
+
+    import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
+        as cluster
+
+    col_n = '#DEA54B'
+    col_pi = '#653239'
+    col_h = '#A846A0'
+    col_qgp = 'blue'
+
+    T = numpy.linspace(1.0, 200.0, num = 200)
+
+    fig = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.axis(
+        [
+            min(T), max(T),
+            0.0, 1.05 * max([cluster.M_th(el, 0.0, 'H') for el in T])
+        ]
+    )
+
+    ax.plot(
+        T, [pnjl.defaults.MI['N'] for el in T], '-', c=col_n,
+        label = r'nucleon'
+    )
+    ax.add_patch(
+        matplotlib.patches.FancyArrowPatch(
+            (30., 1750.), (30., 1000.), arrowstyle='<->',
+            mutation_scale=20, color=col_n
+        )
+    )
+    ax.plot(T, [cluster.M_th(el, 0.0, 'N') for el in T], '--', c=col_n)
+    ax.text(35., 1320., r'nucleon', fontsize = 14)
+
+    ax.plot(
+        T, [pnjl.defaults.MI['pi'] for el in T], '-', c=col_pi,
+        label=r'$\mathrm{\pi}$'
+    )
+    ax.add_patch(
+        matplotlib.patches.FancyArrowPatch(
+            (50., 1150.), (50., 135.), arrowstyle='<->',
+            mutation_scale=20, color=col_pi
+        )
+    )
+    ax.plot(T, [cluster.M_th(el, 0.0, 'pi') for el in T], '--', c=col_pi)
+    ax.text(55., 620., r'pion', fontsize = 14)
+
+    ax.plot(
+        T, [pnjl.defaults.MI['H'] for el in T], '-', c=col_h,
+        label = r'hexaquark'
+    )
+    ax.add_patch(
+        matplotlib.patches.FancyArrowPatch(
+            (10., 3450.), (10., 1900.), arrowstyle='<->',
+            mutation_scale=20, color=col_h
+        )
+    )
+    ax.plot(T, [cluster.M_th(el, 0.0, 'H') for el in T], '--', c=col_h)
+    ax.text(15., 2650., r'hexaquark', fontsize = 14)
+
+    ax.plot(
+        T, [pnjl.thermo.gcp_sigma_lattice.Ml(el, 0.0) for el in T],
+        '-', c = col_qgp, label = r'u/d quark'
+    )
+    ax.text(5., 480., r'u/d quark', fontsize = 10)
+
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax.set_ylabel(r'mass [MeV]', fontsize = 16)
+
+    matplotlib.pyplot.tight_layout()
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+
+def epja_figure3():
+
+    import numpy
+    import pickle
+
+    import matplotlib.pyplot
+
+    import pnjl.thermo.gcp_sigma_lattice
+
+    T = numpy.linspace(1.0, 250.0, num = 200)
+
+    sigma = [pnjl.thermo.gcp_sigma_lattice.Delta_ls(el, 0.0) for el in T]
+
+    with open(
+        "D:/EoS/epja/lattice_data_pickled/1005_3508_table3_delta.pickle",
+        "rb"
+    ) as file:
+        borsanyi_1005_3508 = pickle.load(file)
+
+    fig = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.axis([100, 220, 0.0, 1.1])
+
+    ax.add_patch(
+        matplotlib.patches.Polygon(
+            borsanyi_1005_3508, closed = True, fill = True, color = 'blue',
+            alpha = 0.3
+        )
+    )
+    
+    ax.plot(T, sigma, c = 'green')
+    ax.text(200, 1, r'$\mathrm{\mu_B=0}$', fontsize = 14)
+    ax.text(155, 0.55, r'Borsanyi et al. (2010)', color = 'blue', alpha = 0.7, fontsize = 14)
+    
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax.set_ylabel(r'$\mathrm{\Delta_l(T,\mu)}$', fontsize = 16)
+
+    fig.tight_layout(pad = 0.1)
+
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+
+def epja_figure4():
+
+    import tqdm
+    import numpy
+    import pickle
+    import warnings
+
+    import matplotlib.pyplot
+
+    import pnjl.thermo.gcp_sigma_lattice
+
+    import pnjl.thermo.solvers.\
+        sigma_lattice.\
+        sea_lattice.\
+        pl_polynomial.\
+        pnjl.\
+        perturbative.\
+        no_clusters \
+    as solver_n
+
+    import pnjl.thermo.solvers.\
+        sigma_lattice.\
+        sea_lattice.\
+        pl_polynomial.\
+        pnjl.\
+        perturbative.\
+        clusters_bound_step_continuum_step \
+    as solver_s
+
+    import pnjl.thermo.solvers.\
+        sigma_lattice.\
+        sea_lattice.\
+        pl_polynomial.\
+        pnjl.\
+        perturbative.\
+        clusters_bound_step_continuum_acos_cos \
+    as solver_c
+
+    warnings.filterwarnings("ignore")
+
+    calc_n = True
+    calc_s = True
+    calc_c = True
+
+    files = "D:/EoS/epja/figure4/"
+
+    T0 = numpy.linspace(1.0, 250.0, num=200)
+    T600 = numpy.linspace(1.0, 250.0, num=200)
+
+    phi_re_0_n, phi_im_0_n = \
+        list(), list()
+    phi_re_0_s, phi_im_0_s = \
+        list(), list()
+    phi_re_0_c, phi_im_0_c = \
+        list(), list()
+
+    phi_re_600_n, phi_im_600_n = \
+        list(), list()
+    phi_re_600_s, phi_im_600_s = \
+        list(), list()
+    phi_re_600_c, phi_im_600_c = \
+        list(), list()
+    
+    sigma_0 = [
+        pnjl.thermo.gcp_sigma_lattice.Ml(T_el, 0.0) / \
+        pnjl.thermo.gcp_sigma_lattice.Ml(0.0, 0.0)
+        for T_el in T0]
+    sigma_600 = [
+        pnjl.thermo.gcp_sigma_lattice.Ml(T_el, 600.0) / \
+        pnjl.thermo.gcp_sigma_lattice.Ml(0.0, 0.0)
+        for T_el in T0]
+
+    if calc_n:
+
+        phi_re_0 = 1e-5
+        phi_im_0 = 2e-5
+        print(
+            "Traced Polyakov loop, no clusters, muB = 0 MeV"
+        )
+        for T_el in tqdm.tqdm(T0, total=len(T0), ncols=100):
+            phi_result = solver_n.Polyakov_loop(
+                T_el, 0.0, phi_re_0, phi_im_0
+            )
+            phi_re_0_n.append(phi_result[0])
+            phi_im_0_n.append(phi_result[1])
+            phi_re_0 = phi_result[0]
+            phi_im_0 = phi_result[1]
+        with open(files+"phi_re_0_n.pickle", "wb") as file:
+            pickle.dump(phi_re_0_n, file)
+        with open(files+"phi_im_0_n.pickle", "wb") as file:
+            pickle.dump(phi_im_0_n, file)
+            
+        phi_re_0 = 1e-5
+        phi_im_0 = 2e-5
+        print(
+            "Traced Polyakov loop, no clusters, muB = 600 MeV"
+        )
+        for T_el in tqdm.tqdm(T600, total=len(T600), ncols=100):
+            phi_result = solver_n.Polyakov_loop(
+                T_el, 600.0/3.0, phi_re_0, phi_im_0
+            )
+            phi_re_600_n.append(phi_result[0])
+            phi_im_600_n.append(phi_result[1])
+            phi_re_0 = phi_result[0]
+            phi_im_0 = phi_result[1]
+        with open(files+"phi_re_600_n.pickle", "wb") as file:
+            pickle.dump(phi_re_600_n, file)
+        with open(files+"phi_im_600_n.pickle", "wb") as file:
+            pickle.dump(phi_im_600_n, file)
+    else:
+        with open(files+"phi_re_0_n.pickle", "rb") as file:
+            phi_re_0_n = pickle.load(file)
+        with open(files+"phi_im_0_n.pickle", "rb") as file:
+            phi_im_0_n = pickle.load(file)
+        with open(files+"phi_re_600_n.pickle", "rb") as file:
+            phi_re_600_n = pickle.load(file)
+        with open(files+"phi_im_600_n.pickle", "rb") as file:
+            phi_im_600_n = pickle.load(file)
+
+    if calc_s:
+
+        phi_re_0 = 1e-5
+        phi_im_0 = 2e-5
+        print(
+            "Traced Polyakov loop, clusters step-up-step-down, muB = 0 MeV"
+        )
+        for T_el in tqdm.tqdm(T0, total=len(T0), ncols=100):
+            phi_result = solver_s.Polyakov_loop(
+                T_el, 0.0, phi_re_0, phi_im_0
+            )
+            phi_re_0_s.append(phi_result[0])
+            phi_im_0_s.append(phi_result[1])
+            phi_re_0 = phi_result[0]
+            phi_im_0 = phi_result[1]
+        with open(files+"phi_re_0_s.pickle", "wb") as file:
+            pickle.dump(phi_re_0_s, file)
+        with open(files+"phi_im_0_s.pickle", "wb") as file:
+            pickle.dump(phi_im_0_s, file)
+
+        phi_re_0 = 1e-5
+        phi_im_0 = 2e-5
+        print(
+            "Traced Polyakov loop, clusters step-up-step-down, muB = 600 MeV"
+        )
+        for T_el in tqdm.tqdm(T600, total=len(T600), ncols=100):
+            phi_result = solver_s.Polyakov_loop(
+                T_el, 600.0/3.0, phi_re_0, phi_im_0
+            )
+            phi_re_600_s.append(phi_result[0])
+            phi_im_600_s.append(phi_result[1])
+            phi_re_0 = phi_result[0]
+            phi_im_0 = phi_result[1]
+        with open(files+"phi_re_600_s.pickle", "wb") as file:
+            pickle.dump(phi_re_600_s, file)
+        with open(files+"phi_im_600_s.pickle", "wb") as file:
+            pickle.dump(phi_im_600_s, file)
+    else:
+        with open(files+"phi_re_0_s.pickle", "rb") as file:
+            phi_re_0_s = pickle.load(file)
+        with open(files+"phi_im_0_s.pickle", "rb") as file:
+            phi_im_0_s = pickle.load(file)
+        with open(files+"phi_re_600_s.pickle", "rb") as file:
+            phi_re_600_s = pickle.load(file)
+        with open(files+"phi_im_600_s.pickle", "rb") as file:
+            phi_im_600_s = pickle.load(file)
+
+    if calc_c:
+
+        phi_re_0 = 1e-5
+        phi_im_0 = 2e-5
+        print(
+            "Traced Polyakov loop, clusters step-up-acos-cos, muB = 0 MeV"
+        )
+        for T_el in tqdm.tqdm(T0, total=len(T0), ncols=100):
+            phi_result = solver_c.Polyakov_loop(
+                T_el, 0.0, phi_re_0, phi_im_0
+            )
+            phi_re_0_c.append(phi_result[0])
+            phi_im_0_c.append(phi_result[1])
+            phi_re_0 = phi_result[0]
+            phi_im_0 = phi_result[1]
+        with open(files+"phi_re_0_c.pickle", "wb") as file:
+            pickle.dump(phi_re_0_c, file)
+        with open(files+"phi_im_0_c.pickle", "wb") as file:
+            pickle.dump(phi_im_0_c, file)
+
+        phi_re_0 = 1e-5
+        phi_im_0 = 2e-5
+        print(
+            "Traced Polyakov loop, clusters step-up-acos-cos, muB = 600 MeV"
+        )
+        for T_el in tqdm.tqdm(T600, total=len(T600), ncols=100):
+            phi_result = solver_c.Polyakov_loop(
+                T_el, 600.0/3.0, phi_re_0, phi_im_0
+            )
+            phi_re_600_c.append(phi_result[0])
+            phi_im_600_c.append(phi_result[1])
+            phi_re_0 = phi_result[0]
+            phi_im_0 = phi_result[1]
+        with open(files+"phi_re_600_c.pickle", "wb") as file:
+            pickle.dump(phi_re_600_c, file)
+        with open(files+"phi_im_600_c.pickle", "wb") as file:
+            pickle.dump(phi_im_600_c, file)
+    else:
+        with open(files+"phi_re_0_c.pickle", "rb") as file:
+            phi_re_0_c = pickle.load(file)
+        with open(files+"phi_im_0_c.pickle", "rb") as file:
+            phi_im_0_c = pickle.load(file)
+        with open(files+"phi_re_600_c.pickle", "rb") as file:
+            phi_re_600_c = pickle.load(file)
+        with open(files+"phi_im_600_c.pickle", "rb") as file:
+            phi_im_600_c = pickle.load(file)
+
+    fig = matplotlib.pyplot.figure(num = 1, figsize = (11.0, 5))
+    ax = fig.add_subplot(1, 2, 1)
+    ax.axis([min(T0), max(T0), 0.0, 1.1])
+
+    ax.fill_between(T0, phi_re_0_c, y2=phi_re_0_s, color='blue', alpha=0.5)
+    ax.plot(T0, phi_re_0_s, '-', c='blue')
+    ax.plot(T0, phi_re_0_c, '-', c='blue')
+
+    ax.plot(T0, phi_re_0_n, '--', c='red')
+
+    ax.plot(T0, sigma_0, c = 'green')
+
+    ax.text(
+        10., 1.03, r'$\mathrm{M_q}$ / $\mathrm{M_{q,vac}}$', fontsize=14
+    )
+    ax.text(175., 1.03, r'$\mathrm{\mu_B=0}$', fontsize=14)
+    ax.text(135., 0.25, r'$\mathrm{\Phi}$', fontsize=14, color='blue')
+    ax.text(150., 0.25, r'$\mathrm{\Phi_0}$', fontsize=14, color='red')
+
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+
+    ax.set_xlabel(r'T [MeV]', fontsize=16)
+    ax.set_ylabel(r'$\mathrm{\Phi}$', fontsize=16)
+
+    ax2 = fig.add_subplot(1, 2, 2)
+    ax2.axis([min(T600), max(T600), 0.0, 1.1])
+
+    ax2.fill_between(
+        T600, phi_re_600_c, y2=phi_re_600_s, color='blue', alpha=0.5
+    )
+    ax2.plot(T600, phi_re_600_s, '-', c='blue')
+    ax2.plot(T600, phi_re_600_c, '-', c='blue')
+
+    ax2.plot(T600, phi_re_600_n, '--', c='red')
+
+    ax2.plot(T600, sigma_600, c = 'green')
+
+    ax2.text(
+        10., 1.03, r'$\mathrm{M_q}$ / $\mathrm{M_{q,vac}}$',
+        fontsize=14
+    )
+    ax2.text(145., 1.03, r'$\mathrm{\mu_B=600}$ MeV', fontsize=14)
+    ax2.text(135., 0.25, r'$\mathrm{\Phi}$', fontsize=14, color='blue')
+    ax2.text(150., 0.25, r'$\mathrm{\Phi_0}$', fontsize=14, color='red')
+
+    for tick in ax2.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax2.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+
+    ax2.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax2.set_ylabel(r'$\mathrm{\Phi}$', fontsize = 16)
+
+    fig.tight_layout()
+
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
+
+
 def epja_figure5():
 
     import tqdm
@@ -9603,6 +10145,6 @@ def s_n_plot():
 
 if __name__ == '__main__':
 
-    s_n_plot()
+    epja_figure4()
 
     print("END")
