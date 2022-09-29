@@ -498,10 +498,10 @@ def epja_figure4():
     ax.plot(T0, sigma_0, c = 'green')
 
     ax.text(
-        103., 1.03, r'$\mathrm{M_q}$ / $\mathrm{M_{q,vac}}$', fontsize=14
+        103., 1.0, r'$\mathrm{M_q}$ / $\mathrm{M_{q,vac}}$', fontsize=14
     )
-    ax.text(165., 1.03, r'$\mathrm{\mu_B=0}$', fontsize=14)
-    ax.text(135., 0.25, r'$\mathrm{\Phi}$', fontsize=14, color='blue')
+    ax.text(168., 1.03, r'$\mathrm{\mu_B=0}$', fontsize=14)
+    ax.text(140., 0.25, r'$\mathrm{\Phi}$', fontsize=14, color='blue')
     ax.text(150., 0.25, r'$\mathrm{\Phi_0}$', fontsize=14, color='red')
 
     for tick in ax.xaxis.get_major_ticks():
@@ -526,12 +526,12 @@ def epja_figure4():
     ax2.plot(T600, sigma_600, c = 'green')
 
     ax2.text(
-        103., 1.03, r'$\mathrm{M_q}$ / $\mathrm{M_{q,vac}}$',
+        103., 0.88, r'$\mathrm{M_q}$ / $\mathrm{M_{q,vac}}$',
         fontsize=14
     )
     ax2.text(155., 1.03, r'$\mathrm{\mu_B=600}$ MeV', fontsize=14)
-    ax2.text(135., 0.25, r'$\mathrm{\Phi}$', fontsize=14, color='blue')
-    ax2.text(150., 0.25, r'$\mathrm{\Phi_0}$', fontsize=14, color='red')
+    ax2.text(123., 0.25, r'$\mathrm{\Phi}$', fontsize=14, color='blue')
+    ax2.text(140., 0.25, r'$\mathrm{\Phi_0}$', fontsize=14, color='red')
 
     for tick in ax2.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -776,7 +776,8 @@ def epja_figure5():
 
     fig1 = matplotlib.pyplot.figure(num=1, figsize=(5.9, 5))
     ax1 = fig1.add_subplot(1, 1, 1)
-    ax1.axis([10., 2000., -1.5, 5.1])
+    #ax1.axis([10., 2000., -1.5, 5.1])
+    ax1.axis([50., 300., -1.5, 3.5])
 
     ax1.add_patch(
         matplotlib.patches.Polygon(
@@ -12647,20 +12648,28 @@ def epja_figure11():
     ax1.plot(T_Tc_2, R12_calc_2, '-', c='red')
     ax1.plot(T_HRG, R12_HRG_1, '--', c='red')
     ax1.plot(T_QGP, R12_QGP_1, '--', c='red')
-    ax1.plot(T_Tc_5, R12_calc_5, '-.', c='red')
-    ax1.text(0.705, 0.65, r"HRG", color='black')
-    ax1.text(1.72, 0.99, r"QGP", color='black')
-    ax1.text(1.6, 0.04, r"$\mathrm{\mu_B/T=1.2}$", color='black')
+    #ax1.plot(T_Tc_5, R12_calc_5, '-.', c='red')
+    ax1.text(0.705, 0.63, r"HRG", color='black', fontsize=14)
+    ax1.text(1.69, 1.0, r"QGP", color='black', fontsize=14)
+    ax1.text(1.54, 0.04, r"$\mathrm{\mu_B/T=1.2}$", color='black', fontsize=14)
+
+    ax1.text(
+        0.8, 0.49, r'Alton et al. (2005)', color='red', fontsize=14
+    )
 
     ax2.fill_between(T_Tc_3, R12_calc_3, y2=R12_calc_4, color='blue', alpha=0.7)
     ax2.plot(T_Tc_3, R12_calc_3, '-', c='blue')
     ax2.plot(T_Tc_4, R12_calc_4, '-', c='blue')
     ax2.plot(T_HRG, R12_HRG_2, '--', c='blue')
     ax2.plot(T_QGP, R12_QGP_2, '--', c='blue')
-    ax2.plot(T_Tc_6, R12_calc_6, '-.', c='blue')
-    ax2.text(0.705, 0.36, r"HRG", color='black')
-    ax2.text(1.72, 0.91, r"QGP", color='black')
-    ax2.text(1.6, 0.04, r"$\mathrm{\mu_B/T=2.4}$", color='black')
+    #ax2.plot(T_Tc_6, R12_calc_6, '-.', c='blue')
+    ax2.text(0.705, 0.35, r"HRG", color='black', fontsize=14)
+    ax2.text(1.69, 0.91, r"QGP", color='black', fontsize=14)
+    ax2.text(1.54, 0.04, r"$\mathrm{\mu_B/T=2.4}$", color='black', fontsize=14)
+
+    ax2.text(
+        0.86, 0.2, r'Alton et al. (2005)', color='blue', fontsize=14
+    )
 
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -13523,6 +13532,6 @@ def epja_figure12():
 
 if __name__ == '__main__':
 
-    epja_figure4()
+    epja_figure5()
 
     print("END")
