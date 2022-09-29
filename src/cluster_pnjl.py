@@ -7623,9 +7623,9 @@ def epja_figure10():
 
     warnings.filterwarnings("ignore")
     
-    calc_0 = True
-    calc_1 = True
-    calc_2 = True
+    calc_0 = False
+    calc_1 = False
+    calc_2 = False
 
     files = "D:/EoS/epja/figure10/"
 
@@ -7916,6 +7916,137 @@ def epja_figure10():
                 "wb"
             ) as file:
                 pickle.dump(s_pnjl_s_v, file)
+        else:
+            with open(
+                files+"phi_re_v_" + str(mu_round).replace('.', 'p')+ ".pickle",
+                "rb"
+            ) as file:
+                phi_re_v = pickle.load(file)
+            with open(
+                files+"phi_im_v_" + str(mu_round).replace('.', 'p')+ ".pickle",
+                "rb"
+            ) as file:
+                phi_im_v = pickle.load(file)
+            with open(
+                files+"b_sigma_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_sigma_v = pickle.load(file)
+            with open(
+                files+"s_sigma_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_sigma_v = pickle.load(file)
+            with open(
+                files+"b_gluon_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_gluon_v = pickle.load(file)
+            with open(
+                files+"s_gluon_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_gluon_v = pickle.load(file)
+            with open(
+                files+"b_sea_u_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_sea_u_v = pickle.load(file)
+            with open(
+                files+"b_sea_d_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_sea_d_v = pickle.load(file)
+            with open(
+                files+"b_sea_s_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_sea_s_v = pickle.load(file)
+            with open(
+                files+"s_sea_u_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_sea_u_v = pickle.load(file)
+            with open(
+                files+"s_sea_d_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_sea_d_v = pickle.load(file)
+            with open(
+                files+"s_sea_s_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_sea_s_v = pickle.load(file)
+            with open(
+                files+"b_perturbative_u_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_perturbative_u_v = pickle.load(file)
+            with open(
+                files+"b_perturbative_d_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_perturbative_d_v = pickle.load(file)
+            with open(
+                files+"b_perturbative_s_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_perturbative_s_v = pickle.load(file)
+            with open(
+                files+"s_perturbative_u_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_perturbative_u_v = pickle.load(file)
+            with open(
+                files+"s_perturbative_d_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_perturbative_d_v = pickle.load(file)
+            with open(
+                files+"s_perturbative_s_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_perturbative_s_v = pickle.load(file)
+            with open(
+                files+"b_perturbative_gluon_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_perturbative_gluon_v = pickle.load(file)
+            with open(
+                files+"s_perturbative_gluon_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_perturbative_gluon_v = pickle.load(file)
+            with open(
+                files+"b_pnjl_u_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_pnjl_u_v = pickle.load(file)
+            with open(
+                files+"b_pnjl_d_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_pnjl_d_v = pickle.load(file)
+            with open(
+                files+"b_pnjl_s_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_pnjl_s_v = pickle.load(file)
+            with open(
+                files+"s_pnjl_u_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_pnjl_u_v = pickle.load(file)
+            with open(
+                files+"s_pnjl_d_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_pnjl_d_v = pickle.load(file)
+            with open(
+                files+"s_pnjl_s_v_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_pnjl_s_v = pickle.load(file)
 
         if calc_1:
 
@@ -8193,6 +8324,117 @@ def epja_figure10():
                 "wb"
             ) as file:
                 pickle.dump(s_H_v_1, file)
+        else:
+            with open(
+                files+"b_pi_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_pi_v_1 = pickle.load(file)
+            with open(
+                files+"s_pi_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_pi_v_1 = pickle.load(file)
+            with open(
+                files+"b_K_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_K_v_1 = pickle.load(file)
+            with open(
+                files+"s_K_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_K_v_1 = pickle.load(file)
+            with open(
+                files+"b_rho_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_rho_v_1 = pickle.load(file)
+            with open(
+                files+"s_rho_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_rho_v_1 = pickle.load(file)
+            with open(
+                files+"b_omega_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_omega_v_1 = pickle.load(file)
+            with open(
+                files+"s_omega_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_omega_v_1 = pickle.load(file)
+            with open(
+                files+"b_D_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_D_v_1 = pickle.load(file)
+            with open(
+                files+"s_D_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_D_v_1 = pickle.load(file)
+            with open(
+                files+"b_N_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_N_v_1 = pickle.load(file)
+            with open(
+                files+"s_N_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_N_v_1 = pickle.load(file)
+            with open(
+                files+"b_T_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_T_v_1 = pickle.load(file)
+            with open(
+                files+"s_T_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_T_v_1 = pickle.load(file)
+            with open(
+                files+"b_F_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_F_v_1 = pickle.load(file)
+            with open(
+                files+"s_F_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_F_v_1 = pickle.load(file)
+            with open(
+                files+"b_P_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_P_v_1 = pickle.load(file)
+            with open(
+                files+"s_P_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_P_v_1 = pickle.load(file)
+            with open(
+                files+"b_Q_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_Q_v_1 = pickle.load(file)
+            with open(
+                files+"s_Q_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_Q_v_1 = pickle.load(file)
+            with open(
+                files+"b_H_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_H_v_1 = pickle.load(file)
+            with open(
+                files+"s_H_v_1_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_H_v_1 = pickle.load(file)
 
         if calc_2:
 
@@ -8470,6 +8712,174 @@ def epja_figure10():
                 "wb"
             ) as file:
                 pickle.dump(s_H_v_2, file)
+        else:
+            with open(
+                files+"b_pi_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_pi_v_2 = pickle.load(file)
+            with open(
+                files+"s_pi_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_pi_v_2 = pickle.load(file)
+            with open(
+                files+"b_K_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_K_v_2 = pickle.load(file)
+            with open(
+                files+"s_K_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_K_v_2 = pickle.load(file)
+            with open(
+                files+"b_rho_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_rho_v_2 = pickle.load(file)
+            with open(
+                files+"s_rho_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_rho_v_2 = pickle.load(file)
+            with open(
+                files+"b_omega_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_omega_v_2 = pickle.load(file)
+            with open(
+                files+"s_omega_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_omega_v_2 = pickle.load(file)
+            with open(
+                files+"b_D_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_D_v_2 = pickle.load(file)
+            with open(
+                files+"s_D_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_D_v_2 = pickle.load(file)
+            with open(
+                files+"b_N_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_N_v_2 = pickle.load(file)
+            with open(
+                files+"s_N_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_N_v_2 = pickle.load(file)
+            with open(
+                files+"b_T_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_T_v_2 = pickle.load(file)
+            with open(
+                files+"s_T_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_T_v_2 = pickle.load(file)
+            with open(
+                files+"b_F_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_F_v_2 = pickle.load(file)
+            with open(
+                files+"s_F_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_F_v_2 = pickle.load(file)
+            with open(
+                files+"b_P_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_P_v_2 = pickle.load(file)
+            with open(
+                files+"s_P_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_P_v_2 = pickle.load(file)
+            with open(
+                files+"b_Q_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_Q_v_2 = pickle.load(file)
+            with open(
+                files+"s_Q_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_Q_v_2 = pickle.load(file)
+            with open(
+                files+"b_H_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                b_H_v_2 = pickle.load(file)
+            with open(
+                files+"s_H_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "rb"
+            ) as file:
+                s_H_v_2 = pickle.load(file)
+
+        total_b_1 = [
+            math.fsum(el) for el in zip(
+                b_sigma_v, b_gluon_v, b_sea_u_v, b_sea_d_v, b_sea_s_v,
+                b_perturbative_u_v, b_perturbative_d_v, b_perturbative_s_v,
+                b_perturbative_gluon_v, b_pnjl_u_v, b_pnjl_d_v, b_pnjl_s_v,
+                b_pi_v_1, b_K_v_1, b_rho_v_1, b_omega_v_1, b_D_v_1, b_N_v_1,
+                b_T_v_1, b_F_v_1, b_P_v_1, b_Q_v_1, b_H_v_1
+            )
+        ]
+        total_b_2 = [
+            math.fsum(el) for el in zip(
+                b_sigma_v, b_gluon_v, b_sea_u_v, b_sea_d_v, b_sea_s_v,
+                b_perturbative_u_v, b_perturbative_d_v, b_perturbative_s_v,
+                b_perturbative_gluon_v, b_pnjl_u_v, b_pnjl_d_v, b_pnjl_s_v,
+                b_pi_v_2, b_K_v_2, b_rho_v_2, b_omega_v_2, b_D_v_2, b_N_v_2,
+                b_T_v_2, b_F_v_2, b_P_v_2, b_Q_v_2, b_H_v_2
+            )
+        ]
+        total_s_1 = [
+            math.fsum(el) for el in zip(
+                s_sigma_v, s_gluon_v, s_sea_u_v, s_sea_d_v, s_sea_s_v,
+                s_perturbative_u_v, s_perturbative_d_v, s_perturbative_s_v,
+                s_perturbative_gluon_v, s_pnjl_u_v, s_pnjl_d_v, s_pnjl_s_v,
+                s_pi_v_1, s_K_v_1, s_rho_v_1, s_omega_v_1, s_D_v_1, s_N_v_1,
+                s_T_v_1, s_F_v_1, s_P_v_1, s_Q_v_1, s_H_v_1
+            )
+        ]
+        total_s_2 = [
+            math.fsum(el) for el in zip(
+                s_sigma_v, s_gluon_v, s_sea_u_v, s_sea_d_v, s_sea_s_v,
+                s_perturbative_u_v, s_perturbative_d_v, s_perturbative_s_v,
+                s_perturbative_gluon_v, s_pnjl_u_v, s_pnjl_d_v, s_pnjl_s_v,
+                s_pi_v_2, s_K_v_2, s_rho_v_2, s_omega_v_2, s_D_v_2, s_N_v_2,
+                s_T_v_2, s_F_v_2, s_P_v_2, s_Q_v_2, s_H_v_2
+            )
+        ]
+        total_1 = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_1, total_b_1)]
+        total_2 = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_2, total_b_2)]
+
+        fig = matplotlib.pyplot.figure(num=1, figsize=(5.9, 5))
+        ax = fig.add_subplot(1, 1, 1)
+        ax.axis([1.0, 500.0, -1000.0, 10000.0])
+
+        ax.plot(T, total_1, '-', c="blue")
+        ax.plot(T, total_2, '-', c="red")
+
+        for tick in ax.xaxis.get_major_ticks():
+            tick.label.set_fontsize(16) 
+        for tick in ax.yaxis.get_major_ticks():
+            tick.label.set_fontsize(16)
+        ax.set_xlabel(r'T [MeV]', fontsize = 16)
+        ax.set_ylabel(r's/n', fontsize = 16)
+
+        matplotlib.pyplot.tight_layout()
+        matplotlib.pyplot.show()
+        matplotlib.pyplot.close()
 
 
 def epja_figure11():
@@ -13532,6 +13942,6 @@ def epja_figure12():
 
 if __name__ == '__main__':
 
-    epja_figure5()
+    epja_figure10()
 
     print("END")
