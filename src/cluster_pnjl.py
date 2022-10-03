@@ -7623,9 +7623,34 @@ def epja_figure10():
 
     warnings.filterwarnings("ignore")
     
+    calc_lines = True
+
     calc_0 = False
     calc_1 = False
     calc_2 = False
+
+
+    def intersect(x_v, y_v, target):
+        y_prev = y_v[-1]
+        x_prev = x_v[-1]
+        sol_x = list()
+        for x_el, y_el in zip(x_v[::-1][1:], y_v[::-1][1:]):
+            if (y_el-target)*(y_prev-target) < 0.0:
+                temp_num = math.fsum([
+                    x_el*target, -x_prev*target, x_prev*y_el, -x_el*y_prev
+                ])
+                temp_den = math.fsum([
+                    y_el, -y_prev
+                ])
+                sol_x.append(temp_num/temp_den)
+            y_prev = y_el
+            x_prev = x_el
+        return sol_x
+
+
+    T_30_1, T_45_1, T_300_1 = list(), list(), list()
+    T_30_2, T_45_2, T_300_2 = list(), list(), list()
+    mu_30, mu_45, mu_300 = list(), list(), list()
 
     files = "D:/EoS/epja/figure10/"
 
@@ -8863,23 +8888,71 @@ def epja_figure10():
         total_1 = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_1, total_b_1)]
         total_2 = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_2, total_b_2)]
 
-        fig = matplotlib.pyplot.figure(num=1, figsize=(5.9, 5))
-        ax = fig.add_subplot(1, 1, 1)
-        ax.axis([1.0, 500.0, -1000.0, 10000.0])
+        if calc_lines:
+            T_30_1.append(intersect(T, total_1, 30.0))
+            T_45_1.append(intersect(T, total_1, 45.0))
+            T_300_1.append(intersect(T, total_1, 300.0))
+            T_30_2.append(intersect(T, total_2, 30.0))
+            T_45_2.append(intersect(T, total_2, 45.0))
+            T_300_2.append(intersect(T, total_2, 300.0))
+            mu_30.append(mu_round)
+            mu_45.append(mu_round)
+            mu_300.append(mu_round)
 
-        ax.plot(T, total_1, '-', c="blue")
-        ax.plot(T, total_2, '-', c="red")
+        #fig = matplotlib.pyplot.figure(num=1, figsize=(5.9, 5))
+        #ax = fig.add_subplot(1, 1, 1)
+        #ax.axis([1.0, 500.0, -1000.0, 10000.0])
+        #ax.plot(T, total_1, '-', c="blue")
+        #ax.plot(T, total_2, '-', c="red")
+        #ax.plot(T, [4000.0 for _ in T], '--', c="black")
+        #for tick in ax.xaxis.get_major_ticks():
+        #    tick.label.set_fontsize(16) 
+        #for tick in ax.yaxis.get_major_ticks():
+        #    tick.label.set_fontsize(16)
+        #ax.set_xlabel(r'T [MeV]', fontsize = 16)
+        #ax.set_ylabel(r's/n', fontsize = 16)
+        #matplotlib.pyplot.tight_layout()
+        #matplotlib.pyplot.show()
+        #matplotlib.pyplot.close()
 
-        for tick in ax.xaxis.get_major_ticks():
-            tick.label.set_fontsize(16) 
-        for tick in ax.yaxis.get_major_ticks():
-            tick.label.set_fontsize(16)
-        ax.set_xlabel(r'T [MeV]', fontsize = 16)
-        ax.set_ylabel(r's/n', fontsize = 16)
-
-        matplotlib.pyplot.tight_layout()
-        matplotlib.pyplot.show()
-        matplotlib.pyplot.close()
+    if calc_lines:
+         with open(files+"T_30_1.pickle","wb") as file:
+            pickle.dump(T_30_1, file)
+         with open(files+"T_45_1.pickle","wb") as file:
+            pickle.dump(T_45_1, file)
+         with open(files+"T_300_1.pickle","wb") as file:
+            pickle.dump(T_300_1, file)
+         with open(files+"T_30_2.pickle","wb") as file:
+            pickle.dump(T_30_2, file)
+         with open(files+"T_45_2.pickle","wb") as file:
+            pickle.dump(T_45_2, file)
+         with open(files+"T_300_2.pickle","wb") as file:
+            pickle.dump(T_300_2, file)
+         with open(files+"mu_30.pickle","wb") as file:
+            pickle.dump(mu_30, file)
+         with open(files+"mu_45.pickle","wb") as file:
+            pickle.dump(mu_45, file)
+         with open(files+"mu_300.pickle","wb") as file:
+            pickle.dump(mu_300, file)
+    else:
+        with open(files+"T_30_1.pickle","rb") as file:
+            T_30_1 = pickle.dump(file)
+        with open(files+"T_45_1.pickle","rb") as file:
+            T_45_1 = pickle.dump(file)
+        with open(files+"T_300_1.pickle","rb") as file:
+            T_300_1 = pickle.dump(file)
+        with open(files+"T_30_2.pickle","rb") as file:
+            T_30_2 = pickle.dump(file)
+        with open(files+"T_45_2.pickle","rb") as file:
+            T_45_2 = pickle.dump(file)
+        with open(files+"T_300_2.pickle","rb") as file:
+            T_300_2 = pickle.dump(file)
+        with open(files+"mu_30.pickle","rb") as file:
+            mu_30 = pickle.dump(file)
+        with open(files+"mu_45.pickle","rb") as file:
+            mu_45 = pickle.dump(file)
+        with open(files+"mu_300.pickle","rb") as file:
+            mu_300 = pickle.dump(file)
 
 
 def epja_figure11():
