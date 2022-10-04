@@ -7623,7 +7623,7 @@ def epja_figure10():
 
     warnings.filterwarnings("ignore")
     
-    calc_lines = True
+    calc_lines = False
 
     calc_0 = False
     calc_1 = False
@@ -7657,6 +7657,8 @@ def epja_figure10():
     T = numpy.linspace(1.0, 500.0, num=200)
 
     for mu in numpy.linspace(1.0, 200.0, num=200):
+
+        print(mu)
 
         mu_round = math.floor(mu*10.0)/10.0
 
@@ -8953,6 +8955,8 @@ def epja_figure10():
             mu_45 = pickle.dump(file)
         with open(files+"mu_300.pickle","rb") as file:
             mu_300 = pickle.dump(file)
+
+    print("here")
 
 
 def epja_figure11():
