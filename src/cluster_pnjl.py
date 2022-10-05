@@ -7629,7 +7629,6 @@ def epja_figure10():
     calc_1 = False
     calc_2 = False
 
-
     def intersect(x_v, y_v, target):
         y_prev = y_v[-1]
         x_prev = x_v[-1]
@@ -7646,7 +7645,6 @@ def epja_figure10():
             y_prev = y_el
             x_prev = x_el
         return sol_x
-
 
     T_30_1, T_45_1, T_300_1 = list(), list(), list()
     T_30_2, T_45_2, T_300_2 = list(), list(), list()
@@ -8901,22 +8899,6 @@ def epja_figure10():
             mu_45.append(mu_round)
             mu_300.append(mu_round)
 
-        #fig = matplotlib.pyplot.figure(num=1, figsize=(5.9, 5))
-        #ax = fig.add_subplot(1, 1, 1)
-        #ax.axis([1.0, 500.0, -1000.0, 10000.0])
-        #ax.plot(T, total_1, '-', c="blue")
-        #ax.plot(T, total_2, '-', c="red")
-        #ax.plot(T, [4000.0 for _ in T], '--', c="black")
-        #for tick in ax.xaxis.get_major_ticks():
-        #    tick.label.set_fontsize(16) 
-        #for tick in ax.yaxis.get_major_ticks():
-        #    tick.label.set_fontsize(16)
-        #ax.set_xlabel(r'T [MeV]', fontsize = 16)
-        #ax.set_ylabel(r's/n', fontsize = 16)
-        #matplotlib.pyplot.tight_layout()
-        #matplotlib.pyplot.show()
-        #matplotlib.pyplot.close()
-
     if calc_lines:
          with open(files+"T_30_1.pickle","wb") as file:
             pickle.dump(T_30_1, file)
@@ -8938,25 +8920,255 @@ def epja_figure10():
             pickle.dump(mu_300, file)
     else:
         with open(files+"T_30_1.pickle","rb") as file:
-            T_30_1 = pickle.dump(file)
+            T_30_1 = pickle.load(file)
         with open(files+"T_45_1.pickle","rb") as file:
-            T_45_1 = pickle.dump(file)
+            T_45_1 = pickle.load(file)
         with open(files+"T_300_1.pickle","rb") as file:
-            T_300_1 = pickle.dump(file)
+            T_300_1 = pickle.load(file)
         with open(files+"T_30_2.pickle","rb") as file:
-            T_30_2 = pickle.dump(file)
+            T_30_2 = pickle.load(file)
         with open(files+"T_45_2.pickle","rb") as file:
-            T_45_2 = pickle.dump(file)
+            T_45_2 = pickle.load(file)
         with open(files+"T_300_2.pickle","rb") as file:
-            T_300_2 = pickle.dump(file)
+            T_300_2 = pickle.load(file)
         with open(files+"mu_30.pickle","rb") as file:
-            mu_30 = pickle.dump(file)
+            mu_30 = pickle.load(file)
         with open(files+"mu_45.pickle","rb") as file:
-            mu_45 = pickle.dump(file)
+            mu_45 = pickle.load(file)
         with open(files+"mu_300.pickle","rb") as file:
-            mu_300 = pickle.dump(file)
+            mu_300 = pickle.load(file)
 
-    print("here")
+    mu_300_2_0 = [mu_el*3.0 if len(T_el)>0 else float('nan') for mu_el, T_el in zip(mu_300, T_300_2)]
+    mu_300_2_1 = [mu_el*3.0 if len(T_el)>1 else float('nan') for mu_el, T_el in zip(mu_300, T_300_2)]
+    mu_300_2_2 = [mu_el*3.0 if len(T_el)>2 else float('nan') for mu_el, T_el in zip(mu_300, T_300_2)]
+    mu_300_2_3 = [mu_el*3.0 if len(T_el)>3 else float('nan') for mu_el, T_el in zip(mu_300, T_300_2)]
+    mu_300_2_4 = [mu_el*3.0 if len(T_el)>4 else float('nan') for mu_el, T_el in zip(mu_300, T_300_2)]
+
+    T_300_2_0 = [el[0] if len(el)>0 else float('nan') for el in T_300_2]
+    T_300_2_1 = [el[1] if len(el)>1 else float('nan') for el in T_300_2]
+    T_300_2_2 = [el[2] if len(el)>2 else float('nan') for el in T_300_2]
+    T_300_2_3 = [el[3] if len(el)>3 else float('nan') for el in T_300_2]
+    T_300_2_4 = [el[4] if len(el)>4 else float('nan') for el in T_300_2]
+
+    mu_300_1_0 = [mu_el*3.0 if len(T_el)>0 else float('nan') for mu_el, T_el in zip(mu_300, T_300_1)]
+    mu_300_1_1 = [mu_el*3.0 if len(T_el)>1 else float('nan') for mu_el, T_el in zip(mu_300, T_300_1)]
+    mu_300_1_2 = [mu_el*3.0 if len(T_el)>2 else float('nan') for mu_el, T_el in zip(mu_300, T_300_1)]
+    mu_300_1_3 = [mu_el*3.0 if len(T_el)>3 else float('nan') for mu_el, T_el in zip(mu_300, T_300_1)]
+    mu_300_1_4 = [mu_el*3.0 if len(T_el)>4 else float('nan') for mu_el, T_el in zip(mu_300, T_300_1)]
+    mu_300_1_5 = [mu_el*3.0 if len(T_el)>5 else float('nan') for mu_el, T_el in zip(mu_300, T_300_1)]
+    mu_300_1_6 = [mu_el*3.0 if len(T_el)>6 else float('nan') for mu_el, T_el in zip(mu_300, T_300_1)]
+
+    T_300_1_0 = [el[0] if len(el)>0 else float('nan') for el in T_300_1]
+    T_300_1_1 = [el[1] if len(el)>1 else float('nan') for el in T_300_1]
+    T_300_1_2 = [el[2] if len(el)>2 else float('nan') for el in T_300_1]
+    T_300_1_3 = [el[3] if len(el)>3 else float('nan') for el in T_300_1]
+    T_300_1_4 = [el[4] if len(el)>4 else float('nan') for el in T_300_1]
+    T_300_1_5 = [el[5] if len(el)>5 else float('nan') for el in T_300_1]
+    T_300_1_6 = [el[6] if len(el)>6 else float('nan') for el in T_300_1]
+
+    mu_45_1_0 = [mu_el*3.0 if len(T_el)>0 else float('nan') for mu_el, T_el in zip(mu_45, T_45_1)]
+    mu_45_1_1 = [mu_el*3.0 if len(T_el)>1 else float('nan') for mu_el, T_el in zip(mu_45, T_45_1)]
+    mu_45_1_2 = [mu_el*3.0 if len(T_el)>2 else float('nan') for mu_el, T_el in zip(mu_45, T_45_1)]
+    mu_45_1_3 = [mu_el*3.0 if len(T_el)>3 else float('nan') for mu_el, T_el in zip(mu_45, T_45_1)]
+    mu_45_1_4 = [mu_el*3.0 if len(T_el)>4 else float('nan') for mu_el, T_el in zip(mu_45, T_45_1)]
+    mu_45_1_5 = [mu_el*3.0 if len(T_el)>5 else float('nan') for mu_el, T_el in zip(mu_45, T_45_1)]
+    mu_45_1_6 = [mu_el*3.0 if len(T_el)>6 else float('nan') for mu_el, T_el in zip(mu_45, T_45_1)]
+
+    T_45_1_0 = [el[0] if len(el)>0 else float('nan') for el in T_45_1]
+    T_45_1_1 = [el[1] if len(el)>1 else float('nan') for el in T_45_1]
+    T_45_1_2 = [el[2] if len(el)>2 else float('nan') for el in T_45_1]
+    T_45_1_3 = [el[3] if len(el)>3 else float('nan') for el in T_45_1]
+    T_45_1_4 = [el[4] if len(el)>4 else float('nan') for el in T_45_1]
+    T_45_1_5 = [el[5] if len(el)>5 else float('nan') for el in T_45_1]
+    T_45_1_6 = [el[6] if len(el)>6 else float('nan') for el in T_45_1]
+
+    mu_45_2_0 = [mu_el*3.0 if len(T_el)>0 else float('nan') for mu_el, T_el in zip(mu_45, T_45_2)]
+    mu_45_2_1 = [mu_el*3.0 if len(T_el)>1 else float('nan') for mu_el, T_el in zip(mu_45, T_45_2)]
+    mu_45_2_2 = [mu_el*3.0 if len(T_el)>2 else float('nan') for mu_el, T_el in zip(mu_45, T_45_2)]
+    mu_45_2_3 = [mu_el*3.0 if len(T_el)>3 else float('nan') for mu_el, T_el in zip(mu_45, T_45_2)]
+    mu_45_2_4 = [mu_el*3.0 if len(T_el)>4 else float('nan') for mu_el, T_el in zip(mu_45, T_45_2)]
+    mu_45_2_5 = [mu_el*3.0 if len(T_el)>5 else float('nan') for mu_el, T_el in zip(mu_45, T_45_2)]
+    mu_45_2_6 = [mu_el*3.0 if len(T_el)>6 else float('nan') for mu_el, T_el in zip(mu_45, T_45_2)]
+
+    T_45_2_0 = [el[0] if len(el)>0 else float('nan') for el in T_45_2]
+    T_45_2_1 = [el[1] if len(el)>1 else float('nan') for el in T_45_2]
+    T_45_2_2 = [el[2] if len(el)>2 else float('nan') for el in T_45_2]
+    T_45_2_3 = [el[3] if len(el)>3 else float('nan') for el in T_45_2]
+    T_45_2_4 = [el[4] if len(el)>4 else float('nan') for el in T_45_2]
+    T_45_2_5 = [el[5] if len(el)>5 else float('nan') for el in T_45_2]
+    T_45_2_6 = [el[6] if len(el)>6 else float('nan') for el in T_45_2]
+
+    mu_30_1_0 = [mu_el*3.0 if len(T_el)>0 else float('nan') for mu_el, T_el in zip(mu_30, T_30_1)]
+    mu_30_1_1 = [mu_el*3.0 if len(T_el)>1 else float('nan') for mu_el, T_el in zip(mu_30, T_30_1)]
+    mu_30_1_2 = [mu_el*3.0 if len(T_el)>2 else float('nan') for mu_el, T_el in zip(mu_30, T_30_1)]
+    mu_30_1_3 = [mu_el*3.0 if len(T_el)>3 else float('nan') for mu_el, T_el in zip(mu_30, T_30_1)]
+    mu_30_1_4 = [mu_el*3.0 if len(T_el)>4 else float('nan') for mu_el, T_el in zip(mu_30, T_30_1)]
+    mu_30_1_5 = [mu_el*3.0 if len(T_el)>5 else float('nan') for mu_el, T_el in zip(mu_30, T_30_1)]
+    mu_30_1_6 = [mu_el*3.0 if len(T_el)>6 else float('nan') for mu_el, T_el in zip(mu_30, T_30_1)]
+    mu_30_1_7 = [mu_el*3.0 if len(T_el)>7 else float('nan') for mu_el, T_el in zip(mu_30, T_30_1)]
+    mu_30_1_8 = [mu_el*3.0 if len(T_el)>8 else float('nan') for mu_el, T_el in zip(mu_30, T_30_1)]
+
+    T_30_1_0 = [el[0] if len(el)>0 else float('nan') for el in T_30_1]
+    T_30_1_1 = [el[1] if len(el)>1 else float('nan') for el in T_30_1]
+    T_30_1_2 = [el[2] if len(el)>2 else float('nan') for el in T_30_1]
+    T_30_1_3 = [el[3] if len(el)>3 else float('nan') for el in T_30_1]
+    T_30_1_4 = [el[4] if len(el)>4 else float('nan') for el in T_30_1]
+    T_30_1_5 = [el[5] if len(el)>5 else float('nan') for el in T_30_1]
+    T_30_1_6 = [el[6] if len(el)>6 else float('nan') for el in T_30_1]
+    T_30_1_7 = [el[7] if len(el)>7 else float('nan') for el in T_30_1]
+    T_30_1_8 = [el[8] if len(el)>8 else float('nan') for el in T_30_1]
+
+    mu_30_2_0 = [mu_el*3.0 if len(T_el)>0 else float('nan') for mu_el, T_el in zip(mu_30, T_30_2)]
+    mu_30_2_1 = [mu_el*3.0 if len(T_el)>1 else float('nan') for mu_el, T_el in zip(mu_30, T_30_2)]
+    mu_30_2_2 = [mu_el*3.0 if len(T_el)>2 else float('nan') for mu_el, T_el in zip(mu_30, T_30_2)]
+    mu_30_2_3 = [mu_el*3.0 if len(T_el)>3 else float('nan') for mu_el, T_el in zip(mu_30, T_30_2)]
+    mu_30_2_4 = [mu_el*3.0 if len(T_el)>4 else float('nan') for mu_el, T_el in zip(mu_30, T_30_2)]
+
+    T_30_2_0 = [el[0] if len(el)>0 else float('nan') for el in T_30_2]
+    T_30_2_1 = [el[1] if len(el)>1 else float('nan') for el in T_30_2]
+    T_30_2_2 = [el[2] if len(el)>2 else float('nan') for el in T_30_2]
+    T_30_2_3 = [el[3] if len(el)>3 else float('nan') for el in T_30_2]
+    T_30_2_4 = [el[4] if len(el)>4 else float('nan') for el in T_30_2]
+
+    mu_300_2_full = mu_300_2_0[33:][::-1] \
+        + mu_300_2_1[15:33][::-1] + mu_300_2_3[10:15][::-1] \
+            + mu_300_2_2[10:15] + mu_300_2_1[10:15][::-1] + mu_300_2_0[10:33]
+    T_300_2_full = T_300_2_0[33:][::-1] \
+        + T_300_2_1[15:33][::-1] + T_300_2_3[10:15][::-1] \
+            + T_300_2_2[10:15] + T_300_2_1[10:15][::-1] + T_300_2_0[10:33]
+
+    mu_300_1_full = mu_300_1_0[33:][::-1] + mu_300_1_1[15:33][::-1] \
+        + mu_300_1_3[11:15][::-1] + mu_300_1_5[10:11] \
+            + mu_300_1_1[8:10][::-1] + mu_300_1_0[8:10] \
+                + mu_300_1_4[10:11] + mu_300_1_2[11:15] \
+                    + mu_300_1_1[11:15][::-1] + mu_300_1_3[10:11] \
+                        + mu_300_1_2[10:11] + mu_300_1_1[10:11] \
+                            + mu_300_1_0[10:33]
+    T_300_1_full = T_300_1_0[33:][::-1] + T_300_1_1[15:33][::-1] \
+        + T_300_1_3[11:15][::-1] + T_300_1_5[10:11] \
+            + T_300_1_1[8:10][::-1] + T_300_1_0[8:10] \
+                + T_300_1_4[10:11] + T_300_1_2[11:15] \
+                    + T_300_1_1[11:15][::-1] + T_300_1_3[10:11] \
+                        + T_300_1_2[10:11] + T_300_1_1[10:11] \
+                            + T_300_1_0[10:33]
+
+    mu_45_1_full = mu_45_1_1[104:][::-1] + mu_45_1_3[80:104][::-1] \
+        + mu_45_1_5[77:80][::-1] + mu_45_1_3[74:77][::-1] \
+            + mu_45_1_1[52:74][::-1] + mu_45_1_0[52:74] \
+                + mu_45_1_2[74:77] + mu_45_1_4[77:80] \
+                    + mu_45_1_2[80:104] + mu_45_1_1[80:104][::-1] \
+                        + mu_45_1_3[77:80][::-1] + mu_45_1_2[77:80] \
+                            + mu_45_1_1[74:80][::-1] + mu_45_1_0[74:]
+    T_45_1_full = T_45_1_1[104:][::-1] + T_45_1_3[80:104][::-1] \
+        + T_45_1_5[77:80][::-1] + T_45_1_3[74:77][::-1] \
+            + T_45_1_1[52:74][::-1] + T_45_1_0[52:74] \
+                + T_45_1_2[74:77] + T_45_1_4[77:80] \
+                    + T_45_1_2[80:104] + T_45_1_1[80:104][::-1] \
+                        + T_45_1_3[77:80][::-1] + T_45_1_2[77:80] \
+                            + T_45_1_1[74:80][::-1] + T_45_1_0[74:]
+
+    mu_45_2_full = mu_45_2_1[102:][::-1] + mu_45_2_3[72:102][::-1] \
+        + mu_45_2_1[64:71][::-1] + mu_45_2_0[64:71] \
+            + mu_45_2_2[72:102] + mu_45_2_1[72:102][::-1] \
+                + mu_45_2_0[72:]
+    T_45_2_full = T_45_2_1[102:][::-1] + T_45_2_3[72:102][::-1] \
+        + T_45_2_1[64:71][::-1] + T_45_2_0[64:71] \
+            + T_45_2_2[72:102] + T_45_2_1[72:102][::-1] \
+                + T_45_2_0[72:]
+
+    mu_30_1_full = mu_30_1_1[169:][::-1] + mu_30_1_3[166:169][::-1] \
+        + mu_30_1_1[160:166][::-1] + mu_30_1_3[155:160][::-1] \
+        + mu_30_1_5[154:155] + mu_30_1_3[124:154][::-1] \
+        + mu_30_1_5[123:124] + mu_30_1_7[122:123] \
+        + mu_30_1_5[120:122][::-1] + mu_30_1_3[113:120][::-1] \
+        + mu_30_1_1[73:112][::-1] + mu_30_1_0[73:113] \
+        + mu_30_1_2[113:120] + mu_30_1_4[121:122] \
+        + mu_30_1_6[122:123] + mu_30_1_4[123:124] \
+        + mu_30_1_2[124:154] + mu_30_1_4[154:155] \
+        + mu_30_1_2[155:160] + mu_30_1_2[166:169] \
+        + mu_30_1_1[166:169][::-1] + mu_30_1_1[155:160][::-1] \
+        + mu_30_1_3[154:155] + mu_30_1_1[124:154][::-1] \
+        + mu_30_1_3[123:124] + mu_30_1_5[122:123] \
+        + mu_30_1_3[120:122][::-1] + mu_30_1_2[120:122] \
+        + mu_30_1_4[122:123] + mu_30_1_2[123:124] \
+        + mu_30_1_1[123:124] + mu_30_1_3[122:123] \
+        + mu_30_1_1[113:121][::-1] + mu_30_1_0[113:122] \
+        + mu_30_1_2[122:123] + mu_30_1_1[122:123] \
+        + mu_30_1_0[122:154] + mu_30_1_2[154:155] \
+        + mu_30_1_0[155:]
+    T_30_1_full = T_30_1_1[169:][::-1] + T_30_1_3[166:169][::-1] \
+        + T_30_1_1[160:166][::-1] + T_30_1_3[155:160][::-1] \
+        + T_30_1_5[154:155] + T_30_1_3[124:154][::-1] \
+        + T_30_1_5[123:124] + T_30_1_7[122:123] \
+        + T_30_1_5[120:122][::-1] + T_30_1_3[113:120][::-1] \
+        + T_30_1_1[73:112][::-1] + T_30_1_0[73:113] \
+        + T_30_1_2[113:120] + T_30_1_4[121:122] \
+        + T_30_1_6[122:123] + T_30_1_4[123:124] \
+        + T_30_1_2[124:154] + T_30_1_4[154:155] \
+        + T_30_1_2[155:160] + T_30_1_2[166:169] \
+        + T_30_1_1[166:169][::-1] + T_30_1_1[155:160][::-1] \
+        + T_30_1_3[154:155] + T_30_1_1[124:154][::-1] \
+        + T_30_1_3[123:124] + T_30_1_5[122:123] \
+        + T_30_1_3[120:122][::-1] + T_30_1_2[120:122] \
+        + T_30_1_4[122:123] + T_30_1_2[123:124] \
+        + T_30_1_1[123:124] + T_30_1_3[122:123] \
+        + T_30_1_1[113:121][::-1] + T_30_1_0[113:122] \
+        + T_30_1_2[122:123] + T_30_1_1[122:123] \
+        + T_30_1_0[122:154] + T_30_1_2[154:155] \
+        + T_30_1_0[155:]
+
+    mu_30_2_full = mu_30_2_1[155:][::-1] + mu_30_2_3[110:155][::-1] \
+        + mu_30_2_1[90:109][::-1] + mu_30_2_0[90:109] \
+        + mu_30_2_2[110:154] + mu_30_2_1[110:154][::-1] \
+        + mu_30_2_0[110:154] + mu_30_2_2[154:155] \
+        + mu_30_2_0[155:]
+    T_30_2_full = T_30_2_1[155:][::-1] + T_30_2_3[110:155][::-1] \
+        + T_30_2_1[90:109][::-1] + T_30_2_0[90:109] \
+        + T_30_2_2[110:154] + T_30_2_1[110:154][::-1] \
+        + T_30_2_0[110:154] + T_30_2_2[154:155] \
+        + T_30_2_0[155:]
+
+    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (5.9, 5))
+    ax1 = fig1.add_subplot(1, 1, 1)
+    ax1.axis([0., 600., 20., 500.])
+
+    #ax1.add_patch(matplotlib.patches.Polygon(Schmidt_EPJC_2009_figure6_sn30_N4, 
+    #        closed = True, fill = True, color = 'red', alpha = 0.3))
+    #ax1.add_patch(matplotlib.patches.Polygon(Schmidt_EPJC_2009_figure6_sn45_N4, 
+    #        closed = True, fill = True, color = 'red', alpha = 0.3))
+    #ax1.add_patch(matplotlib.patches.Polygon(Schmidt_EPJC_2009_figure6_sn300_N4, 
+    #        closed = True, fill = True, color = 'red', alpha = 0.3))
+
+    
+    ax1.plot(mu_300_2_full, T_300_2_full, '-', c = 'black')
+    ax1.plot(mu_300_1_full, T_300_1_full, '--', c = 'black')
+    ax1.plot(mu_45_2_full, T_45_2_full, '-', c = 'blue')
+    ax1.plot(mu_45_1_full, T_45_1_full, '--', c = 'blue')
+    ax1.plot(mu_30_2_full, T_30_2_full, '-', c = 'green')
+    ax1.plot(mu_30_1_full, T_30_1_full, '--', c = 'green')
+
+    ax1.plot([el*3.0 for el in mu_300], [pnjl.thermo.gcp_sigma_lattice.Tc(el) for el in mu_300], ':', c = 'black')
+
+    #ax1.text(110.0, 465.0, r'T/${\rm \mu}$=5.3', c = 'black', fontsize = 14)
+    #ax1.text(583.0, 431.0, r'T/${\rm \mu}$=0.79', c = 'blue', fontsize = 14)
+    #ax1.text(610.0, 300.0, r'T/${\rm \mu}$=0.52', c = 'green', fontsize = 14)
+    #ax1.text(65.0, 270.0, r's/n=300', c = 'black', fontsize = 14)
+    #ax1.text(360.0, 270.0, r's/n=45', c = 'blue', fontsize = 14)
+    #ax1.text(512.0, 242.0, r's/n=30', c = 'green', fontsize = 14)
+    #ax1.text(95, 370, r'Schmidt et al. (2009)', c = 'red', alpha = 0.5, fontsize = 14)
+    #ax1.text(675, 121, r'$\mathrm{T_c(\mu)}$', c = 'black', fontsize = 14)
+
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax1.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax1.set_xlabel(r'$\mathrm{\mu_B}$ [MeV]', fontsize = 16)
+    ax1.set_ylabel(r'T [MeV]', fontsize = 16)
+
+    fig1.tight_layout(pad = 0.1)
+
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
 
 
 def epja_figure11():
