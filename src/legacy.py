@@ -8225,6 +8225,12 @@ def pickle_lattice_data():
     (high_1005_3508_x, high_1005_3508_y) = utils.data_load("D:/EoS/epja/lattice_data_raw/1005_3508_table3_delta.dat", 0, 2)
     (T_lQCD_R12_0p8_high, lQCD_R12_0p8_high) = utils.data_load("D:/EoS/epja/lattice_data_raw/2012_12894_R12_0p8_high.dat", 0, 1)
     (T_lQCD_R12_0p8_low, lQCD_R12_0p8_low) = utils.data_load("D:/EoS/epja/lattice_data_raw/2012_12894_R12_0p8_low.dat", 0, 1)
+    (Schmidt_EPJC_2009_figure6_sn30_N4_low_x, Schmidt_EPJC_2009_figure6_sn30_N4_low_y) = utils.data_load("D:/EoS/epja/lattice_data_raw/Schmidt_EPJC_2009_figure6_sn30_N6_low.dat", 0, 1)
+    (Schmidt_EPJC_2009_figure6_sn30_N4_high_x, Schmidt_EPJC_2009_figure6_sn30_N4_high_y) = utils.data_load("D:/EoS/epja/lattice_data_raw/Schmidt_EPJC_2009_figure6_sn30_N6_high.dat", 0, 1)
+    (Schmidt_EPJC_2009_figure6_sn45_N4_low_x, Schmidt_EPJC_2009_figure6_sn45_N4_low_y) = utils.data_load("D:/EoS/epja/lattice_data_raw/Schmidt_EPJC_2009_figure6_sn45_N6_low.dat", 0, 1)
+    (Schmidt_EPJC_2009_figure6_sn45_N4_high_x, Schmidt_EPJC_2009_figure6_sn45_N4_high_y) = utils.data_load("D:/EoS/epja/lattice_data_raw/Schmidt_EPJC_2009_figure6_sn45_N6_high.dat", 0, 1)
+    (Schmidt_EPJC_2009_figure6_sn300_N4_low_x, Schmidt_EPJC_2009_figure6_sn300_N4_low_y) = utils.data_load("D:/EoS/epja/lattice_data_raw/Schmidt_EPJC_2009_figure6_sn300_N6_low.dat", 0, 1)
+    (Schmidt_EPJC_2009_figure6_sn300_N4_high_x, Schmidt_EPJC_2009_figure6_sn300_N4_high_y) = utils.data_load("D:/EoS/epja/lattice_data_raw/Schmidt_EPJC_2009_figure6_sn300_N6_high.dat", 0, 1)
 
     borsanyi_1204_6710v2_mu0 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(high_1204_6710v2_mu0_x, high_1204_6710v2_mu0_y)]
     for x_el, y_el in zip(low_1204_6710v2_mu0_x[::-1], low_1204_6710v2_mu0_y[::-1]):
@@ -8270,6 +8276,18 @@ def pickle_lattice_data():
     for x_el, y_el in zip(T_lQCD_R12_0p8_low[::-1], lQCD_R12_0p8_low[::-1]):
         lQCD_0p8.append(numpy.array([x_el, y_el]))
     lQCD_0p8 = numpy.array(lQCD_0p8)
+    Schmidt_EPJC_2009_figure6_sn30_N4 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(Schmidt_EPJC_2009_figure6_sn30_N4_high_x, Schmidt_EPJC_2009_figure6_sn30_N4_high_y)]
+    for x_el, y_el in zip(Schmidt_EPJC_2009_figure6_sn30_N4_low_x[::-1], Schmidt_EPJC_2009_figure6_sn30_N4_low_y[::-1]):
+        Schmidt_EPJC_2009_figure6_sn30_N4.append(numpy.array([x_el, y_el]))
+    Schmidt_EPJC_2009_figure6_sn30_N4 = numpy.array(Schmidt_EPJC_2009_figure6_sn30_N4)
+    Schmidt_EPJC_2009_figure6_sn45_N4 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(Schmidt_EPJC_2009_figure6_sn45_N4_high_x, Schmidt_EPJC_2009_figure6_sn45_N4_high_y)]
+    for x_el, y_el in zip(Schmidt_EPJC_2009_figure6_sn45_N4_low_x[::-1], Schmidt_EPJC_2009_figure6_sn45_N4_low_y[::-1]):
+        Schmidt_EPJC_2009_figure6_sn45_N4.append(numpy.array([x_el, y_el]))
+    Schmidt_EPJC_2009_figure6_sn45_N4 = numpy.array(Schmidt_EPJC_2009_figure6_sn45_N4)
+    Schmidt_EPJC_2009_figure6_sn300_N4 = [numpy.array([x_el, y_el]) for x_el, y_el in zip(Schmidt_EPJC_2009_figure6_sn300_N4_high_x, Schmidt_EPJC_2009_figure6_sn300_N4_high_y)]
+    for x_el, y_el in zip(Schmidt_EPJC_2009_figure6_sn300_N4_low_x[::-1], Schmidt_EPJC_2009_figure6_sn300_N4_low_y[::-1]):
+        Schmidt_EPJC_2009_figure6_sn300_N4.append(numpy.array([x_el, y_el]))
+    Schmidt_EPJC_2009_figure6_sn300_N4 = numpy.array(Schmidt_EPJC_2009_figure6_sn300_N4)
 
     with open("D:/EoS/epja/lattice_data_pickled/bazavov_1407_6387_mu0.pickle", "wb") as file:
         pickle.dump(bazavov_1407_6387_mu0, file)
@@ -8293,3 +8311,9 @@ def pickle_lattice_data():
         pickle.dump(borsanyi_1204_6710v2_mu400, file)
     with open("D:/EoS/epja/lattice_data_pickled/1005_3508_table3_delta.pickle", "wb") as file:
         pickle.dump(borsanyi_1005_3508, file)
+    with open("D:/EoS/epja/lattice_data_pickled/Schmidt_EPJC_2009_figure6_sn30_N4.pickle", "wb") as file:
+        pickle.dump(Schmidt_EPJC_2009_figure6_sn30_N4, file)
+    with open("D:/EoS/epja/lattice_data_pickled/Schmidt_EPJC_2009_figure6_sn45_N4.pickle", "wb") as file:
+        pickle.dump(Schmidt_EPJC_2009_figure6_sn45_N4, file)
+    with open("D:/EoS/epja/lattice_data_pickled/Schmidt_EPJC_2009_figure6_sn300_N4.pickle", "wb") as file:
+        pickle.dump(Schmidt_EPJC_2009_figure6_sn300_N4, file)

@@ -34,7 +34,7 @@ cast_hash = {
 def data_load(
     path: str, *indices: int, firstrow: int = 0, lastrow: typing.Optional[int] = None,
     cast: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
-    verbose: bool = False
+    verbose: bool = False, delim=';'
 ) -> typing.Tuple[list, ...]:
     """### Description
     Extract columns from file.
@@ -79,11 +79,15 @@ def data_load(
         with open(path, 'r') as data:
             data_parsed = []
             if lastrow:
-                data_parsed= data.readlines()[firstrow:lastrow+1]
+                data_parsed=data.readlines()[firstrow:lastrow+1]
             else:
-                data_parsed= data.readlines()[firstrow:]
+                data_parsed=data.readlines()[firstrow:]
             for row in data_parsed:
-                raw = row.split(';')
+                raw = list()
+                if delim:
+                    raw = row.split(delim)
+                else:
+                    raw = row.split()
                 if len(raw)>max_index:
                     for i, index in enumerate(indices):
                         payload[i].append(cast_hash[cast[i]](raw[index]))
