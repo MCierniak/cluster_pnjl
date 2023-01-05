@@ -75,7 +75,7 @@ def data_load(
     max_index = max(indices)
 
     if os.path.exists(path):
-
+        
         with open(path, 'r') as data:
             data_parsed = []
             if lastrow:
@@ -91,7 +91,8 @@ def data_load(
                 if len(raw)>max_index:
                     for i, index in enumerate(indices):
                         payload[i].append(cast_hash[cast[i]](raw[index]))
-    
+    else:
+        print(f"Warning! Did not find the data file at {path}")
     return tuple(payload)
 
 

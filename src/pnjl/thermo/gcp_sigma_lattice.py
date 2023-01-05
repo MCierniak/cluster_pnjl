@@ -49,7 +49,7 @@ def Tc(mu: float) -> float:
     TC0 = pnjl.defaults.TC0
     KAPPA = pnjl.defaults.KAPPA
 
-    return math.fsum([TC0, -TC0*KAPPA*((mu/TC0)**2)])
+    return math.fsum([TC0, -TC0 * KAPPA * (((3.0 * mu) / TC0) ** 2)])
 
 
 @functools.lru_cache(maxsize=1024)
