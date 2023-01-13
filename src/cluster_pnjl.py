@@ -16512,6 +16512,7 @@ def epja_figure10_new():
     import tqdm
     import numpy
     import pickle
+    import warnings
 
     import matplotlib.pyplot
     import matplotlib.patches
@@ -16535,11 +16536,13 @@ def epja_figure10_new():
         no_clusters \
     as solver_1
 
+    warnings.filterwarnings("ignore")
+
     calc_lines = True
 
-    calc_0 = False
-    calc_1 = False
-    calc_2 = False
+    calc_0 = True
+    calc_1 = True
+    calc_2 = True
 
     def intersect(x_v, y_v, target):
         y_prev = y_v[-1]
