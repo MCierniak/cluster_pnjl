@@ -15,11 +15,15 @@ import os
 import csv
 import sty
 import glob
+import numpy
 import typing
 import pickle
 import atexit
 import hashlib
 import functools
+
+
+import matplotlib.pyplot
 
 
 EXP_LIMIT = 709.78271
@@ -244,3 +248,13 @@ def verify_checksum(file_path: str):
 
         with open(hash_savefile_path, "wb") as file:
             pickle.dump(current_hash, file)
+
+
+def contour_remove_crap(fig, CS, d=10):
+    for level in CS.collections:
+        for kp,path in reversed(list(enumerate(level.get_paths()))):
+            verts = path.vertices
+            diameter = numpy.max(verts.max(axis=0) - verts.min(axis=0))
+            if diameter < d:
+                del(level.get_paths()[kp])
+    fig.canvas.draw()

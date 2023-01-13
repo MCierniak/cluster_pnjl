@@ -16538,39 +16538,29 @@ def epja_figure10_new():
 
     warnings.filterwarnings("ignore")
 
-    calc_lines = True
+    calc_0 = False
+    calc_1 = False
+    calc_2 = False
 
-    calc_0 = True
-    calc_1 = True
-    calc_2 = True
-
-    def intersect(x_v, y_v, target):
-        y_prev = y_v[-1]
-        x_prev = x_v[-1]
-        sol_x = list()
-        for x_el, y_el in zip(x_v[::-1][1:], y_v[::-1][1:]):
-            if (y_el-target)*(y_prev-target) < 0.0:
-                temp_num = math.fsum([
-                    x_el*target, -x_prev*target, x_prev*y_el, -x_el*y_prev
-                ])
-                temp_den = math.fsum([
-                    y_el, -y_prev
-                ])
-                sol_x.append(temp_num/temp_den)
-            y_prev = y_el
-            x_prev = x_el
-        return sol_x
-
-    T_25_1 = list()
-    T_25_2 = list()
-    T_25_qgp = list()
-    mu_T_25_1 = list()
-    mu_T_25_2 = list()
-    mu_T_25_qgp = list()
+    calc_mesh_0   = False
+    calc_mesh_1   = False
+    calc_mesh_2   = False
+    calc_mesh_qgp = False
+    calc_mesh_no_pert = False
 
     files = "D:/EoS/epja/figure10/"
 
     T = numpy.linspace(1.0, 500.0, num=200)
+
+    T_linear = numpy.linspace(1.0, 500.0, num=200)
+    mu_linear = numpy.linspace(1.0, 200.0, num=200)
+
+    mu_meshgrid, T_meshgrid = numpy.meshgrid(mu_linear, T_linear)
+    mu_T_meshgrid = numpy.zeros_like(mu_meshgrid)
+    total_1_meshgrid = numpy.zeros_like(mu_meshgrid)
+    total_2_meshgrid = numpy.zeros_like(mu_meshgrid)
+    total_qgp_meshgrid = numpy.zeros_like(mu_meshgrid)
+    total_no_pert_meshgrid = numpy.zeros_like(mu_meshgrid)
 
     for mu in numpy.linspace(1.0, 200.0, num=200):
 
@@ -17792,6 +17782,12 @@ def epja_figure10_new():
                 b_perturbative_gluon_v, b_pnjl_u_v, b_pnjl_d_v, b_pnjl_s_v
             )
         ]
+        total_b_no_pert = [
+            math.fsum(el) for el in zip(
+                b_sigma_v, b_gluon_v, b_sea_u_v, b_sea_d_v, b_sea_s_v,
+                b_pnjl_u_v, b_pnjl_d_v, b_pnjl_s_v
+            )
+        ]
         total_s_1 = [
             math.fsum(el) for el in zip(
                 s_sigma_v, s_gluon_v, s_sea_u_v, s_sea_d_v, s_sea_s_v,
@@ -17817,132 +17813,101 @@ def epja_figure10_new():
                 s_perturbative_gluon_v, s_pnjl_u_v, s_pnjl_d_v, s_pnjl_s_v
             )
         ]
+        total_s_no_pert = [
+            math.fsum(el) for el in zip(
+                s_sigma_v, s_gluon_v, s_sea_u_v, s_sea_d_v, s_sea_s_v,
+                s_pnjl_u_v, s_pnjl_d_v, s_pnjl_s_v
+            )
+        ]
         total_1 = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_1, total_b_1)]
         total_2 = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_2, total_b_2)]
         total_qgp = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_qgp, total_b_qgp)]
+        total_no_pert = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_no_pert, total_b_no_pert)]
 
-        if calc_lines:
-            temp1 = intersect(T, total_1, 25.0)
-            temp2 = intersect(T, total_2, 25.0)
-            temp3 = intersect(T, total_qgp, 25.0)
-            T_25_1.append(temp1)
-            T_25_2.append(temp2)
-            T_25_qgp.append(temp3)
-            # mu_T_25_1.append([3.0 * mu_round for temp1_el in temp1])
-            # mu_T_25_2.append([3.0 * mu_round for temp2_el in temp2])
-            # mu_T_25_qgp.append([3.0 * mu_round for temp3_el in temp3])
-            mu_T_25_1.append([3.0 * mu_round / temp1_el for temp1_el in temp1])
-            mu_T_25_2.append([3.0 * mu_round / temp2_el for temp2_el in temp2])
-            mu_T_25_qgp.append([3.0 * mu_round / temp3_el for temp3_el in temp3])
+        if calc_mesh_0:
+            for test_el_T in T_linear:
+                test_mub = mu_round
+                testing = list(zip(*numpy.where(mu_meshgrid == test_mub)))
+                testing2 = list(zip(*numpy.where(T_meshgrid == test_el_T)))
+                testing3 = list(set(testing).intersection(testing2))
+                if len(testing3) != 1:
+                    raise RuntimeError("Coś nie pykło!")
+                mu_T_meshgrid[testing3[0][0],testing3[0][1]] = 3.0 * test_mub / test_el_T
 
-    if calc_lines:
-         with open(files+"T_25_1.pickle","wb") as file:
-            pickle.dump(T_25_1, file)
-         with open(files+"T_25_2.pickle","wb") as file:
-            pickle.dump(T_25_2, file)
-         with open(files+"mu_T_25_1.pickle","wb") as file:
-            pickle.dump(mu_T_25_1, file)
-         with open(files+"mu_T_25_2.pickle","wb") as file:
-            pickle.dump(mu_T_25_2, file)
-         with open(files+"mu_T_25_qgp.pickle","wb") as file:
-            pickle.dump(mu_T_25_qgp, file)
+        if calc_mesh_1:
+            for test_el_T, el_t1 in zip(T_linear, total_1):
+                test_mub = mu_round
+                testing = list(zip(*numpy.where(mu_meshgrid == test_mub)))
+                testing2 = list(zip(*numpy.where(T_meshgrid == test_el_T)))
+                testing3 = list(set(testing).intersection(testing2))
+                if len(testing3) != 1:
+                    raise RuntimeError("Coś nie pykło!")
+                total_1_meshgrid[testing3[0][0],testing3[0][1]] = el_t1
+
+        if calc_mesh_2:
+            for test_el_T, el_t2 in zip(T_linear, total_2):
+                test_mub = mu_round
+                testing = list(zip(*numpy.where(mu_meshgrid == test_mub)))
+                testing2 = list(zip(*numpy.where(T_meshgrid == test_el_T)))
+                testing3 = list(set(testing).intersection(testing2))
+                if len(testing3) != 1:
+                    raise RuntimeError("Coś nie pykło!")
+                total_2_meshgrid[testing3[0][0],testing3[0][1]] = el_t2
+
+        if calc_mesh_qgp:
+            for test_el_T, el_tqgp in zip(T_linear, total_qgp):
+                test_mub = mu_round
+                testing = list(zip(*numpy.where(mu_meshgrid == test_mub)))
+                testing2 = list(zip(*numpy.where(T_meshgrid == test_el_T)))
+                testing3 = list(set(testing).intersection(testing2))
+                if len(testing3) != 1:
+                    raise RuntimeError("Coś nie pykło!")
+                total_qgp_meshgrid[testing3[0][0],testing3[0][1]] = el_tqgp
+
+        if calc_mesh_no_pert:
+            for test_el_T, el_tpert in zip(T_linear, total_no_pert):
+                test_mub = mu_round
+                testing = list(zip(*numpy.where(mu_meshgrid == test_mub)))
+                testing2 = list(zip(*numpy.where(T_meshgrid == test_el_T)))
+                testing3 = list(set(testing).intersection(testing2))
+                if len(testing3) != 1:
+                    raise RuntimeError("Coś nie pykło!")
+                total_no_pert_meshgrid[testing3[0][0],testing3[0][1]] = el_tpert
+
+    if calc_mesh_0:
+        with open(files+"mu_T_meshgrid.pickle", "wb") as file:
+                pickle.dump(mu_T_meshgrid, file)
     else:
-        with open(files+"T_25_1.pickle","rb") as file:
-            T_25_1 = pickle.load(file)
-        with open(files+"T_25_2.pickle","rb") as file:
-            T_25_2 = pickle.load(file)
-        with open(files+"mu_T_25_1.pickle","rb") as file:
-            mu_T_25_1 = pickle.load(file)
-        with open(files+"mu_T_25_2.pickle","rb") as file:
-            mu_T_25_2 = pickle.load(file)
-        with open(files+"mu_T_25_qgp.pickle","rb") as file:
-            mu_T_25_qgp = pickle.load(file)
+        with open(files+"mu_T_meshgrid.pickle", "rb") as file:
+                mu_T_meshgrid = pickle.load(file)
 
-    mu_T_25_1_0 = [mu_el[0] if len(T_el)>0 else float('nan') for mu_el, T_el in zip(mu_T_25_1, T_25_1)]
-    mu_T_25_1_1 = [mu_el[1] if len(T_el)>1 else float('nan') for mu_el, T_el in zip(mu_T_25_1, T_25_1)]
-    mu_T_25_1_2 = [mu_el[2] if len(T_el)>2 else float('nan') for mu_el, T_el in zip(mu_T_25_1, T_25_1)]
-    mu_T_25_1_3 = [mu_el[3] if len(T_el)>3 else float('nan') for mu_el, T_el in zip(mu_T_25_1, T_25_1)]
-    mu_T_25_1_4 = [mu_el[4] if len(T_el)>4 else float('nan') for mu_el, T_el in zip(mu_T_25_1, T_25_1)]
-    mu_T_25_1_5 = [mu_el[5] if len(T_el)>5 else float('nan') for mu_el, T_el in zip(mu_T_25_1, T_25_1)]
-    mu_T_25_1_6 = [mu_el[6] if len(T_el)>6 else float('nan') for mu_el, T_el in zip(mu_T_25_1, T_25_1)]
-    mu_T_25_1_7 = [mu_el[7] if len(T_el)>7 else float('nan') for mu_el, T_el in zip(mu_T_25_1, T_25_1)]
-    mu_T_25_1_8 = [mu_el[8] if len(T_el)>8 else float('nan') for mu_el, T_el in zip(mu_T_25_1, T_25_1)]
+    if calc_mesh_1:
+        with open(files+"total_1_meshgrid.pickle", "wb") as file:
+                pickle.dump(total_1_meshgrid, file)
+    else:
+        with open(files+"total_1_meshgrid.pickle", "rb") as file:
+                total_1_meshgrid = pickle.load(file)
 
-    mu_T_25_2_0 = [mu_el[0] if len(T_el)>0 else float('nan') for mu_el, T_el in zip(mu_T_25_2, T_25_2)]
-    mu_T_25_2_1 = [mu_el[1] if len(T_el)>1 else float('nan') for mu_el, T_el in zip(mu_T_25_2, T_25_2)]
-    mu_T_25_2_2 = [mu_el[2] if len(T_el)>2 else float('nan') for mu_el, T_el in zip(mu_T_25_2, T_25_2)]
-    mu_T_25_2_3 = [mu_el[3] if len(T_el)>3 else float('nan') for mu_el, T_el in zip(mu_T_25_2, T_25_2)]
-    mu_T_25_2_4 = [mu_el[4] if len(T_el)>4 else float('nan') for mu_el, T_el in zip(mu_T_25_2, T_25_2)]
-    mu_T_25_2_5 = [mu_el[5] if len(T_el)>5 else float('nan') for mu_el, T_el in zip(mu_T_25_2, T_25_2)]
-    mu_T_25_2_6 = [mu_el[6] if len(T_el)>6 else float('nan') for mu_el, T_el in zip(mu_T_25_2, T_25_2)]
-    mu_T_25_2_7 = [mu_el[7] if len(T_el)>7 else float('nan') for mu_el, T_el in zip(mu_T_25_2, T_25_2)]
-    mu_T_25_2_8 = [mu_el[8] if len(T_el)>8 else float('nan') for mu_el, T_el in zip(mu_T_25_2, T_25_2)]
+    if calc_mesh_2:
+        with open(files+"total_2_meshgrid.pickle", "wb") as file:
+                pickle.dump(total_2_meshgrid, file)
+    else:
+        with open(files+"total_2_meshgrid.pickle", "rb") as file:
+                total_2_meshgrid = pickle.load(file)
 
-    mu_T_25_qgp_0 = [mu_el[0] if len(T_el)>0 else float('nan') for mu_el, T_el in zip(mu_T_25_qgp, T_25_qgp)]
-    mu_T_25_qgp_1 = [mu_el[1] if len(T_el)>1 else float('nan') for mu_el, T_el in zip(mu_T_25_qgp, T_25_qgp)]
-    mu_T_25_qgp_2 = [mu_el[2] if len(T_el)>2 else float('nan') for mu_el, T_el in zip(mu_T_25_qgp, T_25_qgp)]
-    mu_T_25_qgp_3 = [mu_el[3] if len(T_el)>3 else float('nan') for mu_el, T_el in zip(mu_T_25_qgp, T_25_qgp)]
-    mu_T_25_qgp_4 = [mu_el[4] if len(T_el)>4 else float('nan') for mu_el, T_el in zip(mu_T_25_qgp, T_25_qgp)]
-    mu_T_25_qgp_5 = [mu_el[5] if len(T_el)>5 else float('nan') for mu_el, T_el in zip(mu_T_25_qgp, T_25_qgp)]
-    mu_T_25_qgp_6 = [mu_el[6] if len(T_el)>6 else float('nan') for mu_el, T_el in zip(mu_T_25_qgp, T_25_qgp)]
-    mu_T_25_qgp_7 = [mu_el[7] if len(T_el)>7 else float('nan') for mu_el, T_el in zip(mu_T_25_qgp, T_25_qgp)]
-    mu_T_25_qgp_8 = [mu_el[8] if len(T_el)>8 else float('nan') for mu_el, T_el in zip(mu_T_25_qgp, T_25_qgp)]
+    if calc_mesh_qgp:
+        with open(files+"total_qgp_meshgrid.pickle", "wb") as file:
+                pickle.dump(total_qgp_meshgrid, file)
+    else:
+        with open(files+"total_qgp_meshgrid.pickle", "rb") as file:
+                total_qgp_meshgrid = pickle.load(file)
 
-    T_25_1_0 = [el[0] if len(el)>0 else float('nan') for el in T_25_1]
-    T_25_1_1 = [el[1] if len(el)>1 else float('nan') for el in T_25_1]
-    T_25_1_2 = [el[2] if len(el)>2 else float('nan') for el in T_25_1]
-    T_25_1_3 = [el[3] if len(el)>3 else float('nan') for el in T_25_1]
-    T_25_1_4 = [el[4] if len(el)>4 else float('nan') for el in T_25_1]
-    T_25_1_5 = [el[5] if len(el)>5 else float('nan') for el in T_25_1]
-    T_25_1_6 = [el[6] if len(el)>6 else float('nan') for el in T_25_1]
-    T_25_1_7 = [el[7] if len(el)>7 else float('nan') for el in T_25_1]
-    T_25_1_8 = [el[8] if len(el)>8 else float('nan') for el in T_25_1]
-
-    T_25_2_0 = [el[0] if len(el)>0 else float('nan') for el in T_25_2]
-    T_25_2_1 = [el[1] if len(el)>1 else float('nan') for el in T_25_2]
-    T_25_2_2 = [el[2] if len(el)>2 else float('nan') for el in T_25_2]
-    T_25_2_3 = [el[3] if len(el)>3 else float('nan') for el in T_25_2]
-    T_25_2_4 = [el[4] if len(el)>4 else float('nan') for el in T_25_2]
-
-    T_25_qgp_0 = [el[0] if len(el)>0 else float('nan') for el in T_25_qgp]
-    T_25_qgp_1 = [el[1] if len(el)>1 else float('nan') for el in T_25_qgp]
-    T_25_qgp_2 = [el[2] if len(el)>2 else float('nan') for el in T_25_qgp]
-    T_25_qgp_3 = [el[3] if len(el)>3 else float('nan') for el in T_25_qgp]
-    T_25_qgp_4 = [el[4] if len(el)>4 else float('nan') for el in T_25_qgp]
-    T_25_qgp_5 = [el[5] if len(el)>5 else float('nan') for el in T_25_qgp]
-    T_25_qgp_6 = [el[6] if len(el)>6 else float('nan') for el in T_25_qgp]
-
-    mu_T_25_1_full = mu_T_25_1_3[155:200][::-1] + mu_T_25_1_5[154:155] \
-        + mu_T_25_1_3[152:154][::-1] + mu_T_25_1_5[150:152][::-1] + mu_T_25_1_7[148:150][::-1] \
-        + mu_T_25_1_3[138:148][::-1] + mu_T_25_1_1[84:138][::-1] + mu_T_25_1_0[84:138] \
-        + mu_T_25_1_2[138:148] + mu_T_25_1_6[148:150] + mu_T_25_1_4[150:152] \
-        + mu_T_25_1_2[152:154] + mu_T_25_1_4[154:155] + mu_T_25_1_2[155:200] \
-        + mu_T_25_1_1[155:200][::-1] + mu_T_25_1_3[154:155] + mu_T_25_1_1[152:154][::-1] \
-        + mu_T_25_1_3[150:152][::-1] + mu_T_25_1_5[148:150][::-1] + mu_T_25_1_4[148:150] \
-        + mu_T_25_1_2[150:152] + mu_T_25_1_1[150:152][::-1] + mu_T_25_1_3[148:150][::-1] \
-        + mu_T_25_1_1[138:148][::-1] + mu_T_25_1_0[138:148] + mu_T_25_1_2[148:150] \
-        + mu_T_25_1_1[148:150][::-1] + mu_T_25_1_0[148:154] + mu_T_25_1_2[154:155] \
-        + mu_T_25_1_0[155:200]
-
-    T_25_1_full = T_25_1_3[155:200][::-1] + T_25_1_5[154:155] \
-        + T_25_1_3[152:154][::-1] + T_25_1_5[150:152][::-1] + T_25_1_7[148:150][::-1] \
-        + T_25_1_3[138:148][::-1] + T_25_1_1[84:138][::-1] + T_25_1_0[84:138] \
-        + T_25_1_2[138:148] + T_25_1_6[148:150] + T_25_1_4[150:152] \
-        + T_25_1_2[152:154] + T_25_1_4[154:155] + T_25_1_2[155:200] \
-        + T_25_1_1[155:200][::-1] + T_25_1_3[154:155] + T_25_1_1[152:154][::-1] \
-        + T_25_1_3[150:152][::-1] + T_25_1_5[148:150][::-1] + T_25_1_4[148:150] \
-        + T_25_1_2[150:152] + T_25_1_1[150:152][::-1] + T_25_1_3[148:150][::-1] \
-        + T_25_1_1[138:148][::-1] + T_25_1_0[138:148] + T_25_1_2[148:150] \
-        + T_25_1_1[148:150][::-1] + T_25_1_0[148:154] + T_25_1_2[154:155] \
-        + T_25_1_0[155:200]
-
-    # mu_T_25_2_full = 
-
-    # mu_T_25_qgp_full = 
-
-    # T_25_2_full = 
-
-    # T_25_qgp_full = 
+    if calc_mesh_no_pert:
+        with open(files+"total_no_pert_meshgrid.pickle", "wb") as file:
+                pickle.dump(total_no_pert_meshgrid, file)
+    else:
+        with open(files+"total_no_pert_meshgrid.pickle", "rb") as file:
+                total_no_pert_meshgrid = pickle.load(file)
 
     lQCD_Tc_x, lQCD_Tc_y = \
         utils.data_load(
@@ -17975,18 +17940,36 @@ def epja_figure10_new():
             firstrow=0, delim=' '
         )
     lQCD_100 = [[x, y] for x, y in zip(lQCD_100_x, lQCD_100_y)]
+    pQCD_100_x, pQCD_100_y = \
+        utils.data_load(
+            "D://EoS//lattice_data//sn_muB_over_T//2212_09043_fig14_100_pQCD.dat", 0, 1,
+            firstrow=0, delim=' '
+        )
+    pQCD_100 = [[x, y] for x, y in zip(pQCD_100_x, pQCD_100_y)]
     lQCD_200_x, lQCD_200_y = \
         utils.data_load(
             "D://EoS//lattice_data//sn_muB_over_T//2212_09043_fig14_200_lQCD.dat", 0, 1,
             firstrow=0, delim=' '
         )
     lQCD_200 = [[x, y] for x, y in zip(lQCD_200_x, lQCD_200_y)]
+    pQCD_200_x, pQCD_200_y = \
+        utils.data_load(
+            "D://EoS//lattice_data//sn_muB_over_T//2212_09043_fig14_200_pQCD.dat", 0, 1,
+            firstrow=0, delim=' '
+        )
+    pQCD_200 = [[x, y] for x, y in zip(pQCD_200_x, pQCD_200_y)]
     lQCD_400_x, lQCD_400_y = \
         utils.data_load(
             "D://EoS//lattice_data//sn_muB_over_T//2212_09043_fig14_400_lQCD.dat", 0, 1,
             firstrow=0, delim=' '
         )
     lQCD_400 = [[x, y] for x, y in zip(lQCD_400_x, lQCD_400_y)]
+    pQCD_400_x, pQCD_400_y = \
+        utils.data_load(
+            "D://EoS//lattice_data//sn_muB_over_T//2212_09043_fig14_400_pQCD.dat", 0, 1,
+            firstrow=0, delim=' '
+        )
+    pQCD_400 = [[x, y] for x, y in zip(pQCD_400_x, pQCD_400_y)]
 
     mu_Tc_v = numpy.linspace(0.0, 300.0, 200)
     Tc_Tc_v = [pnjl.thermo.gcp_sigma_lattice.Tc(el) for el in mu_Tc_v]
@@ -18008,40 +17991,63 @@ def epja_figure10_new():
             closed = True, fill = True, color = 'green', alpha = 0.4))
     # ax1.add_patch(matplotlib.patches.Polygon(lQCD_50, 
     #         closed = True, fill = True, color = 'blue', alpha = 0.3))
-    # ax1.add_patch(matplotlib.patches.Polygon(lQCD_100, 
-    #         closed = True, fill = True, color = 'purple', alpha = 0.3))
+    ax1.add_patch(matplotlib.patches.Polygon(lQCD_100, 
+            closed = True, fill = True, color = 'purple', alpha = 0.3))
+    ax1.add_patch(matplotlib.patches.Polygon(pQCD_100, 
+            closed = True, fill = True, color = 'purple', alpha = 0.4))
     # ax1.add_patch(matplotlib.patches.Polygon(lQCD_200, 
     #         closed = True, fill = True, color = 'orange', alpha = 0.3))
+    # ax1.add_patch(matplotlib.patches.Polygon(pQCD_200, 
+    #         closed = True, fill = True, color = 'orange', alpha = 0.4))
     # ax1.add_patch(matplotlib.patches.Polygon(lQCD_400, 
     #         closed = True, fill = True, color = 'yellow', alpha = 0.3))
+    # ax1.add_patch(matplotlib.patches.Polygon(pQCD_400, 
+    #         closed = True, fill = True, color = 'yellow', alpha = 0.4))
 
-    # ax1.scatter(mu_T_25_1_0, T_25_1_0, c='blue')
-    # ax1.scatter(mu_T_25_1_1, T_25_1_1, c='green')
-    # ax1.scatter(mu_T_25_1_2, T_25_1_2, c='black')
-    # ax1.scatter(mu_T_25_1_3, T_25_1_3, c='red')
-    # ax1.scatter(mu_T_25_1_4, T_25_1_4, c='magenta')
-    # ax1.scatter(mu_T_25_1_5, T_25_1_5, c='violet')
-    # ax1.scatter(mu_T_25_1_6, T_25_1_6, c='navy')
-    # ax1.scatter(mu_T_25_1_7, T_25_1_7, c='yellow')
-    # ax1.scatter(mu_T_25_1_8, T_25_1_8, c='orange')
+    CS_1 = ax1.contour(mu_T_meshgrid, T_meshgrid, total_1_meshgrid, levels=[25], colors=["green"])
+    CS_1_qgp = ax1.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[25], linestyles="dashed", colors=["green"])
+    CS_1_pert = ax1.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[25], linestyles="dashdot", colors=["green"])
 
-    # ax1.scatter(mu_T_25_1_2[199], T_25_1_2[199], c='cyan')
-    # ax1.scatter(mu_T_25_1_2[155], T_25_1_2[155], c='cyan')
+    CS_3 = ax1.contour(mu_T_meshgrid, T_meshgrid, total_1_meshgrid, levels=[100], colors=["purple"])
+    CS_3_qgp = ax1.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[100], linestyles="dashed", colors=["purple"])
+    CS_3_pert = ax1.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[100], linestyles="dashdot", colors=["purple"])
 
-    ax1.plot(mu_T_25_1_full, T_25_1_full, '-', c='black')
+    utils.contour_remove_crap(fig1, CS_1)
+    utils.contour_remove_crap(fig1, CS_3)
 
     ax1.plot(mu_over_Tc_v, Tc_Tc_v, '--', c='black')
 
+    ax2.add_patch(matplotlib.patches.Polygon(lQCD_Tc, 
+            closed = True, fill = True, color = 'yellow', alpha = 0.3))
+
     ax2.add_patch(matplotlib.patches.Polygon(lQCD_25, 
             closed = True, fill = True, color = 'green', alpha = 0.3))
+    ax2.add_patch(matplotlib.patches.Polygon(pQCD_25, 
+            closed = True, fill = True, color = 'green', alpha = 0.4))
     # ax2.add_patch(matplotlib.patches.Polygon(lQCD_50, 
     #         closed = True, fill = True, color = 'blue', alpha = 0.3))
-    # ax2.add_patch(matplotlib.patches.Polygon(lQCD_100, 
-    #         closed = True, fill = True, color = 'purple', alpha = 0.3))
+    ax2.add_patch(matplotlib.patches.Polygon(lQCD_100, 
+            closed = True, fill = True, color = 'purple', alpha = 0.3))
+    ax2.add_patch(matplotlib.patches.Polygon(pQCD_100, 
+            closed = True, fill = True, color = 'purple', alpha = 0.4))
     # ax2.add_patch(matplotlib.patches.Polygon(lQCD_200, 
     #         closed = True, fill = True, color = 'orange', alpha = 0.3))
+    # ax2.add_patch(matplotlib.patches.Polygon(pQCD_200, 
+    #         closed = True, fill = True, color = 'orange', alpha = 0.4))
     # ax2.add_patch(matplotlib.patches.Polygon(lQCD_400, 
     #         closed = True, fill = True, color = 'yellow', alpha = 0.3))
+    # ax2.add_patch(matplotlib.patches.Polygon(pQCD_400, 
+    #         closed = True, fill = True, color = 'yellow', alpha = 0.4))
+
+    CS_2 = ax2.contour(mu_T_meshgrid, T_meshgrid, total_2_meshgrid, levels=[25], colors=["green"])
+    CS_2_qgp = ax2.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[25], linestyles="dashed", colors=["green"])
+    CS_2_pert = ax2.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[25], linestyles="dashdot", colors=["green"])
+
+    CS_4 = ax2.contour(mu_T_meshgrid, T_meshgrid, total_2_meshgrid, levels=[100], colors=["purple"])
+    CS_4_qgp = ax2.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[100], linestyles="dashed", colors=["purple"])
+    CS_4_pert = ax2.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[100], linestyles="dashdot", colors=["purple"])
+
+    ax2.plot(mu_over_Tc_v, Tc_Tc_v, '--', c='black')
 
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
