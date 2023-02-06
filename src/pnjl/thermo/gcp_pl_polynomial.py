@@ -140,49 +140,52 @@ def bdensity(
         Value of the thermodynamic baryon density in MeV^3.
     """
 
-    h = 1e-2
-
-    if math.fsum([mu, -2*h]) > 0.0:
-
-        mu_vec = [
-            math.fsum([mu, 2*h]), math.fsum([mu, h]),
-            math.fsum([mu, -h]), math.fsum([mu, -2*h])
-        ]
-        deriv_coef = [
-            -1.0/(12.0*h), 8.0/(12.0*h),
-            -8.0/(12.0*h), 1.0/(12.0*h)
-        ]
-        phi_vec = []
-        if pnjl.defaults.D_PHI_D_MU_0:
-            phi_vec = [
-                tuple([phi_re, phi_im])
-                for _ in mu_vec
-            ]
-        else:
-            phi_vec = [
-                phi_solver(T, mu_el, phi_re, phi_im)
-                for mu_el in mu_vec
-            ]
-
-        p_vec = [
-            coef*pressure(T, mu_el, phi_el[0], phi_el[1])/3.0
-            for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
-        ]
-
-        return math.fsum(p_vec)
-
+    if True:
+        return 0.0
     else:
+        h = 1e-2
 
-        new_mu = math.fsum([mu, h])
-        new_phi_re, new_phi_im = phi_re, phi_im
+        if math.fsum([mu, -2*h]) > 0.0:
+
+            mu_vec = [
+                math.fsum([mu, 2*h]), math.fsum([mu, h]),
+                math.fsum([mu, -h]), math.fsum([mu, -2*h])
+            ]
+            deriv_coef = [
+                -1.0/(12.0*h), 8.0/(12.0*h),
+                -8.0/(12.0*h), 1.0/(12.0*h)
+            ]
+            phi_vec = []
+            if pnjl.defaults.D_PHI_D_MU_0:
+                phi_vec = [
+                    tuple([phi_re, phi_im])
+                    for _ in mu_vec
+                ]
+            else:
+                phi_vec = [
+                    phi_solver(T, mu_el, phi_re, phi_im)
+                    for mu_el in mu_vec
+                ]
+
+            p_vec = [
+                coef*pressure(T, mu_el, phi_el[0], phi_el[1])/3.0
+                for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
+            ]
+
+            return math.fsum(p_vec)
+
+        else:
+
+            new_mu = math.fsum([mu, h])
+            new_phi_re, new_phi_im = phi_re, phi_im
             
-        if not pnjl.defaults.D_PHI_D_MU_0:
-            new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
+            if not pnjl.defaults.D_PHI_D_MU_0:
+                new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
 
-        return bdensity(
-            T, new_mu, new_phi_re, new_phi_im, 
-            phi_solver
-        )
+            return bdensity(
+                T, new_mu, new_phi_re, new_phi_im, 
+                phi_solver
+            )
 
 
 @functools.lru_cache(maxsize=1024)
