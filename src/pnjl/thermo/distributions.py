@@ -26,6 +26,7 @@ exp_limit:
 
 
 import math
+import cmath
 import functools
 
 import utils
@@ -162,6 +163,232 @@ def f_boson_singlet(
         return 0.0
     else:
         return 1.0/math.expm1(logy)
+
+
+@functools.lru_cache(maxsize=1024)
+def z_fermion_triplet_case1(
+    logy_p1: float, logy_p2: float, logy_p3: float,
+    phi_re: float, phi_im: float
+) -> complex:
+    
+    den_real_el = [
+        1.0,
+        3.0*phi_re*math.exp(-logy_p1),
+        3.0*phi_re*math.exp(-logy_p2),
+        math.exp(-logy_p3)
+    ]
+    den_imag_el = [
+        -3.0*phi_im*math.exp(-logy_p1),
+        3.0*phi_im*math.exp(-logy_p2)
+    ]
+
+    den_real = math.fsum(den_real_el)
+    den_imag = math.fsum(den_imag_el)
+
+    return cmath.log(complex(den_real, den_imag))
+
+
+@functools.lru_cache(maxsize=1024)
+def z_fermion_triplet_case2(
+    logy_p1: float, logy_p2: float, logy_p3: float,
+    phi_re: float, phi_im: float
+) -> complex:
+    
+    den_real_el = [
+        math.exp(logy_p1),
+        3.0*phi_re,
+        3.0*phi_re*math.exp(-logy_p1),
+        math.exp(-logy_p2)
+    ]
+    den_imag_el = [
+        -3.0*phi_im,
+        3.0*phi_im*math.exp(-logy_p1)
+    ]
+
+    den_real = math.fsum(den_real_el)
+    den_imag = math.fsum(den_imag_el)
+
+    return cmath.log(complex(den_real, den_imag)) - complex(logy_p1, 0.0)
+
+
+@functools.lru_cache(maxsize=1024)
+def z_fermion_triplet_case3(
+    logy_p1: float, logy_p2: float, logy_p3: float,
+    phi_re: float, phi_im: float
+) -> complex:
+    
+    den_real_el = [
+        3.0*phi_re*math.exp(logy_p1),
+        3.0*phi_re,
+        math.exp(-logy_p1)
+    ]
+    den_imag_el = [
+        -3.0*phi_im*math.exp(-logy_p1),
+        3.0*phi_im*math.exp(-logy_p2)
+    ]
+
+    den_real = math.fsum(den_real_el)
+    den_imag = math.fsum(den_imag_el)
+
+    return cmath.log(complex(den_real, den_imag)) - complex(logy_p2, 0.0)
+
+
+@functools.lru_cache(maxsize=1024)
+def z_fermion_triplet_case4(
+    logy_p1: float, logy_p2: float, logy_p3: float,
+    phi_re: float, phi_im: float
+) -> complex:
+    
+    return complex(-logy_p3, 0.0)
+
+
+z_fermion_triplet_hash = {
+    (bool(False), bool(False), bool(False)) : z_fermion_triplet_case1,
+    (bool(False), bool(False), bool(True)) : z_fermion_triplet_case2,
+    (bool(False), bool(True), bool(True)) : z_fermion_triplet_case3,
+    (bool(True), bool(True), bool(True)) : z_fermion_triplet_case4,
+}
+
+
+@functools.lru_cache(maxsize=1024)
+def z_fermion_triplet(
+        p: float, T: float, mu: float, phi_re: float, phi_im: float,
+        mass: float, mu_factor: int, typ: str) -> complex:
+
+    logy_p1 = log_y(p, T, mu, mass, mu_factor, 1, typ)
+    logy_p2 = log_y(p, T, mu, mass, mu_factor, 2, typ)
+    logy_p3 = log_y(p, T, mu, mass, mu_factor, 3, typ)
+
+    test = tuple([el <= -utils.EXP_LIMIT for el in [logy_p1, logy_p2, logy_p3]])
+
+    return z_fermion_triplet_hash[test](logy_p1, logy_p2, logy_p3, phi_re, phi_im)
+
+
+@functools.lru_cache(maxsize=1024)
+def z_fermion_antitriplet(
+        p: float, T: float, mu: float, phi_re: float, phi_im: float,
+        mass: float, mu_factor: int, typ: str) -> complex:
+
+    logy_p1 = log_y(p, T, mu, mass, mu_factor, 1, typ)
+    logy_p2 = log_y(p, T, mu, mass, mu_factor, 2, typ)
+    logy_p3 = log_y(p, T, mu, mass, mu_factor, 3, typ)
+
+    test = tuple([el <= -utils.EXP_LIMIT for el in [logy_p1, logy_p2, logy_p3]])
+
+    return z_fermion_triplet_hash[test](logy_p1, logy_p2, logy_p3, phi_re, -phi_im)
+
+
+@functools.lru_cache(maxsize=1024)
+def z_boson_triplet_case1(
+    logy_p1: float, logy_p2: float, logy_p3: float,
+    phi_re: float, phi_im: float
+) -> complex:
+    
+    den_real_el = [
+        1.0,
+        -3.0*phi_re*math.exp(-logy_p1),
+        3.0*phi_re*math.exp(-logy_p2),
+        -math.exp(-logy_p3)
+    ]
+    den_imag_el = [
+        3.0*phi_im*math.exp(-logy_p1),
+        3.0*phi_im*math.exp(-logy_p2)
+    ]
+
+    den_real = math.fsum(den_real_el)
+    den_imag = math.fsum(den_imag_el)
+
+    return cmath.log(complex(den_real, den_imag))
+
+
+@functools.lru_cache(maxsize=1024)
+def z_boson_triplet_case2(
+    logy_p1: float, logy_p2: float, logy_p3: float,
+    phi_re: float, phi_im: float
+) -> complex:
+    
+    den_real_el = [
+        math.exp(logy_p1),
+        -3.0*phi_re,
+        3.0*phi_re*math.exp(-logy_p1),
+        -math.exp(-logy_p2)
+    ]
+    den_imag_el = [
+        3.0*phi_im,
+        3.0*phi_im*math.exp(-logy_p1)
+    ]
+
+    den_real = math.fsum(den_real_el)
+    den_imag = math.fsum(den_imag_el)
+
+    return cmath.log(complex(den_real, den_imag)) - complex(logy_p1, 0.0)
+
+
+@functools.lru_cache(maxsize=1024)
+def z_boson_triplet_case3(
+    logy_p1: float, logy_p2: float, logy_p3: float,
+    phi_re: float, phi_im: float
+) -> complex:
+    
+    den_real_el = [
+        -3.0*phi_re*math.exp(logy_p1),
+        3.0*phi_re,
+        -math.exp(-logy_p1)
+    ]
+    den_imag_el = [
+        3.0*phi_im*math.exp(logy_p1),
+        3.0*phi_im
+    ]
+
+    den_real = math.fsum(den_real_el)
+    den_imag = math.fsum(den_imag_el)
+
+    return cmath.log(complex(den_real, den_imag)) - complex(logy_p2, 0.0)
+
+
+@functools.lru_cache(maxsize=1024)
+def z_boson_triplet_case4(
+    logy_p1: float, logy_p2: float, logy_p3: float,
+    phi_re: float, phi_im: float
+) -> complex:
+    
+    return complex(-logy_p3, 0.0)
+
+
+z_boson_triplet_hash = {
+    (bool(False), bool(False), bool(False)) : z_boson_triplet_case1,
+    (bool(False), bool(False), bool(True)) : z_boson_triplet_case2,
+    (bool(False), bool(True), bool(True)) : z_boson_triplet_case3,
+    (bool(True), bool(True), bool(True)) : z_boson_triplet_case4,
+}
+
+
+@functools.lru_cache(maxsize=1024)
+def z_boson_triplet(
+        p: float, T: float, mu: float, phi_re: float, phi_im: float,
+        mass: float, mu_factor: int, typ: str) -> complex:
+
+    logy_p1 = log_y(p, T, mu, mass, mu_factor, 1, typ)
+    logy_p2 = log_y(p, T, mu, mass, mu_factor, 2, typ)
+    logy_p3 = log_y(p, T, mu, mass, mu_factor, 3, typ)
+
+    test = tuple([el <= -utils.EXP_LIMIT for el in [logy_p1, logy_p2, logy_p3]])
+
+    return z_boson_triplet_hash[test](logy_p1, logy_p2, logy_p3, phi_re, phi_im)
+
+
+@functools.lru_cache(maxsize=1024)
+def z_boson_antitriplet(
+        p: float, T: float, mu: float, phi_re: float, phi_im: float,
+        mass: float, mu_factor: int, typ: str) -> complex:
+
+    logy_p1 = log_y(p, T, mu, mass, mu_factor, 1, typ)
+    logy_p2 = log_y(p, T, mu, mass, mu_factor, 2, typ)
+    logy_p3 = log_y(p, T, mu, mass, mu_factor, 3, typ)
+
+    test = tuple([el <= -utils.EXP_LIMIT for el in [logy_p1, logy_p2, logy_p3]])
+
+    return z_boson_triplet_hash[test](logy_p1, logy_p2, logy_p3, phi_re, -phi_im)
 
 
 @functools.lru_cache(maxsize=1024)
