@@ -1272,6 +1272,23 @@ def buns_b_fermion_singlet_integrand(
 
 
 @functools.lru_cache(maxsize=1024)
+def buns_b_aux(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int, typ: str
+) -> complex:
+    log_1 = pnjl.thermo.distributions.log_y(p, T, mu, M, a, 1, typ)
+    log_2 = pnjl.thermo.distributions.log_y(p, T, mu, M, a, 2, typ)
+    if log_1 >= utils.EXP_LIMIT:
+        return 0.0
+    elif log_1 < utils.EXP_LIMIT and log_2 >= utils.EXP_LIMIT:
+        pass
+    else:
+        num_1_re = math.fsum([2.0*phi_re, math.exp(log_1)*phi_re])
+        num_1_im = math.fsum([2.0*phi_im, -math.exp(log_1)*phi_im])
+        den_1_re = math.fsum([math.exp(log_2), phi_re, 2.0*phi_re*math.exp(log_1)])
+        den_1_im = math.fsum([phi_im, -2.0*phi_im*math.exp(log_1)])
+
+@functools.lru_cache(maxsize=1024)
 def buns_b_boson_triplet_integrand_real(
     M: float, p: float, T: float, mu: float,
     phi_re: float, phi_im: float, a: int, cluster: str
@@ -1304,13 +1321,20 @@ def buns_b_fermion_triplet_integrand_real(
     M: float, p: float, T: float, mu: float,
     phi_re: float, phi_im: float, a: int, cluster: str
 ) -> float:
-
-    fp_i = pnjl.thermo.distributions.f_fermion_triplet(p, T, mu, phi_re, phi_im, M, a, '+').real
-    fm_i = pnjl.thermo.distributions.f_fermion_triplet(p, T, mu, phi_re, phi_im, M, a, '-').real
-
-    delta_i = phase_factor(M, T, mu, cluster)
-
-    return math.fsum([fp_i, -fm_i])*delta_i
+    log_p_1 = pnjl.thermo.distributions.log_y(p, T, mu, M, a, 1, '+')
+    log_p_2 = pnjl.thermo.distributions.log_y(p, T, mu, M, a, 2, '+')
+    log_m_1 = pnjl.thermo.distributions.log_y(p, T, mu, M, a, 1, '-')
+    log_m_2 = pnjl.thermo.distributions.log_y(p, T, mu, M, a, 2, '-')
+    if log_p_1 <= -utils.EXP_LIMIT or log_m_1 <= -utils.EXP_LIMIT:
+        return 0.0
+    else:
+        energy = pnjl.thermo.distributions.En(p, M)
+        ex_p = math.exp(log_p)
+        ex_m = math.exp(log_m)
+        fp_i = pnjl.thermo.distributions.f_fermion_triplet(p, T, mu, M, a, '+')**2
+        fm_i = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '-')**2
+        delta_i = phase_factor(M, T, mu, cluster)
+        return math.fsum([ex_p*fp_i, -ex_m*fm_i])*(M/(energy*T))*delta_i
 
 
 @functools.lru_cache(maxsize=1024)

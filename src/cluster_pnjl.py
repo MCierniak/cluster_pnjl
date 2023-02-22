@@ -19138,8 +19138,11 @@ def epja_beth_uhlenbeck2():
     import numpy
     import pickle
     import warnings
+    import platform
 
     import matplotlib.pyplot
+    if platform.system() == "Linux":
+        matplotlib.use("TkAgg")
 
     import utils
     import pnjl.thermo.gcp_pnjl
@@ -19172,10 +19175,14 @@ def epja_beth_uhlenbeck2():
 
     warnings.filterwarnings("ignore")
     
-    calc_1 = True
-    calc_2 = True
+    calc_1 = False
+    calc_2 = False
 
     files = "D:/EoS/epja/beth_uhlenbeck/"
+    lattice_files = "D:/EoS/epja/lattice_data_raw/"
+    if platform.system() == "Linux":
+        files = "/home/mcierniak/Data/2023_epja/beth_uhlenbeck/"
+        lattice_files = "/home/mcierniak/Data/2023_epja/lattice_data_raw/"
 
     T_1 = numpy.linspace(1.0, 280.0, 200)
     T_2 = numpy.linspace(1.0, 280.0, 200)
@@ -20271,14 +20278,14 @@ def epja_beth_uhlenbeck2():
 
     lQCD_1_x, lQCD_1_y = \
         utils.data_load(
-            "D://EoS//epja//lattice_data_raw//2212_09043_fig13_top_right_0p0_alt2.dat", 0, 1,
+            lattice_files+"2212_09043_fig13_top_right_0p0_alt2.dat", 0, 1,
             firstrow=0, delim=' '
         )
     lQCD_1 = [[x, y] for x, y in zip(lQCD_1_x, lQCD_1_y)]
 
     lQCD_2_x, lQCD_2_y = \
         utils.data_load(
-            "D://EoS//epja//lattice_data_raw//2212_09043_fig13_top_right_2p5.dat", 0, 1,
+            lattice_files+"2212_09043_fig13_top_right_2p5.dat", 0, 1,
             firstrow=0, delim=' '
         )
     lQCD_2 = [[x, y] for x, y in zip(lQCD_2_x, lQCD_2_y)]
