@@ -31,6 +31,7 @@ import functools
 import scipy.optimize
 import scipy.integrate
 
+import utils
 import pnjl.defaults
 import pnjl.thermo.distributions
 import pnjl.thermo.gcp_sea_lattice
@@ -157,12 +158,7 @@ def continuum_factor2(M: float, T: float, mu: float, cluster: str) -> float:
 @functools.lru_cache(maxsize=1024)
 def phase_factor(M: float, T: float, mu: float, cluster: str) -> float:
 
-        MI_N = pnjl.defaults.MI[cluster]
-        Mth_N = M_th(T, mu, cluster)
-
-        return   continuum_factor1(M, T, mu, cluster) \
-               + bound_factor(M, T, mu, cluster) \
-               + continuum_factor2(M, T, mu, cluster)
+        return bound_factor(M, T, mu, cluster) #+continuum_factor2(M, T, mu, cluster)  #+continuum_factor1(M, T, mu, cluster) 
 
 
 @functools.lru_cache(maxsize=1024)
@@ -1242,13 +1238,18 @@ def buns_b_boson_singlet_integrand(
     M: float, p: float, T: float, mu: float,
     phi_re: float, phi_im: float, a: int, cluster: str
 ) -> float:
-
-    fp_i = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '+')
-    fm_i = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '-')
-
-    delta_i = phase_factor(M, T, mu, cluster)
-
-    return math.fsum([fp_i, -fm_i])*delta_i
+    log_p = pnjl.thermo.distributions.log_y(p, T, mu, M, a, 1, '+')
+    log_m = pnjl.thermo.distributions.log_y(p, T, mu, M, a, 1, '-')
+    if log_p >= utils.EXP_LIMIT or log_m >= utils.EXP_LIMIT:
+        return 0.0
+    else:
+        energy = pnjl.thermo.distributions.En(p, M)
+        ex_p = math.exp(log_p)
+        ex_m = math.exp(log_m)
+        fp_i = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '+')**2
+        fm_i = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '-')**2
+        delta_i = phase_factor(M, T, mu, cluster)
+        return math.fsum([ex_p*fp_i, -ex_m*fm_i])*(M/(energy*T))*delta_i
 
 
 @functools.lru_cache(maxsize=1024)
@@ -1256,13 +1257,18 @@ def buns_b_fermion_singlet_integrand(
     M: float, p: float, T: float, mu: float,
     phi_re: float, phi_im: float, a: int, cluster: str
 ) -> float:
-
-    fp_i = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '+')
-    fm_i = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '-')
-
-    delta_i = phase_factor(M, T, mu, cluster)
-
-    return math.fsum([fp_i, -fm_i])*delta_i
+    log_p = pnjl.thermo.distributions.log_y(p, T, mu, M, a, 1, '+')
+    log_m = pnjl.thermo.distributions.log_y(p, T, mu, M, a, 1, '-')
+    if log_p >= utils.EXP_LIMIT or log_m >= utils.EXP_LIMIT:
+        return 0.0
+    else:
+        energy = pnjl.thermo.distributions.En(p, M)
+        ex_p = math.exp(log_p)
+        ex_m = math.exp(log_m)
+        fp_i = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '+')**2
+        fm_i = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '-')**2
+        delta_i = phase_factor(M, T, mu, cluster)
+        return math.fsum([ex_p*fp_i, -ex_m*fm_i])*(M/(energy*T))*delta_i
 
 
 @functools.lru_cache(maxsize=1024)
@@ -1285,8 +1291,8 @@ def buns_b_boson_antitriplet_integrand_real(
     phi_re: float, phi_im: float, a: int, cluster: str
 ) -> float:
 
-    fp_i = pnjl.thermo.distributions.f_boson_triplet(p, T, mu, phi_re, -phi_im, M, a, '+').real
-    fm_i = pnjl.thermo.distributions.f_boson_triplet(p, T, mu, phi_re, -phi_im, M, a, '-').real
+    fp_i = pnjl.thermo.distributions.f_boson_antitriplet(p, T, mu, phi_re, phi_im, M, a, '+').real
+    fm_i = pnjl.thermo.distributions.f_boson_antitriplet(p, T, mu, phi_re, phi_im, M, a, '-').real
 
     delta_i = phase_factor(M, T, mu, cluster)
 
@@ -1313,8 +1319,8 @@ def buns_b_fermion_antitriplet_integrand_real(
     phi_re: float, phi_im: float, a: int, cluster: str
 ) -> float:
 
-    fp_i = pnjl.thermo.distributions.f_fermion_triplet(p, T, mu, phi_re, -phi_im, M, a, '+').real
-    fm_i = pnjl.thermo.distributions.f_fermion_triplet(p, T, mu, phi_re, -phi_im, M, a, '-').real
+    fp_i = pnjl.thermo.distributions.f_fermion_antitriplet(p, T, mu, phi_re, phi_im, M, a, '+').real
+    fm_i = pnjl.thermo.distributions.f_fermion_antitriplet(p, T, mu, phi_re, phi_im, M, a, '-').real
 
     delta_i = phase_factor(M, T, mu, cluster)
 
