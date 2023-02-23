@@ -702,3 +702,33 @@ def f_boson_antitriplet(
     """
 
     return f_boson_triplet(p, T, mu, phi_re, -phi_im, mass, mu_factor, typ)
+
+
+@functools.lru_cache(maxsize=1024)
+def dfdM_boson_singlet(
+        p: float, T: float, mu: float, 
+        mass: float, mu_factor: int, typ: str
+) -> float:
+    logy = log_y(p, T, mu, mass, mu_factor, 1, typ)
+    if logy >= utils.EXP_LIMIT:
+        return 0.0
+    else:
+        energy = En(p, mass)
+        exy = math.exp(logy)
+        f2 = f_boson_singlet(p, T, mu, mass, mu_factor, typ)**2
+        return exy*f2*(mass/(energy*T))
+    
+
+@functools.lru_cache(maxsize=1024)
+def dfdM_fermion_singlet(
+        p: float, T: float, mu: float, 
+        mass: float, mu_factor: int, typ: str
+) -> float:
+    logy = log_y(p, T, mu, mass, mu_factor, 1, typ)
+    if logy >= utils.EXP_LIMIT:
+        return 0.0
+    else:
+        energy = En(p, mass)
+        exy = math.exp(logy)
+        f2 = f_fermion_singlet(p, T, mu, mass, mu_factor, typ)**2
+        return exy*f2*(mass/(energy*T))
