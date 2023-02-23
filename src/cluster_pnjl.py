@@ -19175,8 +19175,8 @@ def epja_beth_uhlenbeck2():
 
     warnings.filterwarnings("ignore")
     
-    calc_1 = False
-    calc_2 = False
+    calc_1 = True
+    calc_2 = True
 
     files = "D:/EoS/epja/beth_uhlenbeck/"
     lattice_files = "D:/EoS/epja/lattice_data_raw/"
