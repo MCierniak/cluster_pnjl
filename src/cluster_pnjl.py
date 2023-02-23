@@ -19864,7 +19864,7 @@ def epja_beth_uhlenbeck2():
             total=len(T_2), ncols=100
         ):
             pi_v_2.append(
-                cluster_s.bdensity(
+                cluster.bdensity(
                     T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'pi'
                 )/(T_el**3)
             )
@@ -19877,7 +19877,7 @@ def epja_beth_uhlenbeck2():
             total=len(T_2), ncols=100
         ):
             K_v_2.append(
-                cluster_s.bdensity(
+                cluster.bdensity(
                     T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'K'
                 )/(T_el**3)
             )
@@ -19890,7 +19890,7 @@ def epja_beth_uhlenbeck2():
             total=len(T_2), ncols=100
         ):
             rho_v_2.append(
-                cluster_s.bdensity(
+                cluster.bdensity(
                     T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'rho'
                 )/(T_el**3)
             )
@@ -19903,7 +19903,7 @@ def epja_beth_uhlenbeck2():
             total=len(T_2), ncols=100
         ):
             omega_v_2.append(
-                cluster_s.bdensity(
+                cluster.bdensity(
                     T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'omega'
                 )/(T_el**3)
             )
@@ -19916,7 +19916,7 @@ def epja_beth_uhlenbeck2():
             total=len(T_2), ncols=100
         ):
             D_v_2.append(
-                cluster_s.bdensity(
+                cluster.bdensity(
                     T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'D'
                 )/(T_el**3)
             )
@@ -19929,7 +19929,7 @@ def epja_beth_uhlenbeck2():
             total=len(T_2), ncols=100
         ):
             N_v_2.append(
-                cluster_s.bdensity(
+                cluster.bdensity(
                     T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'N'
                 )/(T_el**3)
             )
@@ -19942,7 +19942,7 @@ def epja_beth_uhlenbeck2():
             total=len(T_2), ncols=100
         ):
             T_v_2.append(
-                cluster_s.bdensity(
+                cluster.bdensity(
                     T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'T'
                 )/(T_el**3)
             )
@@ -19955,7 +19955,7 @@ def epja_beth_uhlenbeck2():
             total=len(T_2), ncols=100
         ):
             F_v_2.append(
-                cluster_s.bdensity(
+                cluster.bdensity(
                     T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'F'
                 )/(T_el**3)
             )
@@ -19968,7 +19968,7 @@ def epja_beth_uhlenbeck2():
             total=len(T_2), ncols=100
         ):
             P_v_2.append(
-                cluster_s.bdensity(
+                cluster.bdensity(
                     T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'P'
                 )/(T_el**3)
             )
@@ -19981,7 +19981,7 @@ def epja_beth_uhlenbeck2():
             total=len(T_2), ncols=100
         ):
             Q_v_2.append(
-                cluster_s.bdensity(
+                cluster.bdensity(
                     T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'Q'
                 )/(T_el**3)
             )
@@ -19994,7 +19994,7 @@ def epja_beth_uhlenbeck2():
             total=len(T_2), ncols=100
         ):
             H_v_2.append(
-                cluster_s.bdensity(
+                cluster.bdensity(
                     T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'H'
                 )/(T_el**3)
             )

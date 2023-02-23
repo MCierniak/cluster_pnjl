@@ -158,7 +158,7 @@ def continuum_factor2(M: float, T: float, mu: float, cluster: str) -> float:
 @functools.lru_cache(maxsize=1024)
 def phase_factor(M: float, T: float, mu: float, cluster: str) -> float:
 
-        return bound_factor(M, T, mu, cluster) #+continuum_factor2(M, T, mu, cluster)  #+continuum_factor1(M, T, mu, cluster) 
+        return bound_factor(M, T, mu, cluster)+continuum_factor1(M, T, mu, cluster)+continuum_factor2(M, T, mu, cluster)  
 
 
 @functools.lru_cache(maxsize=1024)
@@ -1307,17 +1307,56 @@ def buns_b_aux_fermion(
 
 
 @functools.lru_cache(maxsize=1024)
+def buns_b_aux_boson(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int, typ: str
+) -> complex:
+    log_1 = pnjl.thermo.distributions.log_y(p, T, mu, M, a, 1, typ)
+    log_2 = pnjl.thermo.distributions.log_y(p, T, mu, M, a, 2, typ)
+    if log_1 >= utils.EXP_LIMIT:
+        return complex(0.0, 0.0)
+    elif log_1 < utils.EXP_LIMIT and log_2 >= utils.EXP_LIMIT:
+        num_1_re = 2.0*math.fsum([math.exp(-log_1)*phi_re, -phi_re])
+        num_1_im = 2.0*math.fsum([math.exp(-log_1)*phi_im, phi_im])
+        den_1_re = math.fsum([math.exp(log_1), math.exp(-log_1)*phi_re, -2.0*phi_re])
+        den_1_im = math.fsum([math.exp(-log_1)*phi_im, 2.0*phi_im])
+        num_2_re = 2.0*math.fsum([-math.exp(-log_1)*1.0, phi_re])
+        num_2_im = 2.0*phi_im
+        den_2_re = math.fsum([math.exp(-log_1), -2.0*phi_re, math.exp(log_1)*phi_re])
+        den_2_im = math.fsum([-2.0*phi_im, -math.exp(log_1)*phi_im])
+        return  -complex(1.0, 0.0) \
+                +(complex(num_1_re, num_1_im)/complex(den_1_re, den_1_im)) \
+                +(complex(num_2_re, num_2_im)/complex(den_2_re, den_2_im))
+    else:
+        num_1_re = 2.0*math.fsum([phi_re, -math.exp(log_1)*phi_re])
+        num_1_im = 2.0*math.fsum([phi_im, math.exp(log_1)*phi_im])
+        den_1_re = math.fsum([math.exp(log_2), phi_re, -2.0*phi_re*math.exp(log_1)])
+        den_1_im = math.fsum([phi_im, 2.0*phi_im*math.exp(log_1)])
+        num_2_re = 2.0*math.fsum([-1.0, math.exp(log_1)*phi_re])
+        num_2_im = 2.0*math.exp(log_1)*phi_im
+        den_2_re = math.fsum([1.0, -2.0*math.exp(log_1)*phi_re, math.exp(log_2)*phi_re])
+        den_2_im = math.fsum([-2.0*math.exp(log_1)*phi_im, -math.exp(log_2)*phi_im])
+        return  -complex(1.0, 0.0) \
+                +(complex(num_1_re, num_1_im)/complex(den_1_re, den_1_im)) \
+                +(complex(num_2_re, num_2_im)/complex(den_2_re, den_2_im))
+
+
+@functools.lru_cache(maxsize=1024)
 def buns_b_boson_triplet_integrand_real(
     M: float, p: float, T: float, mu: float,
     phi_re: float, phi_im: float, a: int, cluster: str
 ) -> float:
-
-    fp_i = pnjl.thermo.distributions.f_boson_triplet(p, T, mu, phi_re, phi_im, M, a, '+').real
-    fm_i = pnjl.thermo.distributions.f_boson_triplet(p, T, mu, phi_re, phi_im, M, a, '-').real
-
+    energy = pnjl.thermo.distributions.En(p, M)
+    fp_i = pnjl.thermo.distributions.f_boson_triplet(p, T, mu, phi_re, phi_im, M, a, '+')
+    fp2_i = fp_i**2
+    aux_p = buns_b_aux_boson(M, p, T, mu, phi_re, phi_im, a, '+')
+    fm_i = pnjl.thermo.distributions.f_boson_antitriplet(p, T, mu, phi_re, phi_im, M, a, '-')
+    fm2_i = fm_i**2
+    aux_m = buns_b_aux_boson(M, p, T, mu, phi_re, phi_im, a, '-')
     delta_i = phase_factor(M, T, mu, cluster)
-
-    return math.fsum([fp_i, -fm_i])*delta_i
+    el_p = ((fp2_i+fp_i)*aux_p).real
+    el_m = ((fm2_i+fm_i)*aux_m).real
+    return -math.fsum([el_p, -el_m])*(M/(energy*T))*delta_i
 
 
 @functools.lru_cache(maxsize=1024)
@@ -1325,13 +1364,17 @@ def buns_b_boson_antitriplet_integrand_real(
     M: float, p: float, T: float, mu: float,
     phi_re: float, phi_im: float, a: int, cluster: str
 ) -> float:
-
-    fp_i = pnjl.thermo.distributions.f_boson_antitriplet(p, T, mu, phi_re, phi_im, M, a, '+').real
-    fm_i = pnjl.thermo.distributions.f_boson_antitriplet(p, T, mu, phi_re, phi_im, M, a, '-').real
-
+    energy = pnjl.thermo.distributions.En(p, M)
+    fp_i = pnjl.thermo.distributions.f_boson_antitriplet(p, T, mu, phi_re, phi_im, M, a, '+')
+    fp2_i = fp_i**2
+    aux_p = buns_b_aux_boson(M, p, T, mu, phi_re, -phi_im, a, '+')
+    fm_i = pnjl.thermo.distributions.f_boson_triplet(p, T, mu, phi_re, phi_im, M, a, '-')
+    fm2_i = fm_i**2
+    aux_m = buns_b_aux_boson(M, p, T, mu, phi_re, -phi_im, a, '-')
     delta_i = phase_factor(M, T, mu, cluster)
-
-    return math.fsum([fp_i, -fm_i])*delta_i
+    el_p = ((fp2_i+fp_i)*aux_p).real
+    el_m = ((fm2_i+fm_i)*aux_m).real
+    return -math.fsum([el_p, -el_m])*(M/(energy*T))*delta_i
 
 
 @functools.lru_cache(maxsize=1024)
