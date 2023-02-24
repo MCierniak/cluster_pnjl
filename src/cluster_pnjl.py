@@ -19175,8 +19175,8 @@ def epja_beth_uhlenbeck2():
 
     warnings.filterwarnings("ignore")
     
-    calc_1 = True
-    calc_2 = True
+    calc_1 = False
+    calc_2 = False
 
     files = "D:/EoS/epja/beth_uhlenbeck/"
     lattice_files = "D:/EoS/epja/lattice_data_raw/"
@@ -19187,7 +19187,8 @@ def epja_beth_uhlenbeck2():
     T_1 = numpy.linspace(1.0, 280.0, 200)
     T_2 = numpy.linspace(1.0, 280.0, 200)
 
-    mu_1 = [0.0 / 3.0 for el in T_1]
+    # mu_1 = [0.0 / 3.0 for el in T_1]
+    mu_1 = [(2.5 * el) / 3.0 for el in T_2]
     mu_2 = [(2.5 * el) / 3.0 for el in T_2]
 
     phi_re_v_1, phi_im_v_1 = \
@@ -19228,489 +19229,7 @@ def epja_beth_uhlenbeck2():
         list(), list(), list(), list(), list(), list(), list(), list(), list()
     omega_v_2s, T_v_2s = list(), list()
 
-    if False:
-
-        phi_re_0 = 1e-5
-        phi_im_0 = 2e-5
-        print("Traced Polyakov loop #1")
-        for T_el, mu_el in tqdm.tqdm(
-            zip(T_1, mu_1), total=len(T_1), ncols=100
-        ):
-            phi_result = solver_1.Polyakov_loop(
-                T_el, mu_el, phi_re_0, phi_im_0
-            )
-            phi_re_v_1.append(phi_result[0])
-            phi_im_v_1.append(phi_result[1])
-            phi_re_0 = phi_result[0]
-            phi_im_0 = phi_result[1]
-        with open(files+"phi_re_v_0p0.pickle", "wb") as file:
-            pickle.dump(phi_re_v_1, file)
-        with open(files+"phi_im_v_0p0.pickle", "wb") as file:
-            pickle.dump(phi_im_v_1, file)
-
-        print("Sigma bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(
-                    T_el, mu_el
-                )/(T_el**3)
-            )
-        with open(files+"b_sigma_v_0p0.pickle", "wb") as file:
-            pickle.dump(sigma_v_1, file)
-
-        print("Gluon bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            gluon_v_1.append(
-                pnjl.thermo.gcp_pl_polynomial.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop
-                )/(T_el**3)
-            )
-        with open(files+"b_gluon_v_0p0.pickle", "wb") as file:
-            pickle.dump(gluon_v_1, file)
-
-        print("Sea bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
-                T_el, mu_el, 'l'
-            )
-            sea_u_v_1.append(lq_temp/(T_el**3))
-            sea_d_v_1.append(lq_temp/(T_el**3))
-            sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
-                    T_el, mu_el, 's'
-                )/(T_el**3)
-            )
-        with open(files+"b_sea_u_v_0p0.pickle", "wb") as file:
-            pickle.dump(sea_u_v_1, file)
-        with open(files+"b_sea_d_v_0p0.pickle", "wb") as file:
-            pickle.dump(sea_d_v_1, file)
-        with open(files+"b_sea_s_v_0p0.pickle", "wb") as file:
-            pickle.dump(sea_s_v_1, file)
-
-        print("Perturbative bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            lq_temp = pnjl.thermo.gcp_perturbative.bdensity(
-                T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
-            )
-            perturbative_u_v_1.append(lq_temp/(T_el**3))
-            perturbative_d_v_1.append(lq_temp/(T_el**3))
-            perturbative_s_v_1.append(
-                pnjl.thermo.gcp_perturbative.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
-                )/(T_el**3)
-            )
-            if pnjl.defaults.PERTURBATIVE_GLUON_CORRECTION:
-                raise RuntimeError("Perturbative gluon bdensity not implemented!")
-            else:
-                perturbative_gluon_v_1.append(0.0)
-        with open(files+"b_perturbative_u_v_0p0.pickle", "wb") as file:
-            pickle.dump(perturbative_u_v_1, file)
-        with open(files+"b_perturbative_d_v_0p0.pickle", "wb") as file:
-            pickle.dump(perturbative_d_v_1, file)
-        with open(files+"b_perturbative_s_v_0p0.pickle", "wb") as file:
-            pickle.dump(perturbative_s_v_1, file)
-        with open(files+"b_perturbative_gluon_v_0p0.pickle", "wb") as file:
-            pickle.dump(perturbative_gluon_v_1, file)
-
-        print("PNJL bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            lq_temp = pnjl.thermo.gcp_pnjl.bdensity(
-                T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
-            )
-            sq_temp = pnjl.thermo.gcp_pnjl.bdensity(
-                T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
-            )
-            pnjl_u_v_1.append(lq_temp/(T_el**3))
-            pnjl_d_v_1.append(lq_temp/(T_el**3))
-            pnjl_s_v_1.append(sq_temp/(T_el**3))
-        with open(files+"b_pnjl_u_v_0p0.pickle", "wb") as file:
-            pickle.dump(pnjl_u_v_1, file)
-        with open(files+"b_pnjl_d_v_0p0.pickle", "wb") as file:
-            pickle.dump(pnjl_d_v_1, file)
-        with open(files+"b_pnjl_s_v_0p0.pickle", "wb") as file:
-            pickle.dump(pnjl_s_v_1, file)
-    else:
-        with open(files+"phi_re_v_0p0.pickle", "rb") as file:
-            phi_re_v_1 = pickle.load(file)
-        with open(files+"phi_im_v_0p0.pickle", "rb") as file:
-            phi_im_v_1 = pickle.load(file)
-        with open(files+"b_sigma_v_0p0.pickle", "rb") as file:
-            sigma_v_1 = pickle.load(file)
-        with open(files+"b_gluon_v_0p0.pickle", "rb") as file:
-            gluon_v_1 = pickle.load(file)
-        with open(files+"b_sea_u_v_0p0.pickle", "rb") as file:
-            sea_u_v_1 = pickle.load(file)
-        with open(files+"b_sea_d_v_0p0.pickle", "rb") as file:
-            sea_d_v_1 = pickle.load(file)
-        with open(files+"b_sea_s_v_0p0.pickle", "rb") as file:
-            sea_s_v_1 = pickle.load(file)
-        with open(files+"b_perturbative_u_v_0p0.pickle", "rb") as file:
-            perturbative_u_v_1 = pickle.load(file)
-        with open(files+"b_perturbative_d_v_0p0.pickle", "rb") as file:
-            perturbative_d_v_1 = pickle.load(file)
-        with open(files+"b_perturbative_s_v_0p0.pickle", "rb") as file:
-            perturbative_s_v_1 = pickle.load(file)
-        with open(files+"b_perturbative_gluon_v_0p0.pickle", "rb") as file:
-            perturbative_gluon_v_1 = pickle.load(file)
-        with open(files+"b_pnjl_u_v_0p0.pickle", "rb") as file:
-            pnjl_u_v_1 = pickle.load(file)
-        with open(files+"b_pnjl_d_v_0p0.pickle", "rb") as file:
-            pnjl_d_v_1 = pickle.load(file)
-        with open(files+"b_pnjl_s_v_0p0.pickle", "rb") as file:
-            pnjl_s_v_1 = pickle.load(file)
-
-    if False:
-
-        print("Pion bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            pi_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'pi'
-                )/(T_el**3)
-            )
-        with open(files+"b_pi_v_0p0.pickle", "wb") as file:
-            pickle.dump(pi_v_1, file)
-
-        print("Kaon bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            K_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'K'
-                )/(T_el**3)
-            )
-        with open(files+"b_K_v_0p0.pickle", "wb") as file:
-            pickle.dump(K_v_1, file)
-
-        print("Rho bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            rho_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'rho'
-                )/(T_el**3)
-            )
-        with open(files+"b_rho_v_0p0.pickle", "wb") as file:
-            pickle.dump(rho_v_1, file)
-
-        print("Omega bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            omega_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'omega'
-                )/(T_el**3)
-            )
-        with open(files+"b_omega_v_0p0.pickle", "wb") as file:
-            pickle.dump(omega_v_1, file)
-
-        print("Diquark bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            D_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'D'
-                )/(T_el**3)
-            )
-        with open(files+"b_D_v_0p0.pickle", "wb") as file:
-            pickle.dump(D_v_1, file)
-
-        print("Nucleon bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            N_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'N'
-                )/(T_el**3)
-            )
-        with open(files+"b_N_v_0p0.pickle", "wb") as file:
-            pickle.dump(N_v_1, file)
-
-        print("Tetraquark bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            T_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'T'
-                )/(T_el**3)
-            )
-        with open(files+"b_T_v_0p0.pickle", "wb") as file:
-            pickle.dump(T_v_1, file)
-
-        print("F-quark bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            F_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'F'
-                )/(T_el**3)
-            )
-        with open(files+"b_F_v_0p0.pickle", "wb") as file:
-            pickle.dump(F_v_1, file)
-
-        print("Pentaquark bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            P_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'P'
-                )/(T_el**3)
-            )
-        with open(files+"b_P_v_0p0.pickle", "wb") as file:
-            pickle.dump(P_v_1, file)
-
-        print("Q-quark bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            Q_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'Q'
-                )/(T_el**3)
-            )
-        with open(files+"b_Q_v_0p0.pickle", "wb") as file:
-            pickle.dump(Q_v_1, file)
-
-        print("Hexaquark bdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            H_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'H'
-                )/(T_el**3)
-            )
-        with open(files+"b_H_v_0p0.pickle", "wb") as file:
-            pickle.dump(H_v_1, file)
-    else:
-        with open(files+"b_pi_v_0p0.pickle", "rb") as file:
-            pi_v_1 = pickle.load(file)
-        with open(files+"b_K_v_0p0.pickle", "rb") as file:
-            K_v_1 = pickle.load(file)
-        with open(files+"b_rho_v_0p0.pickle", "rb") as file:
-            rho_v_1 = pickle.load(file)
-        with open(files+"b_omega_v_0p0.pickle", "rb") as file:
-            omega_v_1 = pickle.load(file)
-        with open(files+"b_D_v_0p0.pickle", "rb") as file:
-            D_v_1 = pickle.load(file)
-        with open(files+"b_N_v_0p0.pickle", "rb") as file:
-            N_v_1 = pickle.load(file)
-        with open(files+"b_T_v_0p0.pickle", "rb") as file:
-            T_v_1 = pickle.load(file)
-        with open(files+"b_F_v_0p0.pickle", "rb") as file:
-            F_v_1 = pickle.load(file)
-        with open(files+"b_P_v_0p0.pickle", "rb") as file:
-            P_v_1 = pickle.load(file)
-        with open(files+"b_Q_v_0p0.pickle", "rb") as file:
-            Q_v_1 = pickle.load(file)
-        with open(files+"b_H_v_0p0.pickle", "rb") as file:
-            H_v_1 = pickle.load(file)
-
-    if False:
-
-        print("Pion bdensity Beth-Uhlenbeck no sin #1 (step)")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            pi_v_1s.append(
-                cluster.bdensity_buns(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'pi'
-                )/(T_el**3)
-            )
-        with open(files+"b_buns_pi_v_0p0s.pickle", "wb") as file:
-            pickle.dump(pi_v_1s, file)
-
-        print("Kaon bdensity Beth-Uhlenbeck no sin #1 (step)")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            K_v_1s.append(
-                cluster.bdensity_buns(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'K'
-                )/(T_el**3)
-            )
-        with open(files+"b_buns_K_v_0p0s.pickle", "wb") as file:
-            pickle.dump(K_v_1s, file)
-
-        print("Rho bdensity Beth-Uhlenbeck no sin #1 (step)")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            rho_v_1s.append(
-                cluster.bdensity_buns(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'rho'
-                )/(T_el**3)
-            )
-        with open(files+"b_buns_rho_v_0p0s.pickle", "wb") as file:
-            pickle.dump(rho_v_1s, file)
-
-        print("Omega bdensity Beth-Uhlenbeck no sin #1 (step)")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            omega_v_1s.append(
-                cluster.bdensity_buns(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'omega'
-                )/(T_el**3)
-            )
-        with open(files+"b_buns_omega_v_0p0s.pickle", "wb") as file:
-            pickle.dump(omega_v_1s, file)
-
-        print("Diquark bdensity Beth-Uhlenbeck no sin #1 (step)")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            D_v_1s.append(
-                cluster.bdensity_buns(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'D'
-                )/(T_el**3)
-            )
-        with open(files+"b_buns_D_v_0p0s.pickle", "wb") as file:
-            pickle.dump(D_v_1s, file)
-
-        print("Nucleon bdensity Beth-Uhlenbeck no sin #1 (step)")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            N_v_1s.append(
-                cluster.bdensity_buns(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'N'
-                )/(T_el**3)
-            )
-        with open(files+"b_buns_N_v_0p0s.pickle", "wb") as file:
-            pickle.dump(N_v_1s, file)
-
-        print("Tetraquark bdensity Beth-Uhlenbeck no sin #1 (step)")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            T_v_1s.append(
-                cluster.bdensity_buns(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'T'
-                )/(T_el**3)
-            )
-        with open(files+"b_buns_T_v_0p0s.pickle", "wb") as file:
-            pickle.dump(T_v_1s, file)
-
-        print("F-quark bdensity Beth-Uhlenbeck no sin #1 (step)")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            F_v_1s.append(
-                cluster.bdensity_buns(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'F'
-                )/(T_el**3)
-            )
-        with open(files+"b_buns_F_v_0p0s.pickle", "wb") as file:
-            pickle.dump(F_v_1s, file)
-
-        print("Pentaquark bdensity Beth-Uhlenbeck no sin #1 (step)")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            P_v_1s.append(
-                cluster.bdensity_buns(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'P'
-                )/(T_el**3)
-            )
-        with open(files+"b_buns_P_v_0p0s.pickle", "wb") as file:
-            pickle.dump(P_v_1s, file)
-
-        print("Q-quark bdensity Beth-Uhlenbeck no sin #1 (step)")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            Q_v_1s.append(
-                cluster.bdensity_buns(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'Q'
-                )/(T_el**3)
-            )
-        with open(files+"b_buns_Q_v_0p0s.pickle", "wb") as file:
-            pickle.dump(Q_v_1s, file)
-
-        print("Hexaquark bdensity Beth-Uhlenbeck no sin #1 (step)")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            H_v_1s.append(
-                cluster.bdensity_buns(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'H'
-                )/(T_el**3)
-            )
-        with open(files+"b_buns_H_v_0p0s.pickle", "wb") as file:
-            pickle.dump(H_v_1s, file)
-    else:
-        with open(files+"b_buns_pi_v_0p0s.pickle", "rb") as file:
-            pi_v_1s = pickle.load(file)
-        with open(files+"b_buns_K_v_0p0s.pickle", "rb") as file:
-            K_v_1s = pickle.load(file)
-        with open(files+"b_buns_rho_v_0p0s.pickle", "rb") as file:
-            rho_v_1s = pickle.load(file)
-        with open(files+"b_buns_omega_v_0p0s.pickle", "rb") as file:
-            omega_v_1s = pickle.load(file)
-        with open(files+"b_buns_D_v_0p0s.pickle", "rb") as file:
-            D_v_1s = pickle.load(file)
-        with open(files+"b_buns_N_v_0p0s.pickle", "rb") as file:
-            N_v_1s = pickle.load(file)
-        with open(files+"b_buns_T_v_0p0s.pickle", "rb") as file:
-            T_v_1s = pickle.load(file)
-        with open(files+"b_buns_F_v_0p0s.pickle", "rb") as file:
-            F_v_1s = pickle.load(file)
-        with open(files+"b_buns_P_v_0p0s.pickle", "rb") as file:
-            P_v_1s = pickle.load(file)
-        with open(files+"b_buns_Q_v_0p0s.pickle", "rb") as file:
-            Q_v_1s = pickle.load(file)
-        with open(files+"b_buns_H_v_0p0s.pickle", "rb") as file:
-            H_v_1s = pickle.load(file)
-
-    if False:
+    if calc_2:
 
         phi_re_0 = 1e-5
         phi_im_0 = 2e-5
@@ -20191,6 +19710,202 @@ def epja_beth_uhlenbeck2():
             Q_v_2s = pickle.load(file)
         with open(files+"b_buns_H_v_2p5s.pickle", "rb") as file:
             H_v_2s = pickle.load(file)
+
+    phi_re_v_1 = phi_re_v_2
+    phi_im_v_1 = phi_im_v_2
+
+    sigma_v_1 = sigma_v_2
+    sea_u_v_1 = sea_u_v_2
+    sea_d_v_1 = sea_d_v_2
+    sea_s_v_1 = sea_s_v_2
+    gluon_v_1 = gluon_v_2
+    perturbative_u_v_1 = perturbative_u_v_2
+    perturbative_d_v_1 = perturbative_d_v_2
+    perturbative_s_v_1 = perturbative_s_v_2
+    perturbative_gluon_v_1 = perturbative_gluon_v_2
+    pnjl_u_v_1 = pnjl_u_v_2
+    pnjl_d_v_1 = pnjl_d_v_2
+    pnjl_s_v_1 = pnjl_s_v_2
+
+    pi_v_1 = pi_v_2s
+    K_v_1 = K_v_2s
+    rho_v_1 = rho_v_2s
+    D_v_1 = D_v_2s
+    N_v_1 = N_v_2s
+    F_v_1 = F_v_2s
+    P_v_1 = P_v_2s
+    Q_v_1 = Q_v_2s
+    H_v_1 = H_v_2s
+    omega_v_1 = omega_v_2s
+    T_v_1 = T_v_2s
+
+    if calc_1:
+
+        print("Pion bdensity Beth-Uhlenbeck sin #1 (step)")
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            total=len(T_1), ncols=100
+        ):
+            pi_v_1s.append(
+                cluster.bdensity_bu(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'pi'
+                )/(T_el**3)
+            )
+        with open(files+"b_buns_pi_v_0p0s.pickle", "wb") as file:
+            pickle.dump(pi_v_1s, file)
+
+        print("Kaon bdensity Beth-Uhlenbeck sin #1 (step)")
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            total=len(T_1), ncols=100
+        ):
+            K_v_1s.append(
+                cluster.bdensity_bu(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'K'
+                )/(T_el**3)
+            )
+        with open(files+"b_buns_K_v_0p0s.pickle", "wb") as file:
+            pickle.dump(K_v_1s, file)
+
+        print("Rho bdensity Beth-Uhlenbeck sin #1 (step)")
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            total=len(T_1), ncols=100
+        ):
+            rho_v_1s.append(
+                cluster.bdensity_bu(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'rho'
+                )/(T_el**3)
+            )
+        with open(files+"b_buns_rho_v_0p0s.pickle", "wb") as file:
+            pickle.dump(rho_v_1s, file)
+
+        print("Omega bdensity Beth-Uhlenbeck sin #1 (step)")
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            total=len(T_1), ncols=100
+        ):
+            omega_v_1s.append(
+                cluster.bdensity_bu(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'omega'
+                )/(T_el**3)
+            )
+        with open(files+"b_buns_omega_v_0p0s.pickle", "wb") as file:
+            pickle.dump(omega_v_1s, file)
+
+        print("Diquark bdensity Beth-Uhlenbeck sin #1 (step)")
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            total=len(T_1), ncols=100
+        ):
+            D_v_1s.append(
+                cluster.bdensity_bu(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'D'
+                )/(T_el**3)
+            )
+        with open(files+"b_buns_D_v_0p0s.pickle", "wb") as file:
+            pickle.dump(D_v_1s, file)
+
+        print("Nucleon bdensity Beth-Uhlenbeck sin #1 (step)")
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            total=len(T_1), ncols=100
+        ):
+            N_v_1s.append(
+                cluster.bdensity_bu(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'N'
+                )/(T_el**3)
+            )
+        with open(files+"b_buns_N_v_0p0s.pickle", "wb") as file:
+            pickle.dump(N_v_1s, file)
+
+        print("Tetraquark bdensity Beth-Uhlenbeck sin #1 (step)")
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            total=len(T_1), ncols=100
+        ):
+            T_v_1s.append(
+                cluster.bdensity_bu(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'T'
+                )/(T_el**3)
+            )
+        with open(files+"b_buns_T_v_0p0s.pickle", "wb") as file:
+            pickle.dump(T_v_1s, file)
+
+        print("F-quark bdensity Beth-Uhlenbeck sin #1 (step)")
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            total=len(T_1), ncols=100
+        ):
+            F_v_1s.append(
+                cluster.bdensity_bu(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'F'
+                )/(T_el**3)
+            )
+        with open(files+"b_buns_F_v_0p0s.pickle", "wb") as file:
+            pickle.dump(F_v_1s, file)
+
+        print("Pentaquark bdensity Beth-Uhlenbeck sin #1 (step)")
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            total=len(T_1), ncols=100
+        ):
+            P_v_1s.append(
+                cluster.bdensity_bu(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'P'
+                )/(T_el**3)
+            )
+        with open(files+"b_buns_P_v_0p0s.pickle", "wb") as file:
+            pickle.dump(P_v_1s, file)
+
+        print("Q-quark bdensity Beth-Uhlenbeck sin #1 (step)")
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            total=len(T_1), ncols=100
+        ):
+            Q_v_1s.append(
+                cluster.bdensity_bu(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'Q'
+                )/(T_el**3)
+            )
+        with open(files+"b_buns_Q_v_0p0s.pickle", "wb") as file:
+            pickle.dump(Q_v_1s, file)
+
+        print("Hexaquark bdensity Beth-Uhlenbeck sin #1 (step)")
+        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
+            total=len(T_1), ncols=100
+        ):
+            H_v_1s.append(
+                cluster.bdensity_bu(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'H'
+                )/(T_el**3)
+            )
+        with open(files+"b_buns_H_v_0p0s.pickle", "wb") as file:
+            pickle.dump(H_v_1s, file)
+    else:
+        with open(files+"b_buns_pi_v_0p0s.pickle", "rb") as file:
+            pi_v_1s = pickle.load(file)
+        with open(files+"b_buns_K_v_0p0s.pickle", "rb") as file:
+            K_v_1s = pickle.load(file)
+        with open(files+"b_buns_rho_v_0p0s.pickle", "rb") as file:
+            rho_v_1s = pickle.load(file)
+        with open(files+"b_buns_omega_v_0p0s.pickle", "rb") as file:
+            omega_v_1s = pickle.load(file)
+        with open(files+"b_buns_D_v_0p0s.pickle", "rb") as file:
+            D_v_1s = pickle.load(file)
+        with open(files+"b_buns_N_v_0p0s.pickle", "rb") as file:
+            N_v_1s = pickle.load(file)
+        with open(files+"b_buns_T_v_0p0s.pickle", "rb") as file:
+            T_v_1s = pickle.load(file)
+        with open(files+"b_buns_F_v_0p0s.pickle", "rb") as file:
+            F_v_1s = pickle.load(file)
+        with open(files+"b_buns_P_v_0p0s.pickle", "rb") as file:
+            P_v_1s = pickle.load(file)
+        with open(files+"b_buns_Q_v_0p0s.pickle", "rb") as file:
+            Q_v_1s = pickle.load(file)
+        with open(files+"b_buns_H_v_0p0s.pickle", "rb") as file:
+            H_v_1s = pickle.load(file)
 
     total_qgp_1 = [
         sum(el) for el in 
