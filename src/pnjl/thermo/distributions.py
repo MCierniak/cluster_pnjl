@@ -732,3 +732,121 @@ def dfdM_fermion_singlet(
         exy = math.exp(logy)
         f2 = f_fermion_singlet(p, T, mu, mass, mu_factor, typ)**2
         return exy*f2*(mass/(energy*T))
+    
+
+@functools.lru_cache(maxsize=1024)
+def dfdM_aux_boson(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int, typ: str
+) -> complex:
+    log_1 = log_y(p, T, mu, M, a, 1, typ)
+    log_2 = log_y(p, T, mu, M, a, 2, typ)
+    if log_1 >= utils.EXP_LIMIT:
+        return complex(0.0, 0.0)
+    elif log_1 < utils.EXP_LIMIT and log_2 >= utils.EXP_LIMIT:
+        num_1_re = 2.0*math.fsum([math.exp(-log_1)*phi_re, -phi_re])
+        num_1_im = 2.0*math.fsum([math.exp(-log_1)*phi_im, phi_im])
+        den_1_re = math.fsum([math.exp(log_1), math.exp(-log_1)*phi_re, -2.0*phi_re])
+        den_1_im = math.fsum([math.exp(-log_1)*phi_im, 2.0*phi_im])
+        num_2_re = 2.0*math.fsum([-math.exp(-log_1)*1.0, phi_re])
+        num_2_im = 2.0*phi_im
+        den_2_re = math.fsum([math.exp(-log_1), -2.0*phi_re, math.exp(log_1)*phi_re])
+        den_2_im = math.fsum([-2.0*phi_im, -math.exp(log_1)*phi_im])
+        return  -complex(1.0, 0.0) \
+                +(complex(num_1_re, num_1_im)/complex(den_1_re, den_1_im)) \
+                +(complex(num_2_re, num_2_im)/complex(den_2_re, den_2_im))
+    else:
+        num_1_re = 2.0*math.fsum([phi_re, -math.exp(log_1)*phi_re])
+        num_1_im = 2.0*math.fsum([phi_im, math.exp(log_1)*phi_im])
+        den_1_re = math.fsum([math.exp(log_2), phi_re, -2.0*phi_re*math.exp(log_1)])
+        den_1_im = math.fsum([phi_im, 2.0*phi_im*math.exp(log_1)])
+        num_2_re = 2.0*math.fsum([-1.0, math.exp(log_1)*phi_re])
+        num_2_im = 2.0*math.exp(log_1)*phi_im
+        den_2_re = math.fsum([1.0, -2.0*math.exp(log_1)*phi_re, math.exp(log_2)*phi_re])
+        den_2_im = math.fsum([-2.0*math.exp(log_1)*phi_im, -math.exp(log_2)*phi_im])
+        return  -complex(1.0, 0.0) \
+                +(complex(num_1_re, num_1_im)/complex(den_1_re, den_1_im)) \
+                +(complex(num_2_re, num_2_im)/complex(den_2_re, den_2_im))
+    
+
+@functools.lru_cache(maxsize=1024)
+def dfdM_aux_fermion(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int, typ: str
+) -> complex:
+    log_1 = log_y(p, T, mu, M, a, 1, typ)
+    log_2 = log_y(p, T, mu, M, a, 2, typ)
+    if log_1 >= utils.EXP_LIMIT:
+        return complex(0.0, 0.0)
+    elif log_1 < utils.EXP_LIMIT and log_2 >= utils.EXP_LIMIT:
+        num_1_re = 2.0*math.fsum([math.exp(-log_1)*phi_re, phi_re])
+        num_1_im = 2.0*math.fsum([math.exp(-log_1)*phi_im, -phi_im])
+        den_1_re = math.fsum([math.exp(log_1), math.exp(-log_1)*phi_re, 2.0*phi_re])
+        den_1_im = math.fsum([math.exp(-log_1)*phi_im, -2.0*phi_im])
+        num_2_re = 2.0*math.fsum([math.exp(-log_1)*1.0, phi_re])
+        num_2_im = 2.0*phi_im
+        den_2_re = math.fsum([math.exp(-log_1), 2.0*phi_re, math.exp(log_1)*phi_re])
+        den_2_im = math.fsum([2.0*phi_im, -math.exp(log_1)*phi_im])
+        return  complex(1.0, 0.0) \
+                -(complex(num_1_re, num_1_im)/complex(den_1_re, den_1_im)) \
+                +(complex(num_2_re, num_2_im)/complex(den_2_re, den_2_im))
+    else:
+        num_1_re = 2.0*math.fsum([phi_re, math.exp(log_1)*phi_re])
+        num_1_im = 2.0*math.fsum([phi_im, -math.exp(log_1)*phi_im])
+        den_1_re = math.fsum([math.exp(log_2), phi_re, 2.0*phi_re*math.exp(log_1)])
+        den_1_im = math.fsum([phi_im, -2.0*phi_im*math.exp(log_1)])
+        num_2_re = 2.0*math.fsum([1.0, math.exp(log_1)*phi_re])
+        num_2_im = 2.0*math.exp(log_1)*phi_im
+        den_2_re = math.fsum([1.0, 2.0*math.exp(log_1)*phi_re, math.exp(log_2)*phi_re])
+        den_2_im = math.fsum([2.0*math.exp(log_1)*phi_im, -math.exp(log_2)*phi_im])
+        return  complex(1.0, 0.0) \
+                -(complex(num_1_re, num_1_im)/complex(den_1_re, den_1_im)) \
+                +(complex(num_2_re, num_2_im)/complex(den_2_re, den_2_im))
+    
+
+@functools.lru_cache(maxsize=1024)
+def dfdM_boson_triplet(
+        p: float, T: float, mu: float, phi_re: float, phi_im: float,
+        mass: float, mu_factor: int, typ: str
+) -> complex:
+    energy = En(p, mass)
+    fp_i = f_boson_triplet(p, T, mu, phi_re, phi_im, mass, mu_factor, typ)
+    fp2_i = fp_i**2
+    aux_p = dfdM_aux_boson(mass, p, T, mu, phi_re, phi_im, mu_factor, typ)
+    return (fp2_i+fp_i)*aux_p*(mass/(energy*T))
+    
+
+@functools.lru_cache(maxsize=1024)
+def dfdM_boson_antitriplet(
+        p: float, T: float, mu: float, phi_re: float, phi_im: float,
+        mass: float, mu_factor: int, typ: str
+) -> complex:
+    energy = En(p, mass)
+    fp_i = f_boson_triplet(p, T, mu, phi_re, -phi_im, mass, mu_factor, typ)
+    fp2_i = fp_i**2
+    aux_p = dfdM_aux_boson(mass, p, T, mu, phi_re, -phi_im, mu_factor, typ)
+    return (fp2_i+fp_i)*aux_p*(mass/(energy*T))
+
+
+@functools.lru_cache(maxsize=1024)
+def dfdM_fermion_triplet(
+        p: float, T: float, mu: float, phi_re: float, phi_im: float,
+        mass: float, mu_factor: int, typ: str
+) -> complex:
+    energy = En(p, mass)
+    fp_i = f_fermion_triplet(p, T, mu, phi_re, phi_im, mass, mu_factor, typ)
+    fp2_i = fp_i**2
+    aux_p = dfdM_aux_fermion(mass, p, T, mu, phi_re, phi_im, mu_factor, typ)
+    return (fp2_i-fp_i)*aux_p*(mass/(energy*T))
+    
+
+@functools.lru_cache(maxsize=1024)
+def dfdM_fermion_antitriplet(
+        p: float, T: float, mu: float, phi_re: float, phi_im: float,
+        mass: float, mu_factor: int, typ: str
+) -> complex:
+    energy = En(p, mass)
+    fp_i = f_fermion_triplet(p, T, mu, phi_re, -phi_im, mass, mu_factor, typ)
+    fp2_i = fp_i**2
+    aux_p = dfdM_aux_fermion(mass, p, T, mu, phi_re, -phi_im, mu_factor, typ)
+    return (fp2_i-fp_i)*aux_p*(mass/(energy*T))
