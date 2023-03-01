@@ -1542,7 +1542,7 @@ def buns_s_boson_singlet_integrand(
         dfm = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, mu, M, a, '-')
         if not (fp == 0.0 or dfp == 0.0):
             sigma_m = math.fsum([math.log(fm), -math.log1p(fm)])*dfm
-        return math.fsum([sigma_p, sigma_m])*delta_i
+        return -math.fsum([sigma_p, sigma_m])*delta_i
 
 
 @functools.lru_cache(maxsize=1024)
@@ -1564,7 +1564,7 @@ def buns_s_fermion_singlet_integrand(
         dfm = pnjl.thermo.distributions.dfdM_fermion_singlet(p, T, mu, M, a, '-')
         if not (fp == 0.0 or dfp == 0.0):
             sigma_m = math.fsum([math.log(fm), math.log(math.fsum([1.0, -fm]))])*dfm
-        return math.fsum([sigma_p, sigma_m])*delta_i
+        return -math.fsum([sigma_p, sigma_m])*delta_i
 
 
 @functools.lru_cache(maxsize=1024)
@@ -1581,7 +1581,7 @@ def buns_s_boson_triplet_integrand_real(
         sigma_p = ((energy-a*mu)/T)*dfp
         dfm = pnjl.thermo.distributions.dfdM_boson_antitriplet(p, T, mu, phi_re, phi_im, M, a, '-').real
         sigma_m = ((energy+a*mu)/T)*dfm
-        return math.fsum([sigma_p, sigma_m])*delta_i
+        return -math.fsum([sigma_p, sigma_m])*delta_i
 
 
 @functools.lru_cache(maxsize=1024)
@@ -1598,7 +1598,7 @@ def buns_s_boson_antitriplet_integrand_real(
         sigma_p = ((energy-a*mu)/T)*dfp
         dfm = pnjl.thermo.distributions.dfdM_boson_triplet(p, T, mu, phi_re, phi_im, M, a, '-').real
         sigma_m = ((energy+a*mu)/T)*dfm
-        return math.fsum([sigma_p, sigma_m])*delta_i
+        return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
 @functools.lru_cache(maxsize=1024)
@@ -1615,7 +1615,7 @@ def buns_s_fermion_triplet_integrand_real(
         sigma_p = ((energy-a*mu)/T)*dfp
         dfm = pnjl.thermo.distributions.dfdM_fermion_antitriplet(p, T, mu, phi_re, phi_im, M, a, '-').real
         sigma_m = ((energy+a*mu)/T)*dfm
-        return math.fsum([sigma_p, sigma_m])*delta_i
+        return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
 @functools.lru_cache(maxsize=1024)
@@ -1632,7 +1632,7 @@ def buns_s_fermion_antitriplet_integrand_real(
         sigma_p = ((energy-a*mu)/T)*dfp
         dfm = pnjl.thermo.distributions.dfdM_fermion_triplet(p, T, mu, phi_re, phi_im, M, a, '-').real
         sigma_m = ((energy+a*mu)/T)*dfm
-        return math.fsum([sigma_p, sigma_m])*delta_i
+        return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
 buns_s_integral_hash = {
@@ -1669,7 +1669,7 @@ def bu_s_boson_singlet_integrand(
         dfm = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, mu, M, a, '-')
         if not (fp == 0.0 or dfp == 0.0):
             sigma_m = math.fsum([math.log(fm), -math.log1p(fm)])*dfm
-        return math.fsum([sigma_p, sigma_m])*delta_i
+        return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
 @functools.lru_cache(maxsize=1024)
@@ -1691,7 +1691,7 @@ def bu_s_fermion_singlet_integrand(
         dfm = pnjl.thermo.distributions.dfdM_fermion_singlet(p, T, mu, M, a, '-')
         if not (fp == 0.0 or dfp == 0.0):
             sigma_m = math.fsum([math.log(fm), -math.log(math.fsum([1.0, -fm]))])*dfm
-        return math.fsum([sigma_p, sigma_m])*delta_i
+        return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
 @functools.lru_cache(maxsize=1024)
@@ -1708,7 +1708,7 @@ def bu_s_boson_triplet_integrand_real(
         sigma_p = ((energy-a*mu)/T)*dfp
         dfm = pnjl.thermo.distributions.dfdM_boson_antitriplet(p, T, mu, phi_re, phi_im, M, a, '-').real
         sigma_m = ((energy+a*mu)/T)*dfm
-        return math.fsum([sigma_p, sigma_m])*delta_i
+        return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
 @functools.lru_cache(maxsize=1024)
@@ -1725,7 +1725,7 @@ def bu_s_boson_antitriplet_integrand_real(
         sigma_p = ((energy-a*mu)/T)*dfp
         dfm = pnjl.thermo.distributions.dfdM_boson_triplet(p, T, mu, phi_re, phi_im, M, a, '-').real
         sigma_m = ((energy+a*mu)/T)*dfm
-        return math.fsum([sigma_p, sigma_m])*delta_i
+        return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
 @functools.lru_cache(maxsize=1024)
@@ -1742,7 +1742,7 @@ def bu_s_fermion_triplet_integrand_real(
         sigma_p = ((energy-a*mu)/T)*dfp
         dfm = pnjl.thermo.distributions.dfdM_fermion_antitriplet(p, T, mu, phi_re, phi_im, M, a, '-').real
         sigma_m = ((energy+a*mu)/T)*dfm
-        return math.fsum([sigma_p, sigma_m])*delta_i
+        return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
 @functools.lru_cache(maxsize=1024)
@@ -1759,7 +1759,7 @@ def bu_s_fermion_antitriplet_integrand_real(
         sigma_p = ((energy-a*mu)/T)*dfp
         dfm = pnjl.thermo.distributions.dfdM_fermion_triplet(p, T, mu, phi_re, phi_im, M, a, '-').real
         sigma_m = ((energy+a*mu)/T)*dfm
-        return math.fsum([sigma_p, sigma_m])*delta_i
+        return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
 bu_s_integral_hash = {
@@ -1780,14 +1780,9 @@ bu_s_integral_hash = {
 @functools.lru_cache(maxsize=1024)
 def sdensity_buns_integral(
     p: float, T: float, mu: float, phi_re: float, phi_im: float,
-    M_max: float, cluster: str
+    M_max: float, A_I: float, cluster: str
 ) -> float:
     
-    A_I = math.fsum([
-        pnjl.defaults.NET_QL[cluster],
-        pnjl.defaults.NET_QS[cluster]
-    ])
-
     integral, error = scipy.integrate.quad(
         buns_s_integral_hash[cluster], 0.0, M_max,
         args = (p, T, mu, phi_re, phi_im, A_I, cluster)
@@ -1813,11 +1808,11 @@ def sdensity_buns(
     M_max = math.fsum([M_th_0, L*N_I])
 
     integral, error = scipy.integrate.quad(
-        bdensity_buns_integral, 0.0, math.inf,
-        args = (T, mu, phi_re, phi_im, M_max, cluster)
+        sdensity_buns_integral, 0.0, math.inf,
+        args = (T, mu, phi_re, phi_im, M_max, A_I, cluster)
     )
 
-    return (D_I/(2.0*(math.pi**2)))*integral
+    return (D_I/(2.0*(math.pi**2)))*3.0*integral
 
 
 @functools.lru_cache(maxsize=1024)
@@ -1856,11 +1851,11 @@ def sdensity_bu(
     M_max = math.fsum([M_th_0, L*N_I])
 
     integral, error = scipy.integrate.quad(
-        bdensity_bu_integral, 0.0, math.inf,
+        sdensity_bu_integral, 0.0, math.inf,
         args = (T, mu, phi_re, phi_im, M_max, cluster)
     )
 
-    return (D_I/(2.0*(math.pi**2)))*integral
+    return (D_I/(2.0*(math.pi**2)))*3.0*integral
 
 
 @functools.lru_cache(maxsize=1024)
