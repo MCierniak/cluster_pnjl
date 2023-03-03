@@ -19513,8 +19513,8 @@ def epja_beth_uhlenbeck1():
 
     warnings.filterwarnings("ignore")
     
-    calc_1 = True
-    calc_2 = True
+    calc_1 = False
+    calc_2 = False
 
     files = "D:/EoS/epja/beth_uhlenbeck/"
     lattice_files = "D:/EoS/epja/lattice_data_raw/"
@@ -19888,7 +19888,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_1), ncols=100
         ):
             pi_v_1s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'pi'
                 )/(T_el**3)
             )
@@ -19901,7 +19901,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_1), ncols=100
         ):
             K_v_1s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'K'
                 )/(T_el**3)
             )
@@ -19914,7 +19914,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_1), ncols=100
         ):
             rho_v_1s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'rho'
                 )/(T_el**3)
             )
@@ -19927,7 +19927,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_1), ncols=100
         ):
             omega_v_1s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'omega'
                 )/(T_el**3)
             )
@@ -19940,7 +19940,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_1), ncols=100
         ):
             D_v_1s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'D'
                 )/(T_el**3)
             )
@@ -19953,7 +19953,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_1), ncols=100
         ):
             N_v_1s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'N'
                 )/(T_el**3)
             )
@@ -19966,7 +19966,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_1), ncols=100
         ):
             T_v_1s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'T'
                 )/(T_el**3)
             )
@@ -19979,7 +19979,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_1), ncols=100
         ):
             F_v_1s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'F'
                 )/(T_el**3)
             )
@@ -19992,7 +19992,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_1), ncols=100
         ):
             P_v_1s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'P'
                 )/(T_el**3)
             )
@@ -20005,7 +20005,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_1), ncols=100
         ):
             Q_v_1s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'Q'
                 )/(T_el**3)
             )
@@ -20018,7 +20018,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_1), ncols=100
         ):
             H_v_1s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'H'
                 )/(T_el**3)
             )
@@ -20370,7 +20370,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_2), ncols=100
         ):
             pi_v_2s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'pi'
                 )/(T_el**3)
             )
@@ -20383,7 +20383,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_2), ncols=100
         ):
             K_v_2s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'K'
                 )/(T_el**3)
             )
@@ -20396,7 +20396,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_2), ncols=100
         ):
             rho_v_2s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'rho'
                 )/(T_el**3)
             )
@@ -20409,7 +20409,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_2), ncols=100
         ):
             omega_v_2s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'omega'
                 )/(T_el**3)
             )
@@ -20422,7 +20422,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_2), ncols=100
         ):
             D_v_2s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'D'
                 )/(T_el**3)
             )
@@ -20435,7 +20435,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_2), ncols=100
         ):
             N_v_2s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'N'
                 )/(T_el**3)
             )
@@ -20448,7 +20448,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_2), ncols=100
         ):
             T_v_2s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'T'
                 )/(T_el**3)
             )
@@ -20461,7 +20461,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_2), ncols=100
         ):
             F_v_2s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'F'
                 )/(T_el**3)
             )
@@ -20474,7 +20474,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_2), ncols=100
         ):
             P_v_2s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'P'
                 )/(T_el**3)
             )
@@ -20487,7 +20487,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_2), ncols=100
         ):
             Q_v_2s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'Q'
                 )/(T_el**3)
             )
@@ -20500,7 +20500,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_2), ncols=100
         ):
             H_v_2s.append(
-                cluster.sdensity_bu(
+                cluster.sdensity_buns(
                     T_el, mu_el, phi_re_el, phi_im_el, 'H'
                 )/(T_el**3)
             )
@@ -20630,7 +20630,8 @@ def epja_beth_uhlenbeck1():
 
     fig1 = matplotlib.pyplot.figure(num = 1, figsize = (12.0, 5.0))
     ax1 = fig1.add_subplot(1, 2, 1)
-    ax1.axis([80., 280., -3.0, 20.0])
+    # ax1.axis([80., 280., -6.0, 20.0])
+    ax1.axis([80., 230., -1.8, 1.2])#zoom
 
     ax1.add_patch(matplotlib.patches.Polygon(lQCD_1, 
             closed = True, fill = True, color = 'green', alpha = 0.3))
@@ -20641,7 +20642,8 @@ def epja_beth_uhlenbeck1():
     # ax1.plot(T_1, total_ccluster_1s, '-.', c = 'red')
     ax1.plot(T_1, total_1, '-', c = 'black')
     ax1.plot(T_1, total_1s, '-.', c = 'black')
-    # ax1.plot(T_1, total_qgp_nog_1, ':', c = 'blue')
+    ax1.plot(T_1, total_qgp_nog_1, '-', c = 'blue')
+    ax1.plot(T_1, total_pert_1, '-', c = 'magenta')
 
     ax1.plot(T_1, pi_v_1s, '-', c="#653239")
     ax1.plot(T_1, K_v_1s, '-', c="red")
@@ -20667,12 +20669,12 @@ def epja_beth_uhlenbeck1():
     ax1.plot(T_1, omega_v_1, ':', c="#FF37A6")
     ax1.plot(T_1, T_v_1, ':', c="#23CE6B")
 
-    ax1.text(171, 5.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
-    ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
-    ax1.text(190, -1.5, r"Color singlet clusters", color="green", fontsize=14)
-    ax1.text(190, 0.5, r"Color charged clusters", color="red", fontsize=14)
-    ax1.text(250, 8.5, r"Quarks", color="blue", fontsize=14)
-    ax1.text(125, 13, r"Total entropy density", color="black", fontsize=14)
+    # ax1.text(171, 5.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
+    # ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
+    # ax1.text(190, -1.5, r"Color singlet clusters", color="green", fontsize=14)
+    # ax1.text(190, 0.5, r"Color charged clusters", color="red", fontsize=14)
+    # ax1.text(250, 8.5, r"Quarks", color="blue", fontsize=14)
+    # ax1.text(125, 13, r"Total entropy density", color="black", fontsize=14)
 
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -20682,7 +20684,8 @@ def epja_beth_uhlenbeck1():
     ax1.set_ylabel(r'$\mathrm{s/T^3}$', fontsize = 16)
 
     ax2 = fig1.add_subplot(1, 2, 2)
-    ax2.axis([80., 280., -3.0, 20.0])
+    # ax2.axis([80., 280., -6.0, 20.0])
+    ax2.axis([80., 230., -1.8, 1.2])#zoom
 
     ax2.add_patch(matplotlib.patches.Polygon(lQCD_2, 
             closed = True, fill = True, color = 'green', alpha = 0.3))
@@ -20693,7 +20696,8 @@ def epja_beth_uhlenbeck1():
     # ax2.plot(T_2, total_ccluster_2s, '-.', c = 'red')
     ax2.plot(T_2, total_2, '-', c = 'black')
     ax2.plot(T_2, total_2s, '-.', c = 'black')
-    # ax2.plot(T_2, total_qgp_nog_2, ':', c = 'blue')
+    ax2.plot(T_1, total_qgp_nog_2, '-', c = 'blue')
+    ax2.plot(T_1, total_pert_2, '-', c = 'magenta')
 
     ax2.plot(T_1, pi_v_2s, '-', c="#653239")
     ax2.plot(T_1, K_v_2s, '-', c="red")
@@ -20719,12 +20723,12 @@ def epja_beth_uhlenbeck1():
     ax2.plot(T_1, omega_v_2, ':', c="#FF37A6")
     ax2.plot(T_1, T_v_2, ':', c="#23CE6B")
 
-    ax2.text(165, 6.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
-    ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
-    ax2.text(190, -1.5, r"Color singlet clusters", color="green", fontsize=14)
-    ax2.text(190, 0.5, r"Color charged clusters", color="red", fontsize=14)
-    ax2.text(250, 10.5, r"Quarks", color="blue", fontsize=14)
-    ax2.text(100, 13, r"Total entropy density", color="black", fontsize=14)
+    # ax2.text(165, 6.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
+    # ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
+    # ax2.text(190, -1.5, r"Color singlet clusters", color="green", fontsize=14)
+    # ax2.text(190, 0.5, r"Color charged clusters", color="red", fontsize=14)
+    # ax2.text(250, 10.5, r"Quarks", color="blue", fontsize=14)
+    # ax2.text(100, 13, r"Total entropy density", color="black", fontsize=14)
 
     for tick in ax2.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -21612,16 +21616,26 @@ def epja_beth_uhlenbeck2():
         )
     lQCD_2 = [[x, y] for x, y in zip(lQCD_2_x, lQCD_2_y)]
 
+    with open(lattice_files+"2212_09043_mub_T_2p5_nT3.pickle", "rb") as file:
+        n_poly = pickle.load(file)
+
     fig1 = matplotlib.pyplot.figure(num = 1, figsize = (12.0, 5.0))
     ax1 = fig1.add_subplot(1, 2, 1)
-    ax1.axis([80., 280., -0.2, 0.8])
+    # ax1.axis([80., 280., -0.2, 0.8])
+    ax1.axis([110., 160., -0.045, 0.06])#zoom
+
+    ax1.add_patch(
+        matplotlib.patches.Polygon(
+            n_poly, closed = True, fill = True, color = "cyan", alpha = 0.3
+        )
+    )
 
     # ax1.plot(T_1, total_cluster_1, '-', c = 'green')
     # ax1.plot(T_1, total_cluster_1s, '-.', c = 'green')
     # ax1.plot(T_1, total_ccluster_1, '-', c = 'red')
     # ax1.plot(T_1, total_ccluster_1s, '-.', c = 'red')
-    ax1.plot(T_1, total_1, '-', c = 'black')
-    ax1.plot(T_1, total_1s, '-.', c = 'black')
+    ax1.plot(T_1, total_1, ':', c = 'black')
+    ax1.plot(T_1, total_1s, '-', c = 'black')
     # ax1.plot(T_1, total_qgp_nog_1, ':', c = 'blue')
 
     ax1.plot(T_1, pi_v_1s, '-', c="#653239")
@@ -21648,12 +21662,12 @@ def epja_beth_uhlenbeck2():
     ax1.plot(T_1, omega_v_1, ':', c="#FF37A6")
     ax1.plot(T_1, T_v_1, ':', c="#23CE6B")
 
-    ax1.text(171, 5.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
-    ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
-    ax1.text(190, -1.5, r"Color singlet clusters", color="green", fontsize=14)
-    ax1.text(190, 0.5, r"Color charged clusters", color="red", fontsize=14)
-    ax1.text(250, 8.5, r"Quarks", color="blue", fontsize=14)
-    ax1.text(125, 13, r"Total entropy density", color="black", fontsize=14)
+    # ax1.text(171, 5.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
+    # ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
+    # ax1.text(190, -1.5, r"Color singlet clusters", color="green", fontsize=14)
+    # ax1.text(190, 0.5, r"Color charged clusters", color="red", fontsize=14)
+    # ax1.text(250, 8.5, r"Quarks", color="blue", fontsize=14)
+    # ax1.text(125, 13, r"Total entropy density", color="black", fontsize=14)
 
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -21663,14 +21677,21 @@ def epja_beth_uhlenbeck2():
     ax1.set_ylabel(r'$\mathrm{n_B/T^3}$', fontsize = 16)
 
     ax2 = fig1.add_subplot(1, 2, 2)
-    ax2.axis([80., 280., -0.2, 0.8])
+    # ax2.axis([80., 280., -0.2, 0.8])
+    ax2.axis([110., 160., -0.045, 0.06])#zoom
+
+    ax2.add_patch(
+        matplotlib.patches.Polygon(
+            n_poly, closed = True, fill = True, color = "cyan", alpha = 0.3
+        )
+    )
 
     # ax2.plot(T_2, total_cluster_2, '-', c = 'green')
     # ax2.plot(T_2, total_cluster_2s, '-.', c = 'green')
     # ax2.plot(T_2, total_ccluster_2, '-', c = 'red')
     # ax2.plot(T_2, total_ccluster_2s, '-.', c = 'red')
-    ax2.plot(T_2, total_2, '-', c = 'black')
-    ax2.plot(T_2, total_2s, '-.', c = 'black')
+    ax2.plot(T_2, total_2, ':', c = 'black')
+    ax2.plot(T_2, total_2s, '-', c = 'black')
     # ax2.plot(T_2, total_qgp_nog_2, ':', c = 'blue')
 
     ax2.plot(T_1, pi_v_2s, '-', c="#653239")
@@ -21697,11 +21718,11 @@ def epja_beth_uhlenbeck2():
     ax2.plot(T_1, omega_v_2, ':', c="#FF37A6")
     ax2.plot(T_1, T_v_2, ':', c="#23CE6B")
 
-    ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
-    ax2.text(190, -1.5, r"Color singlet clusters", color="green", fontsize=14)
-    ax2.text(190, 0.5, r"Color charged clusters", color="red", fontsize=14)
-    ax2.text(250, 10.5, r"Quarks", color="blue", fontsize=14)
-    ax2.text(100, 13, r"Total entropy density", color="black", fontsize=14)
+    # ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
+    # ax2.text(190, -1.5, r"Color singlet clusters", color="green", fontsize=14)
+    # ax2.text(190, 0.5, r"Color charged clusters", color="red", fontsize=14)
+    # ax2.text(250, 10.5, r"Quarks", color="blue", fontsize=14)
+    # ax2.text(100, 13, r"Total entropy density", color="black", fontsize=14)
 
     for tick in ax2.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -23426,12 +23447,18 @@ def lattice_thermo():
     
     import math
     import numpy
+    import pickle
+    import platform
 
     import scipy.interpolate
     import matplotlib.pyplot
+    if platform.system() == "Linux":
+        matplotlib.use("TkAgg")
     import matplotlib.patches
 
     lattice_files = "C:/Users/matci/Desktop/lattice_thermo/"
+    if platform.system() == "Linux":
+        lattice_files = "/home/mcierniak/Data/2023_epja/lattice_data_raw/"
 
     x_p_l, y_p_l = list(), list()
     x_p_h, y_p_h = list(), list()
@@ -23441,6 +23468,7 @@ def lattice_thermo():
     x_s_h, y_s_h = list(), list()
     
     T = numpy.linspace(131.0, 279.0, num=200)
+    mu = [el*2.5 for el in T]
 
     with open(lattice_files+"2212_09043_mub_T_2p5_p_low.dat", 'r') as file:
         for line in file:
@@ -23500,6 +23528,13 @@ def lattice_thermo():
 
     n_h = [avg_el+delta_el for avg_el, delta_el in zip(n_avg, n_delta)]
     n_l = [avg_el-delta_el if avg_el-delta_el >= 0.0 else 0.0 for avg_el, delta_el in zip(n_avg, n_delta)]
+    n_poly = [[x_el, y_el] for x_el, y_el in zip(T, n_l)]
+    for x_el, y_el in zip(T[::-1], n_h[::-1]):
+        n_poly.append([x_el, y_el])
+    with open(lattice_files+"2212_09043_mub_T_2p5_nT3.pickle", "wb") as file:
+        pickle.dump(n_poly, file)
+    with open(lattice_files+"2212_09043_mub_T_2p5_sT3.pickle", "wb") as file:
+        pickle.dump(s_poly, file)
 
     fig1 = matplotlib.pyplot.figure(num = 1, figsize = (6.0, 5.0))
     ax1 = fig1.add_subplot(1, 1, 1)
@@ -23524,8 +23559,11 @@ def lattice_thermo():
     ax1.plot(T, e_avg, '--', c="green")
     ax1.plot(T, s_avg, '--', c="red")
     ax1.plot(T, n_avg, '--', c="cyan")
-    ax1.plot(T, n_h, '-', c="cyan")
-    ax1.plot(T, n_l, '-', c="cyan")
+    ax1.add_patch(
+        matplotlib.patches.Polygon(
+            n_poly, closed = True, fill = True, color = "cyan", alpha = 0.3
+        )
+    )
 
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -23542,6 +23580,6 @@ def lattice_thermo():
 
 if __name__ == '__main__':
 
-    lattice_thermo()
+    epja_beth_uhlenbeck1()
 
     print("END")
