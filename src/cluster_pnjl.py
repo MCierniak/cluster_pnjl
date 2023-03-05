@@ -20538,6 +20538,13 @@ def epja_beth_uhlenbeck1():
                 perturbative_gluon_v_1, pnjl_u_v_1, pnjl_d_v_1, pnjl_s_v_1
             )
     ]
+    total_pnjl_1 = [
+        sum(el) for el in 
+            zip(
+                sigma_v_1, sea_u_v_1, sea_d_v_1, sea_s_v_1,
+                pnjl_u_v_1, pnjl_d_v_1, pnjl_s_v_1
+            )
+    ]
     total_qgp_nog_1 = [
         sum(el) for el in 
             zip(
@@ -20578,6 +20585,13 @@ def epja_beth_uhlenbeck1():
                 sigma_v_2, sea_u_v_2, sea_d_v_2, sea_s_v_2, gluon_v_2,
                 perturbative_u_v_2, perturbative_d_v_2, perturbative_s_v_2,
                 perturbative_gluon_v_2, pnjl_u_v_2, pnjl_d_v_2, pnjl_s_v_2
+            )
+    ]
+    total_pnjl_2 = [
+        sum(el) for el in 
+            zip(
+                sigma_v_2, sea_u_v_2, sea_d_v_2, sea_s_v_2,
+                pnjl_u_v_2, pnjl_d_v_2, pnjl_s_v_2
             )
     ]
     total_qgp_nog_2 = [
@@ -20630,51 +20644,26 @@ def epja_beth_uhlenbeck1():
 
     fig1 = matplotlib.pyplot.figure(num = 1, figsize = (12.0, 5.0))
     ax1 = fig1.add_subplot(1, 2, 1)
-    # ax1.axis([80., 280., -6.0, 20.0])
-    ax1.axis([80., 230., -1.8, 1.2])#zoom
+    ax1.axis([80., 280., -6.0, 20.0])
 
     ax1.add_patch(matplotlib.patches.Polygon(lQCD_1, 
             closed = True, fill = True, color = 'green', alpha = 0.3))
 
-    # ax1.plot(T_1, total_cluster_1, '-', c = 'green')
-    # ax1.plot(T_1, total_cluster_1s, '-.', c = 'green')
-    # ax1.plot(T_1, total_ccluster_1, '-', c = 'red')
-    # ax1.plot(T_1, total_ccluster_1s, '-.', c = 'red')
-    ax1.plot(T_1, total_1, '-', c = 'black')
-    ax1.plot(T_1, total_1s, '-.', c = 'black')
-    ax1.plot(T_1, total_qgp_nog_1, '-', c = 'blue')
-    ax1.plot(T_1, total_pert_1, '-', c = 'magenta')
+    ax1.plot(T_1, total_cluster_1s, '--', c = 'green')
+    ax1.plot(T_1, total_ccluster_1s, '--', c = 'red')
+    ax1.plot(T_1, total_1s, '-', c = 'black')
+    ax1.plot(T_1, total_pert_1, '--', c = 'magenta')
+    ax1.plot(T_1, total_pnjl_1, '--', c = 'blue')
+    ax1.plot(T_1, gluon_v_1, '--', c = 'purple')
 
-    ax1.plot(T_1, pi_v_1s, '-', c="#653239")
-    ax1.plot(T_1, K_v_1s, '-', c="red")
-    ax1.plot(T_1, rho_v_1s, '-', c="#858AE3")
-    ax1.plot(T_1, D_v_1s, '-', c="#4CB944")
-    ax1.plot(T_1, N_v_1s, '-', c="#DEA54B")
-    ax1.plot(T_1, F_v_1s, '-', c="#DB222A")
-    ax1.plot(T_1, P_v_1s, '-', c="#78BC61")
-    ax1.plot(T_1, Q_v_1s, '-', c="#55DBCB")
-    ax1.plot(T_1, H_v_1s, '-', c="#A846A0")
-    ax1.plot(T_1, omega_v_1s, '-', c="#FF37A6")
-    ax1.plot(T_1, T_v_1s, '-', c="#23CE6B")
-
-    ax1.plot(T_1, pi_v_1, ':', c="#653239")
-    ax1.plot(T_1, K_v_1, ':', c="red")
-    ax1.plot(T_1, rho_v_1, ':', c="#858AE3")
-    ax1.plot(T_1, D_v_1, ':', c="#4CB944")
-    ax1.plot(T_1, N_v_1, ':', c="#DEA54B")
-    ax1.plot(T_1, F_v_1, ':', c="#DB222A")
-    ax1.plot(T_1, P_v_1, ':', c="#78BC61")
-    ax1.plot(T_1, Q_v_1, ':', c="#55DBCB")
-    ax1.plot(T_1, H_v_1, ':', c="#A846A0")
-    ax1.plot(T_1, omega_v_1, ':', c="#FF37A6")
-    ax1.plot(T_1, T_v_1, ':', c="#23CE6B")
-
-    # ax1.text(171, 5.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
-    # ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
-    # ax1.text(190, -1.5, r"Color singlet clusters", color="green", fontsize=14)
-    # ax1.text(190, 0.5, r"Color charged clusters", color="red", fontsize=14)
-    # ax1.text(250, 8.5, r"Quarks", color="blue", fontsize=14)
-    # ax1.text(125, 13, r"Total entropy density", color="black", fontsize=14)
+    ax1.text(185, 7.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
+    ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
+    ax1.text(190, 0.5, r"Color singlet clusters", color="green", fontsize=14)
+    ax1.text(190, -1.5, r"Color charged clusters", color="red", fontsize=14)
+    ax1.text(190, -3.5, r"Perturbative correction", color="magenta", fontsize=14)
+    ax1.text(250, 12.0, r"PNJL", color="blue", fontsize=14)
+    ax1.text(188, 3.0, r"Polyakov-loop potential", color="purple", fontsize=14)
+    ax1.text(125, 13, r"Total entropy density", color="black", fontsize=14)
 
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -20684,51 +20673,26 @@ def epja_beth_uhlenbeck1():
     ax1.set_ylabel(r'$\mathrm{s/T^3}$', fontsize = 16)
 
     ax2 = fig1.add_subplot(1, 2, 2)
-    # ax2.axis([80., 280., -6.0, 20.0])
-    ax2.axis([80., 230., -1.8, 1.2])#zoom
+    ax2.axis([80., 280., -6.0, 20.0])
 
     ax2.add_patch(matplotlib.patches.Polygon(lQCD_2, 
             closed = True, fill = True, color = 'green', alpha = 0.3))
 
-    # ax2.plot(T_2, total_cluster_2, '-', c = 'green')
-    # ax2.plot(T_2, total_cluster_2s, '-.', c = 'green')
-    # ax2.plot(T_2, total_ccluster_2, '-', c = 'red')
-    # ax2.plot(T_2, total_ccluster_2s, '-.', c = 'red')
-    ax2.plot(T_2, total_2, '-', c = 'black')
-    ax2.plot(T_2, total_2s, '-.', c = 'black')
-    ax2.plot(T_1, total_qgp_nog_2, '-', c = 'blue')
-    ax2.plot(T_1, total_pert_2, '-', c = 'magenta')
+    ax2.plot(T_2, total_cluster_2s, '--', c = 'green')
+    ax2.plot(T_2, total_ccluster_2s, '--', c = 'red')
+    ax2.plot(T_2, total_2s, '-', c = 'black')
+    ax2.plot(T_2, total_pert_2, '--', c = 'magenta')
+    ax2.plot(T_2, total_pnjl_2, '--', c = 'blue')
+    ax2.plot(T_2, gluon_v_2, '--', c = 'purple')
 
-    ax2.plot(T_1, pi_v_2s, '-', c="#653239")
-    ax2.plot(T_1, K_v_2s, '-', c="red")
-    ax2.plot(T_1, rho_v_2s, '-', c="#858AE3")
-    ax2.plot(T_1, D_v_2s, '-', c="#4CB944")
-    ax2.plot(T_1, N_v_2s, '-', c="#DEA54B")
-    ax2.plot(T_1, F_v_2s, '-', c="#DB222A")
-    ax2.plot(T_1, P_v_2s, '-', c="#78BC61")
-    ax2.plot(T_1, Q_v_2s, '-', c="#55DBCB")
-    ax2.plot(T_1, H_v_2s, '-', c="#A846A0")
-    ax2.plot(T_1, omega_v_2s, '-', c="#FF37A6")
-    ax2.plot(T_1, T_v_2s, '-', c="#23CE6B")
-
-    ax2.plot(T_1, pi_v_2, ':', c="#653239")
-    ax2.plot(T_1, K_v_2, ':', c="red")
-    ax2.plot(T_1, rho_v_2, ':', c="#858AE3")
-    ax2.plot(T_1, D_v_2, ':', c="#4CB944")
-    ax2.plot(T_1, N_v_2, ':', c="#DEA54B")
-    ax2.plot(T_1, F_v_2, ':', c="#DB222A")
-    ax2.plot(T_1, P_v_2, ':', c="#78BC61")
-    ax2.plot(T_1, Q_v_2, ':', c="#55DBCB")
-    ax2.plot(T_1, H_v_2, ':', c="#A846A0")
-    ax2.plot(T_1, omega_v_2, ':', c="#FF37A6")
-    ax2.plot(T_1, T_v_2, ':', c="#23CE6B")
-
-    # ax2.text(165, 6.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
-    # ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
-    # ax2.text(190, -1.5, r"Color singlet clusters", color="green", fontsize=14)
-    # ax2.text(190, 0.5, r"Color charged clusters", color="red", fontsize=14)
-    # ax2.text(250, 10.5, r"Quarks", color="blue", fontsize=14)
-    # ax2.text(100, 13, r"Total entropy density", color="black", fontsize=14)
+    ax2.text(185, 9.0, r"Bollweg et al. (2022)", color="green", fontsize=14)
+    ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
+    ax2.text(190, 0.5, r"Color singlet clusters", color="green", fontsize=14)
+    ax2.text(190, -1.5, r"Color charged clusters", color="red", fontsize=14)
+    ax2.text(188, -3.8, r"Perturbative correction", color="magenta", fontsize=14)
+    ax2.text(260, 15.0, r"PNJL", color="blue", fontsize=14)
+    ax2.text(186, 3.0, r"Polyakov-loop potential", color="purple", fontsize=14)
+    ax2.text(190, 18, r"Total entropy density", color="black", fontsize=14)
 
     for tick in ax2.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -20798,7 +20762,6 @@ def epja_beth_uhlenbeck2():
     T_1 = numpy.linspace(1.0, 280.0, 200)
     T_2 = numpy.linspace(1.0, 280.0, 200)
 
-    # mu_1 = [0.0 / 3.0 for el in T_1]
     mu_1 = [(2.5 * el) / 3.0 for el in T_2]
     mu_2 = [(2.5 * el) / 3.0 for el in T_2]
 
@@ -21568,6 +21531,20 @@ def epja_beth_uhlenbeck2():
                 perturbative_gluon_v_2, pnjl_u_v_2, pnjl_d_v_2, pnjl_s_v_2
             )
     ]
+    total_pnjl_2 = [
+        sum(el) for el in 
+            zip(
+                sigma_v_2, sea_u_v_2, sea_d_v_2, sea_s_v_2, gluon_v_2,
+                pnjl_u_v_2, pnjl_d_v_2, pnjl_s_v_2
+            )
+    ]
+    total_pert_2 = [
+        sum(el) for el in 
+            zip(
+                perturbative_u_v_2, perturbative_d_v_2, perturbative_s_v_2,
+                perturbative_gluon_v_2
+            )
+    ]
     total_qgp_nog_2 = [
         sum(el) for el in 
             zip(
@@ -21619,110 +21596,34 @@ def epja_beth_uhlenbeck2():
     with open(lattice_files+"2212_09043_mub_T_2p5_nT3.pickle", "rb") as file:
         n_poly = pickle.load(file)
 
-    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (12.0, 5.0))
-    ax1 = fig1.add_subplot(1, 2, 1)
-    # ax1.axis([80., 280., -0.2, 0.8])
-    ax1.axis([110., 160., -0.045, 0.06])#zoom
+    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (6.0, 5.0))
 
-    ax1.add_patch(
-        matplotlib.patches.Polygon(
-            n_poly, closed = True, fill = True, color = "cyan", alpha = 0.3
-        )
+    fig1.subplots_adjust(
+        left=0.167, bottom=0.11, right=0.988, top=0.979, wspace=0.2, hspace=0.2
     )
 
-    # ax1.plot(T_1, total_cluster_1, '-', c = 'green')
-    # ax1.plot(T_1, total_cluster_1s, '-.', c = 'green')
-    # ax1.plot(T_1, total_ccluster_1, '-', c = 'red')
-    # ax1.plot(T_1, total_ccluster_1s, '-.', c = 'red')
-    ax1.plot(T_1, total_1, ':', c = 'black')
-    ax1.plot(T_1, total_1s, '-', c = 'black')
-    # ax1.plot(T_1, total_qgp_nog_1, ':', c = 'blue')
-
-    ax1.plot(T_1, pi_v_1s, '-', c="#653239")
-    ax1.plot(T_1, K_v_1s, '-', c="red")
-    ax1.plot(T_1, rho_v_1s, '-', c="#858AE3")
-    ax1.plot(T_1, D_v_1s, '-', c="#4CB944")
-    ax1.plot(T_1, N_v_1s, '-', c="#DEA54B")
-    ax1.plot(T_1, F_v_1s, '-', c="#DB222A")
-    ax1.plot(T_1, P_v_1s, '-', c="#78BC61")
-    ax1.plot(T_1, Q_v_1s, '-', c="#55DBCB")
-    ax1.plot(T_1, H_v_1s, '-', c="#A846A0")
-    ax1.plot(T_1, omega_v_1s, '-', c="#FF37A6")
-    ax1.plot(T_1, T_v_1s, '-', c="#23CE6B")
-
-    ax1.plot(T_1, pi_v_1, ':', c="#653239")
-    ax1.plot(T_1, K_v_1, ':', c="red")
-    ax1.plot(T_1, rho_v_1, ':', c="#858AE3")
-    ax1.plot(T_1, D_v_1, ':', c="#4CB944")
-    ax1.plot(T_1, N_v_1, ':', c="#DEA54B")
-    ax1.plot(T_1, F_v_1, ':', c="#DB222A")
-    ax1.plot(T_1, P_v_1, ':', c="#78BC61")
-    ax1.plot(T_1, Q_v_1, ':', c="#55DBCB")
-    ax1.plot(T_1, H_v_1, ':', c="#A846A0")
-    ax1.plot(T_1, omega_v_1, ':', c="#FF37A6")
-    ax1.plot(T_1, T_v_1, ':', c="#23CE6B")
-
-    # ax1.text(171, 5.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
-    # ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
-    # ax1.text(190, -1.5, r"Color singlet clusters", color="green", fontsize=14)
-    # ax1.text(190, 0.5, r"Color charged clusters", color="red", fontsize=14)
-    # ax1.text(250, 8.5, r"Quarks", color="blue", fontsize=14)
-    # ax1.text(125, 13, r"Total entropy density", color="black", fontsize=14)
-
-    for tick in ax1.xaxis.get_major_ticks():
-        tick.label.set_fontsize(16) 
-    for tick in ax1.yaxis.get_major_ticks():
-        tick.label.set_fontsize(16)
-    ax1.set_xlabel(r'T [MeV]', fontsize = 16)
-    ax1.set_ylabel(r'$\mathrm{n_B/T^3}$', fontsize = 16)
-
-    ax2 = fig1.add_subplot(1, 2, 2)
-    # ax2.axis([80., 280., -0.2, 0.8])
-    ax2.axis([110., 160., -0.045, 0.06])#zoom
+    ax2 = fig1.add_subplot(1, 1, 1)
+    ax2.axis([80., 280., -0.4, 1.2])
 
     ax2.add_patch(
         matplotlib.patches.Polygon(
-            n_poly, closed = True, fill = True, color = "cyan", alpha = 0.3
+            n_poly, closed = True, fill = True, color = "green", alpha = 0.3
         )
     )
 
-    # ax2.plot(T_2, total_cluster_2, '-', c = 'green')
-    # ax2.plot(T_2, total_cluster_2s, '-.', c = 'green')
-    # ax2.plot(T_2, total_ccluster_2, '-', c = 'red')
-    # ax2.plot(T_2, total_ccluster_2s, '-.', c = 'red')
-    ax2.plot(T_2, total_2, ':', c = 'black')
+    ax2.plot(T_2, total_cluster_2s, '--', c = 'green')
+    ax2.plot(T_2, total_ccluster_2s, '--', c = 'red')
+    ax2.plot(T_2, total_pert_2, '--', c = 'magenta')
+    ax2.plot(T_2, total_pnjl_2, '--', c = 'blue')
     ax2.plot(T_2, total_2s, '-', c = 'black')
-    # ax2.plot(T_2, total_qgp_nog_2, ':', c = 'blue')
 
-    ax2.plot(T_1, pi_v_2s, '-', c="#653239")
-    ax2.plot(T_1, K_v_2s, '-', c="red")
-    ax2.plot(T_1, rho_v_2s, '-', c="#858AE3")
-    ax2.plot(T_1, D_v_2s, '-', c="#4CB944")
-    ax2.plot(T_1, N_v_2s, '-', c="#DEA54B")
-    ax2.plot(T_1, F_v_2s, '-', c="#DB222A")
-    ax2.plot(T_1, P_v_2s, '-', c="#78BC61")
-    ax2.plot(T_1, Q_v_2s, '-', c="#55DBCB")
-    ax2.plot(T_1, H_v_2s, '-', c="#A846A0")
-    ax2.plot(T_1, omega_v_2s, '-', c="#FF37A6")
-    ax2.plot(T_1, T_v_2s, '-', c="#23CE6B")
-
-    ax2.plot(T_1, pi_v_2, ':', c="#653239")
-    ax2.plot(T_1, K_v_2, ':', c="red")
-    ax2.plot(T_1, rho_v_2, ':', c="#858AE3")
-    ax2.plot(T_1, D_v_2, ':', c="#4CB944")
-    ax2.plot(T_1, N_v_2, ':', c="#DEA54B")
-    ax2.plot(T_1, F_v_2, ':', c="#DB222A")
-    ax2.plot(T_1, P_v_2, ':', c="#78BC61")
-    ax2.plot(T_1, Q_v_2, ':', c="#55DBCB")
-    ax2.plot(T_1, H_v_2, ':', c="#A846A0")
-    ax2.plot(T_1, omega_v_2, ':', c="#FF37A6")
-    ax2.plot(T_1, T_v_2, ':', c="#23CE6B")
-
-    # ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
-    # ax2.text(190, -1.5, r"Color singlet clusters", color="green", fontsize=14)
-    # ax2.text(190, 0.5, r"Color charged clusters", color="red", fontsize=14)
-    # ax2.text(250, 10.5, r"Quarks", color="blue", fontsize=14)
-    # ax2.text(100, 13, r"Total entropy density", color="black", fontsize=14)
+    ax2.text(196, 1.1, r"Bollweg et al. (2022)", color="green", fontsize=14)
+    ax2.text(85, 1.1, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
+    ax2.text(150, 0.03, r"Color singlet clusters", color="green", fontsize=14)
+    ax2.text(150, -0.08, r"Color charged clusters", color="red", fontsize=14)
+    ax2.text(188, -0.18, r"Perturbative correction", color="magenta", fontsize=14)
+    ax2.text(250, 0.8, r"PNJL", color="blue", fontsize=14)
+    ax2.text(195, 0.5, r"Total baryon density", color="black", fontsize=14)
 
     for tick in ax2.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -23580,6 +23481,6 @@ def lattice_thermo():
 
 if __name__ == '__main__':
 
-    epja_beth_uhlenbeck1()
+    epja_beth_uhlenbeck2()
 
     print("END")
