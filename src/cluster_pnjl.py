@@ -9459,15 +9459,16 @@ def epja_figure10_buns():
 
     warnings.filterwarnings("ignore")
 
-    calc_0 = True
-    calc_1 = True
-    calc_2 = True
+    calc_0 = False
+    calc_1 = False
+    calc_2 = False
 
     calc_mesh_0   = True
     calc_mesh_1   = True
     calc_mesh_2   = True
     calc_mesh_qgp = True
     calc_mesh_no_pert = True
+    calc_mesh_q = True
 
     files = "D:/EoS/epja/figure10_buns/"
 
@@ -9482,6 +9483,7 @@ def epja_figure10_buns():
     total_2_meshgrid = numpy.zeros_like(mu_meshgrid)
     total_qgp_meshgrid = numpy.zeros_like(mu_meshgrid)
     total_no_pert_meshgrid = numpy.zeros_like(mu_meshgrid)
+    total_q_meshgrid = numpy.zeros_like(mu_meshgrid)
 
     for mu in numpy.linspace(1.0, 200.0, num=200):
 
@@ -10292,6 +10294,31 @@ def epja_figure10_buns():
 
         if calc_2:
 
+            print("Hexaquark thermo #2, mu =", mu_round)
+            for T_el, phi_re_el, phi_im_el in tqdm.tqdm(
+                zip(T, phi_re_v, phi_im_v), total=len(T), ncols=100
+            ):
+                b_H_v_2.append(
+                    cluster.bdensity_buns(
+                        T_el, mu_round, phi_re_el, phi_im_el, 'H'
+                    )
+                )
+                s_H_v_2.append(
+                    cluster.sdensity_buns(
+                        T_el, mu_round, phi_re_el, phi_im_el, 'H'
+                    )
+                )
+            with open(
+                files+"b_H_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "wb"
+            ) as file:
+                pickle.dump(b_H_v_2, file)
+            with open(
+                files+"s_H_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
+                "wb"
+            ) as file:
+                pickle.dump(s_H_v_2, file)
+
             print("Pion thermo #2, mu =", mu_round)
             for T_el, phi_re_el, phi_im_el in tqdm.tqdm(
                 zip(T, phi_re_v, phi_im_v), total=len(T), ncols=100
@@ -10541,31 +10568,6 @@ def epja_figure10_buns():
                 "wb"
             ) as file:
                 pickle.dump(s_Q_v_2, file)
-
-            print("Hexaquark thermo #2, mu =", mu_round)
-            for T_el, phi_re_el, phi_im_el in tqdm.tqdm(
-                zip(T, phi_re_v, phi_im_v), total=len(T), ncols=100
-            ):
-                b_H_v_2.append(
-                    cluster.bdensity_buns(
-                        T_el, mu_round, phi_re_el, phi_im_el, 'H'
-                    )
-                )
-                s_H_v_2.append(
-                    cluster.sdensity_buns(
-                        T_el, mu_round, phi_re_el, phi_im_el, 'H'
-                    )
-                )
-            with open(
-                files+"b_H_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
-                "wb"
-            ) as file:
-                pickle.dump(b_H_v_2, file)
-            with open(
-                files+"s_H_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
-                "wb"
-            ) as file:
-                pickle.dump(s_H_v_2, file)
         else:
             with open(
                 files+"b_pi_v_2_" + str(mu_round).replace('.', 'p') + ".pickle",
@@ -10705,9 +10707,14 @@ def epja_figure10_buns():
         ]
         total_b_no_pert = [
             math.fsum(el) for el in zip(
+                b_sigma_v, b_gluon_v, b_sea_u_v, b_sea_d_v, b_sea_s_v,
+                b_pnjl_u_v, b_pnjl_d_v, b_pnjl_s_v
+            )
+        ]
+        total_b_q = [
+            math.fsum(el) for el in zip(
                 b_sigma_v, b_sea_u_v, b_sea_d_v, b_sea_s_v,
-                b_perturbative_u_v, b_perturbative_d_v, b_perturbative_s_v,
-                b_perturbative_gluon_v, b_pnjl_u_v, b_pnjl_d_v, b_pnjl_s_v
+                b_pnjl_u_v, b_pnjl_d_v, b_pnjl_s_v
             )
         ]
         total_s_1 = [
@@ -10737,15 +10744,21 @@ def epja_figure10_buns():
         ]
         total_s_no_pert = [
             math.fsum(el) for el in zip(
+                s_sigma_v, s_gluon_v, s_sea_u_v, s_sea_d_v, s_sea_s_v,
+                s_pnjl_u_v, s_pnjl_d_v, s_pnjl_s_v
+            )
+        ]
+        total_s_q = [
+            math.fsum(el) for el in zip(
                 s_sigma_v, s_sea_u_v, s_sea_d_v, s_sea_s_v,
-                s_perturbative_u_v, s_perturbative_d_v, s_perturbative_s_v,
-                s_perturbative_gluon_v, s_pnjl_u_v, s_pnjl_d_v, s_pnjl_s_v
+                s_pnjl_u_v, s_pnjl_d_v, s_pnjl_s_v
             )
         ]
         total_1 = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_1, total_b_1)]
         total_2 = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_2, total_b_2)]
         total_qgp = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_qgp, total_b_qgp)]
         total_no_pert = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_no_pert, total_b_no_pert)]
+        total_q = [el1/el2 if el2 != 0.0 else 0.0 for el1, el2 in zip(total_s_q, total_b_q)]
 
         if calc_mesh_0:
             for test_el_T in T_linear:
@@ -10796,6 +10809,16 @@ def epja_figure10_buns():
                 if len(testing3) != 1:
                     raise RuntimeError("Coś nie pykło!")
                 total_no_pert_meshgrid[testing3[0][0],testing3[0][1]] = el_tpert
+
+        if calc_mesh_q:
+            for test_el_T, el_tqgp in zip(T_linear, total_q):
+                test_mub = mu_round
+                testing = list(zip(*numpy.where(mu_meshgrid == test_mub)))
+                testing2 = list(zip(*numpy.where(T_meshgrid == test_el_T)))
+                testing3 = list(set(testing).intersection(testing2))
+                if len(testing3) != 1:
+                    raise RuntimeError("Coś nie pykło!")
+                total_q_meshgrid[testing3[0][0],testing3[0][1]] = el_tqgp
 
     if calc_mesh_0:
         with open(files+"mu_T_meshgrid.pickle", "wb") as file:
@@ -10918,14 +10941,14 @@ def epja_figure10_buns():
             closed = True, fill = True, color = 'green', alpha = 0.3))
     ax1.add_patch(matplotlib.patches.Polygon(pQCD_25, 
             closed = True, fill = True, color = 'green', alpha = 0.4))
-    ax1.add_patch(matplotlib.patches.Polygon(lQCD_50, 
-            closed = True, fill = True, color = 'blue', alpha = 0.3))
-    ax1.add_patch(matplotlib.patches.Polygon(pQCD_50, 
-            closed = True, fill = True, color = 'blue', alpha = 0.4))
-    ax1.add_patch(matplotlib.patches.Polygon(lQCD_100, 
-            closed = True, fill = True, color = 'purple', alpha = 0.3))
-    ax1.add_patch(matplotlib.patches.Polygon(pQCD_100, 
-            closed = True, fill = True, color = 'purple', alpha = 0.4))
+    # ax1.add_patch(matplotlib.patches.Polygon(lQCD_50, 
+    #         closed = True, fill = True, color = 'blue', alpha = 0.3))
+    # ax1.add_patch(matplotlib.patches.Polygon(pQCD_50, 
+    #         closed = True, fill = True, color = 'blue', alpha = 0.4))
+    # ax1.add_patch(matplotlib.patches.Polygon(lQCD_100, 
+    #         closed = True, fill = True, color = 'purple', alpha = 0.3))
+    # ax1.add_patch(matplotlib.patches.Polygon(pQCD_100, 
+    #         closed = True, fill = True, color = 'purple', alpha = 0.4))
     # ax1.add_patch(matplotlib.patches.Polygon(lQCD_200, 
     #         closed = True, fill = True, color = 'orange', alpha = 0.3))
     # ax1.add_patch(matplotlib.patches.Polygon(pQCD_200, 
@@ -10937,29 +10960,34 @@ def epja_figure10_buns():
 
     CS_1 = ax1.contour(mu_T_meshgrid, T_meshgrid, total_1_meshgrid, levels=[25], colors=["green"])
     CS_1_qgp = ax1.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[25], linestyles="dashed", colors=["green"])
-    CS_1_pert = ax1.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[25], linestyles="dotted", colors=["green"])
+    CS_1_pert = ax1.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[25], linestyles="dashdot", colors=["green"])
+    CS_1_pert = ax1.contour(mu_T_meshgrid, T_meshgrid, total_q_meshgrid, levels=[25], linestyles="dotted", colors=["green"])
 
-    CS_3 = ax1.contour(mu_T_meshgrid, T_meshgrid, total_1_meshgrid, levels=[100], colors=["purple"])
-    CS_3_qgp = ax1.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[100], linestyles="dashed", colors=["purple"])
-    CS_3_pert = ax1.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[100], linestyles="dotted", colors=["purple"])
+    # CS_3 = ax1.contour(mu_T_meshgrid, T_meshgrid, total_1_meshgrid, levels=[100], colors=["purple"])
+    # CS_3_qgp = ax1.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[100], linestyles="dashed", colors=["purple"])
+    # CS_3_pert = ax1.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[100], linestyles="dotted", colors=["purple"])
 
-    CS_5 = ax1.contour(mu_T_meshgrid, T_meshgrid, total_1_meshgrid, levels=[50], colors=["blue"])
-    CS_5_qgp = ax1.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[50], linestyles="dashed", colors=["blue"])
-    CS_5_pert = ax1.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[50], linestyles="dotted", colors=["blue"])
+    # CS_5 = ax1.contour(mu_T_meshgrid, T_meshgrid, total_1_meshgrid, levels=[50], colors=["blue"])
+    # CS_5_qgp = ax1.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[50], linestyles="dashed", colors=["blue"])
+    # CS_5_pert = ax1.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[50], linestyles="dotted", colors=["blue"])
 
-    ax1.plot([2.3395, 2.38], [258.0, 310.0],':', color="green")
+    ax1.plot([2.3395, 2.38], [258.0, 310.0],'-.', color="green")
     ax1.plot([2.4051, 2.45], [249.4, 310.0],'-', color="green")
 
-    utils.contour_remove_crap(fig1, CS_1)
-    utils.contour_remove_crap(fig1, CS_3)
-    utils.contour_remove_crap(fig1, CS_5)
+    # utils.contour_remove_crap(fig1, CS_1)
+    # utils.contour_remove_crap(fig1, CS_3)
+    # utils.contour_remove_crap(fig1, CS_5)
 
     ax1.plot(mu_over_Tc_v, Tc_Tc_v, '--', c='black')
 
     ax1.text(3.286, 141.5, r"$\mathrm{T_c}$", color="black", fontsize=14)
     ax1.text(2.32, 285.5, r"25", color="green", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
-    ax1.text(1.09, 285.5, r"50", color="blue", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
-    ax1.text(0.45, 285.5, r"100", color="purple", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
+    ax1.text(3.0, 125.0, r"Total", color="green", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
+    ax1.text(2.31, 125.5, r"QGP", color="green", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
+    ax1.text(1.95, 200.0, r"PNJL", color="green", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
+    ax1.text(1.6, 200.0, r"Q", color="green", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
+    # ax1.text(1.09, 285.5, r"50", color="blue", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
+    # ax1.text(0.45, 285.5, r"100", color="purple", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
 
     ax2.add_patch(matplotlib.patches.Polygon(lQCD_Tc, 
             closed = True, fill = True, color = 'yellow', alpha = 0.3))
@@ -10968,14 +10996,14 @@ def epja_figure10_buns():
             closed = True, fill = True, color = 'green', alpha = 0.3))
     ax2.add_patch(matplotlib.patches.Polygon(pQCD_25, 
             closed = True, fill = True, color = 'green', alpha = 0.4))
-    ax2.add_patch(matplotlib.patches.Polygon(lQCD_50, 
-            closed = True, fill = True, color = 'blue', alpha = 0.3))
-    ax2.add_patch(matplotlib.patches.Polygon(pQCD_50, 
-            closed = True, fill = True, color = 'blue', alpha = 0.4))
-    ax2.add_patch(matplotlib.patches.Polygon(lQCD_100, 
-            closed = True, fill = True, color = 'purple', alpha = 0.3))
-    ax2.add_patch(matplotlib.patches.Polygon(pQCD_100, 
-            closed = True, fill = True, color = 'purple', alpha = 0.4))
+    # ax2.add_patch(matplotlib.patches.Polygon(lQCD_50, 
+    #         closed = True, fill = True, color = 'blue', alpha = 0.3))
+    # ax2.add_patch(matplotlib.patches.Polygon(pQCD_50, 
+    #         closed = True, fill = True, color = 'blue', alpha = 0.4))
+    # ax2.add_patch(matplotlib.patches.Polygon(lQCD_100, 
+    #         closed = True, fill = True, color = 'purple', alpha = 0.3))
+    # ax2.add_patch(matplotlib.patches.Polygon(pQCD_100, 
+    #         closed = True, fill = True, color = 'purple', alpha = 0.4))
     # ax2.add_patch(matplotlib.patches.Polygon(lQCD_200, 
     #         closed = True, fill = True, color = 'orange', alpha = 0.3))
     # ax2.add_patch(matplotlib.patches.Polygon(pQCD_200, 
@@ -10987,25 +11015,30 @@ def epja_figure10_buns():
 
     CS_2 = ax2.contour(mu_T_meshgrid, T_meshgrid, total_2_meshgrid, levels=[25], colors=["green"])
     CS_2_qgp = ax2.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[25], linestyles="dashed", colors=["green"])
-    CS_2_pert = ax2.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[25], linestyles="dotted", colors=["green"])
+    CS_2_pert = ax2.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[25], linestyles="dashdot", colors=["green"])
+    CS_2_pert = ax2.contour(mu_T_meshgrid, T_meshgrid, total_q_meshgrid, levels=[25], linestyles="dotted", colors=["green"])
 
-    CS_4 = ax2.contour(mu_T_meshgrid, T_meshgrid, total_2_meshgrid, levels=[100], colors=["purple"])
-    CS_4_qgp = ax2.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[100], linestyles="dashed", colors=["purple"])
-    CS_4_pert = ax2.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[100], linestyles="dotted", colors=["purple"])
+    # CS_4 = ax2.contour(mu_T_meshgrid, T_meshgrid, total_2_meshgrid, levels=[100], colors=["purple"])
+    # CS_4_qgp = ax2.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[100], linestyles="dashed", colors=["purple"])
+    # CS_4_pert = ax2.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[100], linestyles="dotted", colors=["purple"])
 
-    CS_6 = ax2.contour(mu_T_meshgrid, T_meshgrid, total_2_meshgrid, levels=[50], colors=["blue"])
-    CS_6_qgp = ax2.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[50], linestyles="dashed", colors=["blue"])
-    CS_6_pert = ax2.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[50], linestyles="dotted", colors=["blue"])
+    # CS_6 = ax2.contour(mu_T_meshgrid, T_meshgrid, total_2_meshgrid, levels=[50], colors=["blue"])
+    # CS_6_qgp = ax2.contour(mu_T_meshgrid, T_meshgrid, total_qgp_meshgrid, levels=[50], linestyles="dashed", colors=["blue"])
+    # CS_6_pert = ax2.contour(mu_T_meshgrid, T_meshgrid, total_no_pert_meshgrid, levels=[50], linestyles="dotted", colors=["blue"])
 
-    ax2.plot([2.3395, 2.38], [258.0, 310.0],':', color="green")
+    ax2.plot([2.3395, 2.38], [258.0, 310.0],'-.', color="green")
     ax2.plot([2.4051, 2.45], [249.4, 310.0],'-', color="green")
 
     ax2.plot(mu_over_Tc_v, Tc_Tc_v, '--', c='black')
 
     ax2.text(3.286, 141.5, r"$\mathrm{T_c}$", color="black", fontsize=14)
     ax2.text(2.32, 285.5, r"25", color="green", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
-    ax2.text(1.09, 285.5, r"50", color="blue", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
-    ax2.text(0.45, 285.5, r"100", color="purple", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
+    ax2.text(3.0, 125.0, r"Total", color="green", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
+    ax2.text(2.31, 125.5, r"QGP", color="green", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
+    ax2.text(1.95, 200.0, r"PNJL", color="green", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
+    ax2.text(1.6, 200.0, r"Q", color="green", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
+    # ax2.text(1.09, 285.5, r"50", color="blue", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
+    # ax2.text(0.45, 285.5, r"100", color="purple", fontsize=14, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none'))
 
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -23481,6 +23514,6 @@ def lattice_thermo():
 
 if __name__ == '__main__':
 
-    epja_beth_uhlenbeck2()
+    epja_figure10_buns()
 
     print("END")

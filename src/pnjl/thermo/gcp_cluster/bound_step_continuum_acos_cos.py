@@ -1540,7 +1540,7 @@ def buns_s_boson_singlet_integrand(
         sigma_m = 0.0
         fm = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '-')
         dfm = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, mu, M, a, '-')
-        if not (fp == 0.0 or dfp == 0.0):
+        if not (fm == 0.0 or dfm == 0.0):
             sigma_m = math.fsum([math.log(fm), -math.log1p(fm)])*dfm
         return -math.fsum([sigma_p, sigma_m])*delta_i
 
@@ -1562,7 +1562,7 @@ def buns_s_fermion_singlet_integrand(
         sigma_m = 0.0
         fm = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '-')
         dfm = pnjl.thermo.distributions.dfdM_fermion_singlet(p, T, mu, M, a, '-')
-        if not (fp == 0.0 or dfp == 0.0):
+        if not (fm == 0.0 or dfm == 0.0):
             sigma_m = math.fsum([math.log(fm), math.log(math.fsum([1.0, -fm]))])*dfm
         return -math.fsum([sigma_p, sigma_m])*delta_i
 
@@ -1667,7 +1667,7 @@ def bu_s_boson_singlet_integrand(
         sigma_m = 0.0
         fm = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '-')
         dfm = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, mu, M, a, '-')
-        if not (fp == 0.0 or dfp == 0.0):
+        if not (fm == 0.0 or dfm == 0.0):
             sigma_m = math.fsum([math.log(fm), -math.log1p(fm)])*dfm
         return -math.fsum([sigma_p, sigma_m])*delta_i
     
@@ -1689,7 +1689,7 @@ def bu_s_fermion_singlet_integrand(
         sigma_m = 0.0
         fm = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '-')
         dfm = pnjl.thermo.distributions.dfdM_fermion_singlet(p, T, mu, M, a, '-')
-        if not (fp == 0.0 or dfp == 0.0):
+        if not (fm == 0.0 or dfm == 0.0):
             sigma_m = math.fsum([math.log(fm), -math.log(math.fsum([1.0, -fm]))])*dfm
         return -math.fsum([sigma_p, sigma_m])*delta_i
     
