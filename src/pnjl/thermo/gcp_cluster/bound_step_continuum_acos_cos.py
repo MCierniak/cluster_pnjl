@@ -1382,6 +1382,19 @@ def bdensity_buns(
 
 
 @functools.lru_cache(maxsize=1024)
+def pressure_ib_buns(
+    T: float, mu: float, phi_re: float, phi_im: float, cluster: str
+) -> float:
+    
+    integral, error = scipy.integrate.quad(
+        lambda _mu, _T, _phi_re, _phi_im, _cluster: bdensity_buns(_T, _mu, _phi_re, _phi_im, _cluster),
+        0.0, mu, args = (T, phi_re, phi_im, cluster)
+    )
+
+    return integral
+
+
+@functools.lru_cache(maxsize=1024)
 def bu_b_boson_singlet_integrand(
     M: float, p: float, T: float, mu: float,
     phi_re: float, phi_im: float, a: int, cluster: str
@@ -1813,6 +1826,19 @@ def sdensity_buns(
     )
 
     return (D_I/(2.0*(math.pi**2)))*3.0*integral
+
+
+@functools.lru_cache(maxsize=1024)
+def pressure_is_buns(
+    T: float, mu: float, phi_re: float, phi_im: float, cluster: str
+) -> float:
+    
+    integral, error = scipy.integrate.quad(
+        sdensity_buns,
+        0.0, T, args = (mu, phi_re, phi_im, cluster)
+    )
+
+    return integral
 
 
 @functools.lru_cache(maxsize=1024)
