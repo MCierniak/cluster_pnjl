@@ -1382,6 +1382,19 @@ def bdensity_buns(
 
 
 @functools.lru_cache(maxsize=1024)
+def pressure_ib_buns(
+    T: float, mu: float, phi_re: float, phi_im: float, cluster: str
+) -> float:
+    
+    integral, error = scipy.integrate.quad(
+        lambda _mu, _T, _phi_re, _phi_im, _cluster: bdensity_buns(_T, _mu, _phi_re, _phi_im, _cluster),
+        0.0, mu, args = (T, phi_re, phi_im, cluster)
+    )
+
+    return integral
+
+
+@functools.lru_cache(maxsize=1024)
 def bu_b_boson_singlet_integrand(
     M: float, p: float, T: float, mu: float,
     phi_re: float, phi_im: float, a: int, cluster: str
@@ -1540,7 +1553,7 @@ def buns_s_boson_singlet_integrand(
         sigma_m = 0.0
         fm = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '-')
         dfm = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, mu, M, a, '-')
-        if not (fp == 0.0 or dfp == 0.0):
+        if not (fm == 0.0 or dfm == 0.0):
             sigma_m = math.fsum([math.log(fm), -math.log1p(fm)])*dfm
         return -math.fsum([sigma_p, sigma_m])*delta_i
 
@@ -1562,7 +1575,7 @@ def buns_s_fermion_singlet_integrand(
         sigma_m = 0.0
         fm = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '-')
         dfm = pnjl.thermo.distributions.dfdM_fermion_singlet(p, T, mu, M, a, '-')
-        if not (fp == 0.0 or dfp == 0.0):
+        if not (fm == 0.0 or dfm == 0.0):
             sigma_m = math.fsum([math.log(fm), math.log(math.fsum([1.0, -fm]))])*dfm
         return -math.fsum([sigma_p, sigma_m])*delta_i
 
@@ -1667,7 +1680,7 @@ def bu_s_boson_singlet_integrand(
         sigma_m = 0.0
         fm = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '-')
         dfm = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, mu, M, a, '-')
-        if not (fp == 0.0 or dfp == 0.0):
+        if not (fm == 0.0 or dfm == 0.0):
             sigma_m = math.fsum([math.log(fm), -math.log1p(fm)])*dfm
         return -math.fsum([sigma_p, sigma_m])*delta_i
     
@@ -1689,7 +1702,7 @@ def bu_s_fermion_singlet_integrand(
         sigma_m = 0.0
         fm = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '-')
         dfm = pnjl.thermo.distributions.dfdM_fermion_singlet(p, T, mu, M, a, '-')
-        if not (fp == 0.0 or dfp == 0.0):
+        if not (fm == 0.0 or dfm == 0.0):
             sigma_m = math.fsum([math.log(fm), -math.log(math.fsum([1.0, -fm]))])*dfm
         return -math.fsum([sigma_p, sigma_m])*delta_i
     
@@ -1813,6 +1826,19 @@ def sdensity_buns(
     )
 
     return (D_I/(2.0*(math.pi**2)))*3.0*integral
+
+
+@functools.lru_cache(maxsize=1024)
+def pressure_is_buns(
+    T: float, mu: float, phi_re: float, phi_im: float, cluster: str
+) -> float:
+    
+    integral, error = scipy.integrate.quad(
+        sdensity_buns,
+        0.0, T, args = (mu, phi_re, phi_im, cluster)
+    )
+
+    return integral
 
 
 @functools.lru_cache(maxsize=1024)
