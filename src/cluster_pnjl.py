@@ -1691,7 +1691,7 @@ def epja_experimental_hrg_benchmark():
 
     warnings.filterwarnings("ignore")
     
-    calc_1 = True
+    calc_1 = False
     calc_2 = True
 
     files = "D:/EoS/epja/experimental/hrg_benchmark/"
@@ -5555,8 +5555,8 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             D_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'D'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'D'
                 )/(T_el**3)
             )
         with open(files+"D_v_1.pickle", "wb") as file:
@@ -5568,8 +5568,8 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             N_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'N'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'N'
                 )/(T_el**3)
             )
         with open(files+"N_v_1.pickle", "wb") as file:
@@ -5581,8 +5581,8 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             F_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'F'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'F'
                 )/(T_el**3)
             )
         with open(files+"F_v_1.pickle", "wb") as file:
@@ -5594,8 +5594,8 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             P_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'P'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'P'
                 )/(T_el**3)
             )
         with open(files+"P_v_1.pickle", "wb") as file:
@@ -5607,8 +5607,8 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             Q_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'Q'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'Q'
                 )/(T_el**3)
             )
         with open(files+"Q_v_1.pickle", "wb") as file:
@@ -5620,8 +5620,8 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             H_v_1.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'H'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'H'
                 )/(T_el**3)
             )
         with open(files+"H_v_1.pickle", "wb") as file:
@@ -5648,8 +5648,8 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             D_v_1s.append(
-                cluster_s.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'D'
+                cluster_s.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'D'
                 )/(T_el**3)
             )
         with open(files+"D_v_1s.pickle", "wb") as file:
@@ -5661,8 +5661,8 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             N_v_1s.append(
-                cluster_s.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'N'
+                cluster_s.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'N'
                 )/(T_el**3)
             )
         with open(files+"N_v_1s.pickle", "wb") as file:
@@ -5674,8 +5674,8 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             F_v_1s.append(
-                cluster_s.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'F'
+                cluster_s.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'F'
                 )/(T_el**3)
             )
         with open(files+"F_v_1s.pickle", "wb") as file:
@@ -5687,8 +5687,8 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             P_v_1s.append(
-                cluster_s.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'P'
+                cluster_s.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'P'
                 )/(T_el**3)
             )
         with open(files+"P_v_1s.pickle", "wb") as file:
@@ -5700,8 +5700,8 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             Q_v_1s.append(
-                cluster_s.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'Q'
+                cluster_s.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'Q'
                 )/(T_el**3)
             )
         with open(files+"Q_v_1s.pickle", "wb") as file:
@@ -5713,8 +5713,8 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             H_v_1s.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'H'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'H'
                 )/(T_el**3)
             )
         with open(files+"H_v_1s.pickle", "wb") as file:
@@ -5741,8 +5741,8 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             D_v_2.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'D'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'D'
                 )/(T_el**3)
             )
         with open(files+"D_v_2.pickle", "wb") as file:
@@ -5754,8 +5754,8 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             N_v_2.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'N'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'N'
                 )/(T_el**3)
             )
         with open(files+"N_v_2.pickle", "wb") as file:
@@ -5767,8 +5767,8 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             F_v_2.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'F'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'F'
                 )/(T_el**3)
             )
         with open(files+"F_v_2.pickle", "wb") as file:
@@ -5780,8 +5780,8 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             P_v_2.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'P'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'P'
                 )/(T_el**3)
             )
         with open(files+"P_v_2.pickle", "wb") as file:
@@ -5793,8 +5793,8 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             Q_v_2.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'Q'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'Q'
                 )/(T_el**3)
             )
         with open(files+"Q_v_2.pickle", "wb") as file:
@@ -5806,8 +5806,8 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             H_v_2.append(
-                cluster.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'H'
+                cluster.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'H'
                 )/(T_el**3)
             )
         with open(files+"H_v_2.pickle", "wb") as file:
@@ -5834,8 +5834,8 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             D_v_2s.append(
-                cluster_s.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'D'
+                cluster_s.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'D'
                 )/(T_el**3)
             )
         with open(files+"D_v_2s.pickle", "wb") as file:
@@ -5847,8 +5847,8 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             N_v_2s.append(
-                cluster_s.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'N'
+                cluster_s.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'N'
                 )/(T_el**3)
             )
         with open(files+"N_v_2s.pickle", "wb") as file:
@@ -5860,8 +5860,8 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             F_v_2s.append(
-                cluster_s.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'F'
+                cluster_s.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'F'
                 )/(T_el**3)
             )
         with open(files+"F_v_2s.pickle", "wb") as file:
@@ -5873,8 +5873,8 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             P_v_2s.append(
-                cluster_s.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'P'
+                cluster_s.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'P'
                 )/(T_el**3)
             )
         with open(files+"P_v_2s.pickle", "wb") as file:
@@ -5886,8 +5886,8 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             Q_v_2s.append(
-                cluster_s.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'Q'
+                cluster_s.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'Q'
                 )/(T_el**3)
             )
         with open(files+"Q_v_2s.pickle", "wb") as file:
@@ -5899,8 +5899,8 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             H_v_2s.append(
-                cluster_s.bdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'H'
+                cluster_s.bdensity_buns(
+                    T_el, mu_el, phi_re_el, phi_im_el, 'H'
                 )/(T_el**3)
             )
         with open(files+"H_v_2s.pickle", "wb") as file:
