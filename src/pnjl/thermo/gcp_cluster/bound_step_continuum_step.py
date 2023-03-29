@@ -1422,6 +1422,105 @@ def qnumber_cumulant(
                     rank, T, new_mu, new_phi_re, new_phi_im, 
                     phi_solver, cluster
                 )
+            
+
+@functools.lru_cache(maxsize=1024)
+def qnumber_cumulant_buns(
+    rank: int, T: float, mu: float, phi_re: float, phi_im: float, cluster: str
+) -> float:
+    """### Description
+    Generalized Beth-Uhlenbeck cluster quark number cumulant chi_q. Based on 
+    Eq.29 of https://arxiv.org/pdf/2012.12894.pdf and the subsequent inline 
+    definition.
+    
+    ### Prameters
+    rank : int
+        Cumulant rank. Rank 1 equals to 3 times the baryon density.
+    T : float
+        Temperature in MeV.
+    mu : float
+        Quark chemical potential in MeV.
+    phi_re : float
+        Real part of the traced Polyakov-loop in MeV.
+    phi_im : float
+        Imaginary part of the traced Polyakov-loop in MeV.
+    phi_solver : Callable
+        Function calculating the traced Polyakov-loop for given
+        T and mu. Must be of the form
+            (T: float, mu: float,
+            phi_re0: float, phi_im0: float) -> Tuple[float, float],
+            where
+                T : temperature in MeV
+                mu : quark chemical potential in MeV
+                phi_re0 : initial guess for phi_re
+                phi_im0 : initial guess for phi_im
+    cluster : str
+        Cluster type,
+            'pi' : pion
+            'K' : kaon
+            'rho': rho meson
+            'omega': omega meson
+            'D': diquark
+            'N': nucleon
+            'T': tetraquark
+            'F': four-quark
+            'P': pentaquark
+            'Q': five-quark
+            'H': hexaquark
+    
+    ### Returns
+    qnumber_cumulant : float
+        Value of the thermodynamic quark number cumulant in MeV^3.
+    """
+
+    h = 1e-2
+    
+    M_I = pnjl.defaults.MI[cluster]
+
+    M_th_i_min = M_th(T, math.fsum([mu, 2*h]), cluster)
+    M_th_i_max = M_th(T, math.fsum([mu, -2*h]), cluster)
+
+    if M_th_i_min < M_I and M_th_i_max < M_I:
+
+        return 0.0
+        
+    else:
+
+        if rank == 1:
+            return 3.0 * bdensity_buns(T, mu, phi_re, phi_im, cluster)
+        else:
+
+            if math.fsum([mu, -2*h]) > 0.0:
+
+                mu_vec = [
+                    math.fsum([mu, 2*h]), math.fsum([mu, h]),
+                    math.fsum([mu, -h]), math.fsum([mu, -2*h])
+                ]
+                deriv_coef = [
+                    -1.0/(12.0*h), 8.0/(12.0*h),
+                    -8.0/(12.0*h), 1.0/(12.0*h)
+                ]
+                phi_vec = [
+                    tuple([phi_re, phi_im])
+                    for _ in mu_vec
+                ]
+
+                out_vec = [
+                    coef*qnumber_cumulant_buns(
+                        rank-1, T, mu_el, phi_el[0], phi_el[1], cluster)
+                    for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
+                ]
+
+                return math.fsum(out_vec)
+
+            else:
+
+                new_mu = math.fsum([mu, h])
+                new_phi_re, new_phi_im = phi_re, phi_im
+
+                return qnumber_cumulant_buns(
+                    rank, T, new_mu, new_phi_re, new_phi_im, cluster
+                )
 
 
 @functools.lru_cache(maxsize=1024)

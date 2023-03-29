@@ -1,31 +1,12 @@
 """### Description
-Generalized Beth-Uhlenbeck cluster grandcanonical thermodynamic potential and 
-associated functions (HRG approximation) based on 
-https://arxiv.org/pdf/2012.12894.pdf .
+(needs updating)
 
 ### Functions
-gcp_real
-    Generalized Beth-Uhlenbeck cluster grandcanonical thermodynamic potential 
-    (real part).
-gcp_imag
-    Generalized Beth-Uhlenbeck cluster grandcanonical thermodynamic potential 
-    (imaginary part).
-pressure
-    Generalized Beth-Uhlenbeck cluster pressure.
-bdensity
-    Generalized Beth-Uhlenbeck cluster baryon density.
-qnumber_cumulant
-    Generalized Beth-Uhlenbeck cluster quark number cumulant chi_q. Based on 
-    Eq.29 of https://arxiv.org/pdf/2012.12894.pdf and the subsequent inline 
-    definition.
-sdensity
-    Generalized Beth-Uhlenbeck cluster entropy density.
-Polyakov_loop
+(needs updating)
 """
 
 
 import math
-import typing
 import functools
 
 import scipy.optimize
@@ -38,630 +19,195 @@ import pnjl.thermo.gcp_sigma_lattice
 import pnjl.thermo.gcp_pl_polynomial
 
 
-@functools.lru_cache(maxsize=1024)
-def gcp_boson_singlet_integrand(
-    p: float, T: float, mu: float, phi_re: float, phi_im: float,
-    M_I: float, a: int
-) -> float:
-
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M_I, a, '+')
-    fm_i = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M_I, a, '-')
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
-
-    return (p**4)*integ_i
-
-
-@functools.lru_cache(maxsize=1024)
-def gcp_fermion_singlet_integrand(
-    p: float, T: float, mu: float, phi_re: float, phi_im: float,
-    M_I: float, a: int
-) -> float:
-
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M_I, a, '+')
-    fm_i = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M_I, a, '-')
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
-
-    return (p**4)*integ_i
-
-
-@functools.lru_cache(maxsize=1024)
-def gcp_boson_triplet_integrand_real(
-    p: float, T: float, mu: float, phi_re: float, phi_im: float,
-    M_I: float, a: int
-) -> float:
-
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_boson_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).real
-    fm_i = pnjl.thermo.distributions.f_boson_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).real
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
-
-    return (p**4)*integ_i
-
-
-@functools.lru_cache(maxsize=1024)
-def gcp_boson_antitriplet_integrand_real(
-    p: float, T: float, mu: float, phi_re: float, phi_im: float,
-    M_I: float, a: int
-) -> float:
-
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_boson_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).real
-    fm_i = pnjl.thermo.distributions.f_boson_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).real
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
-
-    return (p**4)*integ_i
-
-
-@functools.lru_cache(maxsize=1024)
-def gcp_fermion_triplet_integrand_real(
-    p: float, T: float, mu: float, phi_re: float, phi_im: float,
-    M_I: float, a: int
-) -> float:
-
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_fermion_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).real
-    fm_i = pnjl.thermo.distributions.f_fermion_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).real
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
-
-    return (p**4)*integ_i
-
-
-@functools.lru_cache(maxsize=1024)
-def gcp_fermion_antitriplet_integrand_real(
-    p: float, T: float, mu: float, phi_re: float, phi_im: float,
-    M_I: float, a: int
-) -> float:
-
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_fermion_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).real
-    fm_i = pnjl.thermo.distributions.f_fermion_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).real
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
-
-    return (p**4)*integ_i
-
-
-@functools.lru_cache(maxsize=1024)
-def gcp_boson_triplet_integrand_imag(
-    p: float, T: float, mu: float, phi_re: float, phi_im: float,
-    M_I: float, a: int
-) -> float:
-
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_boson_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).imag
-    fm_i = pnjl.thermo.distributions.f_boson_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).imag
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
-
-    return (p**4)*integ_i
-
-
-@functools.lru_cache(maxsize=1024)
-def gcp_boson_antitriplet_integrand_imag(
-    p: float, T: float, mu: float, phi_re: float, phi_im: float,
-    M_I: float, a: int
-) -> float:
-
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_boson_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).imag
-    fm_i = pnjl.thermo.distributions.f_boson_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).imag
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
-
-    return (p**4)*integ_i
-
-
-@functools.lru_cache(maxsize=1024)
-def gcp_fermion_triplet_integrand_imag(
-    p: float, T: float, mu: float, phi_re: float, phi_im: float,
-    M_I: float, a: int
-) -> float:
-
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_fermion_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).imag
-    fm_i = pnjl.thermo.distributions.f_fermion_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).imag
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
-
-    return (p**4)*integ_i
-
-
-@functools.lru_cache(maxsize=1024)
-def gcp_fermion_antitriplet_integrand_imag(
-    p: float, T: float, mu: float, phi_re: float, phi_im: float,
-    M_I: float, a: int
-) -> float:
-
-    En_i = pnjl.thermo.distributions.En(p, M_I)
-    fp_i = pnjl.thermo.distributions.f_fermion_antitriplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '+'
-    ).imag
-    fm_i = pnjl.thermo.distributions.f_fermion_triplet(
-        p, T, mu, phi_re, phi_im, M_I, a, '-'
-    ).imag
-    integ_i = (1.0/En_i)*math.fsum([fp_i, fm_i])
-
-    return (p**4)*integ_i
-
-
-gcp_real_hash = {
-    'pi': gcp_boson_singlet_integrand,
-    'K': gcp_boson_singlet_integrand,
-    'rho': gcp_boson_singlet_integrand,
-    'omega': gcp_boson_singlet_integrand,
-    'D': gcp_boson_antitriplet_integrand_real,
-    'N': gcp_fermion_singlet_integrand,
-    'T': gcp_boson_singlet_integrand,
-    'F': gcp_boson_triplet_integrand_real,
-    'P': gcp_fermion_singlet_integrand,
-    'Q': gcp_fermion_antitriplet_integrand_real,
-    'H': gcp_boson_singlet_integrand
+MI_OVERRIDE = {
+    'pi': 200.0,
+    'K': 500.0,
+    'rho': math.fsum([2.0*pnjl.defaults.M0, 2.0*pnjl.defaults.ML, -pnjl.defaults.B]),
+    'omega': math.fsum([2.0*pnjl.defaults.M0, 2.0*pnjl.defaults.ML, -pnjl.defaults.B]),
+    'D': math.fsum([2.0*pnjl.defaults.M0, 2.0*pnjl.defaults.ML, -pnjl.defaults.B]),
+    'N': math.fsum([3.0*pnjl.defaults.M0, 3.0*pnjl.defaults.ML, -2.0*pnjl.defaults.B]),
+    'T': math.fsum([4.0*pnjl.defaults.M0, 4.0*pnjl.defaults.ML, -3.0*pnjl.defaults.B]),
+    'F': math.fsum([4.0*pnjl.defaults.M0, 4.0*pnjl.defaults.ML, -3.0*pnjl.defaults.B]),
+    'P': math.fsum([5.0*pnjl.defaults.M0, 5.0*pnjl.defaults.ML, -4.0*pnjl.defaults.B]),
+    'Q': math.fsum([5.0*pnjl.defaults.M0, 5.0*pnjl.defaults.ML, -4.0*pnjl.defaults.B]),
+    'H': math.fsum([6.0*pnjl.defaults.M0, 6.0*pnjl.defaults.ML, -5.0*pnjl.defaults.B]),
 }
 
+DI_OVERRIDE = {
+    'pi': (1.0*1.0)/2.0,
+    'K': (1.0*1.0)/2.0,
+    'rho': (3.0*1.0)/2.0,
+    'omega': (3.0*1.0)/2.0,
+    'D': (1.0*3.0)/2.0,
+    'N': (2.0*1.0)/2.0,
+    'T': math.fsum([(1.0*1.0)/2.0, (3.0*1.0)/2.0]),
+    'F': (1.0*3.0)/2.0,
+    'P': math.fsum([(4.0*1.0)/2.0, (2.0*1.0)/2.0]),
+    'Q': (2.0*3.0)/2.0,
+    'H': math.fsum([(1.0*1.0)/2.0, (5.0*1.0)/2.0, (3.0*1.0)/2.0])
+}
 
-gcp_imag_hash = {
-    'D': gcp_boson_antitriplet_integrand_imag,
-    'F': gcp_boson_triplet_integrand_imag,
-    'Q': gcp_fermion_antitriplet_integrand_imag,
+NET_QL_OVERRIDE = {
+    'pi': 0,
+    'K': 1,
+    'rho': 0,
+    'omega': 0,
+    'D': 2,
+    'N': 3,
+    'T': 0,
+    'F': 4,
+    'P': 3,
+    'Q': 5,
+    'H': 6
+}
+
+NET_QS_OVERRIDE = {
+    'pi': 0,
+    'K': -1,
+    'rho': 0,
+    'omega': 0,
+    'D': 0,
+    'N': 0,
+    'T': 0,
+    'F': 0,
+    'P': 0,
+    'Q': 0,
+    'H': 0
 }
 
 
 @functools.lru_cache(maxsize=1024)
-def gcp_real(
-    T: float, mu: float, phi_re: float, phi_im: float, cluster: str
+def bu_s_boson_singlet_integrand(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
 ) -> float:
-    """### Description
-    Generalized Beth-Uhlenbeck cluster grandcanonical thermodynamic potential 
-    (real part).
+    sigma_p = 0.0
+    fp = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '+')
+    dfp = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, mu, M, a, '+')
+    if not (fp == 0.0 or dfp == 0.0):
+        sigma_p = math.fsum([math.log(fp), -math.log1p(fp)])*dfp
+    sigma_m = 0.0
+    fm = pnjl.thermo.distributions.f_boson_singlet(p, T, mu, M, a, '-')
+    dfm = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, mu, M, a, '-')
+    if not (fm == 0.0 or dfm == 0.0):
+        sigma_m = math.fsum([math.log(fm), -math.log1p(fm)])*dfm
+    return -math.fsum([sigma_p, sigma_m])
     
-    ### Prameters
-    T : float
-        Temperature in MeV.
-    mu : float
-        Quark chemical potential in MeV.
-    phi_re : float
-        Real part of the traced Polyakov-loop in MeV.
-    phi_im : float
-        Imaginary part of the traced Polyakov-loop in MeV.
-    cluster : str
-        Cluster type,
-            'pi' : pion
-            'K' : kaon
-            'rho': rho meson
-            'omega': omega meson
-            'D': diquark
-            'N': nucleon
-            'T': tetraquark
-            'F': four-quark
-            'P': pentaquark
-            'Q': five-quark
-            'H': hexaquark
+
+@functools.lru_cache(maxsize=1024)
+def bu_s_fermion_singlet_integrand(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+    sigma_p = 0.0
+    fp = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '+')
+    dfp = pnjl.thermo.distributions.dfdM_fermion_singlet(p, T, mu, M, a, '+')
+    if not (fp == 0.0 or dfp == 0.0):
+        sigma_p = math.fsum([math.log(fp), -math.log(math.fsum([1.0, -fp]))])*dfp
+    sigma_m = 0.0
+    fm = pnjl.thermo.distributions.f_fermion_singlet(p, T, mu, M, a, '-')
+    dfm = pnjl.thermo.distributions.dfdM_fermion_singlet(p, T, mu, M, a, '-')
+    if not (fm == 0.0 or dfm == 0.0):
+        sigma_m = math.fsum([math.log(fm), -math.log(math.fsum([1.0, -fm]))])*dfm
+    return -math.fsum([sigma_p, sigma_m])
     
-    ### Returns
-    gcp_real : float
-        Value of the thermodynamic potential in MeV^4.
-    """
 
-    M_I = pnjl.defaults.MI[cluster]
-    D_I = pnjl.defaults.DI[cluster]
-    A_I = math.fsum([
-        pnjl.defaults.NET_QL[cluster],
-        pnjl.defaults.NET_QS[cluster]
-    ])
+@functools.lru_cache(maxsize=1024)
+def bu_s_boson_triplet_integrand_real(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+    energy = pnjl.thermo.distributions.En(p, M)
+    dfp = pnjl.thermo.distributions.dfdM_boson_triplet(p, T, mu, phi_re, phi_im, M, a, '+').real
+    sigma_p = ((energy-a*mu)/T)*dfp
+    dfm = pnjl.thermo.distributions.dfdM_boson_antitriplet(p, T, mu, phi_re, phi_im, M, a, '-').real
+    sigma_m = ((energy+a*mu)/T)*dfm
+    return -math.fsum([sigma_p, sigma_m])
+    
 
+@functools.lru_cache(maxsize=1024)
+def bu_s_boson_antitriplet_integrand_real(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+    energy = pnjl.thermo.distributions.En(p, M)
+    dfp = pnjl.thermo.distributions.dfdM_boson_antitriplet(p, T, mu, phi_re, phi_im, M, a, '+').real
+    sigma_p = ((energy-a*mu)/T)*dfp
+    dfm = pnjl.thermo.distributions.dfdM_boson_triplet(p, T, mu, phi_re, phi_im, M, a, '-').real
+    sigma_m = ((energy+a*mu)/T)*dfm
+    return -math.fsum([sigma_p, sigma_m])
+    
+
+@functools.lru_cache(maxsize=1024)
+def bu_s_fermion_triplet_integrand_real(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+    energy = pnjl.thermo.distributions.En(p, M)
+    dfp = pnjl.thermo.distributions.dfdM_fermion_triplet(p, T, mu, phi_re, phi_im, M, a, '+').real
+    sigma_p = ((energy-a*mu)/T)*dfp
+    dfm = pnjl.thermo.distributions.dfdM_fermion_antitriplet(p, T, mu, phi_re, phi_im, M, a, '-').real
+    sigma_m = ((energy+a*mu)/T)*dfm
+    return -math.fsum([sigma_p, sigma_m])
+    
+
+@functools.lru_cache(maxsize=1024)
+def bu_s_fermion_antitriplet_integrand_real(
+    M: float, p: float, T: float, mu: float,
+    phi_re: float, phi_im: float, a: int
+) -> float:
+    energy = pnjl.thermo.distributions.En(p, M)
+    dfp = pnjl.thermo.distributions.dfdM_fermion_antitriplet(p, T, mu, phi_re, phi_im, M, a, '+').real
+    sigma_p = ((energy-a*mu)/T)*dfp
+    dfm = pnjl.thermo.distributions.dfdM_fermion_triplet(p, T, mu, phi_re, phi_im, M, a, '-').real
+    sigma_m = ((energy+a*mu)/T)*dfm
+    return -math.fsum([sigma_p, sigma_m])
+
+
+bu_s_integral_hash = {
+    'pi': bu_s_boson_singlet_integrand,
+    'K': bu_s_boson_singlet_integrand,
+    'rho': bu_s_boson_singlet_integrand,
+    'omega': bu_s_boson_singlet_integrand,
+    'D': bu_s_boson_antitriplet_integrand_real,
+    'N': bu_s_fermion_singlet_integrand,
+    'T': bu_s_boson_singlet_integrand,
+    'F': bu_s_boson_triplet_integrand_real,
+    'P': bu_s_fermion_singlet_integrand,
+    'Q': bu_s_fermion_antitriplet_integrand_real,
+    'H': bu_s_boson_singlet_integrand
+}
+
+
+@functools.lru_cache(maxsize=1024)
+def sdensity_bu_integral(
+    p: float, T: float, mu: float, phi_re: float, phi_im: float, 
+    mass: float, a: float, cluster: str
+) -> float:
+    
     integral, error = scipy.integrate.quad(
-        gcp_real_hash[cluster], 0.0, math.inf,
-        args = (T, mu, phi_re, phi_im, M_I, A_I)
+        bu_s_integral_hash[cluster], mass, math.inf,
+        args = (p, T, mu, phi_re, phi_im, a)
     )
 
-    return -(D_I/(2.0*(math.pi**2)))*integral
+    return (p**2)*integral
 
 
 @functools.lru_cache(maxsize=1024)
-def gcp_imag(
+def sdensity_bu(
     T: float, mu: float, phi_re: float, phi_im: float, cluster: str
 ) -> float:
-    """### Description
-    Generalized Beth-Uhlenbeck cluster grandcanonical thermodynamic potential 
-    (imaginary part).
-    
-    ### Prameters
-    T : float
-        Temperature in MeV.
-    mu : float
-        Quark chemical potential in MeV.
-    phi_re : float
-        Real part of the traced Polyakov-loop in MeV.
-    phi_im : float
-        Imaginary part of the traced Polyakov-loop in MeV.
-    cluster : str
-        Cluster type,
-            'pi' : pion
-            'K' : kaon
-            'rho': rho meson
-            'omega': omega meson
-            'D': diquark
-            'N': nucleon
-            'T': tetraquark
-            'F': four-quark
-            'P': pentaquark
-            'Q': five-quark
-            'H': hexaquark
-    
-    ### Returns
-    gcp_imag : float
-        Value of the thermodynamic potential in MeV^4.
-    """
 
-    M_I = pnjl.defaults.MI[cluster]
-    D_I = pnjl.defaults.DI[cluster]
+    D_I = DI_OVERRIDE[cluster]
     A_I = math.fsum([
-        pnjl.defaults.NET_QL[cluster],
-        pnjl.defaults.NET_QS[cluster]
+        NET_QL_OVERRIDE[cluster],
+        NET_QS_OVERRIDE[cluster]
     ])
-    
-    integral, error = scipy.integrate.quad(
-        gcp_imag_hash[cluster], 0.0, math.inf,
-        args = (T, mu, phi_re, phi_im, M_I, A_I)
+    M_I = MI_OVERRIDE[cluster]
+
+    integral, _ = scipy.integrate.quad(
+        sdensity_bu_integral, 0.0, math.inf,
+        args = (T, mu, phi_re, phi_im, M_I, A_I, cluster)
     )
 
-    return -(D_I/(2.0*(math.pi**2)))*integral
-
-
-@functools.lru_cache(maxsize=1024)
-def pressure(
-    T: float, mu: float, phi_re: float, phi_im: float, cluster: str
-) -> float:
-    """### Description
-    Generalized Beth-Uhlenbeck cluster pressure.
-    
-    ### Prameters
-    T : float
-        Temperature in MeV.
-    mu : float
-        Quark chemical potential in MeV.
-    phi_re : float
-        Real part of the traced Polyakov-loop in MeV.
-    phi_im : float
-        Imaginary part of the traced Polyakov-loop in MeV.
-    cluster : str
-        Cluster type,
-            'pi' : pion
-            'K' : kaon
-            'rho': rho meson
-            'omega': omega meson
-            'D': diquark
-            'N': nucleon
-            'T': tetraquark
-            'F': four-quark
-            'P': pentaquark
-            'Q': five-quark
-            'H': hexaquark
-    
-    ### Returns
-    pressure : float
-        Value of the thermodynamic pressure in MeV^4.
-    """
-
-    return -gcp_real(T, mu, phi_re, phi_im, cluster)
-
-
-@functools.lru_cache(maxsize=1024)
-def bdensity(
-    T: float, mu: float, phi_re: float, phi_im: float,
-    phi_solver: typing.Callable[
-                    [float, float, float, float],
-                    typing.Tuple[float, float]
-                ],
-    cluster: str
-) -> float:
-    """### Description
-    Generalized Beth-Uhlenbeck cluster baryon density.
-    
-    ### Prameters
-    T : float
-        Temperature in MeV.
-    mu : float
-        Quark chemical potential in MeV.
-    phi_re : float
-        Real part of the traced Polyakov-loop in MeV.
-    phi_im : float
-        Imaginary part of the traced Polyakov-loop in MeV.
-    phi_solver : Callable
-        Function calculating the traced Polyakov-loop for given
-        T and mu. Must be of the form
-            (T: float, mu: float,
-            phi_re0: float, phi_im0: float) -> Tuple[float, float],
-            where
-                T : temperature in MeV
-                mu : quark chemical potential in MeV
-                phi_re0 : initial guess for phi_re
-                phi_im0 : initial guess for phi_im
-    cluster : str
-        Cluster type,
-            'pi' : pion
-            'K' : kaon
-            'rho': rho meson
-            'omega': omega meson
-            'D': diquark
-            'N': nucleon
-            'T': tetraquark
-            'F': four-quark
-            'P': pentaquark
-            'Q': five-quark
-            'H': hexaquark
-    
-    ### Returns
-    bdensity : float
-        Value of the thermodynamic baryon density in MeV^3.
-    """
-
-    h = 1e-2
-
-    if math.fsum([mu, -2*h]) > 0.0:
-
-        mu_vec = [
-            math.fsum([mu, 2*h]), math.fsum([mu, h]),
-            math.fsum([mu, -h]), math.fsum([mu, -2*h])
-        ]
-        deriv_coef = [
-            -1.0/(12.0*h), 8.0/(12.0*h),
-            -8.0/(12.0*h), 1.0/(12.0*h)
-        ]
-        phi_vec = []
-        if pnjl.defaults.D_PHI_D_MU_0:
-            phi_vec = [
-                tuple([phi_re, phi_im])
-                for _ in mu_vec
-            ]
-        else:
-            phi_vec = [
-                phi_solver(T, mu_el, phi_re, phi_im)
-                for mu_el in mu_vec
-            ]
-
-        p_vec = [
-            coef*pressure(T, mu_el, phi_el[0], phi_el[1], cluster)/3.0
-            for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
-        ]
-
-        return math.fsum(p_vec)
-
-    else:
-
-        new_mu = math.fsum([mu, h])
-        new_phi_re, new_phi_im = phi_re, phi_im
-            
-        if not pnjl.defaults.D_PHI_D_MU_0:
-            new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
-
-        return bdensity(
-            T, new_mu, new_phi_re, new_phi_im, 
-            phi_solver, cluster
-        )
-
-
-@functools.lru_cache(maxsize=1024)
-def qnumber_cumulant(
-    rank: int, T: float, mu: float, phi_re: float, phi_im: float,
-    phi_solver: typing.Callable[
-                    [float, float, float, float],
-                    typing.Tuple[float, float]
-                ],
-    cluster: str
-) -> float:
-    """### Description
-    Generalized Beth-Uhlenbeck cluster quark number cumulant chi_q. Based on 
-    Eq.29 of https://arxiv.org/pdf/2012.12894.pdf and the subsequent inline 
-    definition.
-    
-    ### Prameters
-    rank : int
-        Cumulant rank. Rank 1 equals to 3 times the baryon density.
-    T : float
-        Temperature in MeV.
-    mu : float
-        Quark chemical potential in MeV.
-    phi_re : float
-        Real part of the traced Polyakov-loop in MeV.
-    phi_im : float
-        Imaginary part of the traced Polyakov-loop in MeV.
-    phi_solver : Callable
-        Function calculating the traced Polyakov-loop for given
-        T and mu. Must be of the form
-            (T: float, mu: float,
-            phi_re0: float, phi_im0: float) -> Tuple[float, float],
-            where
-                T : temperature in MeV
-                mu : quark chemical potential in MeV
-                phi_re0 : initial guess for phi_re
-                phi_im0 : initial guess for phi_im
-    cluster : str
-        Cluster type,
-            'pi' : pion
-            'K' : kaon
-            'rho': rho meson
-            'omega': omega meson
-            'D': diquark
-            'N': nucleon
-            'T': tetraquark
-            'F': four-quark
-            'P': pentaquark
-            'Q': five-quark
-            'H': hexaquark
-    
-    ### Returns
-    qnumber_cumulant : float
-        Value of the thermodynamic quark number cumulant in MeV^3.
-    """
-
-    h = 1e-2
-
-    if rank == 1:
-        return 3.0 * bdensity(T, mu, phi_re, phi_im,  phi_solver, cluster)
-    else:
-
-        if math.fsum([mu, -2*h]) > 0.0:
-
-            mu_vec = [
-                math.fsum([mu, 2*h]), math.fsum([mu, h]),
-                math.fsum([mu, -h]), math.fsum([mu, -2*h])
-            ]
-            deriv_coef = [
-                -1.0/(12.0*h), 8.0/(12.0*h),
-                -8.0/(12.0*h), 1.0/(12.0*h)
-            ]
-            phi_vec = []
-            if pnjl.defaults.D_PHI_D_MU_0:
-                phi_vec = [
-                    tuple([phi_re, phi_im])
-                    for _ in mu_vec
-                ]
-            else:
-                phi_vec = [
-                    phi_solver(T, mu_el, phi_re, phi_im)
-                    for mu_el in mu_vec
-                ]
-
-            out_vec = [
-                coef*qnumber_cumulant(
-                    rank-1, T, mu_el, phi_el[0], phi_el[1], 
-                    phi_solver, cluster)
-                for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
-            ]
-
-            return math.fsum(out_vec)
-
-        else:
-
-            new_mu = math.fsum([mu, h])
-            new_phi_re, new_phi_im = phi_re, phi_im
-            
-            if not pnjl.defaults.D_PHI_D_MU_0:
-                new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
-
-            return qnumber_cumulant(
-                rank, T, new_mu, new_phi_re, new_phi_im, 
-                phi_solver, cluster
-            )
-
-
-@functools.lru_cache(maxsize=1024)
-def sdensity(
-    T: float, mu: float, phi_re : float, phi_im : float,
-    phi_solver: typing.Callable[
-                    [float, float, float, float],
-                    typing.Tuple[float, float]
-                ],
-    cluster: str
-) -> float:
-    """### Description
-    Generalized Beth-Uhlenbeck cluster entropy density.
-    
-    ### Prameters
-    T : float
-        Temperature in MeV.
-    mu : float
-        Quark chemical potential in MeV.
-    phi_re : float
-        Real part of the traced Polyakov-loop in MeV.
-    phi_im : float
-        Imaginary part of the traced Polyakov-loop in MeV.
-    phi_solver : Callable
-        Function calculating the traced Polyakov-loop for given
-        T and mu. Must be of the form
-            (T: float, mu: float,
-            phi_re0: float, phi_im0: float) -> Tuple[float, float],
-            where
-                T : temperature in MeV
-                mu : quark chemical potential in MeV
-                phi_re0 : initial guess for phi_re
-                phi_im0 : initial guess for phi_im
-    cluster : str
-        Cluster type,
-            'pi' : pion
-            'K' : kaon
-            'rho': rho meson
-            'omega': omega meson
-            'D': diquark
-            'N': nucleon
-            'T': tetraquark
-            'F': four-quark
-            'P': pentaquark
-            'Q': five-quark
-            'H': hexaquark
-    
-    ### Returns
-    sdensity : float
-        Value of the thermodynamic entropy density in MeV^3.
-    """
-
-    h = 1e-2
-
-    if math.fsum([T, -2*h]) > 0.0:
-
-        T_vec = [
-            math.fsum([T, 2*h]), math.fsum([T, h]),
-            math.fsum([T, -h]), math.fsum([T, -2*h])
-        ]
-        deriv_coef = [
-            -1.0/(12.0*h), 8.0/(12.0*h),
-            -8.0/(12.0*h), 1.0/(12.0*h)
-        ]
-        phi_vec = []
-        if pnjl.defaults.D_PHI_D_T_0:
-            phi_vec = [
-                tuple([phi_re, phi_im])
-                for _ in T_vec
-            ]
-        else:
-            phi_vec = [
-                phi_solver(T_el, mu, phi_re, phi_im)
-                for T_el in T_vec
-            ]
-
-        p_vec = [
-            coef*pressure(T_el, mu, phi_el[0], phi_el[1], cluster)
-            for T_el, coef, phi_el in zip(T_vec, deriv_coef, phi_vec)
-        ]
-
-        return math.fsum(p_vec)
-
-    else:
-
-        new_T = math.fsum([T, h])
-        new_phi_re, new_phi_im = phi_re, phi_im
-      
-        if not pnjl.defaults.D_PHI_D_T_0:
-            new_phi_re, new_phi_im = phi_solver(new_T, mu, phi_re, phi_im)
-
-        return sdensity(
-            new_T, mu, new_phi_re, new_phi_im, 
-            phi_solver, cluster
-        )
+    return (D_I/(2.0*(math.pi**2)))*3.0*integral
