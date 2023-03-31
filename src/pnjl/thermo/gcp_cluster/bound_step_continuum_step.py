@@ -1261,31 +1261,7 @@ def bdensity(
 
 
 @functools.lru_cache(maxsize=1024)
-def bdensity_buns(
-    T: float, mu: float, phi_re: float, phi_im: float, cluster: str
-) -> float:
-
-    M_I = pnjl.defaults.MI[cluster]
-    D_I = pnjl.defaults.DI[cluster]
-    A_I = math.fsum([
-        pnjl.defaults.NET_QL[cluster],
-        pnjl.defaults.NET_QS[cluster]
-    ])
-
-    M_th_i = M_th(T, mu, cluster)
-
-    integral = 0.0
-    if M_th_i > M_I:
-        integral, error = scipy.integrate.quad(
-            buns_b_real_hash[cluster], 0.0, math.inf,
-            args = (T, mu, phi_re, phi_im, M_I, M_th_i, A_I)
-        )
-
-    return (A_I*D_I/(2.0*(math.pi**2)))*integral
-
-
-@functools.lru_cache(maxsize=1024)
-def bdensity_bus(
+def bdensity_bu(
     T: float, mu: float, phi_re: float, phi_im: float, cluster: str
 ) -> float:
 
@@ -1425,7 +1401,7 @@ def qnumber_cumulant(
             
 
 @functools.lru_cache(maxsize=1024)
-def qnumber_cumulant_buns(
+def qnumber_cumulant_bu(
     rank: int, T: float, mu: float, phi_re: float, phi_im: float, cluster: str
 ) -> float:
     """### Description
@@ -1487,7 +1463,7 @@ def qnumber_cumulant_buns(
     else:
 
         if rank == 1:
-            return 3.0 * bdensity_buns(T, mu, phi_re, phi_im, cluster)
+            return 3.0 * bdensity_bu(T, mu, phi_re, phi_im, cluster)
         else:
 
             if math.fsum([mu, -2*h]) > 0.0:
@@ -1506,7 +1482,7 @@ def qnumber_cumulant_buns(
                 ]
 
                 out_vec = [
-                    coef*qnumber_cumulant_buns(
+                    coef*qnumber_cumulant_bu(
                         rank-1, T, mu_el, phi_el[0], phi_el[1], cluster)
                     for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
                 ]
@@ -1518,7 +1494,7 @@ def qnumber_cumulant_buns(
                 new_mu = math.fsum([mu, h])
                 new_phi_re, new_phi_im = phi_re, phi_im
 
-                return qnumber_cumulant_buns(
+                return qnumber_cumulant_bu(
                     rank, T, new_mu, new_phi_re, new_phi_im, cluster
                 )
 
@@ -1630,31 +1606,7 @@ def sdensity(
         
 
 @functools.lru_cache(maxsize=1024)
-def sdensity_buns(
-    T: float, mu: float, phi_re: float, phi_im: float, cluster: str
-) -> float:
-
-    M_I = pnjl.defaults.MI[cluster]
-    D_I = pnjl.defaults.DI[cluster]
-    A_I = math.fsum([
-        pnjl.defaults.NET_QL[cluster],
-        pnjl.defaults.NET_QS[cluster]
-    ])
-
-    M_th_i = M_th(T, mu, cluster)
-
-    integral = 0.0
-    if M_th_i > M_I:
-        integral, error = scipy.integrate.quad(
-            buns_s_real_hash[cluster], 0.0, math.inf,
-            args = (T, mu, phi_re, phi_im, M_I, M_th_i, A_I)
-        )
-
-    return -(D_I/(2.0*(math.pi**2)))*integral
-
-
-@functools.lru_cache(maxsize=1024)
-def sdensity_bus(
+def sdensity_bu(
     T: float, mu: float, phi_re: float, phi_im: float, cluster: str
 ) -> float:
 

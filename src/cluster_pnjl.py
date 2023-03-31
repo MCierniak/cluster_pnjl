@@ -1662,11 +1662,13 @@ def epja_experimental_pressure_int():
 def epja_experimental_hrg_benchmark():
 
     import tqdm
+    import math
     import numpy
     import pickle
     import warnings
     import platform
 
+    import scipy.optimize
     import matplotlib.pyplot
     if platform.system() == "Linux":
         matplotlib.use("TkAgg")
@@ -1691,7 +1693,7 @@ def epja_experimental_hrg_benchmark():
 
     warnings.filterwarnings("ignore")
     
-    calc_1 = False
+    calc_1 = True
     calc_2 = True
 
     files = "D:/EoS/epja/experimental/hrg_benchmark/"
@@ -1717,8 +1719,8 @@ def epja_experimental_hrg_benchmark():
     perturbative_gluon_v_1, pnjl_u_v_1, pnjl_d_v_1, pnjl_s_v_1 = \
         list(), list(), list(), list()
 
-    pi_v_1, K_v_1, rho_v_1, D_v_1, N_v_1, F_v_1, P_v_1, Q_v_1, H_v_1 = \
-        list(), list(), list(), list(), list(), list(), list(), list(), list()
+    pi_v_1, K_v_1, eta_v_1, rho_v_1, D_v_1, N_v_1, F_v_1, P_v_1, Q_v_1, H_v_1 = \
+        list(), list(), list(), list(), list(), list(), list(), list(), list(), list()
     omega_v_1, T_v_1 = list(), list()
 
     phi_re_v_2, phi_im_v_2 = \
@@ -1732,9 +1734,29 @@ def epja_experimental_hrg_benchmark():
     perturbative_gluon_v_2, pnjl_u_v_2, pnjl_d_v_2, pnjl_s_v_2 = \
         list(), list(), list(), list()
 
-    pi_v_2, K_v_2, rho_v_2, D_v_2, N_v_2, F_v_2, P_v_2, Q_v_2, H_v_2 = \
-        list(), list(), list(), list(), list(), list(), list(), list(), list()
+    pi_v_2, K_v_2, eta_v_2, rho_v_2, D_v_2, N_v_2, F_v_2, P_v_2, Q_v_2, H_v_2 = \
+        list(), list(), list(), list(), list(), list(), list(), list(), list(), list()
     omega_v_2, T_v_2 = list(), list()
+
+    def get_cluster(name, symbol, file, T, mu, phi_re, phi_im, calc=True):
+        payload = list()
+        if calc:
+            print(f"{name} HRG sdensity")
+            for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
+                zip(T, mu, phi_re, phi_im),
+                total=len(T), ncols=100
+            ):
+                payload.append(
+                    cluster.sdensity_bu(
+                        T_el, mu_el, phi_re_el, phi_im_el, symbol
+                    )/(T_el**3)
+                )
+            with open(file, "wb") as file:
+                pickle.dump(payload, file)
+        else:
+            with open(file, "rb") as file:
+                payload = pickle.load(file)
+        return payload
 
     if calc_1:
 
@@ -1882,174 +1904,6 @@ def epja_experimental_hrg_benchmark():
         with open(files+"s_pnjl_s_v_0p0.pickle", "rb") as file:
             pnjl_s_v_1 = pickle.load(file)
 
-    if calc_1:
-
-        print("Pion HRG sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            pi_v_1.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'pi'
-                )/(T_el**3)
-            )
-        with open(files+"s_pi_v_0p0.pickle", "wb") as file:
-            pickle.dump(pi_v_1, file)
-
-        print("Kaon HRG sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            K_v_1.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'K'
-                )/(T_el**3)
-            )
-        with open(files+"s_K_v_0p0.pickle", "wb") as file:
-            pickle.dump(K_v_1, file)
-
-        print("Rho HRG sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            rho_v_1.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'rho'
-                )/(T_el**3)
-            )
-        with open(files+"s_rho_v_0p0.pickle", "wb") as file:
-            pickle.dump(rho_v_1, file)
-
-        print("Omega HRG sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            omega_v_1.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'omega'
-                )/(T_el**3)
-            )
-        with open(files+"s_omega_v_0p0.pickle", "wb") as file:
-            pickle.dump(omega_v_1, file)
-
-        print("Diquark HRG sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            D_v_1.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'D'
-                )/(T_el**3)
-            )
-        with open(files+"s_D_v_0p0.pickle", "wb") as file:
-            pickle.dump(D_v_1, file)
-
-        print("Nucleon HRG sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            N_v_1.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'N'
-                )/(T_el**3)
-            )
-        with open(files+"s_N_v_0p0.pickle", "wb") as file:
-            pickle.dump(N_v_1, file)
-
-        print("Tetraquark HRG sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            T_v_1.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'T'
-                )/(T_el**3)
-            )
-        with open(files+"s_T_v_0p0.pickle", "wb") as file:
-            pickle.dump(T_v_1, file)
-
-        print("F-quark HRG sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            F_v_1.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'F'
-                )/(T_el**3)
-            )
-        with open(files+"s_F_v_0p0.pickle", "wb") as file:
-            pickle.dump(F_v_1, file)
-
-        print("Pentaquark HRG sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            P_v_1.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'P'
-                )/(T_el**3)
-            )
-        with open(files+"s_P_v_0p0.pickle", "wb") as file:
-            pickle.dump(P_v_1, file)
-
-        print("Q-quark HRG sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            Q_v_1.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'Q'
-                )/(T_el**3)
-            )
-        with open(files+"s_Q_v_0p0.pickle", "wb") as file:
-            pickle.dump(Q_v_1, file)
-
-        print("Hexaquark HRG sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            H_v_1.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'H'
-                )/(T_el**3)
-            )
-        with open(files+"s_H_v_0p0.pickle", "wb") as file:
-            pickle.dump(H_v_1, file)
-    else:
-        with open(files+"s_pi_v_0p0.pickle", "rb") as file:
-            pi_v_1 = pickle.load(file)
-        with open(files+"s_K_v_0p0.pickle", "rb") as file:
-            K_v_1 = pickle.load(file)
-        with open(files+"s_rho_v_0p0.pickle", "rb") as file:
-            rho_v_1 = pickle.load(file)
-        with open(files+"s_omega_v_0p0.pickle", "rb") as file:
-            omega_v_1 = pickle.load(file)
-        with open(files+"s_D_v_0p0.pickle", "rb") as file:
-            D_v_1 = pickle.load(file)
-        with open(files+"s_N_v_0p0.pickle", "rb") as file:
-            N_v_1 = pickle.load(file)
-        with open(files+"s_T_v_0p0.pickle", "rb") as file:
-            T_v_1 = pickle.load(file)
-        with open(files+"s_F_v_0p0.pickle", "rb") as file:
-            F_v_1 = pickle.load(file)
-        with open(files+"s_P_v_0p0.pickle", "rb") as file:
-            P_v_1 = pickle.load(file)
-        with open(files+"s_Q_v_0p0.pickle", "rb") as file:
-            Q_v_1 = pickle.load(file)
-        with open(files+"s_H_v_0p0.pickle", "rb") as file:
-            H_v_1 = pickle.load(file)
-
     if calc_2:
 
         phi_re_0 = 1e-5
@@ -2196,173 +2050,149 @@ def epja_experimental_hrg_benchmark():
         with open(files+"s_pnjl_s_v_2p5.pickle", "rb") as file:
             pnjl_s_v_2 = pickle.load(file)
 
-    if calc_2:
+    pi_v_1 = get_cluster(
+        "Pion", "pi", files+"s_pi_v_0p0.pickle",
+        T_1, mu_1, phi_re_v_1, phi_im_v_1,
+        calc=(calc_1 and True)
+    )
 
-        print("Pion HRG sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            pi_v_2.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'pi'
-                )/(T_el**3)
-            )
-        with open(files+"s_pi_v_2p5.pickle", "wb") as file:
-            pickle.dump(pi_v_2, file)
+    K_v_1 = get_cluster(
+        "Kaon", "K", files+"s_K_v_0p0.pickle",
+        T_1, mu_1, phi_re_v_1, phi_im_v_1,
+        calc=(calc_1 and True)
+    )
 
-        print("Kaon HRG sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            K_v_2.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'K'
-                )/(T_el**3)
-            )
-        with open(files+"s_K_v_2p5.pickle", "wb") as file:
-            pickle.dump(K_v_2, file)
+    eta_v_1 = get_cluster(
+        "Eta", "eta", files+"s_eta_v_0p0.pickle",
+        T_1, mu_1, phi_re_v_1, phi_im_v_1,
+        calc=(calc_1 and True)
+    )
 
-        print("Rho HRG sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            rho_v_2.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'rho'
-                )/(T_el**3)
-            )
-        with open(files+"s_rho_v_2p5.pickle", "wb") as file:
-            pickle.dump(rho_v_2, file)
+    rho_v_1 = get_cluster(
+        "Rho", "rho", files+"s_rho_v_0p0.pickle",
+        T_1, mu_1, phi_re_v_1, phi_im_v_1,
+        calc=(calc_1 and True)
+    )
 
-        print("Omega HRG sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            omega_v_2.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'omega'
-                )/(T_el**3)
-            )
-        with open(files+"s_omega_v_2p5.pickle", "wb") as file:
-            pickle.dump(omega_v_2, file)
+    omega_v_1 = get_cluster(
+        "Omega", "omega", files+"s_omega_v_0p0.pickle",
+        T_1, mu_1, phi_re_v_1, phi_im_v_1,
+        calc=(calc_1 and True)
+    )
 
-        print("Diquark HRG sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            D_v_2.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'D'
-                )/(T_el**3)
-            )
-        with open(files+"s_D_v_2p5.pickle", "wb") as file:
-            pickle.dump(D_v_2, file)
+    D_v_1 = get_cluster(
+        "Diquark", "D", files+"s_D_v_0p0.pickle",
+        T_1, mu_1, phi_re_v_1, phi_im_v_1,
+        calc=(calc_1 and True)
+    )
 
-        print("Nucleon HRG sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            N_v_2.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'N'
-                )/(T_el**3)
-            )
-        with open(files+"s_N_v_2p5.pickle", "wb") as file:
-            pickle.dump(N_v_2, file)
+    N_v_1 = get_cluster(
+        "Nucleon", "N", files+"s_N_v_0p0.pickle",
+        T_1, mu_1, phi_re_v_1, phi_im_v_1,
+        calc=(calc_1 and True)
+    )
 
-        print("Tetraquark HRG sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            T_v_2.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'T'
-                )/(T_el**3)
-            )
-        with open(files+"s_T_v_2p5.pickle", "wb") as file:
-            pickle.dump(T_v_2, file)
+    T_v_1 = get_cluster(
+        "Tetraquark", "T", files+"s_T_v_0p0.pickle",
+        T_1, mu_1, phi_re_v_1, phi_im_v_1,
+        calc=(calc_1 and True)
+    )
 
-        print("F-quark HRG sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            F_v_2.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'F'
-                )/(T_el**3)
-            )
-        with open(files+"s_F_v_2p5.pickle", "wb") as file:
-            pickle.dump(F_v_2, file)
+    F_v_1 = get_cluster(
+        "F-quark", "F", files+"s_F_v_0p0.pickle",
+        T_1, mu_1, phi_re_v_1, phi_im_v_1,
+        calc=(calc_1 and True)
+    )
 
-        print("Pentaquark HRG sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            P_v_2.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'P'
-                )/(T_el**3)
-            )
-        with open(files+"s_P_v_2p5.pickle", "wb") as file:
-            pickle.dump(P_v_2, file)
+    P_v_1 = get_cluster(
+        "Pentaquark", "P", files+"s_P_v_0p0.pickle",
+        T_1, mu_1, phi_re_v_1, phi_im_v_1,
+        calc=(calc_1 and True)
+    )
 
-        print("Q-quark HRG sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            Q_v_2.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'Q'
-                )/(T_el**3)
-            )
-        with open(files+"s_Q_v_2p5.pickle", "wb") as file:
-            pickle.dump(Q_v_2, file)
+    Q_v_1 = get_cluster(
+        "Q-quark", "Q", files+"s_Q_v_0p0.pickle",
+        T_1, mu_1, phi_re_v_1, phi_im_v_1,
+        calc=(calc_1 and True)
+    )
 
-        print("Hexaquark HRG sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            H_v_2.append(
-                cluster.sdensity_bu(
-                    T_el, mu_el, phi_re_el, phi_im_el, 'H'
-                )/(T_el**3)
-            )
-        with open(files+"s_H_v_2p5.pickle", "wb") as file:
-            pickle.dump(H_v_2, file)
-    else:
-        with open(files+"s_pi_v_2p5.pickle", "rb") as file:
-            pi_v_2 = pickle.load(file)
-        with open(files+"s_K_v_2p5.pickle", "rb") as file:
-            K_v_2 = pickle.load(file)
-        with open(files+"s_rho_v_2p5.pickle", "rb") as file:
-            rho_v_2 = pickle.load(file)
-        with open(files+"s_omega_v_2p5.pickle", "rb") as file:
-            omega_v_2 = pickle.load(file)
-        with open(files+"s_D_v_2p5.pickle", "rb") as file:
-            D_v_2 = pickle.load(file)
-        with open(files+"s_N_v_2p5.pickle", "rb") as file:
-            N_v_2 = pickle.load(file)
-        with open(files+"s_T_v_2p5.pickle", "rb") as file:
-            T_v_2 = pickle.load(file)
-        with open(files+"s_F_v_2p5.pickle", "rb") as file:
-            F_v_2 = pickle.load(file)
-        with open(files+"s_P_v_2p5.pickle", "rb") as file:
-            P_v_2 = pickle.load(file)
-        with open(files+"s_Q_v_2p5.pickle", "rb") as file:
-            Q_v_2 = pickle.load(file)
-        with open(files+"s_H_v_2p5.pickle", "rb") as file:
-            H_v_2 = pickle.load(file)
+    H_v_1 = get_cluster(
+        "Hexaquark", "H", files+"s_H_v_0p0.pickle",
+        T_1, mu_1, phi_re_v_1, phi_im_v_1,
+        calc=(calc_1 and True)
+    )
+
+    pi_v_2 = get_cluster(
+        "Pion", "pi", files+"s_pi_v_2p5.pickle",
+        T_2, mu_2, phi_re_v_2, phi_im_v_2,
+        calc=(calc_2 and True)
+    )
+
+    K_v_2 = get_cluster(
+        "Kaon", "K", files+"s_K_v_2p5.pickle",
+        T_2, mu_2, phi_re_v_2, phi_im_v_2,
+        calc=(calc_2 and True)
+    )
+
+    eta_v_2 = get_cluster(
+        "Eta", "eta", files+"s_eta_v_2p5.pickle",
+        T_2, mu_2, phi_re_v_2, phi_im_v_2,
+        calc=(calc_2 and True)
+    )
+
+    rho_v_2 = get_cluster(
+        "Rho", "rho", files+"s_rho_v_2p5.pickle",
+        T_2, mu_2, phi_re_v_2, phi_im_v_2,
+        calc=(calc_2 and True)
+    )
+
+    omega_v_2 = get_cluster(
+        "Omega", "omega", files+"s_omega_v_2p5.pickle",
+        T_2, mu_2, phi_re_v_2, phi_im_v_2,
+        calc=(calc_2 and True)
+    )
+
+    D_v_2 = get_cluster(
+        "Diquark", "D", files+"s_D_v_2p5.pickle",
+        T_2, mu_2, phi_re_v_2, phi_im_v_2,
+        calc=(calc_2 and True)
+    )
+
+    N_v_2 = get_cluster(
+        "Nucleon", "N", files+"s_N_v_2p5.pickle",
+        T_2, mu_2, phi_re_v_2, phi_im_v_2,
+        calc=(calc_2 and True)
+    )
+
+    T_v_2 = get_cluster(
+        "Tetraquark", "T", files+"s_T_v_2p5.pickle",
+        T_2, mu_2, phi_re_v_2, phi_im_v_2,
+        calc=(calc_2 and True)
+    )
+
+    F_v_2 = get_cluster(
+        "F-quark", "F", files+"s_F_v_2p5.pickle",
+        T_2, mu_2, phi_re_v_2, phi_im_v_2,
+        calc=(calc_2 and True)
+    )
+
+    P_v_2 = get_cluster(
+        "Pentaquark", "P", files+"s_P_v_2p5.pickle",
+        T_2, mu_2, phi_re_v_2, phi_im_v_2,
+        calc=(calc_2 and True)
+    )
+
+    Q_v_2 = get_cluster(
+        "Q-quark", "Q", files+"s_Q_v_2p5.pickle",
+        T_2, mu_2, phi_re_v_2, phi_im_v_2,
+        calc=(calc_2 and True)
+    )
+
+    H_v_2 = get_cluster(
+        "Hexaquark", "H", files+"s_H_v_2p5.pickle",
+        T_2, mu_2, phi_re_v_2, phi_im_v_2,
+        calc=(calc_2 and True)
+    )
 
     total_qgp_1 = [
         sum(el) for el in 
@@ -2370,27 +2200,6 @@ def epja_experimental_hrg_benchmark():
                 sigma_v_1, sea_u_v_1, sea_d_v_1, sea_s_v_1, gluon_v_1,
                 perturbative_u_v_1, perturbative_d_v_1, perturbative_s_v_1,
                 perturbative_gluon_v_1, pnjl_u_v_1, pnjl_d_v_1, pnjl_s_v_1
-            )
-    ]
-    total_q_1 = [
-        sum(el) for el in 
-            zip(
-                sigma_v_1, sea_u_v_1, sea_d_v_1, sea_s_v_1,
-                pnjl_u_v_1, pnjl_d_v_1, pnjl_s_v_1
-            )
-    ]
-    total_pnjl_1 = [
-        sum(el) for el in 
-            zip(
-                sigma_v_1, sea_u_v_1, sea_d_v_1, sea_s_v_1, gluon_v_1,
-                pnjl_u_v_1, pnjl_d_v_1, pnjl_s_v_1
-            )
-    ]
-    total_pert_1 = [
-        sum(el) for el in 
-            zip(
-                perturbative_u_v_1, perturbative_d_v_1, perturbative_s_v_1,
-                perturbative_gluon_v_1
             )
     ]
     total_cluster_1 = [
@@ -2401,7 +2210,6 @@ def epja_experimental_hrg_benchmark():
         sum(el) for el in 
             zip(D_v_1, F_v_1, Q_v_1)
     ]
-    total_1 = [sum(el) for el in zip(total_qgp_1, total_cluster_1, total_ccluster_1)]
     total_MHRG_1 = [sum(el) for el in zip(total_cluster_1, total_ccluster_1)]
 
     total_qgp_2 = [
@@ -2412,27 +2220,6 @@ def epja_experimental_hrg_benchmark():
                 perturbative_gluon_v_2, pnjl_u_v_2, pnjl_d_v_2, pnjl_s_v_2
             )
     ]
-    total_q_2 = [
-        sum(el) for el in 
-            zip(
-                sigma_v_2, sea_u_v_2, sea_d_v_2, sea_s_v_2,
-                pnjl_u_v_2, pnjl_d_v_2, pnjl_s_v_2
-            )
-    ]
-    total_pnjl_2 = [
-        sum(el) for el in 
-            zip(
-                sigma_v_2, sea_u_v_2, sea_d_v_2, sea_s_v_2, gluon_v_2,
-                pnjl_u_v_2, pnjl_d_v_2, pnjl_s_v_2
-            )
-    ]
-    total_pert_2 = [
-        sum(el) for el in 
-            zip(
-                perturbative_u_v_2, perturbative_d_v_2, perturbative_s_v_2,
-                perturbative_gluon_v_2
-            )
-    ]
     total_cluster_2 = [
         sum(el) for el in 
             zip(pi_v_2, K_v_2, rho_v_2, N_v_2, P_v_2, H_v_2, omega_v_2, T_v_2)
@@ -2441,7 +2228,6 @@ def epja_experimental_hrg_benchmark():
         sum(el) for el in 
             zip(D_v_2, F_v_2, Q_v_2)
     ]
-    total_2 = [sum(el) for el in zip(total_qgp_2, total_cluster_2, total_ccluster_2)]
     total_MHRG_2 = [sum(el) for el in zip(total_cluster_2, total_ccluster_2)]
 
     lQCD_1_x, lQCD_1_y = \
@@ -2458,7 +2244,32 @@ def epja_experimental_hrg_benchmark():
         )
     lQCD_2 = [[x, y] for x, y in zip(lQCD_2_x, lQCD_2_y)]
 
-    # BIR = [-(8.0/3.0)*math.pi*pnjl.thermo.gcp_perturbative.alpha_s(el, 0.0) for el in T_1]
+    hrg_lat_1_x, hrg_lat_1_y = \
+        utils.data_load(
+            lattice_files+"2212_09043v1_fig13_HRG_mub_T_0p0_s.dat", 0, 1,
+            firstrow=0, delim=' '
+        )
+    hrg_lat_1_x.insert(0, 0.0)
+    hrg_lat_1_y.insert(0, 0.0)
+    hrg_lat_2_x, hrg_lat_2_y = \
+        utils.data_load(
+            lattice_files+"2212_09043v1_fig13_HRG_mub_T_2p5_s.dat", 0, 1,
+            firstrow=0, delim=' '
+        )
+    hrg_lat_2_x.insert(0, 0.0)
+    hrg_lat_2_y.insert(0, -10.0)
+
+    def poly(x, a, b, c, d, e):
+        x1 = b*x
+        x2 = c*(x**2)
+        x3 = d*(x**3)
+        x4 = e*(x**4)
+        return a + x1 + x2 + x3 + x4
+
+    hrg_par_1, _ = scipy.optimize.curve_fit(poly, hrg_lat_1_x, hrg_lat_1_y)
+    hrg_par_2, _ = scipy.optimize.curve_fit(poly, hrg_lat_2_x, hrg_lat_2_y)
+
+    BIR = [-(8.0/3.0)*math.pi*pnjl.thermo.gcp_perturbative.alpha_s(el, 0.0) for el in T_1]
 
     fig1 = matplotlib.pyplot.figure(num = 1, figsize = (12.0, 5.0))
     ax1 = fig1.add_subplot(1, 2, 1)
@@ -2467,25 +2278,42 @@ def epja_experimental_hrg_benchmark():
     ax1.add_patch(matplotlib.patches.Polygon(lQCD_1, 
             closed = True, fill = True, color = 'green', alpha = 0.3))
 
-    ax1.plot(T_1, total_1, '-', c = 'black')
-    # ax1.plot(T_1, BIR, '--', c = 'black')
-    ax1.plot(T_1, total_MHRG_1, '--', c = 'green')
-    ax1.plot(T_1, total_qgp_1, '--', c = 'blue')
-    ax1.plot(T_1, total_pnjl_1, '-.', c = 'darkblue')
-    ax1.plot(T_1, total_pert_1, '-.', c = 'magenta')
-    ax1.plot(T_1, gluon_v_1, ':', c = 'red')
-    ax1.plot(T_1, total_q_1, ':', c = 'purple')
+    ax1.plot(T_1, total_MHRG_1, '-', c = 'black')
+    ax1.plot(T_1, [poly(el, *hrg_par_1) for el in T_1], '--', c = 'blue')
+    ax1.plot(T_1, pi_v_1, '-', c = 'red')
+    ax1.plot(T_1, K_v_1, '-', c = 'green')
+    ax1.plot(T_1, rho_v_1, '-', c = 'magenta')
+    ax1.plot(T_1, N_v_1, '-', c = 'darkblue')
+    ax1.plot(T_1, P_v_1, '-', c = 'purple')
+    ax1.plot(T_1, H_v_1, '-', c = 'orange')
+    ax1.plot(T_1, omega_v_1, '-', c = 'cyan')
+    ax1.plot(T_1, T_v_1, '-', c = 'crimson')
+    ax1.plot(T_1, D_v_1, '-', c = 'darkred')
+    ax1.plot(T_1, F_v_1, '-', c = 'salmon')
+    ax1.plot(T_1, Q_v_1, '-', c = 'lime')
 
-    ax1.text(185, 7.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
-    ax1.text(82, -4.5, r"Blaizot et al. (1999)", color="black", fontsize=14)
+    ax1.plot(T_1, eta_v_1, '--', c = 'red')
+
     ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
-    ax1.text(105, 2.5, r"Total", color="black", fontsize=14)
-    ax1.text(250, 15.5, r"QGP", color="blue", fontsize=14)
-    ax1.text(190, 0.5, r"MHRG", color="green", fontsize=14)
-    ax1.text(190, 17.5, r"PNJL", color="darkblue", fontsize=14)
-    ax1.text(188, -3.5, r"Perturbative correction", color="magenta", fontsize=14)
-    ax1.text(220, 5.5, r"Polyakov-loop", color="red", fontsize=14)
-    ax1.text(170, 12.5, r"Quarks", color="purple", fontsize=14)
+
+    # ax1.plot(T_1, total_1, '-', c = 'black')
+    # ax1.plot(hrg_lat_1_x[1:], hrg_lat_1_y[1:], '-', c = 'red')
+    # ax1.plot(T_1, total_qgp_1, '--', c = 'blue')
+    # ax1.plot(T_1, total_pnjl_1, '-.', c = 'darkblue')
+    # ax1.plot(T_1, total_pert_1, '-.', c = 'magenta')
+    # ax1.plot(T_1, gluon_v_1, ':', c = 'red')
+    # ax1.plot(T_1, BIR, '--', c = 'black')
+
+    # ax1.plot(T_1, total_q_1, ':', c = 'purple')
+    # ax1.text(185, 7.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
+    # ax1.text(105, 2.5, r"Total", color="black", fontsize=14)
+    # ax1.text(250, 15.5, r"QGP", color="blue", fontsize=14)
+    # ax1.text(185, 3.5, r"HRG", color="purple", fontsize=14)
+    # ax1.text(82, -4.5, r"Blaizot et al. (1999)", color="black", fontsize=14)
+    # ax1.text(190, 17.5, r"PNJL", color="darkblue", fontsize=14)
+    # ax1.text(188, -3.5, r"Perturbative correction", color="magenta", fontsize=14)
+    # ax1.text(220, 5.5, r"Polyakov-loop", color="red", fontsize=14)
+    # ax1.text(170, 12.5, r"Quarks", color="purple", fontsize=14)
 
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -2500,23 +2328,40 @@ def epja_experimental_hrg_benchmark():
     ax2.add_patch(matplotlib.patches.Polygon(lQCD_2, 
             closed = True, fill = True, color = 'green', alpha = 0.3))
 
-    ax2.plot(T_2, total_2, '-', c = 'black')
-    ax2.plot(T_1, total_MHRG_2, '--', c = 'green')
-    ax2.plot(T_1, total_qgp_2, '--', c = 'blue')
-    ax2.plot(T_2, total_pnjl_2, '-.', c = 'darkblue')
-    ax2.plot(T_2, total_pert_2, '-.', c = 'magenta')
-    ax2.plot(T_2, gluon_v_2, ':', c = 'red')
-    ax2.plot(T_2, total_q_2, ':', c = 'purple')
+    ax2.plot(T_2, total_MHRG_2, '-', c = 'black')
+    ax2.plot(T_2, [poly(el, *hrg_par_2) for el in T_1], '--', c = 'blue')
+    ax2.plot(T_2, pi_v_2, '-', c = 'red')
+    ax2.plot(T_2, K_v_2, '-', c = 'green')
+    ax2.plot(T_2, rho_v_2, '-', c = 'magenta')
+    ax2.plot(T_2, N_v_2, '-', c = 'darkblue')
+    ax2.plot(T_2, P_v_2, '-', c = 'purple')
+    ax2.plot(T_2, H_v_2, '-', c = 'orange')
+    ax2.plot(T_2, omega_v_2, '-', c = 'cyan')
+    ax2.plot(T_2, T_v_2, '-', c = 'crimson')
+    ax2.plot(T_2, D_v_2, '-', c = 'darkred')
+    ax2.plot(T_2, F_v_2, '-', c = 'salmon')
+    ax2.plot(T_2, Q_v_2, '-', c = 'lime')
 
-    ax2.text(185, 9.0, r"Bollweg et al. (2022)", color="green", fontsize=14)
+    ax2.plot(T_2, eta_v_2, '--', c = 'red')
+
     ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
-    ax2.text(102, 2.5, r"Total", color="black", fontsize=14)
-    ax2.text(250, 17.5, r"QGP", color="blue", fontsize=14)
-    ax2.text(190, 0.5, r"MHRG", color="green", fontsize=14)
-    ax2.text(164, 17.5, r"PNJL", color="darkblue", fontsize=14)
-    ax2.text(188, -3.8, r"Perturbative correction", color="magenta", fontsize=14)
-    ax2.text(220, 5.5, r"Polyakov-loop", color="red", fontsize=14)
-    ax2.text(160, 14.2, r"Quarks", color="purple", fontsize=14)
+
+    # ax2.plot(T_2, total_2, '-', c = 'black')
+    # ax2.plot(hrg_lat_2_x[1:], hrg_lat_2_y[1:], '-', c = 'red')
+    # ax2.plot(T_2, total_qgp_2, '--', c = 'blue')
+    # ax2.plot(T_2, total_pnjl_2, '-.', c = 'darkblue')
+    # ax2.plot(T_2, total_pert_2, '-.', c = 'magenta')
+    # ax2.plot(T_2, gluon_v_2, ':', c = 'red')
+    # ax2.plot(T_2, total_q_2, ':', c = 'purple')
+
+    # ax2.text(190, 9.0, r"Bollweg et al. (2022)", color="green", fontsize=14)
+    # ax2.text(102, 2.5, r"Total", color="black", fontsize=14)
+    # ax2.text(250, 17.5, r"QGP", color="blue", fontsize=14)
+    # ax2.text(165, 4.7, r"HRG", color="purple", fontsize=14)
+    # ax2.text(164, 17.5, r"PNJL", color="darkblue", fontsize=14)
+    # ax2.text(188, -3.8, r"Perturbative correction", color="magenta", fontsize=14)
+    # ax2.text(220, 5.5, r"Polyakov-loop", color="red", fontsize=14)
+    # ax2.text(160, 14.2, r"Quarks", color="purple", fontsize=14)
 
     for tick in ax2.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -19064,6 +18909,61 @@ def epja_beth_uhlenbeck1():
 
     BIR = [-(8.0/3.0)*math.pi*pnjl.thermo.gcp_perturbative.alpha_s(el, 0.0) for el in T_1]
 
+    def g2_1loop(T: float, kT: float, LMS: float):
+        beta0 = (11.0 - 2.0)/(4.0*math.pi)
+        aux_log = (kT*math.pi*T)/LMS
+        return 2*math.pi/(beta0*math.log(aux_log))
+
+    def g2(T: float, kT: float, LMS: float):
+        try:
+            beta0 = (11.0 - 2.0)/(4.0*math.pi)
+            beta1 = (102 - 38)/(16*(math.pi**2))
+            b10 = beta1/beta0
+            aux_log = (kT*math.pi*T)/LMS
+            log2 = 2.0*math.log(aux_log)
+            return g2_1loop(T, kT, LMS)*(1.0 - b10*(math.log(log2)/log2))
+        except ValueError:
+            return float('nan')
+
+    def dg2dT(T: float, kT: float, LMS: float):
+        try:
+            aux_log = (kT*math.pi*T)/LMS
+            log = math.log(aux_log)
+            return -8.0*math.pi*(8.0+9.0*math.pi*log-16.0*math.log(2.0*log))/(81.0*(log**3))
+        except ValueError:
+            return float('nan')
+
+    def p_id(T: float, mu: float):
+        muT = mu/T
+        zero = (23.75*math.pi**2)/45.0
+        mu1 = 0.5*(muT**2)
+        piterm = 1.0/(4.0*(math.pi**2))
+        mu2 = muT**4
+        return zero + 3.0*(mu1 + piterm*mu2)
+
+    def s_id(T: float, mu: float):
+        muT = mu/T
+        return -3.0*((muT**2) + (muT**4)/(math.pi**2))
+
+    def p_2(T: float, mu: float):
+        muT = mu/T
+        zero = (1.0 + ((5.0*3.0)/12.0))/6.0
+        piterm = 1.0/(4.0*(math.pi**2))
+        mu1 = 0.5*(muT**2)
+        mu2 = muT**4
+        return zero + (2.0*3.0*piterm)*(mu1 + piterm*mu2)
+
+    def s_2(T: float, mu: float):
+        return s_id(T, mu)/(2.0*(math.pi**2))
+
+    def s_pert_og2(T: float, mu: float, kT: float, LMS: float):
+        return 4.0*p_id(T, mu) + s_id(T, mu) - 4.0*g2(T, kT, LMS) - p_2(T, mu)*dg2dT(T, kT, LMS) - g2(T, kT, LMS)*s_2(T, mu)
+
+    s_pert_og2_v_1_low = [s_pert_og2(T_el, mu_el, 4.0, 351.0) for T_el, mu_el in zip(T_1, mu_1)]
+    s_pert_og2_v_1_high = [s_pert_og2(T_el, mu_el, 8.0, 327.0) for T_el, mu_el in zip(T_1, mu_1)]
+    s_pert_og2_v_2_low = [s_pert_og2(T_el, mu_el, 4.0, 351.0) for T_el, mu_el in zip(T_2, mu_2)]
+    s_pert_og2_v_2_high = [s_pert_og2(T_el, mu_el, 8.0, 327.0) for T_el, mu_el in zip(T_2, mu_2)]
+
     fig1 = matplotlib.pyplot.figure(num = 1, figsize = (12.0, 5.0))
     ax1 = fig1.add_subplot(1, 2, 1)
     ax1.axis([80., 280., -6.0, 20.0])
@@ -19072,16 +18972,18 @@ def epja_beth_uhlenbeck1():
             closed = True, fill = True, color = 'green', alpha = 0.3))
 
     ax1.plot(T_1, total_1s, '-', c = 'black')
-    ax1.plot(T_1, BIR, '--', c = 'black')
+    # ax1.plot(T_1, BIR, '--', c = 'black')
     ax1.plot(T_1, total_MHRG_1s, '--', c = 'green')
     ax1.plot(T_1, total_qgp_1, '--', c = 'blue')
     ax1.plot(T_1, total_pnjl_1, '-.', c = 'darkblue')
     ax1.plot(T_1, total_pert_1, '-.', c = 'magenta')
-    ax1.plot(T_1, gluon_v_1, ':', c = 'red')
+    ax1.plot(T_1, gluon_v_1, '-.', c = 'red')
     ax1.plot(T_1, total_q_1, ':', c = 'purple')
+    ax1.plot(T_1, s_pert_og2_v_1_low, ':', c = 'red')
+    ax1.plot(T_1, s_pert_og2_v_1_high, ':', c = 'red')
 
     ax1.text(185, 7.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
-    ax1.text(82, -4.5, r"Blaizot et al. (1999)", color="black", fontsize=14)
+    # ax1.text(82, -4.5, r"Blaizot et al. (1999)", color="black", fontsize=14)
     ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
     ax1.text(105, 2.5, r"Total", color="black", fontsize=14)
     ax1.text(250, 15.5, r"QGP", color="blue", fontsize=14)
@@ -19109,8 +19011,10 @@ def epja_beth_uhlenbeck1():
     ax2.plot(T_1, total_qgp_2, '--', c = 'blue')
     ax2.plot(T_2, total_pnjl_2, '-.', c = 'darkblue')
     ax2.plot(T_2, total_pert_2, '-.', c = 'magenta')
-    ax2.plot(T_2, gluon_v_2, ':', c = 'red')
+    ax2.plot(T_2, gluon_v_2, '-.', c = 'red')
     ax2.plot(T_2, total_q_2, ':', c = 'purple')
+    ax2.plot(T_2, s_pert_og2_v_2_low, ':', c = 'red')
+    ax2.plot(T_2, s_pert_og2_v_2_high, ':', c = 'red')
 
     ax2.text(185, 9.0, r"Bollweg et al. (2022)", color="green", fontsize=14)
     ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
@@ -19138,6 +19042,7 @@ def epja_beth_uhlenbeck1():
 def epja_beth_uhlenbeck2():
 
     import tqdm
+    import math
     import numpy
     import pickle
     import warnings
@@ -20021,8 +19926,44 @@ def epja_beth_uhlenbeck2():
         )
     lQCD_2 = [[x, y] for x, y in zip(lQCD_2_x, lQCD_2_y)]
 
+    lQCD_new_x, lQCD_new_y = \
+        utils.data_load(
+            lattice_files+"2202_09184v2_fig2_mub_T_2p5_nb.dat", 0, 1,
+            firstrow=0, delim=' '
+        )
+    lQCD_new = [[x, y] for x, y in zip(lQCD_new_x, lQCD_new_y)]
+
     with open(lattice_files+"2212_09043_mub_T_2p5_nT3.pickle", "rb") as file:
         n_poly = pickle.load(file)
+
+    def g2_1loop(T: float, kT: float, LMS: float):
+        beta0 = (11.0 - 2.0)/(4.0*math.pi)
+        aux_log = (kT*math.pi*T)/LMS
+        return 2*math.pi/(beta0*math.log(aux_log))
+
+    def g2(T: float, kT: float, LMS: float):
+        try:
+            beta0 = (11.0 - 2.0)/(4.0*math.pi)
+            beta1 = (102 - 38)/(16*(math.pi**2))
+            b10 = beta1/beta0
+            aux_log = (kT*math.pi*T)/LMS
+            log2 = 2.0*math.log(aux_log)
+            return g2_1loop(T, kT, LMS)*(1.0 - b10*(math.log(log2)/log2))
+        except ValueError:
+            return float('nan')
+
+    def n_id(T: float, mu: float):
+        muT = mu/T
+        return muT + (1.0/(math.pi**2))*(muT**3)
+
+    def n_2(T: float, mu: float):
+        return n_id(T, mu)/(2.0*(math.pi**2))
+
+    def n_pert_og2(T: float, mu: float, kT: float, LMS: float):
+        return n_id(T, mu) - g2(T, kT, LMS)*n_2(T, mu)
+
+    n_pert_og2_v_low = [n_pert_og2(T_el, mu_el, 4.0, 351.0) for T_el, mu_el in zip(T_2, mu_2)]
+    n_pert_og2_v_high = [n_pert_og2(T_el, mu_el, 8.0, 327.0) for T_el, mu_el in zip(T_2, mu_2)]
 
     fig1 = matplotlib.pyplot.figure(num = 1, figsize = (6.0, 5.0))
 
@@ -20035,7 +19976,7 @@ def epja_beth_uhlenbeck2():
 
     ax2.add_patch(
         matplotlib.patches.Polygon(
-            n_poly, closed = True, fill = True, color = "green", alpha = 0.3
+            lQCD_new, closed = True, fill = True, color = "green", alpha = 0.3
         )
     )
 
@@ -20044,8 +19985,10 @@ def epja_beth_uhlenbeck2():
     ax2.plot(T_2, total_pnjl_2, '-.', c = 'darkblue')
     ax2.plot(T_2, total_pert_2, '-.', c = 'magenta')
     ax2.plot(T_2, total_2s, '-', c = 'black')
+    ax2.plot(T_2, n_pert_og2_v_low, ':', c = 'red')
+    ax2.plot(T_2, n_pert_og2_v_high, ':', c = 'red')
 
-    ax2.text(196, 1.1, r"Bollweg et al. (2022)", color="green", fontsize=14)
+    # ax2.text(196, 1.1, r"Bollweg et al. (2022)", color="green", fontsize=14)
     ax2.text(85, 1.1, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
     ax2.text(150, 0.03, r"MHRG", color="green", fontsize=14)
     ax2.text(188, -0.18, r"Perturbative correction", color="magenta", fontsize=14)

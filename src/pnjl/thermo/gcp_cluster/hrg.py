@@ -20,8 +20,9 @@ import pnjl.thermo.gcp_pl_polynomial
 
 
 MI_OVERRIDE = {
-    'pi': 200.0,
+    'pi': 140.0,
     'K': 500.0,
+    'eta': 550.0,
     'rho': math.fsum([2.0*pnjl.defaults.M0, 2.0*pnjl.defaults.ML, -pnjl.defaults.B]),
     'omega': math.fsum([2.0*pnjl.defaults.M0, 2.0*pnjl.defaults.ML, -pnjl.defaults.B]),
     'D': math.fsum([2.0*pnjl.defaults.M0, 2.0*pnjl.defaults.ML, -pnjl.defaults.B]),
@@ -34,22 +35,24 @@ MI_OVERRIDE = {
 }
 
 DI_OVERRIDE = {
-    'pi': (1.0*1.0)/2.0,
-    'K': (1.0*1.0)/2.0,
-    'rho': (3.0*1.0)/2.0,
-    'omega': (3.0*1.0)/2.0,
-    'D': (1.0*3.0)/2.0,
-    'N': (2.0*1.0)/2.0,
-    'T': math.fsum([(1.0*1.0)/2.0, (3.0*1.0)/2.0]),
-    'F': (1.0*3.0)/2.0,
-    'P': math.fsum([(4.0*1.0)/2.0, (2.0*1.0)/2.0]),
-    'Q': (2.0*3.0)/2.0,
-    'H': math.fsum([(1.0*1.0)/2.0, (5.0*1.0)/2.0, (3.0*1.0)/2.0])
+    'pi': 3.0,
+    'K': 4.0,
+    'eta': 550.0,
+    'rho': 9.0,
+    'omega': 3.0,
+    'D': 3.0,
+    'N': 4.0,
+    'T': 1.0,
+    'F': 3.0,
+    'P': 4.0,
+    'Q': 6.0,
+    'H': 3.0
 }
 
 NET_QL_OVERRIDE = {
     'pi': 0,
     'K': 1,
+    'eta': 0,
     'rho': 0,
     'omega': 0,
     'D': 2,
@@ -64,6 +67,37 @@ NET_QL_OVERRIDE = {
 NET_QS_OVERRIDE = {
     'pi': 0,
     'K': -1,
+    'eta': 0,
+    'rho': 0,
+    'omega': 0,
+    'D': 0,
+    'N': 0,
+    'T': 0,
+    'F': 0,
+    'P': 0,
+    'Q': 0,
+    'H': 0
+}
+
+NI_OVERRIDE = {
+    'pi': 2.0,
+    'K': 2.0,
+    'eta': 2.0,
+    'rho': 2.0,
+    'omega': 2.0,
+    'D': 2.0,
+    'N': 3.0,
+    'T': 4.0,
+    'F': 4.0,
+    'P': 5.0,
+    'Q': 5.0,
+    'H': 6.0
+}
+
+S_OVERRIDE = {
+    'pi': 0,
+    'K': 1,
+    'eta': 0,
     'rho': 0,
     'omega': 0,
     'D': 0,
@@ -167,6 +201,7 @@ def bu_s_fermion_antitriplet_integrand_real(
 bu_s_integral_hash = {
     'pi': bu_s_boson_singlet_integrand,
     'K': bu_s_boson_singlet_integrand,
+    'eta': bu_s_boson_singlet_integrand,
     'rho': bu_s_boson_singlet_integrand,
     'omega': bu_s_boson_singlet_integrand,
     'D': bu_s_boson_antitriplet_integrand_real,
@@ -210,4 +245,4 @@ def sdensity_bu(
         args = (T, mu, phi_re, phi_im, M_I, A_I, cluster)
     )
 
-    return (D_I/(2.0*(math.pi**2)))*3.0*integral
+    return (D_I/(2.0*(math.pi**2)))*integral

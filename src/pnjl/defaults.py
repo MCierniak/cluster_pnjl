@@ -144,7 +144,7 @@ import math
 
 TC0 = 154.#170.
 DELTA_T = 26.
-ML = 5.5
+ML = 5.0
 C = 300.0
 D = 3.2
 KAPPA = 0.012
@@ -157,8 +157,8 @@ B3 = 0.75
 B4 = 7.5
 T0 = 175.#187.
 NC = 3.0
-M0 = 400.
-MS = 100.0
+M0 = 395.0
+MS = 155.0
 M_L_VAC = math.fsum([0.5*M0*math.fsum([1.0, math.tanh(TC0/DELTA_T)]), ML])
 M_S_VAC = math.fsum([0.5*M0*math.fsum([1.0, math.tanh(TC0/DELTA_T)]), MS])
 LAMBDA = 900.0
