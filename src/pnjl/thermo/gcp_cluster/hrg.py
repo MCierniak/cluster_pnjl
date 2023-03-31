@@ -37,7 +37,7 @@ MI_OVERRIDE = {
 DI_OVERRIDE = {
     'pi': 3.0,
     'K': 4.0,
-    'eta': 550.0,
+    'eta': 1.0,
     'rho': 9.0,
     'omega': 3.0,
     'D': 3.0,

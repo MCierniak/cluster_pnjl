@@ -1693,8 +1693,8 @@ def epja_experimental_hrg_benchmark():
 
     warnings.filterwarnings("ignore")
     
-    calc_1 = True
-    calc_2 = True
+    calc_1 = False
+    calc_2 = False
 
     files = "D:/EoS/epja/experimental/hrg_benchmark/"
     lattice_files = "D:/EoS/epja/lattice_data_raw/"
@@ -2051,147 +2051,147 @@ def epja_experimental_hrg_benchmark():
             pnjl_s_v_2 = pickle.load(file)
 
     pi_v_1 = get_cluster(
-        "Pion", "pi", files+"s_pi_v_0p0.pickle",
+        "Pion #1", "pi", files+"s_pi_v_0p0.pickle",
         T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=(calc_1 and True)
+        calc=calc_1
     )
 
     K_v_1 = get_cluster(
-        "Kaon", "K", files+"s_K_v_0p0.pickle",
+        "Kaon #1", "K", files+"s_K_v_0p0.pickle",
         T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=(calc_1 and True)
+        calc=calc_1
     )
 
     eta_v_1 = get_cluster(
-        "Eta", "eta", files+"s_eta_v_0p0.pickle",
+        "Eta #1", "eta", files+"s_eta_v_0p0.pickle",
         T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=(calc_1 and True)
+        calc=True
     )
 
     rho_v_1 = get_cluster(
-        "Rho", "rho", files+"s_rho_v_0p0.pickle",
+        "Rho #1", "rho", files+"s_rho_v_0p0.pickle",
         T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=(calc_1 and True)
+        calc=calc_1
     )
 
     omega_v_1 = get_cluster(
-        "Omega", "omega", files+"s_omega_v_0p0.pickle",
+        "Omega #1", "omega", files+"s_omega_v_0p0.pickle",
         T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=(calc_1 and True)
+        calc=calc_1
     )
 
     D_v_1 = get_cluster(
-        "Diquark", "D", files+"s_D_v_0p0.pickle",
+        "Diquark #1", "D", files+"s_D_v_0p0.pickle",
         T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=(calc_1 and True)
+        calc=calc_1
     )
 
     N_v_1 = get_cluster(
-        "Nucleon", "N", files+"s_N_v_0p0.pickle",
+        "Nucleon #1", "N", files+"s_N_v_0p0.pickle",
         T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=(calc_1 and True)
+        calc=calc_1
     )
 
     T_v_1 = get_cluster(
-        "Tetraquark", "T", files+"s_T_v_0p0.pickle",
+        "Tetraquark #1", "T", files+"s_T_v_0p0.pickle",
         T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=(calc_1 and True)
+        calc=calc_1
     )
 
     F_v_1 = get_cluster(
-        "F-quark", "F", files+"s_F_v_0p0.pickle",
+        "F-quark #1", "F", files+"s_F_v_0p0.pickle",
         T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=(calc_1 and True)
+        calc=calc_1
     )
 
     P_v_1 = get_cluster(
-        "Pentaquark", "P", files+"s_P_v_0p0.pickle",
+        "Pentaquark #1", "P", files+"s_P_v_0p0.pickle",
         T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=(calc_1 and True)
+        calc=calc_1
     )
 
     Q_v_1 = get_cluster(
-        "Q-quark", "Q", files+"s_Q_v_0p0.pickle",
+        "Q-quark #1", "Q", files+"s_Q_v_0p0.pickle",
         T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=(calc_1 and True)
+        calc=calc_1
     )
 
     H_v_1 = get_cluster(
-        "Hexaquark", "H", files+"s_H_v_0p0.pickle",
+        "Hexaquark #1", "H", files+"s_H_v_0p0.pickle",
         T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=(calc_1 and True)
+        calc=calc_1
     )
 
     pi_v_2 = get_cluster(
-        "Pion", "pi", files+"s_pi_v_2p5.pickle",
+        "Pion #2", "pi", files+"s_pi_v_2p5.pickle",
         T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=(calc_2 and True)
+        calc=calc_2
     )
 
     K_v_2 = get_cluster(
-        "Kaon", "K", files+"s_K_v_2p5.pickle",
+        "Kaon #2", "K", files+"s_K_v_2p5.pickle",
         T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=(calc_2 and True)
+        calc=calc_2
     )
 
     eta_v_2 = get_cluster(
-        "Eta", "eta", files+"s_eta_v_2p5.pickle",
+        "Eta #2", "eta", files+"s_eta_v_2p5.pickle",
         T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=(calc_2 and True)
+        calc=True
     )
 
     rho_v_2 = get_cluster(
-        "Rho", "rho", files+"s_rho_v_2p5.pickle",
+        "Rho #2", "rho", files+"s_rho_v_2p5.pickle",
         T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=(calc_2 and True)
+        calc=calc_2
     )
 
     omega_v_2 = get_cluster(
-        "Omega", "omega", files+"s_omega_v_2p5.pickle",
+        "Omega #2", "omega", files+"s_omega_v_2p5.pickle",
         T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=(calc_2 and True)
+        calc=calc_2
     )
 
     D_v_2 = get_cluster(
-        "Diquark", "D", files+"s_D_v_2p5.pickle",
+        "Diquark #2", "D", files+"s_D_v_2p5.pickle",
         T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=(calc_2 and True)
+        calc=calc_2
     )
 
     N_v_2 = get_cluster(
-        "Nucleon", "N", files+"s_N_v_2p5.pickle",
+        "Nucleon #2", "N", files+"s_N_v_2p5.pickle",
         T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=(calc_2 and True)
+        calc=calc_2
     )
 
     T_v_2 = get_cluster(
-        "Tetraquark", "T", files+"s_T_v_2p5.pickle",
+        "Tetraquark #2", "T", files+"s_T_v_2p5.pickle",
         T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=(calc_2 and True)
+        calc=calc_2
     )
 
     F_v_2 = get_cluster(
-        "F-quark", "F", files+"s_F_v_2p5.pickle",
+        "F-quark #2", "F", files+"s_F_v_2p5.pickle",
         T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=(calc_2 and True)
+        calc=calc_2
     )
 
     P_v_2 = get_cluster(
-        "Pentaquark", "P", files+"s_P_v_2p5.pickle",
+        "Pentaquark #2", "P", files+"s_P_v_2p5.pickle",
         T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=(calc_2 and True)
+        calc=calc_2
     )
 
     Q_v_2 = get_cluster(
-        "Q-quark", "Q", files+"s_Q_v_2p5.pickle",
+        "Q-quark #2", "Q", files+"s_Q_v_2p5.pickle",
         T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=(calc_2 and True)
+        calc=calc_2
     )
 
     H_v_2 = get_cluster(
-        "Hexaquark", "H", files+"s_H_v_2p5.pickle",
+        "Hexaquark #2", "H", files+"s_H_v_2p5.pickle",
         T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=(calc_2 and True)
+        calc=calc_2
     )
 
     total_qgp_1 = [
@@ -2204,7 +2204,7 @@ def epja_experimental_hrg_benchmark():
     ]
     total_cluster_1 = [
         sum(el) for el in 
-            zip(pi_v_1, K_v_1, rho_v_1, N_v_1, P_v_1, H_v_1, omega_v_1, T_v_1)
+            zip(pi_v_1, K_v_1, rho_v_1, N_v_1, P_v_1, H_v_1, omega_v_1, T_v_1, eta_v_1)
     ]
     total_ccluster_1 = [
         sum(el) for el in 
@@ -2222,7 +2222,7 @@ def epja_experimental_hrg_benchmark():
     ]
     total_cluster_2 = [
         sum(el) for el in 
-            zip(pi_v_2, K_v_2, rho_v_2, N_v_2, P_v_2, H_v_2, omega_v_2, T_v_2)
+            zip(pi_v_2, K_v_2, rho_v_2, N_v_2, P_v_2, H_v_2, omega_v_2, T_v_2, eta_v_2)
     ]
     total_ccluster_2 = [
         sum(el) for el in 
@@ -2279,7 +2279,7 @@ def epja_experimental_hrg_benchmark():
             closed = True, fill = True, color = 'green', alpha = 0.3))
 
     ax1.plot(T_1, total_MHRG_1, '-', c = 'black')
-    ax1.plot(T_1, [poly(el, *hrg_par_1) for el in T_1], '--', c = 'blue')
+    ax1.plot(T_1, [poly(el, *hrg_par_1) for el in T_1], ':', c = 'blue')
     ax1.plot(T_1, pi_v_1, '-', c = 'red')
     ax1.plot(T_1, K_v_1, '-', c = 'green')
     ax1.plot(T_1, rho_v_1, '-', c = 'magenta')
@@ -2329,7 +2329,7 @@ def epja_experimental_hrg_benchmark():
             closed = True, fill = True, color = 'green', alpha = 0.3))
 
     ax2.plot(T_2, total_MHRG_2, '-', c = 'black')
-    ax2.plot(T_2, [poly(el, *hrg_par_2) for el in T_1], '--', c = 'blue')
+    ax2.plot(T_2, [poly(el, *hrg_par_2) for el in T_1], ':', c = 'blue')
     ax2.plot(T_2, pi_v_2, '-', c = 'red')
     ax2.plot(T_2, K_v_2, '-', c = 'green')
     ax2.plot(T_2, rho_v_2, '-', c = 'magenta')
