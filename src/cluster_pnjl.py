@@ -1679,7 +1679,7 @@ def epja_experimental_hrg_benchmark():
     import pnjl.thermo.gcp_perturbative
     import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl_polynomial
-    import pnjl.thermo.gcp_cluster.hrg \
+    import pnjl.thermo.gcp_cluster.hrg_albright \
         as cluster
 
     import pnjl.thermo.solvers.\
@@ -1705,530 +1705,97 @@ def epja_experimental_hrg_benchmark():
     T_1 = numpy.linspace(1.0, 280.0, 200)
     T_2 = numpy.linspace(1.0, 280.0, 200)
 
-    mu_1 = [0.0 / 3.0 for el in T_1]
-    mu_2 = [(2.5 * el) / 3.0 for el in T_2]
+    muB_1 = [0.0 for el in T_1]
+    muB_2 = [2.5 * el for el in T_2]
 
-    phi_re_v_1, phi_im_v_1 = \
-        list(), list()
-
-    sigma_v_1, sea_u_v_1, sea_d_v_1, sea_s_v_1 = \
-        list(), list(), list(), list()
-    gluon_v_1 = list()
-    perturbative_u_v_1, perturbative_d_v_1, perturbative_s_v_1 = \
-        list(), list(), list()
-    perturbative_gluon_v_1, pnjl_u_v_1, pnjl_d_v_1, pnjl_s_v_1 = \
-        list(), list(), list(), list()
-
-    pi_v_1, K_v_1, eta_v_1, rho_v_1, D_v_1, N_v_1, F_v_1, P_v_1, Q_v_1, H_v_1 = \
-        list(), list(), list(), list(), list(), list(), list(), list(), list(), list()
-    omega_v_1, T_v_1 = list(), list()
-
-    phi_re_v_2, phi_im_v_2 = \
-        list(), list()
-
-    sigma_v_2, sea_u_v_2, sea_d_v_2, sea_s_v_2 = \
-        list(), list(), list(), list()
-    gluon_v_2 = list()
-    perturbative_u_v_2, perturbative_d_v_2, perturbative_s_v_2 = \
-        list(), list(), list()
-    perturbative_gluon_v_2, pnjl_u_v_2, pnjl_d_v_2, pnjl_s_v_2 = \
-        list(), list(), list(), list()
-
-    pi_v_2, K_v_2, eta_v_2, rho_v_2, D_v_2, N_v_2, F_v_2, P_v_2, Q_v_2, H_v_2 = \
-        list(), list(), list(), list(), list(), list(), list(), list(), list(), list()
-    omega_v_2, T_v_2 = list(), list()
-
-    def get_cluster(name, symbol, file, T, mu, phi_re, phi_im, calc=True):
-        payload = list()
-        if calc:
-            print(f"{name} HRG sdensity")
-            for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-                zip(T, mu, phi_re, phi_im),
-                total=len(T), ncols=100
-            ):
-                payload.append(
-                    cluster.sdensity_bu(
-                        T_el, mu_el, phi_re_el, phi_im_el, symbol
-                    )/(T_el**3)
-                )
-            with open(file, "wb") as file:
-                pickle.dump(payload, file)
-        else:
-            with open(file, "rb") as file:
-                payload = pickle.load(file)
-        return payload
-
-    if calc_1:
-
-        phi_re_0 = 1e-5
-        phi_im_0 = 2e-5
-        print("Traced Polyakov loop #1")
-        for T_el, mu_el in tqdm.tqdm(
-            zip(T_1, mu_1), total=len(T_1), ncols=100
-        ):
-            phi_result = solver.Polyakov_loop(
-                T_el, mu_el, phi_re_0, phi_im_0
-            )
-            phi_re_v_1.append(phi_result[0])
-            phi_im_v_1.append(phi_result[1])
-            phi_re_0 = phi_result[0]
-            phi_im_0 = phi_result[1]
-        with open(files+"phi_re_v_0p0.pickle", "wb") as file:
-            pickle.dump(phi_re_v_1, file)
-        with open(files+"phi_im_v_0p0.pickle", "wb") as file:
-            pickle.dump(phi_im_v_1, file)
-
-        print("Sigma sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.sdensity(
-                    T_el, mu_el
-                )/(T_el**3)
-            )
-        with open(files+"s_sigma_v_0p0.pickle", "wb") as file:
-            pickle.dump(sigma_v_1, file)
-
-        print("Gluon sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            gluon_v_1.append(
-                pnjl.thermo.gcp_pl_polynomial.sdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop
-                )/(T_el**3)
-            )
-        with open(files+"s_gluon_v_0p0.pickle", "wb") as file:
-            pickle.dump(gluon_v_1, file)
-
-        print("Sea sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(
-                T_el, mu_el, 'l'
-            )
-            sea_u_v_1.append(lq_temp/(T_el**3))
-            sea_d_v_1.append(lq_temp/(T_el**3))
-            sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.sdensity(
-                    T_el, mu_el, 's'
-                )/(T_el**3)
-            )
-        with open(files+"s_sea_u_v_0p0.pickle", "wb") as file:
-            pickle.dump(sea_u_v_1, file)
-        with open(files+"s_sea_d_v_0p0.pickle", "wb") as file:
-            pickle.dump(sea_d_v_1, file)
-        with open(files+"s_sea_s_v_0p0.pickle", "wb") as file:
-            pickle.dump(sea_s_v_1, file)
-
-        print("Perturbative sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            lq_temp = pnjl.thermo.gcp_perturbative.sdensity(
-                T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 'l'
-            )
-            perturbative_u_v_1.append(lq_temp/(T_el**3))
-            perturbative_d_v_1.append(lq_temp/(T_el**3))
-            perturbative_s_v_1.append(
-                pnjl.thermo.gcp_perturbative.sdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 's'
-                )/(T_el**3)
-            )
-            if pnjl.defaults.PERTURBATIVE_GLUON_CORRECTION:
-                raise RuntimeError("Perturbative gluon bdensity not implemented!")
-            else:
-                perturbative_gluon_v_1.append(0.0)
-        with open(files+"s_perturbative_u_v_0p0.pickle", "wb") as file:
-            pickle.dump(perturbative_u_v_1, file)
-        with open(files+"s_perturbative_d_v_0p0.pickle", "wb") as file:
-            pickle.dump(perturbative_d_v_1, file)
-        with open(files+"s_perturbative_s_v_0p0.pickle", "wb") as file:
-            pickle.dump(perturbative_s_v_1, file)
-        with open(files+"s_perturbative_gluon_v_0p0.pickle", "wb") as file:
-            pickle.dump(perturbative_gluon_v_1, file)
-
-        print("PNJL sdensity #1")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
-            total=len(T_1), ncols=100
-        ):
-            lq_temp = pnjl.thermo.gcp_pnjl.sdensity(
-                T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 'l'
-            )
-            sq_temp = pnjl.thermo.gcp_pnjl.sdensity(
-                T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 's'
-            )
-            pnjl_u_v_1.append(lq_temp/(T_el**3))
-            pnjl_d_v_1.append(lq_temp/(T_el**3))
-            pnjl_s_v_1.append(sq_temp/(T_el**3))
-        with open(files+"s_pnjl_u_v_0p0.pickle", "wb") as file:
-            pickle.dump(pnjl_u_v_1, file)
-        with open(files+"s_pnjl_d_v_0p0.pickle", "wb") as file:
-            pickle.dump(pnjl_d_v_1, file)
-        with open(files+"s_pnjl_s_v_0p0.pickle", "wb") as file:
-            pickle.dump(pnjl_s_v_1, file)
-    else:
-        with open(files+"phi_re_v_0p0.pickle", "rb") as file:
-            phi_re_v_1 = pickle.load(file)
-        with open(files+"phi_im_v_0p0.pickle", "rb") as file:
-            phi_im_v_1 = pickle.load(file)
-        with open(files+"s_sigma_v_0p0.pickle", "rb") as file:
-            sigma_v_1 = pickle.load(file)
-        with open(files+"s_gluon_v_0p0.pickle", "rb") as file:
-            gluon_v_1 = pickle.load(file)
-        with open(files+"s_sea_u_v_0p0.pickle", "rb") as file:
-            sea_u_v_1 = pickle.load(file)
-        with open(files+"s_sea_d_v_0p0.pickle", "rb") as file:
-            sea_d_v_1 = pickle.load(file)
-        with open(files+"s_sea_s_v_0p0.pickle", "rb") as file:
-            sea_s_v_1 = pickle.load(file)
-        with open(files+"s_perturbative_u_v_0p0.pickle", "rb") as file:
-            perturbative_u_v_1 = pickle.load(file)
-        with open(files+"s_perturbative_d_v_0p0.pickle", "rb") as file:
-            perturbative_d_v_1 = pickle.load(file)
-        with open(files+"s_perturbative_s_v_0p0.pickle", "rb") as file:
-            perturbative_s_v_1 = pickle.load(file)
-        with open(files+"s_perturbative_gluon_v_0p0.pickle", "rb") as file:
-            perturbative_gluon_v_1 = pickle.load(file)
-        with open(files+"s_pnjl_u_v_0p0.pickle", "rb") as file:
-            pnjl_u_v_1 = pickle.load(file)
-        with open(files+"s_pnjl_d_v_0p0.pickle", "rb") as file:
-            pnjl_d_v_1 = pickle.load(file)
-        with open(files+"s_pnjl_s_v_0p0.pickle", "rb") as file:
-            pnjl_s_v_1 = pickle.load(file)
-
-    if calc_2:
-
-        phi_re_0 = 1e-5
-        phi_im_0 = 2e-5
-        print("Traced Polyakov loop #2")
-        for T_el, mu_el in tqdm.tqdm(
-            zip(T_2, mu_2), total=len(T_2), ncols=100
-        ):
-            phi_result = solver.Polyakov_loop(
-                T_el, mu_el, phi_re_0, phi_im_0
-            )
-            phi_re_v_2.append(phi_result[0])
-            phi_im_v_2.append(phi_result[1])
-            phi_re_0 = phi_result[0]
-            phi_im_0 = phi_result[1]
-        with open(files+"phi_re_v_2p5.pickle", "wb") as file:
-            pickle.dump(phi_re_v_2, file)
-        with open(files+"phi_im_v_2p5.pickle", "wb") as file:
-            pickle.dump(phi_im_v_2, file)
-
-        print("Sigma sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            sigma_v_2.append(
-                pnjl.thermo.gcp_sigma_lattice.sdensity(
-                    T_el, mu_el
-                )/(T_el**3)
-            )
-        with open(files+"s_sigma_v_2p5.pickle", "wb") as file:
-            pickle.dump(sigma_v_2, file)
-
-        print("Gluon sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            gluon_v_2.append(
-                pnjl.thermo.gcp_pl_polynomial.sdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop
-                )/(T_el**3)
-            )
-        with open(files+"s_gluon_v_2p5.pickle", "wb") as file:
-            pickle.dump(gluon_v_2, file)
-
-        print("Sea sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(
-                T_el, mu_el, 'l'
-            )
-            sea_u_v_2.append(lq_temp/(T_el**3))
-            sea_d_v_2.append(lq_temp/(T_el**3))
-            sea_s_v_2.append(
-                pnjl.thermo.gcp_sea_lattice.sdensity(
-                    T_el, mu_el, 's'
-                )/(T_el**3)
-            )
-        with open(files+"s_sea_u_v_2p5.pickle", "wb") as file:
-            pickle.dump(sea_u_v_2, file)
-        with open(files+"s_sea_d_v_2p5.pickle", "wb") as file:
-            pickle.dump(sea_d_v_2, file)
-        with open(files+"s_sea_s_v_2p5.pickle", "wb") as file:
-            pickle.dump(sea_s_v_2, file)
-
-        print("Perturbative sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            lq_temp = pnjl.thermo.gcp_perturbative.sdensity(
-                T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 'l'
-            )
-            perturbative_u_v_2.append(lq_temp/(T_el**3))
-            perturbative_d_v_2.append(lq_temp/(T_el**3))
-            perturbative_s_v_2.append(
-                pnjl.thermo.gcp_perturbative.sdensity(
-                    T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 's'
-                )/(T_el**3)
-            )
-            if pnjl.defaults.PERTURBATIVE_GLUON_CORRECTION:
-                raise RuntimeError("Perturbative gluon bdensity not implemented!")
-            else:
-                perturbative_gluon_v_2.append(0.0)
-        with open(files+"s_perturbative_u_v_2p5.pickle", "wb") as file:
-            pickle.dump(perturbative_u_v_2, file)
-        with open(files+"s_perturbative_d_v_2p5.pickle", "wb") as file:
-            pickle.dump(perturbative_d_v_2, file)
-        with open(files+"s_perturbative_s_v_2p5.pickle", "wb") as file:
-            pickle.dump(perturbative_s_v_2, file)
-        with open(files+"s_perturbative_gluon_v_2p5.pickle", "wb") as file:
-            pickle.dump(perturbative_gluon_v_2, file)
-
-        print("PNJL sdensity #2")
-        for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
-            total=len(T_2), ncols=100
-        ):
-            lq_temp = pnjl.thermo.gcp_pnjl.sdensity(
-                T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 'l'
-            )
-            sq_temp = pnjl.thermo.gcp_pnjl.sdensity(
-                T_el, mu_el, phi_re_el, phi_im_el, solver.Polyakov_loop, 's'
-            )
-            pnjl_u_v_2.append(lq_temp/(T_el**3))
-            pnjl_d_v_2.append(lq_temp/(T_el**3))
-            pnjl_s_v_2.append(sq_temp/(T_el**3))
-        with open(files+"s_pnjl_u_v_2p5.pickle", "wb") as file:
-            pickle.dump(pnjl_u_v_2, file)
-        with open(files+"s_pnjl_d_v_2p5.pickle", "wb") as file:
-            pickle.dump(pnjl_d_v_2, file)
-        with open(files+"s_pnjl_s_v_2p5.pickle", "wb") as file:
-            pickle.dump(pnjl_s_v_2, file)
-    else:
-        with open(files+"phi_re_v_2p5.pickle", "rb") as file:
-            phi_re_v_2 = pickle.load(file)
-        with open(files+"phi_im_v_2p5.pickle", "rb") as file:
-            phi_im_v_2 = pickle.load(file)
-        with open(files+"s_sigma_v_2p5.pickle", "rb") as file:
-            sigma_v_2 = pickle.load(file)
-        with open(files+"s_gluon_v_2p5.pickle", "rb") as file:
-            gluon_v_2 = pickle.load(file)
-        with open(files+"s_sea_u_v_2p5.pickle", "rb") as file:
-            sea_u_v_2 = pickle.load(file)
-        with open(files+"s_sea_d_v_2p5.pickle", "rb") as file:
-            sea_d_v_2 = pickle.load(file)
-        with open(files+"s_sea_s_v_2p5.pickle", "rb") as file:
-            sea_s_v_2 = pickle.load(file)
-        with open(files+"s_perturbative_u_v_2p5.pickle", "rb") as file:
-            perturbative_u_v_2 = pickle.load(file)
-        with open(files+"s_perturbative_d_v_2p5.pickle", "rb") as file:
-            perturbative_d_v_2 = pickle.load(file)
-        with open(files+"s_perturbative_s_v_2p5.pickle", "rb") as file:
-            perturbative_s_v_2 = pickle.load(file)
-        with open(files+"s_perturbative_gluon_v_2p5.pickle", "rb") as file:
-            perturbative_gluon_v_2 = pickle.load(file)
-        with open(files+"s_pnjl_u_v_2p5.pickle", "rb") as file:
-            pnjl_u_v_2 = pickle.load(file)
-        with open(files+"s_pnjl_d_v_2p5.pickle", "rb") as file:
-            pnjl_d_v_2 = pickle.load(file)
-        with open(files+"s_pnjl_s_v_2p5.pickle", "rb") as file:
-            pnjl_s_v_2 = pickle.load(file)
-
-    pi_v_1 = get_cluster(
-        "Pion #1", "pi", files+"s_pi_v_0p0.pickle",
-        T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=calc_1
+    hadrons_reduced = (
+        'pi0', 'pi', 'K', 'K0', 'eta', 'rho', 'omega', 'K*(892)', 'K*0(892)',
+        'p', 'n', 'etaPrime', 'a0', 'f0', 'phi', 'Lambda', 'h1', 'Sigma+',
+        'Sigma0', 'Sigma-', 'b1', 'a1', 'Delta'
     )
 
-    K_v_1 = get_cluster(
-        "Kaon #1", "K", files+"s_K_v_0p0.pickle",
-        T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=calc_1
-    )
+    phi_re_v_1, phi_im_v_1 = list(), list()
+    phi_re_v_2, phi_im_v_2 = list(), list()
 
-    eta_v_1 = get_cluster(
-        "Eta #1", "eta", files+"s_eta_v_0p0.pickle",
-        T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=True
-    )
+    qgp_sdensity_v_1, qgp_partial_sdensity_v_1 = list(), list()
+    hrg_full_sdensity_v_1, hrg_full_partial_sdensity_v_1 = list(), list()
+    hrg_reduced_sdensity_v_1, hrg_reduced_partial_sdensity_v_1 = list(), list()
 
-    rho_v_1 = get_cluster(
-        "Rho #1", "rho", files+"s_rho_v_0p0.pickle",
-        T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=calc_1
-    )
+    qgp_bdensity_v_1, qgp_partial_bdensity_v_1 = list(), list()
+    hrg_full_bdensity_v_1, hrg_full_partial_bdensity_v_1 = list(), list()
+    hrg_reduced_bdensity_v_1, hrg_reduced_partial_bdensity_v_1 = list(), list()
 
-    omega_v_1 = get_cluster(
-        "Omega #1", "omega", files+"s_omega_v_0p0.pickle",
-        T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=calc_1
-    )
+    qgp_sdensity_v_2, qgp_partial_sdensity_v_2 = list(), list()
+    hrg_full_sdensity_v_2, hrg_full_partial_sdensity_v_2 = list(), list()
+    hrg_reduced_sdensity_v_2, hrg_reduced_partial_sdensity_v_2 = list(), list()
 
-    D_v_1 = get_cluster(
-        "Diquark #1", "D", files+"s_D_v_0p0.pickle",
-        T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=calc_1
-    )
+    qgp_bdensity_v_2, qgp_partial_bdensity_v_2 = list(), list()
+    hrg_full_bdensity_v_2, hrg_full_partial_bdensity_v_2 = list(), list()
+    hrg_reduced_bdensity_v_2, hrg_reduced_partial_bdensity_v_2 = list(), list()
 
-    N_v_1 = get_cluster(
-        "Nucleon #1", "N", files+"s_N_v_0p0.pickle",
-        T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=calc_1
-    )
-
-    T_v_1 = get_cluster(
-        "Tetraquark #1", "T", files+"s_T_v_0p0.pickle",
-        T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=calc_1
-    )
-
-    F_v_1 = get_cluster(
-        "F-quark #1", "F", files+"s_F_v_0p0.pickle",
-        T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=calc_1
-    )
-
-    P_v_1 = get_cluster(
-        "Pentaquark #1", "P", files+"s_P_v_0p0.pickle",
-        T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=calc_1
-    )
-
-    Q_v_1 = get_cluster(
-        "Q-quark #1", "Q", files+"s_Q_v_0p0.pickle",
-        T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=calc_1
-    )
-
-    H_v_1 = get_cluster(
-        "Hexaquark #1", "H", files+"s_H_v_0p0.pickle",
-        T_1, mu_1, phi_re_v_1, phi_im_v_1,
-        calc=calc_1
-    )
-
-    pi_v_2 = get_cluster(
-        "Pion #2", "pi", files+"s_pi_v_2p5.pickle",
-        T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=calc_2
-    )
-
-    K_v_2 = get_cluster(
-        "Kaon #2", "K", files+"s_K_v_2p5.pickle",
-        T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=calc_2
-    )
-
-    eta_v_2 = get_cluster(
-        "Eta #2", "eta", files+"s_eta_v_2p5.pickle",
-        T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=True
-    )
-
-    rho_v_2 = get_cluster(
-        "Rho #2", "rho", files+"s_rho_v_2p5.pickle",
-        T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=calc_2
-    )
-
-    omega_v_2 = get_cluster(
-        "Omega #2", "omega", files+"s_omega_v_2p5.pickle",
-        T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=calc_2
-    )
-
-    D_v_2 = get_cluster(
-        "Diquark #2", "D", files+"s_D_v_2p5.pickle",
-        T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=calc_2
-    )
-
-    N_v_2 = get_cluster(
-        "Nucleon #2", "N", files+"s_N_v_2p5.pickle",
-        T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=calc_2
-    )
-
-    T_v_2 = get_cluster(
-        "Tetraquark #2", "T", files+"s_T_v_2p5.pickle",
-        T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=calc_2
-    )
-
-    F_v_2 = get_cluster(
-        "F-quark #2", "F", files+"s_F_v_2p5.pickle",
-        T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=calc_2
-    )
-
-    P_v_2 = get_cluster(
-        "Pentaquark #2", "P", files+"s_P_v_2p5.pickle",
-        T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=calc_2
-    )
-
-    Q_v_2 = get_cluster(
-        "Q-quark #2", "Q", files+"s_Q_v_2p5.pickle",
-        T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=calc_2
-    )
-
-    H_v_2 = get_cluster(
-        "Hexaquark #2", "H", files+"s_H_v_2p5.pickle",
-        T_2, mu_2, phi_re_v_2, phi_im_v_2,
-        calc=calc_2
-    )
-
-    total_qgp_1 = [
-        sum(el) for el in 
-            zip(
-                sigma_v_1, sea_u_v_1, sea_d_v_1, sea_s_v_1, gluon_v_1,
-                perturbative_u_v_1, perturbative_d_v_1, perturbative_s_v_1,
-                perturbative_gluon_v_1, pnjl_u_v_1, pnjl_d_v_1, pnjl_s_v_1
-            )
-    ]
-    total_cluster_1 = [
-        sum(el) for el in 
-            zip(pi_v_1, K_v_1, rho_v_1, N_v_1, P_v_1, H_v_1, omega_v_1, T_v_1, eta_v_1)
-    ]
-    total_ccluster_1 = [
-        sum(el) for el in 
-            zip(D_v_1, F_v_1, Q_v_1)
-    ]
-    total_MHRG_1 = [sum(el) for el in zip(total_cluster_1, total_ccluster_1)]
-
-    total_qgp_2 = [
-        sum(el) for el in 
-            zip(
-                sigma_v_2, sea_u_v_2, sea_d_v_2, sea_s_v_2, gluon_v_2,
-                perturbative_u_v_2, perturbative_d_v_2, perturbative_s_v_2,
-                perturbative_gluon_v_2, pnjl_u_v_2, pnjl_d_v_2, pnjl_s_v_2
-            )
-    ]
-    total_cluster_2 = [
-        sum(el) for el in 
-            zip(pi_v_2, K_v_2, rho_v_2, N_v_2, P_v_2, H_v_2, omega_v_2, T_v_2, eta_v_2)
-    ]
-    total_ccluster_2 = [
-        sum(el) for el in 
-            zip(D_v_2, F_v_2, Q_v_2)
-    ]
-    total_MHRG_2 = [sum(el) for el in zip(total_cluster_2, total_ccluster_2)]
+    def qgp_sdensity_all(T: float, muB: float, phi_re_0=1e-5, phi_im_0=2e-5, calc_phi=True):
+        partial = list()
+        phi_result = (phi_re_0, phi_im_0)
+        if calc_phi:
+            phi_result = solver.Polyakov_loop(T, muB/3.0, phi_re_0, phi_im_0)
+        pars = (T, muB/3.0, phi_result[0], phi_result[1], solver.Polyakov_loop)
+        #Sigma sdensity
+        partial.append(
+            pnjl.thermo.gcp_sigma_lattice.sdensity(T, muB/3.0)/(T**3)
+        )
+        #Gluon sdensity
+        partial.append(pnjl.thermo.gcp_pl_polynomial.sdensity(*pars)/(T**3))
+        #Sea sdensity
+        lq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(T, muB/3.0, 'l')/(T**3)
+        sq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(T, muB/3.0, 's')/(T**3)
+        partial.append(lq_temp)
+        partial.append(lq_temp)
+        partial.append(sq_temp)
+        #Perturbative sdensity
+        lq_temp = pnjl.thermo.gcp_perturbative.sdensity(*pars, 'l')/(T**3)
+        sq_temp = pnjl.thermo.gcp_perturbative.sdensity(*pars, 's')/(T**3)
+        partial.append(lq_temp)
+        partial.append(lq_temp)
+        partial.append(sq_temp)
+        #PNJL sdensity
+        lq_temp = pnjl.thermo.gcp_pnjl.sdensity(*pars, 'l')/(T**3)
+        sq_temp = pnjl.thermo.gcp_pnjl.sdensity(*pars, 's')/(T**3)
+        partial.append(lq_temp)
+        partial.append(lq_temp)
+        partial.append(sq_temp)
+        return phi_result[0], phi_result[1], math.fsum(partial), (*partial,)
+    
+    def qgp_bdensity_all(T: float, muB: float, phi_re_0=1e-5, phi_im_0=2e-5, calc_phi=True):
+        partial = list()
+        phi_result = (phi_re_0, phi_im_0)
+        if calc_phi:
+            phi_result = solver.Polyakov_loop(T, muB/3.0, phi_re_0, phi_im_0)
+        pars = (T, muB/3.0, phi_result[0], phi_result[1], solver.Polyakov_loop)
+        #Sigma bdensity
+        partial.append(
+            pnjl.thermo.gcp_sigma_lattice.bdensity(T, muB/3.0)/(T**3)
+        )
+        #Gluon bdensity
+        partial.append(pnjl.thermo.gcp_pl_polynomial.bdensity(*pars)/(T**3))
+        #Sea bdensity
+        lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(T, muB/3.0, 'l')/(T**3)
+        sq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(T, muB/3.0, 's')/(T**3)
+        partial.append(lq_temp)
+        partial.append(lq_temp)
+        partial.append(sq_temp)
+        #Perturbative bdensity
+        lq_temp = pnjl.thermo.gcp_perturbative.bdensity(*pars, 'l')/(T**3)
+        sq_temp = pnjl.thermo.gcp_perturbative.bdensity(*pars, 's')/(T**3)
+        partial.append(lq_temp)
+        partial.append(lq_temp)
+        partial.append(sq_temp)
+        #PNJL bdensity
+        lq_temp = pnjl.thermo.gcp_pnjl.bdensity(*pars, 'l')/(T**3)
+        sq_temp = pnjl.thermo.gcp_pnjl.bdensity(*pars, 's')/(T**3)
+        partial.append(lq_temp)
+        partial.append(lq_temp)
+        partial.append(sq_temp)
+        return phi_result[0], phi_result[1], math.fsum(partial), (*partial,)
 
     lQCD_1_x, lQCD_1_y = \
         utils.data_load(
@@ -2244,6 +1811,13 @@ def epja_experimental_hrg_benchmark():
         )
     lQCD_2 = [[x, y] for x, y in zip(lQCD_2_x, lQCD_2_y)]
 
+    lQCD_new_x, lQCD_new_y = \
+        utils.data_load(
+            lattice_files+"2202_09184v2_fig2_mub_T_2p5_nb.dat", 0, 1,
+            firstrow=0, delim=' '
+        )
+    lQCD_new = [[x, y] for x, y in zip(lQCD_new_x, lQCD_new_y)]
+
     hrg_lat_1_x, hrg_lat_1_y = \
         utils.data_load(
             lattice_files+"2212_09043v1_fig13_HRG_mub_T_0p0_s.dat", 0, 1,
@@ -2256,7 +1830,7 @@ def epja_experimental_hrg_benchmark():
             lattice_files+"2212_09043v1_fig13_HRG_mub_T_2p5_s.dat", 0, 1,
             firstrow=0, delim=' '
         )
-    hrg_lat_2_x.insert(0, 0.0)
+    hrg_lat_2_x.insert(0, -10.0)
     hrg_lat_2_y.insert(0, -10.0)
 
     def poly(x, a, b, c, d, e):
@@ -2269,51 +1843,247 @@ def epja_experimental_hrg_benchmark():
     hrg_par_1, _ = scipy.optimize.curve_fit(poly, hrg_lat_1_x, hrg_lat_1_y)
     hrg_par_2, _ = scipy.optimize.curve_fit(poly, hrg_lat_2_x, hrg_lat_2_y)
 
-    BIR = [-(8.0/3.0)*math.pi*pnjl.thermo.gcp_perturbative.alpha_s(el, 0.0) for el in T_1]
+    if calc_1:
+        phi_re_0 = 1e-5
+        phi_im_0 = 2e-5
+        print("QGP PL and sdensity #1")
+        for T_el, muB_el in tqdm.tqdm(
+            zip(T_1, muB_1), total=len(T_1), ncols=100
+        ):
+            phi_re_0, phi_im_0, temp_qgp, temp_qgp_partials = qgp_sdensity_all(
+                T_el, muB_el, phi_re_0, phi_im_0
+            )
+            phi_re_v_1.append(phi_re_0)
+            phi_im_v_1.append(phi_im_0)
+            qgp_sdensity_v_1.append(temp_qgp)
+            qgp_partial_sdensity_v_1.append(temp_qgp_partials)
+        with open(files+"phi_re_v_0p0.pickle", "wb") as file:
+            pickle.dump(phi_re_v_1, file)
+        with open(files+"phi_im_v_0p0.pickle", "wb") as file:
+            pickle.dump(phi_im_v_1, file)
+        with open(files+"qgp_sdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(qgp_sdensity_v_1, file)
+        with open(files+"qgp_partial_sdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(qgp_partial_sdensity_v_1, file)
+        print("QGP bdensity #1")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
+        ):
+            _, _, temp_qgp, temp_qgp_partials = qgp_bdensity_all(
+                T_el, muB_el, phi_re_el, phi_im_el, calc_phi=False
+            )
+            qgp_bdensity_v_1.append(temp_qgp)
+            qgp_partial_bdensity_v_1.append(temp_qgp_partials)
+        with open(files+"qgp_bdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(qgp_bdensity_v_1, file)
+        with open(files+"qgp_partial_bdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(qgp_partial_bdensity_v_1, file)
+    else:
+        with open(files+"phi_re_v_0p0.pickle", "rb") as file:
+            phi_re_v_1 = pickle.load(file)
+        with open(files+"phi_im_v_0p0.pickle", "rb") as file:
+            phi_im_v_1 = pickle.load(file)
+        with open(files+"qgp_sdensity_v_0p0.pickle", "rb") as file:
+            qgp_sdensity_v_1 = pickle.load(file)
+        with open(files+"qgp_partial_sdensity_v_0p0.pickle", "rb") as file:
+            qgp_partial_sdensity_v_1 = pickle.load(file)
+        with open(files+"qgp_bdensity_v_0p0.pickle", "rb") as file:
+            qgp_bdensity_v_1 = pickle.load(file)
+        with open(files+"qgp_partial_bdensity_v_0p0.pickle", "rb") as file:
+            qgp_partial_bdensity_v_1 = pickle.load(file)
 
-    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (12.0, 5.0))
-    ax1 = fig1.add_subplot(1, 2, 1)
-    ax1.axis([80., 280., -6.0, 20.0])
+    if calc_2:
+        phi_re_0 = 1e-5
+        phi_im_0 = 2e-5
+        print("QGP PL and sdensity #2")
+        for T_el, muB_el in tqdm.tqdm(
+            zip(T_2, muB_2), total=len(T_2), ncols=100
+        ):
+            phi_re_0, phi_im_0, temp_qgp, temp_qgp_partials = qgp_sdensity_all(
+                T_el, muB_el, phi_re_0, phi_im_0
+            )
+            phi_re_v_2.append(phi_re_0)
+            phi_im_v_2.append(phi_im_0)
+            qgp_sdensity_v_2.append(temp_qgp)
+            qgp_partial_sdensity_v_2.append(temp_qgp_partials)
+        with open(files+"phi_re_v_2p5.pickle", "wb") as file:
+            pickle.dump(phi_re_v_2, file)
+        with open(files+"phi_im_v_2p5.pickle", "wb") as file:
+            pickle.dump(phi_im_v_2, file)
+        with open(files+"qgp_sdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(qgp_sdensity_v_2, file)
+        with open(files+"qgp_partial_sdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(qgp_partial_sdensity_v_2, file)
+        print("QGP bdensity #2")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+        ):
+            _, _, temp_qgp, temp_qgp_partials = qgp_bdensity_all(
+                T_el, muB_el, phi_re_el, phi_im_el, calc_phi=False
+            )
+            qgp_bdensity_v_2.append(temp_qgp)
+            qgp_partial_bdensity_v_2.append(temp_qgp_partials)
+        with open(files+"qgp_bdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(qgp_bdensity_v_2, file)
+        with open(files+"qgp_partial_bdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(qgp_partial_bdensity_v_2, file)
+    else:
+        with open(files+"phi_re_v_2p5.pickle", "rb") as file:
+            phi_re_v_2 = pickle.load(file)
+        with open(files+"phi_im_v_2p5.pickle", "rb") as file:
+            phi_im_v_2 = pickle.load(file)
+        with open(files+"qgp_sdensity_v_2p5.pickle", "rb") as file:
+            qgp_sdensity_v_2 = pickle.load(file)
+        with open(files+"qgp_partial_sdensity_v_2p5.pickle", "rb") as file:
+            qgp_partial_sdensity_v_2 = pickle.load(file)
+        with open(files+"qgp_bdensity_v_2p5.pickle", "rb") as file:
+            qgp_bdensity_v_2 = pickle.load(file)
+        with open(files+"qgp_partial_bdensity_v_2p5.pickle", "rb") as file:
+            qgp_partial_bdensity_v_2 = pickle.load(file)
+
+    if False:
+        print("Full HRG sdensity #1")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
+        ):
+            temp_hrg, temp_hrg_partials = cluster.sdensity_multi(T_el, muB_el)
+            hrg_full_sdensity_v_1.append(temp_hrg/(T_el**3))
+            hrg_full_partial_sdensity_v_1.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        with open(files+"hrg_full_sdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(hrg_full_sdensity_v_1, file)
+        with open(files+"hrg_full_partial_sdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(hrg_full_partial_sdensity_v_1, file)
+        print("Full HRG bdensity #1")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
+        ):
+            temp_hrg, temp_hrg_partials = cluster.bdensity_multi(T_el, muB_el)
+            hrg_full_bdensity_v_1.append(temp_hrg/(T_el**3))
+            hrg_full_partial_bdensity_v_1.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        with open(files+"hrg_full_bdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(hrg_full_bdensity_v_1, file)
+        with open(files+"hrg_full_partial_bdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(hrg_full_partial_bdensity_v_1, file)
+    else:
+        with open(files+"hrg_full_sdensity_v_0p0.pickle", "rb") as file:
+            hrg_full_sdensity_v_1 = pickle.load(file)
+        with open(files+"hrg_full_partial_sdensity_v_0p0.pickle", "rb") as file:
+            hrg_full_partial_sdensity_v_1 = pickle.load(file)
+        with open(files+"hrg_full_bdensity_v_0p0.pickle", "rb") as file:
+            hrg_full_bdensity_v_1 = pickle.load(file)
+        with open(files+"hrg_full_partial_bdensity_v_0p0.pickle", "rb") as file:
+            hrg_full_partial_bdensity_v_1 = pickle.load(file)
+
+    if False:
+        print("Reduced HRG sdensity #1")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
+        ):
+            temp_hrg, temp_hrg_partials = cluster.sdensity_multi(T_el, muB_el, hadrons=hadrons_reduced)
+            hrg_reduced_sdensity_v_1.append(temp_hrg/(T_el**3))
+            hrg_reduced_partial_sdensity_v_1.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        with open(files+"hrg_reduced_sdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(hrg_reduced_sdensity_v_1, file)
+        with open(files+"hrg_reduced_partial_sdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(hrg_reduced_partial_sdensity_v_1, file)
+        print("Reduced HRG bdensity #1")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
+        ):
+            temp_hrg, temp_hrg_partials = cluster.bdensity_multi(T_el, muB_el, hadrons=hadrons_reduced)
+            hrg_reduced_bdensity_v_1.append(temp_hrg/(T_el**3))
+            hrg_reduced_partial_bdensity_v_1.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        with open(files+"hrg_reduced_bdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(hrg_reduced_bdensity_v_1, file)
+        with open(files+"hrg_reduced_partial_bdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(hrg_reduced_partial_bdensity_v_1, file)
+    else:
+        with open(files+"hrg_reduced_sdensity_v_0p0.pickle", "rb") as file:
+            hrg_reduced_sdensity_v_1 = pickle.load(file)
+        with open(files+"hrg_reduced_partial_sdensity_v_0p0.pickle", "rb") as file:
+            hrg_reduced_partial_sdensity_v_1 = pickle.load(file)
+        with open(files+"hrg_reduced_bdensity_v_0p0.pickle", "rb") as file:
+            hrg_reduced_bdensity_v_1 = pickle.load(file)
+        with open(files+"hrg_reduced_partial_bdensity_v_0p0.pickle", "rb") as file:
+            hrg_reduced_partial_bdensity_v_1 = pickle.load(file)
+
+    if False:
+        print("Full HRG sdensity #2")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+        ):
+            temp_hrg, temp_hrg_partials = cluster.sdensity_multi(T_el, muB_el)
+            hrg_full_sdensity_v_2.append(temp_hrg/(T_el**3))
+            hrg_full_partial_sdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        with open(files+"hrg_full_sdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(hrg_full_sdensity_v_2, file)
+        with open(files+"hrg_full_partial_sdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(hrg_full_partial_sdensity_v_2, file)
+        print("Full HRG bdensity #2")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+        ):
+            temp_hrg, temp_hrg_partials = cluster.bdensity_multi(T_el, muB_el)
+            hrg_full_bdensity_v_2.append(temp_hrg/(T_el**3))
+            hrg_full_partial_bdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        with open(files+"hrg_full_bdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(hrg_full_bdensity_v_2, file)
+        with open(files+"hrg_full_partial_bdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(hrg_full_partial_bdensity_v_2, file)
+    else:
+        with open(files+"hrg_full_sdensity_v_2p5.pickle", "rb") as file:
+            hrg_full_sdensity_v_2 = pickle.load(file)
+        with open(files+"hrg_full_partial_sdensity_v_2p5.pickle", "rb") as file:
+            hrg_full_partial_sdensity_v_2 = pickle.load(file)
+        with open(files+"hrg_full_bdensity_v_2p5.pickle", "rb") as file:
+            hrg_full_bdensity_v_2 = pickle.load(file)
+        with open(files+"hrg_full_partial_bdensity_v_2p5.pickle", "rb") as file:
+            hrg_full_partial_bdensity_v_2 = pickle.load(file)
+
+    if False:
+        print("Reduced HRG sdensity #2")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+        ):
+            temp_hrg, temp_hrg_partials = cluster.sdensity_multi(T_el, muB_el, hadrons=hadrons_reduced)
+            hrg_reduced_sdensity_v_2.append(temp_hrg/(T_el**3))
+            hrg_reduced_partial_sdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        with open(files+"hrg_reduced_sdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(hrg_reduced_sdensity_v_2, file)
+        with open(files+"hrg_reduced_partial_sdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(hrg_reduced_partial_sdensity_v_2, file)
+        print("Reduced HRG bdensity #2")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+        ):
+            temp_hrg, temp_hrg_partials = cluster.bdensity_multi(T_el, muB_el, hadrons=hadrons_reduced)
+            hrg_reduced_bdensity_v_2.append(temp_hrg/(T_el**3))
+            hrg_reduced_partial_bdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        with open(files+"hrg_reduced_bdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(hrg_reduced_bdensity_v_2, file)
+        with open(files+"hrg_reduced_partial_bdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(hrg_reduced_partial_bdensity_v_2, file)
+    else:
+        with open(files+"hrg_reduced_sdensity_v_2p5.pickle", "rb") as file:
+            hrg_reduced_sdensity_v_2 = pickle.load(file)
+        with open(files+"hrg_reduced_partial_sdensity_v_2p5.pickle", "rb") as file:
+            hrg_reduced_partial_sdensity_v_2 = pickle.load(file)
+        with open(files+"hrg_reduced_bdensity_v_2p5.pickle", "rb") as file:
+            hrg_reduced_bdensity_v_2 = pickle.load(file)
+        with open(files+"hrg_reduced_partial_bdensity_v_2p5.pickle", "rb") as file:
+            hrg_reduced_partial_bdensity_v_2 = pickle.load(file)
+
+    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (18.0, 5.0))
+    ax1 = fig1.add_subplot(1, 3, 1)
+    ax1.axis([80., 280., 0.0, 20.0])
 
     ax1.add_patch(matplotlib.patches.Polygon(lQCD_1, 
             closed = True, fill = True, color = 'green', alpha = 0.3))
 
-    ax1.plot(T_1, total_MHRG_1, '-', c = 'black')
-    ax1.plot(T_1, [poly(el, *hrg_par_1) for el in T_1], ':', c = 'blue')
-    ax1.plot(T_1, pi_v_1, '-', c = 'red')
-    ax1.plot(T_1, K_v_1, '-', c = 'green')
-    ax1.plot(T_1, rho_v_1, '-', c = 'magenta')
-    ax1.plot(T_1, N_v_1, '-', c = 'darkblue')
-    ax1.plot(T_1, P_v_1, '-', c = 'purple')
-    ax1.plot(T_1, H_v_1, '-', c = 'orange')
-    ax1.plot(T_1, omega_v_1, '-', c = 'cyan')
-    ax1.plot(T_1, T_v_1, '-', c = 'crimson')
-    ax1.plot(T_1, D_v_1, '-', c = 'darkred')
-    ax1.plot(T_1, F_v_1, '-', c = 'salmon')
-    ax1.plot(T_1, Q_v_1, '-', c = 'lime')
-
-    ax1.plot(T_1, eta_v_1, '--', c = 'red')
+    ax1.plot(T_1, hrg_full_sdensity_v_1, '-', c = 'blue')
+    ax1.plot(T_1, hrg_reduced_sdensity_v_1, '-', c = 'red')
 
     ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
-
-    # ax1.plot(T_1, total_1, '-', c = 'black')
-    # ax1.plot(hrg_lat_1_x[1:], hrg_lat_1_y[1:], '-', c = 'red')
-    # ax1.plot(T_1, total_qgp_1, '--', c = 'blue')
-    # ax1.plot(T_1, total_pnjl_1, '-.', c = 'darkblue')
-    # ax1.plot(T_1, total_pert_1, '-.', c = 'magenta')
-    # ax1.plot(T_1, gluon_v_1, ':', c = 'red')
-    # ax1.plot(T_1, BIR, '--', c = 'black')
-
-    # ax1.plot(T_1, total_q_1, ':', c = 'purple')
-    # ax1.text(185, 7.5, r"Bollweg et al. (2022)", color="green", fontsize=14)
-    # ax1.text(105, 2.5, r"Total", color="black", fontsize=14)
-    # ax1.text(250, 15.5, r"QGP", color="blue", fontsize=14)
-    # ax1.text(185, 3.5, r"HRG", color="purple", fontsize=14)
-    # ax1.text(82, -4.5, r"Blaizot et al. (1999)", color="black", fontsize=14)
-    # ax1.text(190, 17.5, r"PNJL", color="darkblue", fontsize=14)
-    # ax1.text(188, -3.5, r"Perturbative correction", color="magenta", fontsize=14)
-    # ax1.text(220, 5.5, r"Polyakov-loop", color="red", fontsize=14)
-    # ax1.text(170, 12.5, r"Quarks", color="purple", fontsize=14)
 
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -2322,46 +2092,16 @@ def epja_experimental_hrg_benchmark():
     ax1.set_xlabel(r'T [MeV]', fontsize = 16)
     ax1.set_ylabel(r'$\mathrm{s/T^3}$', fontsize = 16)
 
-    ax2 = fig1.add_subplot(1, 2, 2)
-    ax2.axis([80., 280., -6.0, 20.0])
+    ax2 = fig1.add_subplot(1, 3, 2)
+    ax2.axis([80., 280., 0.0, 20.0])
 
     ax2.add_patch(matplotlib.patches.Polygon(lQCD_2, 
             closed = True, fill = True, color = 'green', alpha = 0.3))
 
-    ax2.plot(T_2, total_MHRG_2, '-', c = 'black')
-    ax2.plot(T_2, [poly(el, *hrg_par_2) for el in T_1], ':', c = 'blue')
-    ax2.plot(T_2, pi_v_2, '-', c = 'red')
-    ax2.plot(T_2, K_v_2, '-', c = 'green')
-    ax2.plot(T_2, rho_v_2, '-', c = 'magenta')
-    ax2.plot(T_2, N_v_2, '-', c = 'darkblue')
-    ax2.plot(T_2, P_v_2, '-', c = 'purple')
-    ax2.plot(T_2, H_v_2, '-', c = 'orange')
-    ax2.plot(T_2, omega_v_2, '-', c = 'cyan')
-    ax2.plot(T_2, T_v_2, '-', c = 'crimson')
-    ax2.plot(T_2, D_v_2, '-', c = 'darkred')
-    ax2.plot(T_2, F_v_2, '-', c = 'salmon')
-    ax2.plot(T_2, Q_v_2, '-', c = 'lime')
-
-    ax2.plot(T_2, eta_v_2, '--', c = 'red')
-
+    ax2.plot(T_2, hrg_full_sdensity_v_2, '-', c = 'blue')
+    ax2.plot(T_2, hrg_reduced_sdensity_v_2, '-', c = 'red')
+    
     ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
-
-    # ax2.plot(T_2, total_2, '-', c = 'black')
-    # ax2.plot(hrg_lat_2_x[1:], hrg_lat_2_y[1:], '-', c = 'red')
-    # ax2.plot(T_2, total_qgp_2, '--', c = 'blue')
-    # ax2.plot(T_2, total_pnjl_2, '-.', c = 'darkblue')
-    # ax2.plot(T_2, total_pert_2, '-.', c = 'magenta')
-    # ax2.plot(T_2, gluon_v_2, ':', c = 'red')
-    # ax2.plot(T_2, total_q_2, ':', c = 'purple')
-
-    # ax2.text(190, 9.0, r"Bollweg et al. (2022)", color="green", fontsize=14)
-    # ax2.text(102, 2.5, r"Total", color="black", fontsize=14)
-    # ax2.text(250, 17.5, r"QGP", color="blue", fontsize=14)
-    # ax2.text(165, 4.7, r"HRG", color="purple", fontsize=14)
-    # ax2.text(164, 17.5, r"PNJL", color="darkblue", fontsize=14)
-    # ax2.text(188, -3.8, r"Perturbative correction", color="magenta", fontsize=14)
-    # ax2.text(220, 5.5, r"Polyakov-loop", color="red", fontsize=14)
-    # ax2.text(160, 14.2, r"Quarks", color="purple", fontsize=14)
 
     for tick in ax2.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -2370,8 +2110,28 @@ def epja_experimental_hrg_benchmark():
     ax2.set_xlabel(r'T [MeV]', fontsize = 16)
     ax2.set_ylabel(r'$\mathrm{s/T^3}$', fontsize = 16)
 
-    fig1.tight_layout(pad = 0.1)
+    ax3 = fig1.add_subplot(1, 3, 3)
+    ax3.axis([80., 280., 0.0, 1.0])
 
+    ax3.add_patch(
+        matplotlib.patches.Polygon(
+            lQCD_new, closed = True, fill = True, color = "green", alpha = 0.3
+        )
+    )
+
+    ax3.plot(T_2, hrg_full_bdensity_v_2, '-', c = 'blue')
+    ax3.plot(T_2, hrg_reduced_bdensity_v_2, '-', c = 'red')
+    
+    ax3.text(85.0, 0.93, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
+
+    for tick in ax3.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax3.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax3.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax3.set_ylabel(r'$\mathrm{n_B/T^3}$', fontsize = 16)
+
+    fig1.tight_layout(pad = 0.1)
     matplotlib.pyplot.show()
     matplotlib.pyplot.close()
 
@@ -10994,7 +10754,7 @@ def epja_figure11():
         as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
         as cluster
-    import pnjl.thermo.gcp_cluster.hrg \
+    import pnjl.thermo.gcp_cluster.hrg_bu \
         as cluster_h
 
     import pnjl.thermo.solvers.\
@@ -20789,7 +20549,7 @@ def epja_mhrg_vs_hrg():
         as cluster
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
-    import pnjl.thermo.gcp_cluster.hrg \
+    import pnjl.thermo.gcp_cluster.hrg_bu \
         as cluster_h
 
     import pnjl.thermo.solvers.\
