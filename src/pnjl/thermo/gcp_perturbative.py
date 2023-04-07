@@ -92,14 +92,8 @@ fermion_hash = {
 }
 
 
-boson_hash = {
-    '+' : pnjl.thermo.distributions.f_boson_triplet,
-    '-' : pnjl.thermo.distributions.f_boson_antitriplet
-}
-
-
 @functools.lru_cache(maxsize=1024)
-def I_fermion_integrand_real(
+def I_integrand_real(
     p: float, T: float, mu: float, mass: float,
     phi_re: float, phi_im: float, typ: str
 ) -> float:
@@ -112,7 +106,7 @@ def I_fermion_integrand_real(
 
 
 @functools.lru_cache(maxsize=1024)
-def I_fermion_integrand_imag(
+def I_integrand_imag(
     p: float, T: float, mu: float, mass: float,
     phi_re: float, phi_im: float, typ: str
 ) -> float:
@@ -125,33 +119,7 @@ def I_fermion_integrand_imag(
 
 
 @functools.lru_cache(maxsize=1024)
-def I_boson_integrand_real(
-    p: float, T: float, mu: float, mass: float,
-    phi_re: float, phi_im: float, typ: str
-) -> float:
-
-    distr = boson_hash[typ](
-        p, T, mu, phi_re, phi_im, mass, 1, typ
-    ).real
-
-    return p * distr
-
-
-@functools.lru_cache(maxsize=1024)
-def I_boson_integrand_imag(
-    p: float, T: float, mu: float, mass: float,
-    phi_re: float, phi_im: float, typ: str
-) -> float:
-
-    distr = boson_hash[typ](
-        p, T, mu, phi_re, phi_im, mass, 1, typ
-    ).imag
-
-    return p * distr
-
-
-@functools.lru_cache(maxsize=1024)
-def I_fermion(
+def I(
     T: float, mu: float, mass: float,
     phi_re: float, phi_im: float, en_typ: str,
 ) -> complex:
@@ -178,50 +146,11 @@ def I_fermion(
     """
 
     integral_real, error_real = scipy.integrate.quad(
-        I_fermion_integrand_real, 0.0, math.inf,
+        I_integrand_real, 0.0, math.inf,
         args = (T, mu, mass, phi_re, phi_im, en_typ)
     )
     integral_imag, error_imag = scipy.integrate.quad(
-        I_fermion_integrand_imag, 0.0, math.inf,
-        args = (T, mu, mass, phi_re, phi_im, en_typ)
-    )
-
-    return complex(integral_real, integral_imag)/(T**2)
-
-
-@functools.lru_cache(maxsize=1024)
-def I_boson(
-    T: float, mu: float, mass: float,
-    phi_re: float, phi_im: float, en_typ: str,
-) -> complex:
-    """### Description
-    Integral of the bosonic correction to the PNJL thermodynamic potential.
-    
-    ### Prameters
-    T : float
-        Temperature in MeV.
-    mu : float
-        Quark chemical potential in MeV.
-    phi_re : float
-        Real part of the traced Polyakov-loop in MeV.
-    phi_im : float
-        Imaginary part of the traced Polyakov-loop in MeV.
-    en_typ : str
-        Type of particle:
-            '+' : positive energy particle
-            '-' : negative energy antiparticle
-    
-    ### Returns
-    I_fermion : complex
-        Value of the integral.
-    """
-
-    integral_real, error_real = scipy.integrate.quad(
-        I_fermion_integrand_real, 0.0, math.inf,
-        args = (T, mu, mass, phi_re, phi_im, en_typ)
-    )
-    integral_imag, error_imag = scipy.integrate.quad(
-        I_fermion_integrand_imag, 0.0, math.inf,
+        I_integrand_imag, 0.0, math.inf,
         args = (T, mu, mass, phi_re, phi_im, en_typ)
     )
 

@@ -89,13 +89,13 @@ DI = {
     'Delta(1910)': 8.0, 'Lambda(1890)': 4.0, 'pi2(1880)': 15.0,
     'N(1900)': 8.0, 'Sigma(1915)': 18.0, 'Delta(1920)': 16.0,
     'Delta(1950)': 32.0, 'Sigma(1940)': 12.0, 'f2(1950)': 5.0,
-    'Delta(1930)': 24.0/2, 'Xi(1950)': 4.0/2, 'a4(2040)': 27.0,
-    'f2(2010)': 5.0, 'f4(2050)': 9.0, 'Xi(2030)': 12.0/2,
-    'Sigma(2030)': 24.0/2, 'K4*(2045)': 36.0, 'Lambda(2100)': 8.0/2,
-    'Lambda(2110)': 6.0/2, 'phi(2170)': 3.0, 'N(2190)': 16.0/2,
-    'N(2200)': 20.0/2, 'Sigma(2250)': 6.0/2, 'Omega-(2250)': 2.0/2,
-    'N(2250)': 20.0/2, 'f2(2300)': 5.0, 'f2(2340)': 5.0,
-    'Lambda(2350)': 10.0, 'Delta(2420)': 48.0, 'N(2600)': 24.0
+    'Delta(1930)': 24.0, 'Xi(1950)': 4.0, 'a4(2040)': 27.0,
+    'f2(2010)': 5.0, 'f4(2050)': 9.0, 'Xi(2030)': 12.0,
+    'Sigma(2030)': 24.0, 'K4*(2045)': 36.0, 'Lambda(2100)': 8.0,
+    'Lambda(2110)': 6.0, 'phi(2170)': 3.0, 'N(2190)': 16.0,
+    'N(2200)': 20.0, 'Sigma(2250)': 6.0, 'Omega-(2250)': 2.0,
+    'N(2250)': 20.0, 'f2(2300)': 5.0, 'f2(2340)': 5.0,
+    'Lambda(2350)': 10.0, 'Delta(2420)': 48.0, 'N(2600)': 24.0,
 }
     
 BI = {
@@ -136,7 +136,7 @@ BI = {
     'Lambda(2110)': 1.0, 'phi(2170)': 0.0, 'N(2190)': 1.0,
     'N(2200)': 1.0, 'Sigma(2250)': 1.0, 'Omega-(2250)': 1.0,
     'N(2250)': 1.0, 'f2(2300)': 0.0, 'f2(2340)': 0.0,
-    'Lambda(2350)': 1.0, 'Delta(2420)': 1.0, 'N(2600)': 1.0
+    'Lambda(2350)': 1.0, 'Delta(2420)': 1.0, 'N(2600)': 1.0,
 }
 
 
@@ -306,7 +306,7 @@ pressure_hash = {
     'Sigma(2250)': fermion_pressure_integ, 'Omega-(2250)': fermion_pressure_integ,
     'N(2250)': fermion_pressure_integ, 'f2(2300)': boson_pressure_integ,
     'f2(2340)': boson_pressure_integ, 'Lambda(2350)': fermion_pressure_integ,
-    'Delta(2420)': fermion_pressure_integ, 'N(2600)': fermion_pressure_integ
+    'Delta(2420)': fermion_pressure_integ, 'N(2600)': fermion_pressure_integ,
 }
 
 sdensity_hash = {
@@ -371,7 +371,7 @@ sdensity_hash = {
     'Sigma(2250)': fermion_sdensity_integ, 'Omega-(2250)': fermion_sdensity_integ,
     'N(2250)': fermion_sdensity_integ, 'f2(2300)': boson_sdensity_integ,
     'f2(2340)': boson_sdensity_integ, 'Lambda(2350)': fermion_sdensity_integ,
-    'Delta(2420)': fermion_sdensity_integ, 'N(2600)': fermion_sdensity_integ
+    'Delta(2420)': fermion_sdensity_integ, 'N(2600)': fermion_sdensity_integ,
 }
 
 bdensity_hash = {
@@ -436,7 +436,7 @@ bdensity_hash = {
     'Sigma(2250)': fermion_bdensity_integ, 'Omega-(2250)': fermion_bdensity_integ,
     'N(2250)': fermion_bdensity_integ, 'f2(2300)': boson_bdensity_integ,
     'f2(2340)': boson_bdensity_integ, 'Lambda(2350)': fermion_bdensity_integ,
-    'Delta(2420)': fermion_bdensity_integ, 'N(2600)': fermion_bdensity_integ
+    'Delta(2420)': fermion_bdensity_integ, 'N(2600)': fermion_bdensity_integ,
 }
     
 
