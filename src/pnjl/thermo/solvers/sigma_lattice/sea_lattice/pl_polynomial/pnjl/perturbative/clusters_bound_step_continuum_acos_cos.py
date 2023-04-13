@@ -31,18 +31,13 @@ def Polyakov_loop_inner(phi, T, mu):
     perturbative_s = pnjl.thermo.gcp_perturbative.gcp_fermion_s_real(
         T, mu, phi[0], phi[1]
     )
-    perturbative_gluon = 0.0
-    if pnjl.defaults.PERTURBATIVE_GLUON_CORRECTION:
-        perturbative_gluon = pnjl.thermo.gcp_perturbative.gcp_boson_real(
-            T, mu, phi[0], phi[1]
-        )
     pnjl_l = 2.0*pnjl.thermo.gcp_pnjl.gcp_l_real(T, mu, phi[0], phi[1])
     pnjl_s = pnjl.thermo.gcp_pnjl.gcp_s_real(T, mu, phi[0], phi[1])
     diquark = cluster.gcp_real(T, mu, phi[0], phi[1], 'D')
     fquark = cluster.gcp_real(T, mu, phi[0], phi[1], 'F')
     qquark = cluster.gcp_real(T, mu, phi[0], phi[1], 'Q')
     return math.fsum([
-        sigma, gluon, perturbative_gluon,
+        sigma, gluon,
         sea_l, pnjl_l, perturbative_l,
         sea_s, pnjl_s, perturbative_s,
         diquark, fquark, qquark

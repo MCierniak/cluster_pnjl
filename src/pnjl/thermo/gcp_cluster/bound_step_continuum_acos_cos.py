@@ -25,13 +25,11 @@ Polyakov_loop
 
 import math
 import numpy
-import typing
 import functools
 
 import scipy.optimize
 import scipy.integrate
 
-import utils
 import pnjl.defaults
 import pnjl.thermo.distributions
 import pnjl.thermo.gcp_sea_lattice
@@ -95,18 +93,47 @@ SI = {
     '5q3': 2.0, 'd': 0.0
 }
 
+TC02 = pnjl.defaults.TC0**2
+
+TC0DT = pnjl.defaults.TC0*pnjl.defaults.DELTA_T
+
+SQRT2 = math.sqrt(2.0)
+
+CONT_POW_M = 2
+
+CONT_POW_T = 2
+
 
 @functools.lru_cache(maxsize=1024)
 def M_th(T: float, muB: float, cluster: str) -> float:
-
     N_I = NI[cluster]
     S_I = SI[cluster]
-    M_th_i = math.sqrt(2)*math.fsum([
+    M_th_i = SQRT2*math.fsum([
         math.fsum([N_I,-S_I])*pnjl.thermo.gcp_sigma_lattice.Ml(T, muB),
         S_I*pnjl.thermo.gcp_sigma_lattice.Ms(T, muB)
     ])
-
     return M_th_i
+
+
+@functools.lru_cache(maxsize=1024)
+def T_Mott(T: float, muB: float, cluster: str):
+    kappa = pnjl.defaults.KAPPA
+    Tc0 = pnjl.defaults.TC0
+    M0 = pnjl.defaults.M0
+    ml = pnjl.defaults.ML
+    ms = pnjl.defaults.MS
+    N_I = NI[cluster]
+    S_I = SI[cluster]
+    M_I = MI[cluster]
+    atanh_inner = math.fsum([
+        -2.0*M_I, SQRT2*M0*N_I, 2.0*SQRT2*ml*N_I, -2.0*SQRT2*ml*S_I, 2.0*SQRT2*ms*S_I
+    ])/(SQRT2*M0*N_I)
+    if math.fabs(atanh_inner) > 1.0: #|atanh_inner| is > 1 when a cluster has no bound state
+        return pnjl.thermo.gcp_sigma_lattice.Tc(muB)
+    else:
+        return math.fsum([
+            TC02, -kappa*(muB**2), TC0DT*math.atanh(atanh_inner)
+        ])/Tc0
 
 
 @functools.lru_cache(maxsize=1024)
@@ -117,94 +144,156 @@ def bound_factor(M: float, T: float, muB: float, cluster: str) -> float:
     Mi = MI[cluster]
     M_th_i = M_th(T, muB, cluster)
 
-    if M_th_i >= Mi:
+    if M_th_i >= Mi and False:
         return  numpy.heaviside(math.fsum([M**2 , -Mi**2]), H_ZERO) \
                 -numpy.heaviside(math.fsum([M**2 , -M_th_i**2]), H_ZERO)
     else:
         return 0.0
 
 
+# @functools.lru_cache(maxsize=1024)
+# def continuum_factor1(M: float, T: float, muB: float, cluster: str) -> float:
+
+#     L = pnjl.defaults.L
+#     Ni = NI[cluster]
+#     H_ZERO = pnjl.defaults.HEAVISIDE_ZERO
+#     Mi = MI[cluster]
+
+#     M_th_0 = M_th(0, 0, cluster)
+#     M_th_i = M_th(T, muB, cluster)
+
+#     nlambda = Ni*L
+
+#     if M_th_i >= Mi:
+#         if M >= M_th_i and M <= math.fsum([M_th_0, nlambda]):
+        
+#             arccos_in_a = -2.0
+#             heavi1_i = math.fsum([M**2 , -M_th_i**2])
+#             heavi2_i = math.fsum([M_th_0, nlambda, -M])
+#             arccos_in_b = math.fsum([M_th_i, M_th_0, nlambda])
+#             arccos_in_denom = math.fsum([M_th_i, -M_th_0, -nlambda])
+
+#             arccos_in = (arccos_in_a*M + arccos_in_b)/arccos_in_denom
+
+#             arccos_el = math.acos(arccos_in)
+#             heavi1 = numpy.heaviside(heavi1_i, H_ZERO)
+#             heavi2 = numpy.heaviside(heavi2_i, H_ZERO)
+
+#             return heavi1*heavi2*arccos_el/math.pi
+
+#         else:
+#             return 0.0
+#     else:
+#         return 0.0
+    
+
 @functools.lru_cache(maxsize=1024)
 def continuum_factor1(M: float, T: float, muB: float, cluster: str) -> float:
-
     L = pnjl.defaults.L
     Ni = NI[cluster]
-    H_ZERO = pnjl.defaults.HEAVISIDE_ZERO
     Mi = MI[cluster]
-
     M_th_0 = M_th(0, 0, cluster)
     M_th_i = M_th(T, muB, cluster)
-
     nlambda = Ni*L
-
+    M_thL = math.fsum([M_th_0, nlambda])
     if M_th_i >= Mi:
-        if M >= M_th_i and M <= math.fsum([M_th_0, nlambda]):
-        
-            arccos_in_a = -2.0
-            heavi1_i = math.fsum([M**2 , -M_th_i**2])
-            heavi2_i = math.fsum([M_th_0, nlambda, -M])
-            arccos_in_b = math.fsum([M_th_i, M_th_0, nlambda])
-            arccos_in_denom = math.fsum([M_th_i, -M_th_0, -nlambda])
-
-            arccos_in = (arccos_in_a*M + arccos_in_b)/arccos_in_denom
-
-            arccos_el = math.acos(arccos_in)
-            heavi1 = numpy.heaviside(heavi1_i, H_ZERO)
-            heavi2 = numpy.heaviside(heavi2_i, H_ZERO)
-
-            return heavi1*heavi2*arccos_el/math.pi
-
+        if M >= M_th_i and M <= M_thL:
+            a = -1.0/math.fsum([-M_th_i, M_thL])
+            b = -M_thL/math.fsum([M_th_i, -M_thL])
+            return (a*M+b)**CONT_POW_M
         else:
             return 0.0
     else:
         return 0.0
 
 
+# @functools.lru_cache(maxsize=1024)
+# def continuum_factor2(M: float, T: float, muB: float, cluster: str) -> float:
+
+#     L = pnjl.defaults.L
+#     Ni = NI[cluster]
+#     H_ZERO = pnjl.defaults.HEAVISIDE_ZERO
+#     Mi = MI[cluster]
+
+#     M_th_0 = M_th(0, 0, cluster)
+#     M_th_i = M_th(T, muB, cluster)
+
+#     nlambda = Ni*L
+
+#     if Mi > M_th_i:
+#         if M >= M_th_i and M <= math.fsum([M_th_0, nlambda]):
+        
+#             arccos_in_a = -2.0
+#             heavi1_i = math.fsum([M**2 , -M_th_i**2])
+#             heavi2_i = math.fsum([M_th_0, nlambda, -M])
+#             arccos_in_b = math.fsum([M_th_i, M_th_0, nlambda])
+#             arccos_in_denom = math.fsum([M_th_i, -M_th_0, -nlambda])
+
+#             arccos_in = math.fsum([arccos_in_a*M, arccos_in_b])/arccos_in_denom
+#             cos_in = math.fsum(
+#                 [-math.pi*M, 0.5*(math.pi*arccos_in_b)]
+#             )/arccos_in_denom
+
+#             cos_el = math.cos(cos_in)
+#             arccos_el = math.acos(arccos_in)
+#             heavi1 = numpy.heaviside(heavi1_i, H_ZERO)
+#             heavi2 = numpy.heaviside(heavi2_i, H_ZERO)
+
+#             damp = 1.8*nlambda
+
+#             dampening_factor = math.fsum(
+#                 [-math.fsum([Mi, -damp]), M_th_i]
+#             )/damp
+
+#             if dampening_factor <= 0.0:
+#                 return 0.0
+#             else:
+#                 return heavi1*heavi2*dampening_factor*math.fsum(
+#                 [arccos_el*dampening_factor, cos_el*(1.0-dampening_factor)]
+#             )/math.pi
+
+#         else:
+#             return 0.0
+#     else:
+#         return 0.0
+    
+
 @functools.lru_cache(maxsize=1024)
-def continuum_factor2(M: float, T: float, muB: float, cluster: str) -> float:
-
+def continuum_factor2(M: float, T: float, muB: float, TM: float, cluster: str) -> float:
     L = pnjl.defaults.L
+    L2 = pnjl.defaults.L2
     Ni = NI[cluster]
-    H_ZERO = pnjl.defaults.HEAVISIDE_ZERO
     Mi = MI[cluster]
-
     M_th_0 = M_th(0, 0, cluster)
     M_th_i = M_th(T, muB, cluster)
-
     nlambda = Ni*L
-
-    if Mi > M_th_i:
-        if M >= M_th_i and M <= math.fsum([M_th_0, nlambda]):
-        
-            arccos_in_a = -2.0
-            heavi1_i = math.fsum([M**2 , -M_th_i**2])
-            heavi2_i = math.fsum([M_th_0, nlambda, -M])
-            arccos_in_b = math.fsum([M_th_i, M_th_0, nlambda])
-            arccos_in_denom = math.fsum([M_th_i, -M_th_0, -nlambda])
-
-            arccos_in = math.fsum([arccos_in_a*M, arccos_in_b])/arccos_in_denom
-            cos_in = math.fsum(
-                [-math.pi*M, 0.5*(math.pi*arccos_in_b)]
-            )/arccos_in_denom
-
-            cos_el = math.cos(cos_in)
-            arccos_el = math.acos(arccos_in)
-            heavi1 = numpy.heaviside(heavi1_i, H_ZERO)
-            heavi2 = numpy.heaviside(heavi2_i, H_ZERO)
-
-            damp = 1.8*nlambda
-
-            dampening_factor = math.fsum(
-                [-math.fsum([Mi, -damp]), M_th_i]
-            )/damp
-
-            if dampening_factor <= 0.0:
-                return 0.0
+    M_thL = math.fsum([M_th_0, nlambda])
+    T_ML = math.fsum([TM, L2])
+    if M_th_i < Mi:
+        if M >= Mi and M <= M_thL:
+            a = -1.0/math.fsum([-Mi, M_thL])
+            b = -M_thL/math.fsum([Mi, -M_thL])
+            a2 = -1.0/L2
+            b2 = T_ML/L2
+            t_factor = (a2*T+b2)**CONT_POW_T
+            if t_factor > 1.0: #t_factor is > 1 if a cluster has no bound state
+                t_factor = (T/TM)**CONT_POW_T
+            if T < T_ML:
+                return ((a*M+b)**CONT_POW_M)*t_factor
             else:
-                return heavi1*heavi2*dampening_factor*math.fsum(
-                [arccos_el*dampening_factor, cos_el*(1.0-dampening_factor)]
-            )/math.pi
-
+                return 0.0
+        # elif M < Mi and M >= M_th_i:
+        #     a = 1.0/math.fsum([Mi, -M_th_i])
+        #     b = -M_th_i/math.fsum([Mi, -M_th_i])
+        #     a2 = -1.0/L2
+        #     b2 = T_ML/L2
+        #     t_factor = (a2*T+b2)**CONT_POW_T
+        #     if t_factor > 1.0: #t_factor is > 1 if a cluster has no bound state
+        #         t_factor = (T/TM)**CONT_POW_T
+        #     if T < T_ML:
+        #         return ((a*M+b)**CONT_POW_M)*t_factor
+        #     else:
+        #         return 0.0
         else:
             return 0.0
     else:
@@ -212,17 +301,17 @@ def continuum_factor2(M: float, T: float, muB: float, cluster: str) -> float:
     
 
 @functools.lru_cache(maxsize=1024)
-def phase_factor(M: float, T: float, muB: float, cluster: str) -> float:
-    delta_i = bound_factor(M, T, muB, cluster)+continuum_factor1(M, T, muB, cluster)+continuum_factor2(M, T, muB, cluster)  
+def phase_factor(M: float, T: float, muB: float, TM: float, cluster: str) -> float:
+    delta_i = bound_factor(M, T, muB, cluster)+continuum_factor1(M, T, muB, cluster)+continuum_factor2(M, T, muB, TM, cluster)  
     return (delta_i-(1.0/(2.0*math.pi))*math.sin(2.0*math.pi*delta_i))
 
 
 @functools.lru_cache(maxsize=1024)
 def b_boson_singlet_integrand(
     M: float, p: float, T: float, muB: float,
-    phi_re: float, phi_im: float, a: float, cluster: str
+    phi_re: float, phi_im: float, a: float, TM: float, cluster: str
 ) -> float:
-    delta_i = phase_factor(M, T, muB, cluster)
+    delta_i = phase_factor(M, T, muB, TM, cluster)
     if delta_i == 0.0:
         return 0.0
     else:
@@ -234,9 +323,9 @@ def b_boson_singlet_integrand(
 @functools.lru_cache(maxsize=1024)
 def b_fermion_singlet_integrand(
     M: float, p: float, T: float, muB: float,
-    phi_re: float, phi_im: float, a: float, cluster: str
+    phi_re: float, phi_im: float, a: float, TM: float, cluster: str
 ) -> float:
-    delta_i = phase_factor(M, T, muB, cluster)
+    delta_i = phase_factor(M, T, muB, TM, cluster)
     if delta_i == 0.0:
         return 0.0
     else:
@@ -248,9 +337,9 @@ def b_fermion_singlet_integrand(
 @functools.lru_cache(maxsize=1024)
 def b_boson_triplet_integrand(
     M: float, p: float, T: float, muB: float,
-    phi_re: float, phi_im: float, a: float, cluster: str
+    phi_re: float, phi_im: float, a: float, TM: float, cluster: str
 ) -> float:
-    delta_i = phase_factor(M, T, muB, cluster)
+    delta_i = phase_factor(M, T, muB, TM, cluster)
     if delta_i == 0.0:
         return 0.0
     else:
@@ -262,9 +351,9 @@ def b_boson_triplet_integrand(
 @functools.lru_cache(maxsize=1024)
 def b_boson_antitriplet_integrand(
     M: float, p: float, T: float, muB: float,
-    phi_re: float, phi_im: float, a: float, cluster: str
+    phi_re: float, phi_im: float, a: float, TM: float, cluster: str
 ) -> float:
-    delta_i = phase_factor(M, T, muB, cluster)
+    delta_i = phase_factor(M, T, muB, TM, cluster)
     if delta_i == 0.0:
         return 0.0
     else:
@@ -276,9 +365,9 @@ def b_boson_antitriplet_integrand(
 @functools.lru_cache(maxsize=1024)
 def b_fermion_triplet_integrand(
     M: float, p: float, T: float, muB: float,
-    phi_re: float, phi_im: float, a: float, cluster: str
+    phi_re: float, phi_im: float, a: float, TM: float, cluster: str
 ) -> float:
-    delta_i = phase_factor(M, T, muB, cluster)
+    delta_i = phase_factor(M, T, muB, TM, cluster)
     if delta_i == 0.0:
         return 0.0
     else:
@@ -290,9 +379,9 @@ def b_fermion_triplet_integrand(
 @functools.lru_cache(maxsize=1024)
 def b_fermion_antitriplet_integrand(
     M: float, p: float, T: float, muB: float,
-    phi_re: float, phi_im: float, a: float, cluster: str
+    phi_re: float, phi_im: float, a: float, TM: float, cluster: str
 ) -> float:
-    delta_i = phase_factor(M, T, muB, cluster)
+    delta_i = phase_factor(M, T, muB, TM, cluster)
     if delta_i == 0.0:
         return 0.0
     else:
@@ -326,11 +415,11 @@ b_integral_hash = {
 @functools.lru_cache(maxsize=1024)
 def bdensity_integral(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
-    M_max: float, a: float, cluster: str
+    M_min: float, M_max: float, a: float, TM: float, cluster: str
 ) -> float:
-    integral, error = scipy.integrate.quad(
-        b_integral_hash[cluster], 0.0, M_max,
-        args = (p, T, muB, phi_re, phi_im, a, cluster)
+    integral, _ = scipy.integrate.quad(
+        b_integral_hash[cluster], M_min, M_max,
+        args = (p, T, muB, phi_re, phi_im, a, TM, cluster)
     )
     return (p**2)*integral
 
@@ -346,43 +435,62 @@ def bdensity(
     if A_I == 0.0:
         return 0.0
     else:
+        TM = T_Mott(T, muB, cluster)
         M_th_0 = M_th(0.0, 0.0, cluster)
+        M_min = M_th(T, muB, cluster)
         M_max = math.fsum([M_th_0, L*N_I])
-        integral, error = scipy.integrate.quad(
-            bdensity_integral, 0.0, math.inf,
-            args = (T, muB, phi_re, phi_im, M_max, A_I, cluster)
+        b_susd = pnjl.thermo.gcp_cluster.bound_step_continuum_step.bdensity(
+            T, muB, phi_re, phi_im, cluster
         )
-        return (A_I*D_I/(2.0*(math.pi**2)))*integral
+        integral, _ = scipy.integrate.quad(
+            bdensity_integral, 0.0, math.inf,
+            args = (T, muB, phi_re, phi_im, M_min, M_max, A_I, TM, cluster)
+        )
+        return b_susd + (A_I*D_I/(2.0*(math.pi**2)))*integral
 
 
 @functools.lru_cache(maxsize=1024)
 def s_boson_singlet_integrand(
     M: float, p: float, T: float, muB: float,
-    phi_re: float, phi_im: float, a: float, cluster: str
+    phi_re: float, phi_im: float, a: float, TM: float, cluster: str
 ) -> float:
-    delta_i = phase_factor(M, T, muB, cluster)
+    delta_i = phase_factor(M, T, muB, TM, cluster)
     if delta_i == 0.0:
         return 0.0
     else:
         sigma_p = 0.0
-        fp = pnjl.thermo.distributions.f_boson_singlet(p, T, muB, M, a, '+')
-        dfp = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, muB, M, a, '+')
-        if not (fp == 0.0 or dfp == 0.0):
-            sigma_p = math.fsum([math.log(fp), -math.log1p(fp)])*dfp
+        logyp = pnjl.thermo.distributions.log_y(p, T, muB, M, a, 1, '+')
+        if logyp != 0.0:
+            dfp = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, muB, M, a, '+')
+            sigma_p = logyp*dfp
+        # fp = pnjl.thermo.distributions.f_boson_singlet(p, T, muB, M, a, '+')
+        # if not (fp <= 0.0 or dfp == 0.0):
+        #     sigma_p = math.fsum([math.log(fp), -math.log1p(fp)])*dfp
+        # elif fp < 0.0:
+        #     sigma_p = pnjl.thermo.distributions.log_y(
+        #         p, T, muB, M, a, 1, '+'
+        #     )*dfp
         sigma_m = 0.0
-        fm = pnjl.thermo.distributions.f_boson_singlet(p, T, muB, M, a, '-')
-        dfm = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, muB, M, a, '-')
-        if not (fm == 0.0 or dfm == 0.0):
-            sigma_m = math.fsum([math.log(fm), -math.log1p(fm)])*dfm
-        return -math.fsum([sigma_p, sigma_m])*delta_i
+        logym = pnjl.thermo.distributions.log_y(p, T, muB, M, a, 1, '-')
+        if logym != 0.0:
+            dfm = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, muB, M, a, '-')
+            sigma_m = logym*dfm
+        # fm = pnjl.thermo.distributions.f_boson_singlet(p, T, muB, M, a, '-')
+        # if not (fm <= 0.0 or dfm == 0.0):
+        #     sigma_m = math.fsum([math.log(fm), -math.log1p(fm)])*dfm
+        # elif fm < 0.0:
+        #     sigma_m = pnjl.thermo.distributions.log_y(
+        #         p, T, muB, M, a, 1, '-'
+        #     )*dfm
+        return math.fsum([sigma_p, sigma_m])*delta_i
     
 
 @functools.lru_cache(maxsize=1024)
 def s_fermion_singlet_integrand(
     M: float, p: float, T: float, muB: float,
-    phi_re: float, phi_im: float, a: float, cluster: str
+    phi_re: float, phi_im: float, a: float, TM: float, cluster: str
 ) -> float:
-    delta_i = phase_factor(M, T, muB, cluster)
+    delta_i = phase_factor(M, T, muB, TM, cluster)
     if delta_i == 0.0:
         return 0.0
     else:
@@ -402,9 +510,9 @@ def s_fermion_singlet_integrand(
 @functools.lru_cache(maxsize=1024)
 def s_boson_triplet_integrand(
     M: float, p: float, T: float, muB: float,
-    phi_re: float, phi_im: float, a: float, cluster: str
+    phi_re: float, phi_im: float, a: float, TM: float, cluster: str
 ) -> float:
-    delta_i = phase_factor(M, T, muB, cluster)
+    delta_i = phase_factor(M, T, muB, TM, cluster)
     if delta_i == 0.0:
         return 0.0
     else:
@@ -419,9 +527,9 @@ def s_boson_triplet_integrand(
 @functools.lru_cache(maxsize=1024)
 def s_boson_antitriplet_integrand(
     M: float, p: float, T: float, muB: float,
-    phi_re: float, phi_im: float, a: float, cluster: str
+    phi_re: float, phi_im: float, a: float, TM: float, cluster: str
 ) -> float:
-    delta_i = phase_factor(M, T, muB, cluster)
+    delta_i = phase_factor(M, T, muB, TM, cluster)
     if delta_i == 0.0:
         return 0.0
     else:
@@ -436,9 +544,9 @@ def s_boson_antitriplet_integrand(
 @functools.lru_cache(maxsize=1024)
 def s_fermion_triplet_integrand(
     M: float, p: float, T: float, muB: float,
-    phi_re: float, phi_im: float, a: float, cluster: str
+    phi_re: float, phi_im: float, a: float, TM: float, cluster: str
 ) -> float:
-    delta_i = phase_factor(M, T, muB, cluster)
+    delta_i = phase_factor(M, T, muB, TM, cluster)
     if delta_i == 0.0:
         return 0.0
     else:
@@ -453,9 +561,9 @@ def s_fermion_triplet_integrand(
 @functools.lru_cache(maxsize=1024)
 def s_fermion_antitriplet_integrand(
     M: float, p: float, T: float, muB: float,
-    phi_re: float, phi_im: float, a: float, cluster: str
+    phi_re: float, phi_im: float, a: float, TM: float, cluster: str
 ) -> float:
-    delta_i = phase_factor(M, T, muB, cluster)
+    delta_i = phase_factor(M, T, muB, TM, cluster)
     if delta_i == 0.0:
         return 0.0
     else:
@@ -491,99 +599,53 @@ s_integral_hash = {
 
 @functools.lru_cache(maxsize=1024)
 def sdensity_integral(
-    p: float, T: float, mu: float, phi_re: float, phi_im: float,
-    M_max: float, a: float, cluster: str
+    p: float, T: float, muB: float, phi_re: float, phi_im: float,
+    M_min: float, M_max: float, a: float, TM: float, cluster: str
 ) -> float:
-    integral, error = scipy.integrate.quad(
-        s_integral_hash[cluster], 0.0, M_max,
-        args = (p, T, mu, phi_re, phi_im, a, cluster)
+    integral, _ = scipy.integrate.quad(
+        s_integral_hash[cluster], M_min, M_max,
+        args = (p, T, muB, phi_re, phi_im, a, TM, cluster)
     )
     return (p**2)*integral
 
 
 @functools.lru_cache(maxsize=1024)
 def sdensity(
-    T: float, mu: float, phi_re: float, phi_im: float, cluster: str
+    T: float, muB: float, phi_re: float, phi_im: float, cluster: str
 ) -> float:
-
     L = pnjl.defaults.L
     D_I = DI[cluster]
     N_I = NI[cluster]
     A_I = BI[cluster]
-
-    M_th_0 = M_th(0.0, 0.0, cluster)
-    M_max = math.fsum([M_th_0, L*N_I])
-
-    integral, error = scipy.integrate.quad(
-        sdensity_integral, 0.0, math.inf,
-        args = (T, mu, phi_re, phi_im, M_max, A_I, cluster)
-    )
-
-    return (D_I/(2.0*(math.pi**2)))*integral
+    if A_I == 0.0 and muB != 0.0:
+        return sdensity(T, 0.0, phi_re, phi_im, cluster)
+    else:
+        M_th_0 = M_th(0.0, 0.0, cluster)
+        M_max = math.fsum([M_th_0, L*N_I])
+        M_min = M_th(T, muB, cluster)
+        TM = T_Mott(T, muB, cluster)
+        s_susd = pnjl.thermo.gcp_cluster.bound_step_continuum_step.sdensity(
+            T, muB, phi_re, phi_im, cluster
+        )
+        integral, _ = scipy.integrate.quad(
+            sdensity_integral, 0.0, math.inf,
+            args = (T, muB, phi_re, phi_im, M_min, M_max, A_I, TM, cluster)
+        )
+        return s_susd + (D_I/(2.0*(math.pi**2)))*integral
 
 
 @functools.lru_cache(maxsize=1024)
 def qnumber_cumulant(
-    rank: int, T: float, mu: float, phi_re: float, phi_im: float, cluster: str
+    rank: int, T: float, muB: float, phi_re: float, phi_im: float, cluster: str
 ) -> float:
-    """### Description
-    Generalized Beth-Uhlenbeck cluster quark number cumulant chi_q. Based on 
-    Eq.29 of https://arxiv.org/pdf/2012.12894.pdf and the subsequent inline 
-    definition.
-    
-    ### Prameters
-    rank : int
-        Cumulant rank. Rank 1 equals to 3 times the baryon density.
-    T : float
-        Temperature in MeV.
-    mu : float
-        Quark chemical potential in MeV.
-    phi_re : float
-        Real part of the traced Polyakov-loop in MeV.
-    phi_im : float
-        Imaginary part of the traced Polyakov-loop in MeV.
-    phi_solver : Callable
-        Function calculating the traced Polyakov-loop for given
-        T and mu. Must be of the form
-            (T: float, mu: float,
-            phi_re0: float, phi_im0: float) -> Tuple[float, float],
-            where
-                T : temperature in MeV
-                mu : quark chemical potential in MeV
-                phi_re0 : initial guess for phi_re
-                phi_im0 : initial guess for phi_im
-    cluster : str
-        Cluster type,
-            'pi' : pion
-            'K' : kaon
-            'rho': rho meson
-            'omega': omega meson
-            'D': diquark
-            'N': nucleon
-            'T': tetraquark
-            'F': four-quark
-            'P': pentaquark
-            'Q': five-quark
-            'H': hexaquark
-    
-    ### Returns
-    qnumber_cumulant : float
-        Value of the thermodynamic quark number cumulant in MeV^3.
-    """
-
     if rank == 1:
-
-        return 3.0 * bdensity(T, mu, phi_re, phi_im, cluster)
-
+        return 3.0 * bdensity(T, muB, phi_re, phi_im, cluster)
     else:
-
         h = 1e-2
-
-        if math.fsum([mu, -2*h]) > 0.0:
-
-            mu_vec = [
-                math.fsum([mu, 2*h]), math.fsum([mu, h]),
-                math.fsum([mu, -h]), math.fsum([mu, -2*h])
+        if math.fsum([muB, -2*h]) > 0.0:
+            muB_vec = [
+                math.fsum([muB, 2*h]), math.fsum([muB, h]),
+                math.fsum([muB, -h]), math.fsum([muB, -2*h])
             ]
             deriv_coef = [
                 -1.0/(12.0*h), 8.0/(12.0*h),
@@ -591,24 +653,20 @@ def qnumber_cumulant(
             ]
             phi_vec = [
                 tuple([phi_re, phi_im])
-                for _ in mu_vec
+                for _ in muB_vec
             ]
             out_vec = [
                 coef*qnumber_cumulant(
-                    rank-1, T, mu_el, phi_el[0], phi_el[1], cluster
+                    rank-1, T, muB_el, phi_el[0], phi_el[1], cluster
                 )
-                for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
+                for muB_el, coef, phi_el in zip(muB_vec, deriv_coef, phi_vec)
             ]
-
             return math.fsum(out_vec)
-
         else:
-
-            new_mu = math.fsum([mu, h])
+            new_muB = math.fsum([muB, h])
             new_phi_re, new_phi_im = phi_re, phi_im
-
             return qnumber_cumulant(
-                rank, T, new_mu, new_phi_re, new_phi_im, cluster
+                rank, T, new_muB, new_phi_re, new_phi_im, cluster
             )
 
 
