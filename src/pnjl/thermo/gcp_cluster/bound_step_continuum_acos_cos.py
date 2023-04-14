@@ -99,9 +99,9 @@ TC0DT = pnjl.defaults.TC0*pnjl.defaults.DELTA_T
 
 SQRT2 = math.sqrt(2.0)
 
-CONT_POW_M = 2
+MSC_SLOPE = 50.0
 
-CONT_POW_T = 2
+CONT_POW_M = 2
 
 
 @functools.lru_cache(maxsize=1024)
@@ -116,7 +116,7 @@ def M_th(T: float, muB: float, cluster: str) -> float:
 
 
 @functools.lru_cache(maxsize=1024)
-def T_Mott(T: float, muB: float, cluster: str):
+def T_Mott(muB: float, cluster: str):
     kappa = pnjl.defaults.KAPPA
     Tc0 = pnjl.defaults.TC0
     M0 = pnjl.defaults.M0
@@ -126,13 +126,13 @@ def T_Mott(T: float, muB: float, cluster: str):
     S_I = SI[cluster]
     M_I = MI[cluster]
     atanh_inner = math.fsum([
-        -2.0*M_I, SQRT2*M0*N_I, 2.0*SQRT2*ml*N_I, -2.0*SQRT2*ml*S_I, 2.0*SQRT2*ms*S_I
-    ])/(SQRT2*M0*N_I)
+        -SQRT2*M_I, M0*N_I, 2.0*ml*N_I, -2.0*ml*S_I, 2.0*ms*S_I
+    ])/(M0*N_I)
     if math.fabs(atanh_inner) > 1.0: #|atanh_inner| is > 1 when a cluster has no bound state
-        return pnjl.thermo.gcp_sigma_lattice.Tc(muB)
+        return pnjl.thermo.gcp_sigma_lattice.Tc(muB/3.0)
     else:
         return math.fsum([
-            TC02, -kappa*(muB**2), TC0DT*math.atanh(atanh_inner)
+            TC02, -9.0*kappa*(muB**2), TC0DT*math.atanh(atanh_inner)
         ])/Tc0
 
 
@@ -258,42 +258,58 @@ def continuum_factor1(M: float, T: float, muB: float, cluster: str) -> float:
 #         return 0.0
     
 
+# @functools.lru_cache(maxsize=1024)
+# def continuum_factor2(M: float, T: float, muB: float, TM: float, cluster: str) -> float:
+#     L = pnjl.defaults.L
+#     L2 = pnjl.defaults.L2
+#     Ni = NI[cluster]
+#     Mi = MI[cluster]
+#     M_th_0 = M_th(0, 0, cluster)
+#     M_th_i = M_th(T, muB, cluster)
+#     nlambda = Ni*L
+#     M_thL = math.fsum([M_th_0, nlambda])
+#     T_ML = math.fsum([TM, L2])
+#     M_sc = MSC_SLOPE*(T - TM) + Mi
+#     if M_th_i < Mi:
+#         if M >= M_sc and M <= M_thL:
+#             a = -1.0/math.fsum([-M_sc, M_thL])
+#             b = -M_thL/math.fsum([M_sc, -M_thL])
+#             a2 = -1.0/L2
+#             b2 = T_ML/L2
+#             t_factor = (a2*T+b2)**CONT_POW_T
+#             if t_factor > 1.0: #t_factor is > 1 if a cluster has no bound state
+#                 t_factor = (T/TM)**CONT_POW_T
+#             if T < T_ML:
+#                 return ((a*M+b)**CONT_POW_M)*t_factor
+#             else:
+#                 return 0.0
+#         elif M >= Mi and M < M_sc:
+#             return 0.0
+#         else:
+#             return 0.0
+#     else:
+#         return 0.0
+    
+
 @functools.lru_cache(maxsize=1024)
 def continuum_factor2(M: float, T: float, muB: float, TM: float, cluster: str) -> float:
     L = pnjl.defaults.L
-    L2 = pnjl.defaults.L2
     Ni = NI[cluster]
     Mi = MI[cluster]
     M_th_0 = M_th(0, 0, cluster)
     M_th_i = M_th(T, muB, cluster)
     nlambda = Ni*L
     M_thL = math.fsum([M_th_0, nlambda])
-    T_ML = math.fsum([TM, L2])
-    if M_th_i < Mi:
-        if M >= Mi and M <= M_thL:
-            a = -1.0/math.fsum([-Mi, M_thL])
-            b = -M_thL/math.fsum([Mi, -M_thL])
-            a2 = -1.0/L2
-            b2 = T_ML/L2
-            t_factor = (a2*T+b2)**CONT_POW_T
-            if t_factor > 1.0: #t_factor is > 1 if a cluster has no bound state
-                t_factor = (T/TM)**CONT_POW_T
-            if T < T_ML:
-                return ((a*M+b)**CONT_POW_M)*t_factor
-            else:
-                return 0.0
-        # elif M < Mi and M >= M_th_i:
-        #     a = 1.0/math.fsum([Mi, -M_th_i])
-        #     b = -M_th_i/math.fsum([Mi, -M_th_i])
-        #     a2 = -1.0/L2
-        #     b2 = T_ML/L2
-        #     t_factor = (a2*T+b2)**CONT_POW_T
-        #     if t_factor > 1.0: #t_factor is > 1 if a cluster has no bound state
-        #         t_factor = (T/TM)**CONT_POW_T
-        #     if T < T_ML:
-        #         return ((a*M+b)**CONT_POW_M)*t_factor
-        #     else:
-        #         return 0.0
+    M_sc = MSC_SLOPE*(T - TM) + Mi
+    if M_th_i < Mi and M_thL > M_sc and M_sc > Mi:
+        if M >= Mi and M < M_sc:
+            a = 1.0/math.fsum([-Mi, M_sc])
+            b = Mi/math.fsum([Mi, -M_sc])
+            return (a*M+b)**CONT_POW_M
+        elif M >= M_sc and M < M_thL:
+            a = -1.0/math.fsum([-M_sc, M_thL])
+            b = -M_thL/math.fsum([M_sc, -M_thL])
+            return (a*M+b)**CONT_POW_M
         else:
             return 0.0
     else:
@@ -435,7 +451,7 @@ def bdensity(
     if A_I == 0.0:
         return 0.0
     else:
-        TM = T_Mott(T, muB, cluster)
+        TM = T_Mott(muB, cluster)
         M_th_0 = M_th(0.0, 0.0, cluster)
         M_min = M_th(T, muB, cluster)
         M_max = math.fsum([M_th_0, L*N_I])
@@ -463,25 +479,11 @@ def s_boson_singlet_integrand(
         if logyp != 0.0:
             dfp = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, muB, M, a, '+')
             sigma_p = logyp*dfp
-        # fp = pnjl.thermo.distributions.f_boson_singlet(p, T, muB, M, a, '+')
-        # if not (fp <= 0.0 or dfp == 0.0):
-        #     sigma_p = math.fsum([math.log(fp), -math.log1p(fp)])*dfp
-        # elif fp < 0.0:
-        #     sigma_p = pnjl.thermo.distributions.log_y(
-        #         p, T, muB, M, a, 1, '+'
-        #     )*dfp
         sigma_m = 0.0
         logym = pnjl.thermo.distributions.log_y(p, T, muB, M, a, 1, '-')
         if logym != 0.0:
             dfm = pnjl.thermo.distributions.dfdM_boson_singlet(p, T, muB, M, a, '-')
             sigma_m = logym*dfm
-        # fm = pnjl.thermo.distributions.f_boson_singlet(p, T, muB, M, a, '-')
-        # if not (fm <= 0.0 or dfm == 0.0):
-        #     sigma_m = math.fsum([math.log(fm), -math.log1p(fm)])*dfm
-        # elif fm < 0.0:
-        #     sigma_m = pnjl.thermo.distributions.log_y(
-        #         p, T, muB, M, a, 1, '-'
-        #     )*dfm
         return math.fsum([sigma_p, sigma_m])*delta_i
     
 
@@ -623,7 +625,7 @@ def sdensity(
         M_th_0 = M_th(0.0, 0.0, cluster)
         M_max = math.fsum([M_th_0, L*N_I])
         M_min = M_th(T, muB, cluster)
-        TM = T_Mott(T, muB, cluster)
+        TM = T_Mott(muB, cluster)
         s_susd = pnjl.thermo.gcp_cluster.bound_step_continuum_step.sdensity(
             T, muB, phi_re, phi_im, cluster
         )
