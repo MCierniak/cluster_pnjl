@@ -46,12 +46,14 @@ def Polyakov_loop_inner(phi, T, mu):
         gluon = pnjl.thermo.gcp_pl_lo.U(T, phi[0], phiim)
         sea_l = 2.0*pnjl.thermo.gcp_sea_lattice.gcp_l(T, mu)
         sea_s = pnjl.thermo.gcp_sea_lattice.gcp_s(T, mu)
-        perturbative_l = 2.0*pnjl.thermo.gcp_perturbative.gcp(
-            T, mu, phi[0], phiim
-        )
-        perturbative_s = pnjl.thermo.gcp_perturbative.gcp(
-            T, mu, phi[0], phiim
-        )
+        perturbative_l = 0.0
+        # perturbative_l = 2.0*pnjl.thermo.gcp_perturbative.gcp(
+        #     T, mu, phi[0], phiim
+        # )
+        perturbative_s = 0.0
+        # perturbative_s = pnjl.thermo.gcp_perturbative.gcp(
+        #     T, mu, phi[0], phiim
+        # )
         pnjl_l = 2.0*pnjl.thermo.gcp_pnjl.gcp_l_real(T, mu, phi[0], phiim)
         pnjl_s = pnjl.thermo.gcp_pnjl.gcp_s_real(T, mu, phi[0], phiim)
         return math.fsum([

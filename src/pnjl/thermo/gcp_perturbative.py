@@ -51,6 +51,9 @@ import pnjl.thermo.distributions
 import pnjl.thermo.gcp_sigma_lattice
 
 
+CUTOFF = 600.0
+
+
 @functools.lru_cache(maxsize=1024)
 def alpha_s(T : float, mu : float) -> float:
     """### Description
@@ -115,13 +118,12 @@ def I_integrand_imag(
 def I(
     T: float, mu: float, phi_re: float, phi_im: float,
 ) -> complex:
-    cutoff = 600.0
     integral_real, _ = scipy.integrate.quad(
-        I_integrand_real, cutoff, math.inf,
+        I_integrand_real, CUTOFF, math.inf,
         args = (T, mu, phi_re, phi_im)
     )
     integral_imag, _ = scipy.integrate.quad(
-        I_integrand_imag, cutoff, math.inf,
+        I_integrand_imag, CUTOFF, math.inf,
         args = (T, mu, phi_re, phi_im)
     )
     return complex(integral_real, integral_imag)/(T**2)
