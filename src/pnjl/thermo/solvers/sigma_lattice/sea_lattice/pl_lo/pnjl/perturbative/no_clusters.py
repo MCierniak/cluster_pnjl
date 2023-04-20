@@ -13,7 +13,7 @@ import scipy.optimize
 
 import pnjl.defaults
 import pnjl.thermo.gcp_pnjl
-import pnjl.thermo.gcp_pl_lo
+import pnjl.thermo.gcp_pl.lo
 import pnjl.thermo.gcp_sea_lattice
 import pnjl.thermo.gcp_perturbative
 import pnjl.thermo.gcp_sigma_lattice
@@ -38,22 +38,22 @@ def inv_phi_im(phi_re, phi_im):
 
 def Polyakov_loop_inner(phi, T, mu):
     phiim = phi_im(phi[0], phi[1])
-    MH = pnjl.thermo.gcp_pl_lo.M_H(phi[0], phiim)
+    MH = pnjl.thermo.gcp_pl.lo.M_H(phi[0], phiim)
     if MH < 0.0:
         return math.inf
     else:
         sigma = pnjl.thermo.gcp_sigma_lattice.gcp(T, mu)
-        gluon = pnjl.thermo.gcp_pl_lo.U(T, phi[0], phiim)
+        gluon = pnjl.thermo.gcp_pl.lo.U(T, phi[0], phiim)
         sea_l = 2.0*pnjl.thermo.gcp_sea_lattice.gcp_l(T, mu)
         sea_s = pnjl.thermo.gcp_sea_lattice.gcp_s(T, mu)
-        perturbative_l = 0.0
-        # perturbative_l = 2.0*pnjl.thermo.gcp_perturbative.gcp(
-        #     T, mu, phi[0], phiim
-        # )
-        perturbative_s = 0.0
-        # perturbative_s = pnjl.thermo.gcp_perturbative.gcp(
-        #     T, mu, phi[0], phiim
-        # )
+        # perturbative_l = 0.0
+        perturbative_l = 2.0*pnjl.thermo.gcp_perturbative.gcp(
+            T, mu, phi[0], phiim
+        )
+        # perturbative_s = 0.0
+        perturbative_s = pnjl.thermo.gcp_perturbative.gcp(
+            T, mu, phi[0], phiim
+        )
         pnjl_l = 2.0*pnjl.thermo.gcp_pnjl.gcp_l_real(T, mu, phi[0], phiim)
         pnjl_s = pnjl.thermo.gcp_pnjl.gcp_s_real(T, mu, phi[0], phiim)
         return math.fsum([

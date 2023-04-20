@@ -295,7 +295,7 @@ def legacy_figure5():
     import pnjl.thermo.gcp_sea_lattice
     import pnjl.thermo.gcp_perturbative
     import pnjl.thermo.gcp_sigma_lattice
-    import pnjl.thermo.gcp_pl_polynomial
+    import pnjl.thermo.gcp_pl.polynomial
 
     import pnjl.thermo.solvers.\
         sigma_lattice.\
@@ -373,7 +373,7 @@ def legacy_figure5():
             zip(T, mu, phi_re_v_1, phi_im_v_1), total=len(T), ncols=100
         ):
             gluon_v_1.append(
-                pnjl.thermo.gcp_pl_polynomial.pressure(
+                pnjl.thermo.gcp_pl.polynomial.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el
                 )/(T_el**4)
             )
@@ -658,7 +658,7 @@ def legacy_figure6():
     import pnjl.thermo.gcp_sea_lattice
     import pnjl.thermo.gcp_perturbative
     import pnjl.thermo.gcp_sigma_lattice
-    import pnjl.thermo.gcp_pl_polynomial
+    import pnjl.thermo.gcp_pl.polynomial
     import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
         as cluster
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
@@ -803,7 +803,7 @@ def legacy_figure6():
             ncols=100
         ):
             gluon_v_1.append(
-                pnjl.thermo.gcp_pl_polynomial.pressure(
+                pnjl.thermo.gcp_pl.polynomial.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el
                 )/(T_el**4)
             )
@@ -944,7 +944,7 @@ def legacy_figure6():
             ncols=100
         ):
             gluon_v_2.append(
-                pnjl.thermo.gcp_pl_polynomial.pressure(
+                pnjl.thermo.gcp_pl.polynomial.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el
                 )/(T_el**4)
             )
@@ -1085,7 +1085,7 @@ def legacy_figure6():
             ncols=100
         ):
             gluon_v_3.append(
-                pnjl.thermo.gcp_pl_polynomial.pressure(
+                pnjl.thermo.gcp_pl.polynomial.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el
                 )/(T_el**4)
             )
@@ -1226,7 +1226,7 @@ def legacy_figure6():
             ncols=100
         ):
             gluon_v_4.append(
-                pnjl.thermo.gcp_pl_polynomial.pressure(
+                pnjl.thermo.gcp_pl.polynomial.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el
                 )/(T_el**4)
             )
@@ -3040,7 +3040,7 @@ def legacy_figure7():
     import pnjl.thermo.gcp_sea_lattice
     import pnjl.thermo.gcp_perturbative
     import pnjl.thermo.gcp_sigma_lattice
-    import pnjl.thermo.gcp_pl_polynomial
+    import pnjl.thermo.gcp_pl.polynomial
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
@@ -3150,7 +3150,7 @@ def legacy_figure7():
             total=len(T_1), ncols=100
         ):
             gluon_v_1.append(
-                pnjl.thermo.gcp_pl_polynomial.pressure(
+                pnjl.thermo.gcp_pl.polynomial.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el
                 )/(T_el**4)
             )
@@ -3287,7 +3287,7 @@ def legacy_figure7():
             total=len(T_2), ncols=100
         ):
             gluon_v_2.append(
-                pnjl.thermo.gcp_pl_polynomial.pressure(
+                pnjl.thermo.gcp_pl.polynomial.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el
                 )/(T_el**4)
             )

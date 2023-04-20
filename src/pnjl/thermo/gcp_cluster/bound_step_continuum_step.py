@@ -34,7 +34,7 @@ import pnjl.defaults
 import pnjl.thermo.distributions
 import pnjl.thermo.gcp_sea_lattice
 import pnjl.thermo.gcp_sigma_lattice
-import pnjl.thermo.gcp_pl_polynomial
+import pnjl.thermo.gcp_pl.polynomial
 
 
 MI = {
