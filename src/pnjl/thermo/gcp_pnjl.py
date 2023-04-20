@@ -267,14 +267,7 @@ def pressure(
 
 
 @functools.lru_cache(maxsize=1024)
-def bdensity(
-    T: float, mu: float, phi_re: float, phi_im: float,
-    phi_solver: typing.Callable[
-                    [float, float, float, float],
-                    typing.Tuple[float, float]
-                ],
-    typ: str
-) -> float:
+def bdensity(T: float, mu: float, phi_re: float, phi_im: float, typ: str) -> float:
     """### Description
     PNJL baryon density of a single quark flavor.
     
@@ -311,9 +304,7 @@ def bdensity(
     """
 
     h = 1e-2
-
     if math.fsum([mu, -2*h]) > 0.0:
-
         mu_vec = [
             math.fsum([mu, 2*h]), math.fsum([mu, h]),
             math.fsum([mu, -h]), math.fsum([mu, -2*h])
@@ -322,48 +313,23 @@ def bdensity(
             -1.0/(12.0*h), 8.0/(12.0*h),
             -8.0/(12.0*h), 1.0/(12.0*h)
         ]
-        phi_vec = []
-        if pnjl.defaults.D_PHI_D_MU_0:
-            phi_vec = [
-                tuple([phi_re, phi_im])
-                for _ in mu_vec
-            ]
-        else:
-            phi_vec = [
-                phi_solver(T, mu_el, phi_re, phi_im)
-                for mu_el in mu_vec
-            ]
-
+        phi_vec = [
+            tuple([phi_re, phi_im])
+            for _ in mu_vec
+        ]
         p_vec = [
             coef*pressure(T, mu_el, phi_el[0], phi_el[1], typ)/3.0
             for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
         ]
-
         return math.fsum(p_vec)
-
     else:
-
         new_mu = math.fsum([mu, h])
         new_phi_re, new_phi_im = phi_re, phi_im
-            
-        if not pnjl.defaults.D_PHI_D_MU_0:
-            new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
-
-        return bdensity(
-            T, new_mu, new_phi_re, new_phi_im, 
-            phi_solver, typ
-        )
+        return bdensity(T, new_mu, new_phi_re, new_phi_im, typ)
 
 
 @functools.lru_cache(maxsize=1024)
-def qnumber_cumulant(
-    rank: int, T: float, mu: float, phi_re: float, phi_im: float,
-    phi_solver: typing.Callable[
-                    [float, float, float, float],
-                    typing.Tuple[float, float]
-                ],
-    typ: str
-) -> float:
+def qnumber_cumulant(rank: int, T: float, mu: float, phi_re: float, phi_im: float, typ: str) -> float:
     """### Description
     PNJL quark number cumulant chi_q of a single quark flavor. Based on 
     Eq.29 of https://arxiv.org/pdf/2012.12894.pdf and the subsequent inline definition.
@@ -402,15 +368,10 @@ def qnumber_cumulant(
     """
 
     if rank == 1:
-
-        return 3.0 * bdensity(T, mu, phi_re, phi_im,  phi_solver, typ)
-
+        return 3.0 * bdensity(T, mu, phi_re, phi_im, typ)
     else:
-
         h = 1e-2
-
         if math.fsum([mu, -2*h]) > 0.0:
-
             mu_vec = [
                 math.fsum([mu, 2*h]), math.fsum([mu, h]),
                 math.fsum([mu, -h]), math.fsum([mu, -2*h])
@@ -419,49 +380,24 @@ def qnumber_cumulant(
                 -1.0/(12.0*h), 8.0/(12.0*h),
                 -8.0/(12.0*h), 1.0/(12.0*h)
             ]
-            phi_vec = []
-            if pnjl.defaults.D_PHI_D_MU_0:
-                phi_vec = [
-                    tuple([phi_re, phi_im])
-                    for _ in mu_vec
-                ]
-            else:
-                phi_vec = [
-                    phi_solver(T, mu_el, phi_re, phi_im)
-                    for mu_el in mu_vec
-                ]
-
+            phi_vec = [
+                tuple([phi_re, phi_im])
+                for _ in mu_vec
+            ]
             out_vec = [
-                coef*qnumber_cumulant(
-                    rank-1, T, mu_el, phi_el[0], phi_el[1], 
-                    phi_solver, typ)
+                coef*qnumber_cumulant(rank-1, T, mu_el, phi_el[0], phi_el[1], typ)
                 for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
             ]
-
             return math.fsum(out_vec)
-
         else:
-
             new_mu = math.fsum([mu, h])
             new_phi_re, new_phi_im = phi_re, phi_im
-            
-            if not pnjl.defaults.D_PHI_D_MU_0:
-                new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
-
-            return qnumber_cumulant(
-                rank, T, new_mu, new_phi_re, new_phi_im, 
-                phi_solver, typ
-            )
+            return qnumber_cumulant(rank, T, new_mu, new_phi_re, new_phi_im, typ)
 
 
 @functools.lru_cache(maxsize=1024)
 def sdensity(
-    T: float, mu: float, phi_re : float, phi_im : float,
-    phi_solver: typing.Callable[
-                    [float, float, float, float],
-                    typing.Tuple[float, float]
-                ],
-    typ: str
+    T: float, mu: float, phi_re : float, phi_im : float, typ: str
 ) -> float:
     """### Description
     PNJL entropy density of a single quark flavor.
@@ -496,9 +432,7 @@ def sdensity(
     """
 
     h = 1e-2
-
     if math.fsum([T, -2*h]) > 0.0:
-
         T_vec = [
             math.fsum([T, 2*h]), math.fsum([T, h]),
             math.fsum([T, -h]), math.fsum([T, -2*h])
@@ -507,34 +441,16 @@ def sdensity(
             -1.0/(12.0*h), 8.0/(12.0*h),
             -8.0/(12.0*h), 1.0/(12.0*h)
         ]
-        phi_vec = []
-        if pnjl.defaults.D_PHI_D_T_0:
-            phi_vec = [
-                tuple([phi_re, phi_im])
-                for _ in T_vec
-            ]
-        else:
-            phi_vec = [
-                phi_solver(T_el, mu, phi_re, phi_im)
-                for T_el in T_vec
-            ]
-
+        phi_vec = [
+            tuple([phi_re, phi_im])
+            for _ in T_vec
+        ]
         p_vec = [
             coef*pressure(T_el, mu, phi_el[0], phi_el[1], typ)
             for T_el, coef, phi_el in zip(T_vec, deriv_coef, phi_vec)
         ]
-
         return math.fsum(p_vec)
-
     else:
-
         new_T = math.fsum([T, h])
         new_phi_re, new_phi_im = phi_re, phi_im
-            
-        if not pnjl.defaults.D_PHI_D_T_0:
-            new_phi_re, new_phi_im = phi_solver(new_T, mu, phi_re, phi_im)
-
-        return sdensity(
-            new_T, mu, new_phi_re, new_phi_im, 
-            phi_solver, typ
-        )
+        return sdensity(new_T, mu, new_phi_re, new_phi_im, typ)

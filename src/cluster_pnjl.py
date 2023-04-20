@@ -586,12 +586,13 @@ def epja_figure3():
 
     import matplotlib.pyplot
 
+    import pnjl.thermo.gcp_pl.sasaki
     import pnjl.thermo.gcp_sigma_lattice
 
     import pnjl.thermo.solvers.\
         sigma_lattice.\
         sea_lattice.\
-        pl_lo.\
+        pl_sasaki.\
         pnjl.\
         perturbative.\
         no_clusters \
@@ -612,6 +613,7 @@ def epja_figure3():
     T = numpy.linspace(1.0, 250.0, num = 200)
 
     sigma = [pnjl.thermo.gcp_sigma_lattice.Delta_ls(el, 0.0) for el in T]
+    mg = [pnjl.thermo.gcp_pl.sasaki.Mg(el, 0.0) for el in T]
 
     phi_re_v_1 = list()
     phi_im_v_1 = list()
@@ -649,6 +651,7 @@ def epja_figure3():
     )
     
     ax.plot(T, sigma, c = 'green')
+    ax.plot(T, mg, c = 'magenta')
     ax.plot(T, phi_re_v_1, c = 'blue')
     ax.plot(T, phi_im_v_1, c = 'red')
     ax.text(200, 1, r'$\mathrm{\mu_B=0}$', fontsize = 14)
@@ -2658,11 +2661,12 @@ def epja_experimental_pert():
     import pnjl.thermo.gcp_sea_lattice
     import pnjl.thermo.gcp_perturbative
     import pnjl.thermo.gcp_sigma_lattice
+    import pnjl.thermo.gcp_pl.sasaki
 
     import pnjl.thermo.solvers.\
         sigma_lattice.\
         sea_lattice.\
-        pl_lo.\
+        pl_sasaki.\
         pnjl.\
         perturbative.\
         no_clusters \
@@ -2702,14 +2706,14 @@ def epja_experimental_pert():
         phi_result = (phi_re_0, phi_im_0)
         if calc_phi:
             phi_result = solver.Polyakov_loop(T, muB/3.0, phi_re_0, phi_im_0)
-        pars = (T, muB/3.0, phi_result[0], phi_result[1], solver.Polyakov_loop)
-        pars_reduced = (T, muB/3.0, phi_result[0], phi_result[1])
+        pars = (T, muB/3.0, phi_result[0], phi_result[1])
+        pars_muB = (T, muB, phi_result[0], phi_result[1])
         #Sigma bdensity
         partial.append(
             pnjl.thermo.gcp_sigma_lattice.bdensity(T, muB/3.0)/(T**3)
         )
         #Gluon bdensity
-        partial.append(pnjl.thermo.gcp_pl_lo.bdensity(*pars_reduced)/(T**3))
+        partial.append(pnjl.thermo.gcp_pl.sasaki.bdensity(*pars_muB)/(T**3))
         #Sea bdensity
         lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(T, muB/3.0, 'l')/(T**3)
         sq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(T, muB/3.0, 's')/(T**3)
@@ -2717,7 +2721,7 @@ def epja_experimental_pert():
         partial.append(lq_temp)
         partial.append(sq_temp)
         #Perturbative bdensity
-        lq_temp = pnjl.thermo.gcp_perturbative.bdensity(*pars_reduced)/(T**3)
+        lq_temp = pnjl.thermo.gcp_perturbative.bdensity(*pars)/(T**3)
         partial.append(lq_temp)
         partial.append(lq_temp)
         partial.append(lq_temp)
@@ -2734,14 +2738,15 @@ def epja_experimental_pert():
         phi_result = (phi_re_0, phi_im_0)
         if calc_phi:
             phi_result = solver.Polyakov_loop(T, muB/3.0, phi_re_0, phi_im_0)
-        pars = (T, muB/3.0, phi_result[0], phi_result[1], solver.Polyakov_loop)
-        pars_reduced = (T, muB/3.0, phi_result[0], phi_result[1])
+        # pars = (T, muB/3.0, phi_result[0], phi_result[1], solver.Polyakov_loop)
+        pars = (T, muB/3.0, phi_result[0], phi_result[1])
+        pars_muB = (T, muB, phi_result[0], phi_result[1])
         #Sigma sdensity
         partial.append(
             pnjl.thermo.gcp_sigma_lattice.sdensity(T, muB/3.0)/(T**3)
         )
         #Gluon sdensity
-        partial.append(pnjl.thermo.gcp_pl_lo.sdensity(*pars_reduced)/(T**3))
+        partial.append(pnjl.thermo.gcp_pl.sasaki.sdensity(*pars_muB)/(T**3))
         #Sea sdensity
         lq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(T, muB/3.0, 'l')/(T**3)
         sq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(T, muB/3.0, 's')/(T**3)
@@ -2749,7 +2754,7 @@ def epja_experimental_pert():
         partial.append(lq_temp)
         partial.append(sq_temp)
         #Perturbative sdensity
-        lq_temp = pnjl.thermo.gcp_perturbative.sdensity(*pars_reduced)/(T**3)
+        lq_temp = pnjl.thermo.gcp_perturbative.sdensity(*pars)/(T**3)
         partial.append(lq_temp)
         partial.append(lq_temp)
         partial.append(lq_temp)
@@ -2978,6 +2983,10 @@ def epja_experimental_pert():
     ]
     t_pert_bdensity_2 = [
         math.fsum([el[5], el[6], el[7]]) 
+        for el in qgp_partial_bdensity_v_2
+    ]
+    t_gluon_bdensity_2 = [
+        el[1]
         for el in qgp_partial_bdensity_v_2
     ]
     t_quark_sdensity_1 = [
@@ -3261,6 +3270,7 @@ def epja_experimental_pert():
     ax3.plot(T_2, t_pnjl_bdensity_2, '-', c = 'darkblue')
     ax3.plot(T_2, t_pert_bdensity_old_2, '-.', c = 'magenta')
     ax3.plot(T_2, t_pert_bdensity_2, '-', c = 'magenta')
+    ax3.plot(T_2, t_gluon_bdensity_2, '-', c = 'red')
 
     ax3.text(85, 1.1, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
     ax3.text(188, -0.18, r"Perturbative correction", color="magenta", fontsize=14)
@@ -23383,6 +23393,6 @@ def lattice_thermo():
 
 if __name__ == '__main__':
 
-    epja_experimental_full()
+    epja_experimental_pert()
 
     print("END")
