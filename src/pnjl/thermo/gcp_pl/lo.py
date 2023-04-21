@@ -44,7 +44,7 @@ D3 = 71.2225
 D4 = 2.9715
 D5 = 6.61433
 
-T0 = 260.0
+T0 = 240.0
 
 
 @functools.lru_cache(maxsize=1024)

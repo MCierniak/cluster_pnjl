@@ -15,7 +15,7 @@ NF = 3.0
 
 
 A0 = (0.197*1000.0)**3
-C0 = (0.180*1000.0)**4
+C0 = -((0.180*1000.0)**4)
 
 
 @functools.lru_cache(maxsize=1024)
@@ -27,6 +27,7 @@ def Mg(T: float, muB: float):
             NF*g2*(3.0/(math.pi**2))*(muB**2)/18.0
         ]
     )
+    # return 0.0
 
 
 @functools.lru_cache(maxsize=1024)
@@ -138,7 +139,10 @@ def gcp_g_inner(p: float, T: float, muB: float, phi_re: float, phi_im: float) ->
         n = i + 1
         en = En(p, Mg(T, muB))
         logterm += Cn(n, phi_re, phi_im)*math.exp(-float(n)*en/T)
-    return (p**2)*math.log1p(logterm)
+    if logterm <= -1.0:
+        return math.inf
+    else:
+        return (p**2)*math.log1p(logterm)
 
 
 @functools.lru_cache(maxsize=1024)
