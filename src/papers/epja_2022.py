@@ -18,7 +18,7 @@ def legacy_figure4():
         sea_lattice.\
         pl_polynomial.\
         pnjl.\
-        perturbative.\
+        pert_const.\
         no_clusters \
     as solver_n
 
@@ -27,7 +27,7 @@ def legacy_figure4():
         sea_lattice.\
         pl_polynomial.\
         pnjl.\
-        perturbative.\
+        pert_const.\
         clusters_bound_step_continuum_step \
     as solver_s
 
@@ -36,7 +36,7 @@ def legacy_figure4():
         sea_lattice.\
         pl_polynomial.\
         pnjl.\
-        perturbative.\
+        pert_const.\
         clusters_bound_step_continuum_acos_cos \
     as solver_c
 
@@ -293,7 +293,7 @@ def legacy_figure5():
 
     import pnjl.thermo.gcp_pnjl
     import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative
+    import pnjl.thermo.gcp_perturbative.const
     import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
 
@@ -302,7 +302,7 @@ def legacy_figure5():
         sea_lattice.\
         pl_polynomial.\
         pnjl.\
-        perturbative.\
+        pert_const.\
         no_clusters \
     as solver_1
 
@@ -403,13 +403,13 @@ def legacy_figure5():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T, mu, phi_re_v_1, phi_im_v_1), total=len(T), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_perturbative.pressure(
+            lq_temp = pnjl.thermo.gcp_perturbative.const.pressure(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
             perturbative_u_v_1.append(lq_temp/(T_el**4))
             perturbative_d_v_1.append(lq_temp/(T_el**4))
             perturbative_s_v_1.append(
-                pnjl.thermo.gcp_perturbative.pressure(
+                pnjl.thermo.gcp_perturbative.const.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el, 's'
                 )/(T_el**4)
             )
@@ -656,7 +656,7 @@ def legacy_figure6():
 
     import pnjl.thermo.gcp_pnjl
     import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative
+    import pnjl.thermo.gcp_perturbative.const
     import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
     import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
@@ -669,7 +669,7 @@ def legacy_figure6():
         sea_lattice.\
         pl_polynomial.\
         pnjl.\
-        perturbative.\
+        pert_const.\
         no_clusters \
     as solver_1
 
@@ -835,13 +835,13 @@ def legacy_figure6():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1), total=len(T_1),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_perturbative.pressure(
+            lq_temp = pnjl.thermo.gcp_perturbative.const.pressure(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
             perturbative_u_v_1.append(lq_temp/(T_el**4))
             perturbative_d_v_1.append(lq_temp/(T_el**4))
             perturbative_s_v_1.append(
-                pnjl.thermo.gcp_perturbative.pressure(
+                pnjl.thermo.gcp_perturbative.const.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el, 's'
                 )/(T_el**4)
             )
@@ -976,13 +976,13 @@ def legacy_figure6():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2), total=len(T_2),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_perturbative.pressure(
+            lq_temp = pnjl.thermo.gcp_perturbative.const.pressure(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
             perturbative_u_v_2.append(lq_temp/(T_el**4))
             perturbative_d_v_2.append(lq_temp/(T_el**4))
             perturbative_s_v_2.append(
-                pnjl.thermo.gcp_perturbative.pressure(
+                pnjl.thermo.gcp_perturbative.const.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el, 's'
                 )/(T_el**4)
             )
@@ -1117,13 +1117,13 @@ def legacy_figure6():
             zip(T_3, mu_3, phi_re_v_3, phi_im_v_3), total=len(T_3),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_perturbative.pressure(
+            lq_temp = pnjl.thermo.gcp_perturbative.const.pressure(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
             perturbative_u_v_3.append(lq_temp/(T_el**4))
             perturbative_d_v_3.append(lq_temp/(T_el**4))
             perturbative_s_v_3.append(
-                pnjl.thermo.gcp_perturbative.pressure(
+                pnjl.thermo.gcp_perturbative.const.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el, 's'
                 )/(T_el**4)
             )
@@ -1258,13 +1258,13 @@ def legacy_figure6():
             zip(T_4, mu_4, phi_re_v_4, phi_im_v_4), total=len(T_4),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_perturbative.pressure(
+            lq_temp = pnjl.thermo.gcp_perturbative.const.pressure(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
             perturbative_u_v_4.append(lq_temp/(T_el**4))
             perturbative_d_v_4.append(lq_temp/(T_el**4))
             perturbative_s_v_4.append(
-                pnjl.thermo.gcp_perturbative.pressure(
+                pnjl.thermo.gcp_perturbative.const.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el, 's'
                 )/(T_el**4)
             )
@@ -3038,7 +3038,7 @@ def legacy_figure7():
 
     import pnjl.thermo.gcp_pnjl
     import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative
+    import pnjl.thermo.gcp_perturbative.const
     import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
@@ -3051,7 +3051,7 @@ def legacy_figure7():
         sea_lattice.\
         pl_polynomial.\
         pnjl.\
-        perturbative.\
+        pert_const.\
         no_clusters \
     as solver_1
 
@@ -3184,13 +3184,13 @@ def legacy_figure7():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_perturbative.pressure(
+            lq_temp = pnjl.thermo.gcp_perturbative.const.pressure(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
             perturbative_u_v_1.append(lq_temp/(T_el**4))
             perturbative_d_v_1.append(lq_temp/(T_el**4))
             perturbative_s_v_1.append(
-                pnjl.thermo.gcp_perturbative.pressure(
+                pnjl.thermo.gcp_perturbative.const.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el, 's'
                 )/(T_el**4)
             )
@@ -3321,13 +3321,13 @@ def legacy_figure7():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_perturbative.pressure(
+            lq_temp = pnjl.thermo.gcp_perturbative.const.pressure(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
             perturbative_u_v_2.append(lq_temp/(T_el**4))
             perturbative_d_v_2.append(lq_temp/(T_el**4))
             perturbative_s_v_2.append(
-                pnjl.thermo.gcp_perturbative.pressure(
+                pnjl.thermo.gcp_perturbative.const.pressure(
                     T_el, mu_el, phi_re_el, phi_im_el, 's'
                 )/(T_el**4)
             )

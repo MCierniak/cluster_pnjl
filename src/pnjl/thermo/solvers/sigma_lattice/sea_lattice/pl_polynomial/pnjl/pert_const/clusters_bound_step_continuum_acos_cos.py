@@ -14,10 +14,10 @@ import scipy.optimize
 import pnjl.defaults
 import pnjl.thermo.gcp_pnjl
 import pnjl.thermo.gcp_sea_lattice
-import pnjl.thermo.gcp_perturbative
+import pnjl.thermo.gcp_perturbative.const
 import pnjl.thermo.gcp_sigma_lattice
 import pnjl.thermo.gcp_pl.polynomial
-import pnjl.thermo.gcp_cluster.bound_step_continuum_step as cluster
+import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos as cluster
 
 
 def Polyakov_loop_inner(phi, T, mu):
@@ -26,10 +26,10 @@ def Polyakov_loop_inner(phi, T, mu):
     sea_l = 2.0*pnjl.thermo.gcp_sea_lattice.gcp_l(T, mu)
     sea_s = pnjl.thermo.gcp_sea_lattice.gcp_s(T, mu)
     perturbative_l = 2.0*pnjl.thermo.gcp_perturbative.gcp_fermion_l_real(
-        T, mu, phi[0], phi[1]
+        T, mu, phi[0], phi[1], 'l'
     )
     perturbative_s = pnjl.thermo.gcp_perturbative.gcp_fermion_s_real(
-        T, mu, phi[0], phi[1]
+        T, mu, phi[0], phi[1], 's'
     )
     pnjl_l = 2.0*pnjl.thermo.gcp_pnjl.gcp_l_real(T, mu, phi[0], phi[1])
     pnjl_s = pnjl.thermo.gcp_pnjl.gcp_s_real(T, mu, phi[0], phi[1])

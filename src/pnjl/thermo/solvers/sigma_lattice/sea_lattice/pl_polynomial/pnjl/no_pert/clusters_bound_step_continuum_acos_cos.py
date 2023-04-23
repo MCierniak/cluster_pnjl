@@ -14,9 +14,9 @@ import scipy.optimize
 import pnjl.defaults
 import pnjl.thermo.gcp_pnjl
 import pnjl.thermo.gcp_sea_lattice
-import pnjl.thermo.gcp_perturbative
 import pnjl.thermo.gcp_sigma_lattice
 import pnjl.thermo.gcp_pl.polynomial
+import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos as cluster
 
 
 def Polyakov_loop_inner(phi, T, mu):
@@ -24,18 +24,18 @@ def Polyakov_loop_inner(phi, T, mu):
     gluon = pnjl.thermo.gcp_pl.polynomial.U(T, phi[0], phi[1])
     sea_l = 2.0*pnjl.thermo.gcp_sea_lattice.gcp_l(T, mu)
     sea_s = pnjl.thermo.gcp_sea_lattice.gcp_s(T, mu)
-    perturbative_l = 2.0*pnjl.thermo.gcp_perturbative.gcp(
-        T, mu, phi[0], phi[1]
-    )
-    perturbative_s = pnjl.thermo.gcp_perturbative.gcp(
-        T, mu, phi[0], phi[1]
-    )
+    perturbative_l = 0.0
+    perturbative_s = 0.0
     pnjl_l = 2.0*pnjl.thermo.gcp_pnjl.gcp_l_real(T, mu, phi[0], phi[1])
     pnjl_s = pnjl.thermo.gcp_pnjl.gcp_s_real(T, mu, phi[0], phi[1])
+    diquark = cluster.gcp_real(T, mu, phi[0], phi[1], 'D')
+    fquark = cluster.gcp_real(T, mu, phi[0], phi[1], 'F')
+    qquark = cluster.gcp_real(T, mu, phi[0], phi[1], 'Q')
     return math.fsum([
         sigma, gluon,
         sea_l, pnjl_l, perturbative_l,
-        sea_s, pnjl_s, perturbative_s
+        sea_s, pnjl_s, perturbative_s,
+        diquark, fquark, qquark
     ])
 
 

@@ -51,7 +51,10 @@ import pnjl.thermo.distributions
 import pnjl.thermo.gcp_sigma_lattice
 
 
-CUTOFF = 600.0
+mass_hash = {
+    'l': pnjl.thermo.gcp_sigma_lattice.Ml,
+    's': pnjl.thermo.gcp_sigma_lattice.Ms,
+}
 
 
 @functools.lru_cache(maxsize=1024)
@@ -116,14 +119,14 @@ def I_integrand_imag(
 
 @functools.lru_cache(maxsize=1024)
 def I(
-    T: float, mu: float, phi_re: float, phi_im: float,
+    T: float, mu: float, phi_re: float, phi_im: float, typ: str
 ) -> complex:
     integral_real, _ = scipy.integrate.quad(
-        I_integrand_real, CUTOFF, math.inf,
+        I_integrand_real, mass_hash[typ](T, mu), math.inf,
         args = (T, mu, phi_re, phi_im)
     )
     integral_imag, _ = scipy.integrate.quad(
-        I_integrand_imag, CUTOFF, math.inf,
+        I_integrand_imag, mass_hash[typ](T, mu), math.inf,
         args = (T, mu, phi_re, phi_im)
     )
     return complex(integral_real, integral_imag)/(T**2)
@@ -131,9 +134,9 @@ def I(
 
 @functools.lru_cache(maxsize=1024)
 def gcp(
-    T: float, mu: float, phi_re: float, phi_im: float
+    T: float, mu: float, phi_re: float, phi_im: float, typ: str
 ) -> float:
-    I_val = I(T, mu, phi_re, phi_im)
+    I_val = I(T, mu, phi_re, phi_im, typ)
     alpha = alpha_s(T, mu)
     I_val2 = I_val**2
     par_real = math.fsum([I_val.real/6.0, (1.0/(4.0*(math.pi**2)))*I_val2.real])
@@ -142,14 +145,14 @@ def gcp(
 
 @functools.lru_cache(maxsize=1024)
 def pressure(
-    T: float, mu: float, phi_re: float, phi_im: float
+    T: float, mu: float, phi_re: float, phi_im: float, typ: str
 ) -> float:
-    return -gcp(T, mu, phi_re, phi_im)
+    return -gcp(T, mu, phi_re, phi_im, typ)
 
 
 @functools.lru_cache(maxsize=1024)
 def bdensity(
-    T: float, mu: float, phi_re: float, phi_im: float
+    T: float, mu: float, phi_re: float, phi_im: float, typ: str
 ) -> float:
     h = 1e-2
     if math.fsum([mu, -2*h]) > 0.0:
@@ -166,22 +169,22 @@ def bdensity(
             for _ in mu_vec
         ]
         p_vec = [
-            coef*pressure(T, mu_el, phi_el[0], phi_el[1])/3.0
+            coef*pressure(T, mu_el, phi_el[0], phi_el[1], typ)/3.0
             for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
         ]
         return math.fsum(p_vec)
     else:
         new_mu = math.fsum([mu, h])
         new_phi_re, new_phi_im = phi_re, phi_im
-        return bdensity(T, new_mu, new_phi_re, new_phi_im)
+        return bdensity(T, new_mu, new_phi_re, new_phi_im, typ)
 
 
 @functools.lru_cache(maxsize=1024)
 def qnumber_cumulant(
-    rank: int, T: float, mu: float, phi_re: float, phi_im: float
+    rank: int, T: float, mu: float, phi_re: float, phi_im: float, typ: str
 ) -> float:
     if rank == 1:
-        return 3.0 * bdensity(T, mu, phi_re, phi_im)
+        return 3.0 * bdensity(T, mu, phi_re, phi_im, typ)
     else:
         h = 1e-2
         if math.fsum([mu, -2*h]) > 0.0:
@@ -198,19 +201,19 @@ def qnumber_cumulant(
                 for _ in mu_vec
             ]
             out_vec = [
-                coef*qnumber_cumulant(rank-1, T, mu_el, phi_el[0], phi_el[1])
+                coef*qnumber_cumulant(rank-1, T, mu_el, phi_el[0], phi_el[1], typ)
                 for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
             ]
             return math.fsum(out_vec)
         else:
             new_mu = math.fsum([mu, h])
             new_phi_re, new_phi_im = phi_re, phi_im
-            return qnumber_cumulant(rank, T, new_mu, new_phi_re, new_phi_im)
+            return qnumber_cumulant(rank, T, new_mu, new_phi_re, new_phi_im, typ)
 
 
 @functools.lru_cache(maxsize=1024)
 def sdensity(
-    T: float, mu: float, phi_re : float, phi_im : float
+    T: float, mu: float, phi_re : float, phi_im : float, typ: str
 ) -> float:
     h = 1e-2
     if math.fsum([T, -2*h]) > 0.0:
@@ -227,11 +230,11 @@ def sdensity(
             for _ in T_vec
         ]
         p_vec = [
-            coef*pressure(T_el, mu, phi_el[0], phi_el[1])
+            coef*pressure(T_el, mu, phi_el[0], phi_el[1], typ)
             for T_el, coef, phi_el in zip(T_vec, deriv_coef, phi_vec)
         ]
         return math.fsum(p_vec)
     else:
         new_T = math.fsum([T, h])
         new_phi_re, new_phi_im = phi_re, phi_im
-        return sdensity(new_T, mu, new_phi_re, new_phi_im)
+        return sdensity(new_T, mu, new_phi_re, new_phi_im, typ)

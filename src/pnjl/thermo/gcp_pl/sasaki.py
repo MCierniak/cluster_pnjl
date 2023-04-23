@@ -7,7 +7,7 @@ import functools
 
 import scipy.integrate
 
-import pnjl.thermo.gcp_perturbative
+import pnjl.thermo.gcp_perturbative.const
 
 
 N = 3.0
@@ -20,7 +20,7 @@ C0 = -((0.180*1000.0)**4)
 
 @functools.lru_cache(maxsize=1024)
 def Mg(T: float, muB: float):
-    g2 = 4.0*math.pi*pnjl.thermo.gcp_perturbative.alpha_s(T, muB)
+    g2 = 4.0*math.pi*pnjl.thermo.gcp_perturbative.const.alpha_s(T, muB)
     return math.fsum(
         [
             N*(T**2)*g2/9.0, NF*(T**2)*g2/18.0,
