@@ -44,7 +44,7 @@ D3 = 71.2225
 D4 = 2.9715
 D5 = 6.61433
 
-T0 = 260.0
+T0 = 220.0
 
 
 @functools.lru_cache(maxsize=1024)
@@ -113,13 +113,17 @@ def U(T : float, phi_re : float, phi_im : float) -> float:
         Potential value in MeV^4.
     """
     haar = M_H(phi_re, phi_im)
+    b_term = 0.0
+    if haar <= 0.0:
+        b_term = -b(T)*math.inf
+    else:
+        b_term = b(T)*math.log(haar)
     phi_re2 = phi_re**2
     phi_re3 = phi_re**3
     phi_re4 = phi_re**4
     phi_im2 = phi_im**2
     phi_im4 = phi_im**4
     a_term = -(a(T)/2.0)*(phi_re2 + phi_im2)
-    b_term = b(T)*math.log(haar)
     c_term = c(T)*(phi_re3 - 3.0*phi_im2*phi_re)
     d_term = d(T)*(phi_im4 + phi_re4 + 2.0*phi_im2*phi_re2)
     return (T**4)*math.fsum([a_term, b_term, c_term, d_term])
