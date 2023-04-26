@@ -29,7 +29,6 @@ Polyakov_loop
 
 
 import math
-import typing
 import functools
 
 import scipy.integrate

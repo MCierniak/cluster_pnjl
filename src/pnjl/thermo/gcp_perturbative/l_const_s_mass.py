@@ -56,13 +56,9 @@ def cut(T, mu):
 
 
 mass_hash = {
-    's': pnjl.thermo.gcp_sigma_lattice.Ms,
     'l': cut,
+    's': pnjl.thermo.gcp_sigma_lattice.Ms,
 }
-# mass_hash = {
-#     'l': pnjl.thermo.gcp_sigma_lattice.Ml,
-#     's': cut,
-# }
 
 
 @functools.lru_cache(maxsize=1024)

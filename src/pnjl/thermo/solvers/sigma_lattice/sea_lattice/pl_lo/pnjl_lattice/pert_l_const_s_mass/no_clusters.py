@@ -13,11 +13,11 @@ import functools
 import scipy.optimize
 
 import pnjl.defaults
-import pnjl.thermo.gcp_pnjl
+import pnjl.thermo.gcp_pnjl_lattice
 import pnjl.thermo.gcp_pl.lo
 import pnjl.thermo.gcp_sea_lattice
 import pnjl.thermo.gcp_sigma_lattice
-import pnjl.thermo.gcp_perturbative.const
+import pnjl.thermo.gcp_perturbative.l_const_s_mass
 
 
 def phi_im(phi_re, phi_im_ratio):
@@ -31,10 +31,13 @@ def phi_im(phi_re, phi_im_ratio):
 
 
 def inv_phi_im(phi_re, phi_im):
-    inner_sqrt = 2.0*math.sqrt(math.fsum([1.0, 2.0*phi_re])**3)/math.sqrt(3.0)
-    inner_sum = math.fsum([4.0, phi_re])
-    square_root = math.sqrt(math.fsum([-1.0, -phi_re*inner_sum, inner_sqrt]))
-    return -math.fsum([-phi_im, -square_root])/(2.0*square_root)
+    if phi_im == 0.0:
+        return 0.0
+    else:
+        inner_sqrt = 2.0*math.sqrt(math.fsum([1.0, 2.0*phi_re])**3)/math.sqrt(3.0)
+        inner_sum = math.fsum([4.0, phi_re])
+        square_root = math.sqrt(math.fsum([-1.0, -phi_re*inner_sum, inner_sqrt]))
+        return -math.fsum([-phi_im, -square_root])/(2.0*square_root)
 
 
 def Polyakov_loop_inner(phi, T, mu):
@@ -47,14 +50,14 @@ def Polyakov_loop_inner(phi, T, mu):
         gluon = pnjl.thermo.gcp_pl.lo.U(T, phi[0], phiim)
         sea_l = 2.0*pnjl.thermo.gcp_sea_lattice.gcp_l(T, mu)
         sea_s = pnjl.thermo.gcp_sea_lattice.gcp_s(T, mu)
-        perturbative_l = 2.0*pnjl.thermo.gcp_perturbative.const.gcp(
+        perturbative_l = 2.0*pnjl.thermo.gcp_perturbative.l_const_s_mass.gcp(
             T, mu, phi[0], phiim, 'l'
         )
-        perturbative_s = pnjl.thermo.gcp_perturbative.const.gcp(
+        perturbative_s = pnjl.thermo.gcp_perturbative.l_const_s_mass.gcp(
             T, mu, phi[0], phiim, 's'
         )
-        pnjl_l = 2.0*pnjl.thermo.gcp_pnjl.gcp_l_real(T, mu, phi[0], phiim)
-        pnjl_s = pnjl.thermo.gcp_pnjl.gcp_s_real(T, mu, phi[0], phiim)
+        pnjl_l = 2.0*pnjl.thermo.gcp_pnjl_lattice.gcp_l_real(T, mu, phi[0], phiim)
+        pnjl_s = pnjl.thermo.gcp_pnjl_lattice.gcp_s_real(T, mu, phi[0], phiim)
         return math.fsum([
             sigma, gluon,
             sea_l, pnjl_l, perturbative_l,
@@ -118,14 +121,14 @@ def pressure_single(T: float, muB: float, phi_re_0=1e-5, phi_im_0=2e-5, calc_phi
     #Gluon pressure
     partial.append(pnjl.thermo.gcp_pl.lo.pressure(*pars)/(T**4))
     #PNJL pressure
-    lq_temp = pnjl.thermo.gcp_pnjl.pressure(*pars, 'l')/(T**4)
-    sq_temp = pnjl.thermo.gcp_pnjl.pressure(*pars, 's')/(T**4)
+    lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(*pars, 'l')/(T**4)
+    sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(*pars, 's')/(T**4)
     partial.append(lq_temp)
     partial.append(lq_temp)
     partial.append(sq_temp)
     #Perturbative pressure
-    lq_temp = pnjl.thermo.gcp_perturbative.const.pressure(*pars, 'l')/(T**4)
-    sq_temp = pnjl.thermo.gcp_perturbative.const.pressure(*pars, 's')/(T**4)
+    lq_temp = pnjl.thermo.gcp_perturbative.l_const_s_mass.pressure(*pars, 'l')/(T**4)
+    sq_temp = pnjl.thermo.gcp_perturbative.l_const_s_mass.pressure(*pars, 's')/(T**4)
     partial.append(lq_temp)
     partial.append(lq_temp)
     partial.append(sq_temp)
@@ -185,14 +188,14 @@ def bdensity_single(T: float, muB: float, phi_re_0=1e-5, phi_im_0=2e-5, calc_phi
     #Gluon bdensity
     partial.append(pnjl.thermo.gcp_pl.lo.bdensity(*pars)/(T**3))
     #PNJL bdensity
-    lq_temp = pnjl.thermo.gcp_pnjl.bdensity(*pars, 'l')/(T**3)
-    sq_temp = pnjl.thermo.gcp_pnjl.bdensity(*pars, 's')/(T**3)
+    lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(*pars, 'l')/(T**3)
+    sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(*pars, 's')/(T**3)
     partial.append(lq_temp)
     partial.append(lq_temp)
     partial.append(sq_temp)
     #Perturbative bdensity
-    lq_temp = pnjl.thermo.gcp_perturbative.const.bdensity(*pars, 'l')/(T**3)
-    sq_temp = pnjl.thermo.gcp_perturbative.const.bdensity(*pars, 's')/(T**3)
+    lq_temp = pnjl.thermo.gcp_perturbative.l_const_s_mass.bdensity(*pars, 'l')/(T**3)
+    sq_temp = pnjl.thermo.gcp_perturbative.l_const_s_mass.bdensity(*pars, 's')/(T**3)
     partial.append(lq_temp)
     partial.append(lq_temp)
     partial.append(sq_temp)
@@ -252,14 +255,14 @@ def sdensity_single(T: float, muB: float, phi_re_0=1e-5, phi_im_0=2e-5, calc_phi
     #Gluon sdensity
     partial.append(pnjl.thermo.gcp_pl.lo.sdensity(*pars)/(T**3))
     #PNJL sdensity
-    lq_temp = pnjl.thermo.gcp_pnjl.sdensity(*pars, 'l')/(T**3)
-    sq_temp = pnjl.thermo.gcp_pnjl.sdensity(*pars, 's')/(T**3)
+    lq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(*pars, 'l')/(T**3)
+    sq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(*pars, 's')/(T**3)
     partial.append(lq_temp)
     partial.append(lq_temp)
     partial.append(sq_temp)
     #Perturbative sdensity
-    lq_temp = pnjl.thermo.gcp_perturbative.const.sdensity(*pars, 'l')/(T**3)
-    sq_temp = pnjl.thermo.gcp_perturbative.const.sdensity(*pars, 's')/(T**3)
+    lq_temp = pnjl.thermo.gcp_perturbative.l_const_s_mass.sdensity(*pars, 'l')/(T**3)
+    sq_temp = pnjl.thermo.gcp_perturbative.l_const_s_mass.sdensity(*pars, 's')/(T**3)
     partial.append(lq_temp)
     partial.append(lq_temp)
     partial.append(sq_temp)

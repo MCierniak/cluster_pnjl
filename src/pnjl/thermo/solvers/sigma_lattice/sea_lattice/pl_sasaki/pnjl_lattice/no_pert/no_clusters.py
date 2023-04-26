@@ -13,11 +13,10 @@ import functools
 import scipy.optimize
 
 import pnjl.defaults
-import pnjl.thermo.gcp_pnjl
+import pnjl.thermo.gcp_pnjl_lattice
 import pnjl.thermo.gcp_pl.sasaki
 import pnjl.thermo.gcp_sea_lattice
 import pnjl.thermo.gcp_sigma_lattice
-import pnjl.thermo.gcp_perturbative.const
 
 
 def phi_im(phi_re, phi_im_ratio):
@@ -50,14 +49,10 @@ def Polyakov_loop_inner(phi, T, mu):
         gluon = pnjl.thermo.gcp_pl.sasaki.gcp(T, 3.0*mu, phi[0], phiim)
         sea_l = 2.0*pnjl.thermo.gcp_sea_lattice.gcp_l(T, mu)
         sea_s = pnjl.thermo.gcp_sea_lattice.gcp_s(T, mu)
-        perturbative_l = 2.0*pnjl.thermo.gcp_perturbative.const.gcp(
-            T, mu, phi[0], phiim, 'l'
-        )
-        perturbative_s = pnjl.thermo.gcp_perturbative.const.gcp(
-            T, mu, phi[0], phiim, 's'
-        )
-        pnjl_l = 2.0*pnjl.thermo.gcp_pnjl.gcp_l_real(T, mu, phi[0], phiim)
-        pnjl_s = pnjl.thermo.gcp_pnjl.gcp_s_real(T, mu, phi[0], phiim)
+        perturbative_l = 0.0
+        perturbative_s = 0.0
+        pnjl_l = 2.0*pnjl.thermo.gcp_pnjl_lattice.gcp_l_real(T, mu, phi[0], phiim)
+        pnjl_s = pnjl.thermo.gcp_pnjl_lattice.gcp_s_real(T, mu, phi[0], phiim)
         return math.fsum([
             sigma, gluon,
             sea_l, pnjl_l, perturbative_l,
@@ -121,17 +116,16 @@ def pressure_single(T: float, muB: float, phi_re_0=1e-5, phi_im_0=2e-5, calc_phi
     #Gluon pressure
     partial.append(pnjl.thermo.gcp_pl.sasaki.pressure(*pars)/(T**4))
     #PNJL pressure
-    lq_temp = pnjl.thermo.gcp_pnjl.pressure(*pars, 'l')/(T**4)
-    sq_temp = pnjl.thermo.gcp_pnjl.pressure(*pars, 's')/(T**4)
+    lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(*pars, 'l')/(T**4)
+    sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(*pars, 's')/(T**4)
     partial.append(lq_temp)
     partial.append(lq_temp)
     partial.append(sq_temp)
     #Perturbative pressure
-    lq_temp = pnjl.thermo.gcp_perturbative.const.pressure(*pars, 'l')/(T**4)
-    sq_temp = pnjl.thermo.gcp_perturbative.const.pressure(*pars, 's')/(T**4)
+    lq_temp = 0.0
     partial.append(lq_temp)
     partial.append(lq_temp)
-    partial.append(sq_temp)
+    partial.append(lq_temp)
     return phi_result[0], phi_result[1], math.fsum(partial), (*partial,)
     
 
@@ -188,17 +182,16 @@ def bdensity_single(T: float, muB: float, phi_re_0=1e-5, phi_im_0=2e-5, calc_phi
     #Gluon bdensity
     partial.append(pnjl.thermo.gcp_pl.sasaki.bdensity(*pars)/(T**3))
     #PNJL bdensity
-    lq_temp = pnjl.thermo.gcp_pnjl.bdensity(*pars, 'l')/(T**3)
-    sq_temp = pnjl.thermo.gcp_pnjl.bdensity(*pars, 's')/(T**3)
+    lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(*pars, 'l')/(T**3)
+    sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(*pars, 's')/(T**3)
     partial.append(lq_temp)
     partial.append(lq_temp)
     partial.append(sq_temp)
     #Perturbative bdensity
-    lq_temp = pnjl.thermo.gcp_perturbative.const.bdensity(*pars, 'l')/(T**3)
-    sq_temp = pnjl.thermo.gcp_perturbative.const.bdensity(*pars, 's')/(T**3)
+    lq_temp = 0.0
     partial.append(lq_temp)
     partial.append(lq_temp)
-    partial.append(sq_temp)
+    partial.append(lq_temp)
     return phi_result[0], phi_result[1], math.fsum(partial), (*partial,)
     
 
@@ -255,17 +248,16 @@ def sdensity_single(T: float, muB: float, phi_re_0=1e-5, phi_im_0=2e-5, calc_phi
     #Gluon sdensity
     partial.append(pnjl.thermo.gcp_pl.sasaki.sdensity(*pars)/(T**3))
     #PNJL sdensity
-    lq_temp = pnjl.thermo.gcp_pnjl.sdensity(*pars, 'l')/(T**3)
-    sq_temp = pnjl.thermo.gcp_pnjl.sdensity(*pars, 's')/(T**3)
+    lq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(*pars, 'l')/(T**3)
+    sq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(*pars, 's')/(T**3)
     partial.append(lq_temp)
     partial.append(lq_temp)
     partial.append(sq_temp)
     #Perturbative sdensity
-    lq_temp = pnjl.thermo.gcp_perturbative.const.sdensity(*pars, 'l')/(T**3)
-    sq_temp = pnjl.thermo.gcp_perturbative.const.sdensity(*pars, 's')/(T**3)
+    lq_temp = 0.0
     partial.append(lq_temp)
     partial.append(lq_temp)
-    partial.append(sq_temp)
+    partial.append(lq_temp)
     return phi_result[0], phi_result[1], math.fsum(partial), (*partial,)
 
 

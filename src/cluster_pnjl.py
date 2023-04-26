@@ -11,7 +11,7 @@ def epja_figure1():
 
     import pnjl.defaults
 
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
+    import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     if platform.system() == "Linux":
@@ -265,7 +265,7 @@ def epja_figure2():
     import pnjl.defaults
     import pnjl.thermo.gcp_sigma_lattice
 
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
+    import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     col_n = '#DEA54B'
@@ -358,7 +358,7 @@ def epja_figure3():
         sigma_lattice.\
         sea_lattice.\
         pl_sasaki.\
-        pnjl.\
+        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver
@@ -443,13 +443,14 @@ def epja_experimental_annals_phys_comparison():
 
     import matplotlib.pyplot
 
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
+    import pnjl.thermo.distributions
+    import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     if platform.system() == "Linux":
         matplotlib.use("TkAgg")
 
-    hadron = 'pi0'
+    hadron = 'p'
 
     def phase(M, T, mu):
         MI_N = cluster.MI[hadron]
@@ -466,15 +467,20 @@ def epja_experimental_annals_phys_comparison():
             TM2 = cluster.T_Mott2(mu, hadron)
             return cluster.continuum_factor2(M, T, mu, TM, TM2, hadron)
 
-    T_1 = 0.0
-    T_2 = 200.0
-    T_3 = 250.0
-    T_4 = 600.0
+    T_1 = 10.0
+    T_2 = 100.0
+    T_3 = 125.0
+    T_4 = 150.0
 
-    muB_1 = 0.0
-    muB_2 = 0.0
-    muB_3 = 0.0
-    muB_4 = 0.0
+    # muB_1 = 0.0
+    # muB_2 = 0.0
+    # muB_3 = 0.0
+    # muB_4 = 0.0
+
+    muB_1 = 2.5*T_1
+    muB_2 = 2.5*T_2
+    muB_3 = 2.5*T_3
+    muB_4 = 2.5*T_4
 
     TM_1 = cluster.T_Mott(muB_1, hadron)
     TM_2 = cluster.T_Mott(muB_2, hadron)
@@ -486,7 +492,7 @@ def epja_experimental_annals_phys_comparison():
     TM2_3 = cluster.T_Mott2(muB_3, hadron)
     TM2_4 = cluster.T_Mott2(muB_4, hadron)
 
-    s_v = numpy.linspace(0.004, 3.0, num=10000)
+    s_v = numpy.linspace(0.004, 13.0, num=10000)
 
     delta_v_1 = [
             cluster.bound_factor2(math.sqrt(s_el)*1000.0, T_1, muB_1, hadron) \
@@ -512,6 +518,31 @@ def epja_experimental_annals_phys_comparison():
         +   cluster.continuum_factor2(math.sqrt(s_el)*1000.0, T_4, muB_4, TM_4, TM2_4, hadron)
         for s_el in s_v
     ]
+
+    f_v_1 = [
+        pnjl.thermo.distributions.f_fermion_singlet(1000.0, T_1, muB_1, math.sqrt(s_el)*1000.0, 1, '+')*d_el
+        if d_el > 0.0 else 0.0
+        for s_el, d_el in zip(s_v, delta_v_1)
+    ]
+    f_v_1_norm = [el/max(f_v_1) for el in f_v_1]
+    f_v_2 = [
+        pnjl.thermo.distributions.f_fermion_singlet(1000.0, T_2, muB_2, math.sqrt(s_el)*1000.0, 1, '+')*d_el
+        if d_el > 0.0 else 0.0
+        for s_el, d_el in zip(s_v, delta_v_2)
+    ]
+    f_v_2_norm = [el/max(f_v_2) for el in f_v_2]
+    f_v_3 = [
+        pnjl.thermo.distributions.f_fermion_singlet(1000.0, T_3, muB_3, math.sqrt(s_el)*1000.0, 1, '+')*d_el
+        if d_el > 0.0 else 0.0
+        for s_el, d_el in zip(s_v, delta_v_3)
+    ]
+    f_v_3_norm = [el/max(f_v_3) for el in f_v_3]
+    f_v_4 = [
+        pnjl.thermo.distributions.f_fermion_singlet(1000.0, T_4, muB_4, math.sqrt(s_el)*1000.0, 1, '+')*d_el
+        if d_el > 0.0 else 0.0
+        for s_el, d_el in zip(s_v, delta_v_4)
+    ]
+    f_v_4_norm = [el/max(f_v_4) for el in f_v_4]
 
     T_v_1 = numpy.linspace(0.0, 0.3, num=200)
     T_v_2 = numpy.linspace(0.0, 0.3, num=200)
@@ -648,13 +679,18 @@ def epja_experimental_annals_phys_comparison():
     ax2.set_ylabel(r'masses [GeV]', fontsize = 16)
 
     ax3 = fig1.add_subplot(1, 3, 3)
-    ax3.axis([0.004, 3., -0.25, 1.5])
+    ax3.axis([0.004, 13., -0.25, 1.5])
     ax3.set_xscale("log")
 
     ax3.plot(s_v, delta_v_1, '-', c="blue")
     ax3.plot(s_v, delta_v_2, ':', c="blue")
     ax3.plot(s_v, delta_v_3, '--', c="blue")
     ax3.plot(s_v, delta_v_4, '-.', c="blue")
+    
+    ax3.plot(s_v, f_v_1, '-', c="red")
+    ax3.plot(s_v, f_v_2, ':', c="red")
+    ax3.plot(s_v, f_v_3, '--', c="red")
+    ax3.plot(s_v, f_v_4, '-.', c="red")
 
     for tick in ax3.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -682,21 +718,21 @@ def epja_experimental_pressure_int():
     if platform.system() == "Linux":
         matplotlib.use("TkAgg")
 
-    import pnjl.thermo.gcp_pnjl
+    import pnjl.thermo.gcp_pnjl_lattice
     import pnjl.thermo.gcp_sea_lattice
     import pnjl.thermo.gcp_perturbative.const
     import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
+    import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster_s
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
+    import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     import pnjl.thermo.solvers.\
         sigma_lattice.\
         sea_lattice.\
         pl_polynomial.\
-        pnjl.\
+        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -862,10 +898,10 @@ def epja_experimental_pressure_int():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl.pressure(
+            sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
                 T_el, mu_el, phi_re_el, phi_im_el, 's'
             )
             pnjl_u_v_1.append(lq_temp/(T_el**4))
@@ -1012,10 +1048,10 @@ def epja_experimental_pressure_int():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl.pressure(
+            sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
                 T_el, mu_el, phi_re_el, phi_im_el, 's'
             )
             pnjl_u_v_2.append(lq_temp/(T_el**4))
@@ -1954,7 +1990,7 @@ def epja_experimental_hrg_benchmark():
     import matplotlib.pyplot
 
     import utils
-    import pnjl.thermo.gcp_pnjl
+    import pnjl.thermo.gcp_pnjl_lattice
     import pnjl.thermo.gcp_sea_lattice
     import pnjl.thermo.gcp_perturbative.const
     import pnjl.thermo.gcp_sigma_lattice
@@ -1963,14 +1999,14 @@ def epja_experimental_hrg_benchmark():
         as cluster
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_mhrg
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
+    import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster_mhrg2
 
     import pnjl.thermo.solvers.\
         sigma_lattice.\
         sea_lattice.\
         pl_polynomial.\
-        pnjl.\
+        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver
@@ -2051,8 +2087,8 @@ def epja_experimental_hrg_benchmark():
         partial.append(lq_temp)
         partial.append(lq_temp)
         #PNJL sdensity
-        lq_temp = pnjl.thermo.gcp_pnjl.sdensity(*pars, 'l')/(T**3)
-        sq_temp = pnjl.thermo.gcp_pnjl.sdensity(*pars, 's')/(T**3)
+        lq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(*pars, 'l')/(T**3)
+        sq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(*pars, 's')/(T**3)
         partial.append(lq_temp)
         partial.append(lq_temp)
         partial.append(sq_temp)
@@ -2082,8 +2118,8 @@ def epja_experimental_hrg_benchmark():
         partial.append(lq_temp)
         partial.append(lq_temp)
         #PNJL bdensity
-        lq_temp = pnjl.thermo.gcp_pnjl.bdensity(*pars, 'l')/(T**3)
-        sq_temp = pnjl.thermo.gcp_pnjl.bdensity(*pars, 's')/(T**3)
+        lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(*pars, 'l')/(T**3)
+        sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(*pars, 's')/(T**3)
         partial.append(lq_temp)
         partial.append(lq_temp)
         partial.append(sq_temp)
@@ -2661,8 +2697,8 @@ def epja_experimental_qgp_pressure():
         sigma_lattice.\
         sea_lattice.\
         pl_lo.\
-        pnjl.\
-        pert_l_mass_s_const.\
+        pnjl_lattice.\
+        pert_l_const_s_mass.\
         no_clusters \
     as solver
 
@@ -2926,8 +2962,8 @@ def epja_experimental_pert():
         sigma_lattice.\
         sea_lattice.\
         pl_lo.\
-        pnjl.\
-        pert_l_mass_s_const.\
+        pnjl_lattice.\
+        pert_l_const_s_mass.\
         no_clusters \
     as solver
 
@@ -3153,6 +3189,14 @@ def epja_experimental_pert():
         math.fsum([el[0], el[1], el[2], el[3], el[4], el[5], el[6], el[7]]) 
         for el in qgp_partial_bdensity_v_2
     ]
+    t_sea_bdensity_2 = [
+        math.fsum([el[1], el[2], el[3]]) 
+        for el in qgp_partial_bdensity_v_2
+    ]
+    t_field_bdensity_2 = [
+        math.fsum([el[0]]) 
+        for el in qgp_partial_bdensity_v_2
+    ]
     t_pert_bdensity_2 = [
         math.fsum([el[8], el[9], el[10]]) 
         for el in qgp_partial_bdensity_v_2
@@ -3173,6 +3217,14 @@ def epja_experimental_pert():
         math.fsum([el[0], el[1], el[2], el[3], el[4], el[5], el[6], el[7]]) 
         for el in qgp_partial_sdensity_v_1
     ]
+    t_sea_sdensity_1 = [
+        math.fsum([el[1], el[2], el[3]]) 
+        for el in qgp_partial_sdensity_v_1
+    ]
+    t_field_sdensity_1 = [
+        math.fsum([el[0]]) 
+        for el in qgp_partial_sdensity_v_1
+    ]
     t_pert_sdensity_1 = [
         math.fsum([el[8], el[9], el[10]])
         for el in qgp_partial_sdensity_v_1
@@ -3191,6 +3243,14 @@ def epja_experimental_pert():
     ]
     t_pnjl_sdensity_2 = [
         math.fsum([el[0], el[1], el[2], el[3], el[4], el[5], el[6], el[7]]) 
+        for el in qgp_partial_sdensity_v_2
+    ]
+    t_sea_sdensity_2 = [
+        math.fsum([el[1], el[2], el[3]]) 
+        for el in qgp_partial_sdensity_v_2
+    ]
+    t_field_sdensity_2 = [
+        math.fsum([el[0]]) 
         for el in qgp_partial_sdensity_v_2
     ]
     t_pert_sdensity_2 = [
@@ -3368,21 +3428,18 @@ def epja_experimental_pert():
         )
     )
 
-    ax1.plot(T_1, qgp_sdensity_v_1, '-', c = 'blue')
-    ax1.plot(T_1, t_pnjl_sdensity_1, '-', c = 'darkblue')
+    ax1.plot(T_1, qgp_sdensity_v_1, '-', c = 'black')
+    ax1.plot(T_1, t_pnjl_sdensity_1, '-', c = 'blue')
     ax1.plot(T_1, t_pert_sdensity_1, '-', c = 'magenta')
     ax1.plot(T_1, t_pert_ud_sdensity_1, '--', c = 'magenta')
     ax1.plot(T_1, t_gluon_sdensity_1, '-', c = 'red')
     ax1.plot(T_1, t_quark_sdensity_1, '-', c = 'purple')
-    # ax1.plot(T_1, qgp_old_sdensity_v_1, '--', c = 'blue')
-    # ax1.plot(T_1, t_pnjl_sdensity_old_1, '-.', c = 'darkblue')
-    # ax1.plot(T_1, t_pert_sdensity_old_1, '-.', c = 'magenta')
-    # ax1.plot(T_1, t_gluon_sdensity_old_1, '-.', c = 'red')
-    # ax1.plot(T_1, t_quark_sdensity_old_1, ':', c = 'purple')
+    ax1.plot(T_1, t_sea_sdensity_1, '-', c = 'cyan')
+    ax1.plot(T_1, t_field_sdensity_1, '-', c = 'orange')
 
     ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
-    ax1.text(250, 15.5, r"QGP", color="blue", fontsize=14)
-    ax1.text(190, 17.5, r"PNJL", color="darkblue", fontsize=14)
+    ax1.text(250, 15.5, r"QGP", color="black", fontsize=14)
+    ax1.text(190, 17.5, r"PNJL", color="blue", fontsize=14)
     ax1.text(188, -3.5, r"Perturbative correction", color="magenta", fontsize=14)
     ax1.text(220, 5.5, r"Polyakov-loop", color="red", fontsize=14)
     ax1.text(170, 12.5, r"Quarks", color="purple", fontsize=14)
@@ -3410,21 +3467,18 @@ def epja_experimental_pert():
         )
     )
 
-    ax2.plot(T_2, qgp_sdensity_v_2, '-', c = 'blue')
-    ax2.plot(T_2, t_pnjl_sdensity_2, '-', c = 'darkblue')
+    ax2.plot(T_2, qgp_sdensity_v_2, '-', c = 'black')
+    ax2.plot(T_2, t_pnjl_sdensity_2, '-', c = 'blue')
     ax2.plot(T_2, t_pert_sdensity_2, '-', c = 'magenta')
     ax2.plot(T_2, t_pert_ud_sdensity_2, '--', c = 'magenta')
     ax2.plot(T_2, t_gluon_sdensity_2, '-', c = 'red')
     ax2.plot(T_2, t_quark_sdensity_2, '-', c = 'purple')
-    # ax2.plot(T_2, qgp_old_sdensity_v_2, '--', c = 'blue')
-    # ax2.plot(T_2, t_pnjl_sdensity_old_2, '-.', c = 'darkblue')
-    # ax2.plot(T_2, t_pert_sdensity_old_2, '-.', c = 'magenta')
-    # ax2.plot(T_2, t_gluon_sdensity_old_2, '-.', c = 'red')
-    # ax2.plot(T_2, t_quark_sdensity_old_2, ':', c = 'purple')
+    ax2.plot(T_2, t_sea_sdensity_2, '-', c = 'cyan')
+    ax2.plot(T_2, t_field_sdensity_2, '-', c = 'orange')
 
     ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
-    ax2.text(250, 17.3, r"QGP", color="blue", fontsize=14)
-    ax2.text(165.5, 18.5, r"PNJL", color="darkblue", fontsize=14)
+    ax2.text(250, 17.3, r"QGP", color="black", fontsize=14)
+    ax2.text(165.5, 18.5, r"PNJL", color="blue", fontsize=14)
     ax2.text(188, -3.5, r"Perturbative correction", color="magenta", fontsize=14)
     ax2.text(220, 5.5, r"Polyakov-loop", color="red", fontsize=14)
     ax2.text(170, 14.5, r"Quarks", color="purple", fontsize=14)
@@ -3450,19 +3504,18 @@ def epja_experimental_pert():
         )
     )
 
-    ax3.plot(T_2, qgp_bdensity_v_2, '-', c = 'blue')
-    ax3.plot(T_2, t_pnjl_bdensity_2, '-', c = 'darkblue')
+    ax3.plot(T_2, qgp_bdensity_v_2, '-', c = 'black')
+    ax3.plot(T_2, t_pnjl_bdensity_2, '-', c = 'blue')
     ax3.plot(T_2, t_pert_bdensity_2, '-', c = 'magenta')
     ax3.plot(T_2, t_gluon_bdensity_2, '-', c = 'red')
     ax3.plot(T_2, t_pert_ud_bdensity_2, '--', c = 'magenta')
-    # ax3.plot(T_2, qgp_old_bdensity_v_2, '--', c = 'blue')
-    # ax3.plot(T_2, t_pnjl_bdensity_old_2, '-.', c = 'darkblue')
-    # ax3.plot(T_2, t_pert_bdensity_old_2, '-.', c = 'magenta')
+    ax3.plot(T_2, t_sea_bdensity_2, '-', c = 'cyan')
+    ax3.plot(T_2, t_field_bdensity_2, '-', c = 'orange')
 
     ax3.text(85, 1.1, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
     ax3.text(188, -0.18, r"Perturbative correction", color="magenta", fontsize=14)
-    ax3.text(250, 0.95, r"PNJL", color="darkblue", fontsize=14)
-    ax3.text(200, 0.67, r"QGP", color="blue", fontsize=14)
+    ax3.text(250, 0.95, r"PNJL", color="blue", fontsize=14)
+    ax3.text(200, 0.67, r"QGP", color="black", fontsize=14)
 
     for tick in ax3.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -3493,14 +3546,14 @@ def epja_experimental_full():
         as cluster
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_mhrg
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_acos_cos \
+    import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster_mhrg2
     import pnjl.thermo.solvers.\
         sigma_lattice.\
         sea_lattice.\
         pl_lo.\
-        pnjl.\
-        pert_ls_mass.\
+        pnjl_lattice.\
+        pert_l_const_s_mass.\
         no_clusters \
     as solver
 
@@ -3546,7 +3599,7 @@ def epja_experimental_full():
     mhrg2_bdensity_v_2, mhrg2_partial_bdensity_v_2 = list(), list()
 
     #QGP #1
-    if False:
+    if calc_1:
         sol = solver.sdensity_all(T_1, muB_1, label="QGP PL and sdensity #1")
         phi_re_v_1 = sol[0]
         phi_im_v_1 = sol[1]
@@ -3609,7 +3662,7 @@ def epja_experimental_full():
             mhrg_partial_sdensity_v_1 = pickle.load(file)
 
     #MHRG (continuum) #1
-    if calc_1:
+    if False:
         print("MHRG (continuum) sdensity #1")
         for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
@@ -3628,7 +3681,7 @@ def epja_experimental_full():
             mhrg2_partial_sdensity_v_1 = pickle.load(file)
 
     #QGP #2
-    if False:
+    if calc_2:
         sol = solver.sdensity_all(T_2, muB_2, label="QGP PL and sdensity #2")
         phi_re_v_2 = sol[0]
         phi_im_v_2 = sol[1]
@@ -3732,22 +3785,27 @@ def epja_experimental_full():
             mhrg_partial_bdensity_v_2 = pickle.load(file)
 
     #MHRG (continuum) #2
-    if calc_2:
-        print("MHRG (continuum) sdensity #2")
-        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
-        ):
-            temp_hrg, temp_hrg_partials = cluster_mhrg2.sdensity_multi(T_el, muB_el, phi_re_el, phi_im_el)
-            mhrg2_sdensity_v_2.append(temp_hrg/(T_el**3))
-            mhrg2_partial_sdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
-        with open(files+"mhrg2_sdensity_v_2p5.pickle", "wb") as file:
-            pickle.dump(mhrg2_sdensity_v_2, file)
-        with open(files+"mhrg2_partial_sdensity_v_2p5.pickle", "wb") as file:
-            pickle.dump(mhrg2_partial_sdensity_v_2, file)
+    if False:
+        # print("MHRG (continuum) sdensity #2")
+        # for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+        #     zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+        # ):
+        #     temp_hrg, temp_hrg_partials = cluster_mhrg2.sdensity_multi(T_el, muB_el, phi_re_el, phi_im_el)
+        #     mhrg2_sdensity_v_2.append(temp_hrg/(T_el**3))
+        #     mhrg2_partial_sdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        # with open(files+"mhrg2_sdensity_v_2p5.pickle", "wb") as file:
+        #     pickle.dump(mhrg2_sdensity_v_2, file)
+        # with open(files+"mhrg2_partial_sdensity_v_2p5.pickle", "wb") as file:
+        #     pickle.dump(mhrg2_partial_sdensity_v_2, file)
+        with open(files+"mhrg2_sdensity_v_2p5.pickle", "rb") as file:
+            mhrg2_sdensity_v_2 = pickle.load(file)
+        with open(files+"mhrg2_partial_sdensity_v_2p5.pickle", "rb") as file:
+            mhrg2_partial_sdensity_v_2 = pickle.load(file)
         print("MHRG (continuum) bdensity #2")
-        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
-        ):
+        for T_el, muB_el, phi_re_el, phi_im_el in zip(T_2, muB_2, phi_re_v_2, phi_im_v_2):
+        # for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+        #     zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+        # ):
             temp_hrg, temp_hrg_partials = cluster_mhrg2.bdensity_multi(T_el, muB_el, phi_re_el, phi_im_el)
             mhrg2_bdensity_v_2.append(temp_hrg/(T_el**3))
             mhrg2_partial_bdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
@@ -4001,7 +4059,9 @@ def epja_experimental_full():
     ax3.plot(T_2, [sum(el) for el in zip(mhrg_bdensity_v_2, qgp_bdensity_v_2)], '-.', c = 'black')
     ax3.plot(T_2, mhrg2_bdensity_v_2, '-', c = 'green')
     ax3.plot(T_2, [sum(el) for el in zip(mhrg2_bdensity_v_2, qgp_bdensity_v_2)], '-', c = 'black')
-    # ax3.plot(T_2, [sum(el)-sum([el[5], el[6], el[7]]) for el in qgp_partial_bdensity_v_2], '-', c = 'magenta')
+    # ax3.plot(T_2, [el[9]+el[10] for el in mhrg2_partial_bdensity_v_2], '-', c = 'magenta')
+    # ax3.plot(T_2, [el[15] for el in mhrg2_partial_bdensity_v_2], '-', c = 'brown')
+    # ax3.plot(T_2, [el[22] for el in mhrg2_partial_bdensity_v_2], '-', c = 'grey')
 
     ax3.text(85, 1.1, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
     ax3.text(200, 0.67, r"QGP", color="blue", fontsize=14)
@@ -4021,6 +4081,6 @@ def epja_experimental_full():
 
 if __name__ == '__main__':
 
-    epja_experimental_qgp_pressure()
+    epja_experimental_pert()
 
     print("END")

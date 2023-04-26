@@ -612,7 +612,10 @@ def bdensity_multi(
     partial = list()
     if hadrons == "all":
         for hadron in MI:
-            partial.append(bdensity(T, muB, phi_re, phi_im, hadron))
+            temp = bdensity(T, muB, phi_re, phi_im, hadron)
+            partial.append(temp)
+            if hadron == 'p':
+                print("proton", T, muB, temp/(T**3))
     else:
         for hadron in hadrons:
             partial.append(bdensity(T, muB, phi_re, phi_im, hadron))
