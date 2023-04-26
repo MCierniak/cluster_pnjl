@@ -11,31 +11,25 @@ def legacy_figure4():
     if platform.system() == "Linux":
         matplotlib.use("TkAgg")
 
-    import pnjl.thermo.gcp_sigma_lattice
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_n
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl.\
         pert_const.\
         clusters_bound_step_continuum_step \
     as solver_s
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl.\
         pert_const.\
         clusters_bound_step_continuum_acos_cos \
     as solver_c
@@ -68,12 +62,12 @@ def legacy_figure4():
         list(), list()
     
     sigma_0 = [
-        pnjl.thermo.gcp_sigma_lattice.Ml(T_el, 0.0) / \
-        pnjl.thermo.gcp_sigma_lattice.Ml(0.0, 0.0)
+        pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ml(T_el, 0.0) / \
+        pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ml(0.0, 0.0)
         for T_el in T0]
     sigma_600 = [
-        pnjl.thermo.gcp_sigma_lattice.Ml(T_el, 600.0) / \
-        pnjl.thermo.gcp_sigma_lattice.Ml(0.0, 0.0)
+        pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ml(T_el, 600.0) / \
+        pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ml(0.0, 0.0)
         for T_el in T0]
 
     if calc_n:
@@ -291,17 +285,13 @@ def legacy_figure5():
     if platform.system() == "Linux":
         matplotlib.use("TkAgg")
 
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -361,7 +351,7 @@ def legacy_figure5():
             zip(T, mu, phi_re_v_1, phi_im_v_1), total=len(T), ncols=100
         ):
             sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_field(
                     T_el, mu_el
                 )/(T_el**4)
             )
@@ -384,11 +374,11 @@ def legacy_figure5():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T, mu, phi_re_v_1, phi_im_v_1), total=len(T), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el, 'l')
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(T_el, mu_el, 'l')
             sea_u_v_1.append(lq_temp/(T_el**4))
             sea_d_v_1.append(lq_temp/(T_el**4))
             sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(
                     T_el, mu_el, 's'
                 )/(T_el**4)
             )
@@ -427,10 +417,10 @@ def legacy_figure5():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T, mu, phi_re_v_1, phi_im_v_1), total=len(T), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 's'
             )
             pnjl_u_v_1.append(lq_temp/(T_el**4))
@@ -654,21 +644,17 @@ def legacy_figure6():
     if platform.system() == "Linux":
         matplotlib.use("TkAgg")
 
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -790,7 +776,7 @@ def legacy_figure6():
             ncols=100
         ):
             sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_field(
                     T_el, mu_el
                 )/(T_el**4)
             )
@@ -815,11 +801,11 @@ def legacy_figure6():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1), total=len(T_1),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el, 'l')
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(T_el, mu_el, 'l')
             sea_u_v_1.append(lq_temp/(T_el**4))
             sea_d_v_1.append(lq_temp/(T_el**4))
             sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(
                     T_el, mu_el, 's'
                 )/(T_el**4)
             )
@@ -860,10 +846,10 @@ def legacy_figure6():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1), total=len(T_1),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 's'
             )
             pnjl_u_v_1.append(lq_temp/(T_el**4))
@@ -931,7 +917,7 @@ def legacy_figure6():
             ncols=100
         ):
             sigma_v_2.append(
-                pnjl.thermo.gcp_sigma_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_field(
                     T_el, mu_el
                 )/(T_el**4)
             )
@@ -956,11 +942,11 @@ def legacy_figure6():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2), total=len(T_2),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el, 'l')
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(T_el, mu_el, 'l')
             sea_u_v_2.append(lq_temp/(T_el**4))
             sea_d_v_2.append(lq_temp/(T_el**4))
             sea_s_v_2.append(
-                pnjl.thermo.gcp_sea_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(
                     T_el, mu_el, 's'
                 )/(T_el**4)
             )
@@ -1001,10 +987,10 @@ def legacy_figure6():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2), total=len(T_2),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 's'
             )
             pnjl_u_v_2.append(lq_temp/(T_el**4))
@@ -1072,7 +1058,7 @@ def legacy_figure6():
             ncols=100
         ):
             sigma_v_3.append(
-                pnjl.thermo.gcp_sigma_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_field(
                     T_el, mu_el
                 )/(T_el**4)
             )
@@ -1097,11 +1083,11 @@ def legacy_figure6():
             zip(T_3, mu_3, phi_re_v_3, phi_im_v_3), total=len(T_3),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el, 'l')
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(T_el, mu_el, 'l')
             sea_u_v_3.append(lq_temp/(T_el**4))
             sea_d_v_3.append(lq_temp/(T_el**4))
             sea_s_v_3.append(
-                pnjl.thermo.gcp_sea_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(
                     T_el, mu_el, 's'
                 )/(T_el**4)
             )
@@ -1142,10 +1128,10 @@ def legacy_figure6():
             zip(T_3, mu_3, phi_re_v_3, phi_im_v_3), total=len(T_3),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 's'
             )
             pnjl_u_v_3.append(lq_temp/(T_el**4))
@@ -1213,7 +1199,7 @@ def legacy_figure6():
             ncols=100
         ):
             sigma_v_4.append(
-                pnjl.thermo.gcp_sigma_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_field(
                     T_el, mu_el
                 )/(T_el**4)
             )
@@ -1238,11 +1224,11 @@ def legacy_figure6():
             zip(T_4, mu_4, phi_re_v_4, phi_im_v_4), total=len(T_4),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el, 'l')
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(T_el, mu_el, 'l')
             sea_u_v_4.append(lq_temp/(T_el**4))
             sea_d_v_4.append(lq_temp/(T_el**4))
             sea_s_v_4.append(
-                pnjl.thermo.gcp_sea_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(
                     T_el, mu_el, 's'
                 )/(T_el**4)
             )
@@ -1283,10 +1269,10 @@ def legacy_figure6():
             zip(T_4, mu_4, phi_re_v_4, phi_im_v_4), total=len(T_4),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 's'
             )
             pnjl_u_v_4.append(lq_temp/(T_el**4))
@@ -3036,21 +3022,17 @@ def legacy_figure7():
     if platform.system() == "Linux":
         matplotlib.use("TkAgg")
 
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -3137,7 +3119,7 @@ def legacy_figure7():
             total=len(T_1), ncols=100
         ):
             sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_field(
                     T_el, mu_el
                 )/(T_el**4)
             )
@@ -3162,13 +3144,13 @@ def legacy_figure7():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_1.append(lq_temp/(T_el**4))
             sea_d_v_1.append(lq_temp/(T_el**4))
             sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(
                     T_el, mu_el, 's'
                 )/(T_el**4)
             )
@@ -3216,10 +3198,10 @@ def legacy_figure7():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 's'
             )
             pnjl_u_v_1.append(lq_temp/(T_el**4))
@@ -3274,7 +3256,7 @@ def legacy_figure7():
             total=len(T_2), ncols=100
         ):
             sigma_v_2.append(
-                pnjl.thermo.gcp_sigma_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_field(
                     T_el, mu_el
                 )/(T_el**4)
             )
@@ -3299,13 +3281,13 @@ def legacy_figure7():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_2.append(lq_temp/(T_el**4))
             sea_d_v_2.append(lq_temp/(T_el**4))
             sea_s_v_2.append(
-                pnjl.thermo.gcp_sea_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(
                     T_el, mu_el, 's'
                 )/(T_el**4)
             )
@@ -3353,10 +3335,10 @@ def legacy_figure7():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 's'
             )
             pnjl_u_v_2.append(lq_temp/(T_el**4))
@@ -4717,21 +4699,17 @@ def epja_figure8():
 
     import matplotlib.pyplot
 
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -4814,7 +4792,7 @@ def epja_figure8():
             total=len(T_1), ncols=100
         ):
             sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_field(
                     T_el, mu_el
                 )/(T_el**4)
             )
@@ -4839,13 +4817,13 @@ def epja_figure8():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_1.append(lq_temp/(T_el**4))
             sea_d_v_1.append(lq_temp/(T_el**4))
             sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(
                     T_el, mu_el, 's'
                 )/(T_el**4)
             )
@@ -4893,10 +4871,10 @@ def epja_figure8():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 's'
             )
             pnjl_u_v_1.append(lq_temp/(T_el**4))
@@ -4951,7 +4929,7 @@ def epja_figure8():
             total=len(T_2), ncols=100
         ):
             sigma_v_2.append(
-                pnjl.thermo.gcp_sigma_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_field(
                     T_el, mu_el
                 )/(T_el**4)
             )
@@ -4976,13 +4954,13 @@ def epja_figure8():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, 'l'
             )
             sea_u_v_2.append(lq_temp/(T_el**4))
             sea_d_v_2.append(lq_temp/(T_el**4))
             sea_s_v_2.append(
-                pnjl.thermo.gcp_sea_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                     T_el, mu_el, 's'
                 )/(T_el**4)
             )
@@ -5030,10 +5008,10 @@ def epja_figure8():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 's'
             )
             pnjl_u_v_2.append(lq_temp/(T_el**4))
@@ -6333,21 +6311,17 @@ def epja_figure9():
     if platform.system() == "Linux":
         matplotlib.use("TkAgg")
 
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -6424,7 +6398,7 @@ def epja_figure9():
             total=len(T_1), ncols=100
         ):
             sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(
                     T_el, mu_el
                 )/(T_el**3)
             )
@@ -6436,13 +6410,13 @@ def epja_figure9():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_1.append(lq_temp/(T_el**3))
             sea_d_v_1.append(lq_temp/(T_el**3))
             sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )/(T_el**3)
             )
@@ -6486,10 +6460,10 @@ def epja_figure9():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             pnjl_u_v_1.append(lq_temp/(T_el**3))
@@ -6542,7 +6516,7 @@ def epja_figure9():
             total=len(T_2), ncols=100
         ):
             sigma_v_2.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(
                     T_el, mu_el
                 )/(T_el**3)
             )
@@ -6554,13 +6528,13 @@ def epja_figure9():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_2.append(lq_temp/(T_el**3))
             sea_d_v_2.append(lq_temp/(T_el**3))
             sea_s_v_2.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )/(T_el**3)
             )
@@ -6604,10 +6578,10 @@ def epja_figure9():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             pnjl_u_v_2.append(lq_temp/(T_el**3))
@@ -7405,21 +7379,17 @@ def epja_figure9_alt():
     if platform.system() == "Linux":
         matplotlib.use("TkAgg")
 
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -7498,7 +7468,7 @@ def epja_figure9_alt():
             total=len(T_1), ncols=100
         ):
             sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(
                     T_el, mu_el
                 )/(T_el**3)
             )
@@ -7510,13 +7480,13 @@ def epja_figure9_alt():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_1.append(lq_temp/(T_el**3))
             sea_d_v_1.append(lq_temp/(T_el**3))
             sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )/(T_el**3)
             )
@@ -7560,10 +7530,10 @@ def epja_figure9_alt():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             pnjl_u_v_1.append(lq_temp/(T_el**3))
@@ -7616,7 +7586,7 @@ def epja_figure9_alt():
             total=len(T_2), ncols=100
         ):
             sigma_v_2.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(
                     T_el, mu_el
                 )/(T_el**3)
             )
@@ -7628,13 +7598,13 @@ def epja_figure9_alt():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_2.append(lq_temp/(T_el**3))
             sea_d_v_2.append(lq_temp/(T_el**3))
             sea_s_v_2.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )/(T_el**3)
             )
@@ -7678,10 +7648,10 @@ def epja_figure9_alt():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             pnjl_u_v_2.append(lq_temp/(T_el**3))
@@ -8283,19 +8253,15 @@ def epja_figure10():
 
     import utils
     import pnjl.defaults
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad as cluster
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -8405,10 +8371,10 @@ def epja_figure10():
                 zip(T, phi_re_v, phi_im_v), total=len(T), ncols=100
             ):
                 b_sigma_v.append(
-                    pnjl.thermo.gcp_sigma_lattice.bdensity(T_el, mu_round)
+                    pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(T_el, mu_round)
                 )
                 s_sigma_v.append(
-                    pnjl.thermo.gcp_sigma_lattice.sdensity(T_el, mu_round)
+                    pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_field(T_el, mu_round)
                 )
             with open(
                 files+"b_sigma_v_" + str(mu_round).replace('.', 'p') + ".pickle",
@@ -8450,21 +8416,21 @@ def epja_figure10():
             for T_el, phi_re_el, phi_im_el in tqdm.tqdm(
                 zip(T, phi_re_v, phi_im_v), total=len(T), ncols=100
             ):
-                b_lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+                b_lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_round, 'l'
                 )
                 b_sea_u_v.append(b_lq_temp)
                 b_sea_d_v.append(b_lq_temp)
                 b_sea_s_v.append(
-                    pnjl.thermo.gcp_sea_lattice.bdensity(T_el, mu_round, 's')
+                    pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(T_el, mu_round, 's')
                 )
-                s_lq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(
+                s_lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                     T_el, mu_round, 'l'
                 )
                 s_sea_u_v.append(s_lq_temp)
                 s_sea_d_v.append(s_lq_temp)
                 s_sea_s_v.append(
-                    pnjl.thermo.gcp_sea_lattice.sdensity(T_el, mu_round, 's')
+                    pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(T_el, mu_round, 's')
                 )
             with open(
                 files+"b_sea_u_v_" + str(mu_round).replace('.', 'p') + ".pickle",
@@ -8573,16 +8539,16 @@ def epja_figure10():
             for T_el, phi_re_el, phi_im_el in tqdm.tqdm(
                 zip(T, phi_re_v, phi_im_v), total=len(T), ncols=100
             ):
-                b_lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+                b_lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                     T_el, mu_round, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
                 )
-                b_sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+                b_sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                     T_el, mu_round, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
                 )
-                s_lq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+                s_lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                     T_el, mu_round, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
                 )
-                s_sq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+                s_sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                     T_el, mu_round, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
                 )
                 b_pnjl_u_v.append(b_lq_temp)
@@ -10025,8 +9991,8 @@ def epja_figure10():
     # ax2.plot(Schmidt_new_mu_low_400, Schmidt_new_T_400, '-', c = 'grey')
     # ax2.plot(Schmidt_new_mu_high_400, Schmidt_new_T_400, '-', c = 'grey')
 
-    ax1.plot([el*3.0 for el in mu_300], [pnjl.thermo.gcp_sigma_lattice.Tc(el) for el in mu_300], ':', c = 'black')
-    ax2.plot([el*3.0 for el in mu_300], [pnjl.thermo.gcp_sigma_lattice.Tc(el) for el in mu_300], ':', c = 'black')
+    ax1.plot([el*3.0 for el in mu_300], [pnjl.thermo.gcp_pnjl.lattice_cut_sea.Tc(el) for el in mu_300], ':', c = 'black')
+    ax2.plot([el*3.0 for el in mu_300], [pnjl.thermo.gcp_pnjl.lattice_cut_sea.Tc(el) for el in mu_300], ':', c = 'black')
 
     ax1.text(69.0, 214.0, r'T/${\rm \mu}$=5.3', c = 'black', fontsize = 14)
     ax1.text(286.0, 214.0, r'T/${\rm \mu}$=0.79', c = 'blue', fontsize = 14)
@@ -10079,19 +10045,15 @@ def epja_figure10_buns():
 
     import utils
     import pnjl.defaults
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad as cluster
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -10195,10 +10157,10 @@ def epja_figure10_buns():
                 zip(T, phi_re_v, phi_im_v), total=len(T), ncols=100
             ):
                 b_sigma_v.append(
-                    pnjl.thermo.gcp_sigma_lattice.bdensity(T_el, mu_round)
+                    pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(T_el, mu_round)
                 )
                 s_sigma_v.append(
-                    pnjl.thermo.gcp_sigma_lattice.sdensity(T_el, mu_round)
+                    pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_field(T_el, mu_round)
                 )
             with open(
                 files+"b_sigma_v_" + str(mu_round).replace('.', 'p') + ".pickle",
@@ -10240,21 +10202,21 @@ def epja_figure10_buns():
             for T_el, phi_re_el, phi_im_el in tqdm.tqdm(
                 zip(T, phi_re_v, phi_im_v), total=len(T), ncols=100
             ):
-                b_lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+                b_lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_round, 'l'
                 )
                 b_sea_u_v.append(b_lq_temp)
                 b_sea_d_v.append(b_lq_temp)
                 b_sea_s_v.append(
-                    pnjl.thermo.gcp_sea_lattice.bdensity(T_el, mu_round, 's')
+                    pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(T_el, mu_round, 's')
                 )
-                s_lq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(
+                s_lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                     T_el, mu_round, 'l'
                 )
                 s_sea_u_v.append(s_lq_temp)
                 s_sea_d_v.append(s_lq_temp)
                 s_sea_s_v.append(
-                    pnjl.thermo.gcp_sea_lattice.sdensity(T_el, mu_round, 's')
+                    pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(T_el, mu_round, 's')
                 )
             with open(
                 files+"b_sea_u_v_" + str(mu_round).replace('.', 'p') + ".pickle",
@@ -10363,16 +10325,16 @@ def epja_figure10_buns():
             for T_el, phi_re_el, phi_im_el in tqdm.tqdm(
                 zip(T, phi_re_v, phi_im_v), total=len(T), ncols=100
             ):
-                b_lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+                b_lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                     T_el, mu_round, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
                 )
-                b_sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+                b_sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                     T_el, mu_round, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
                 )
-                s_lq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+                s_lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                     T_el, mu_round, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
                 )
-                s_sq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+                s_sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                     T_el, mu_round, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
                 )
                 b_pnjl_u_v.append(b_lq_temp)
@@ -11563,7 +11525,7 @@ def epja_figure10_buns():
     pQCD_400 = [[x, y] for x, y in zip(pQCD_400_x, pQCD_400_y)]
 
     mu_Tc_v = numpy.linspace(0.0, 300.0, 200)
-    Tc_Tc_v = [pnjl.thermo.gcp_sigma_lattice.Tc(el) for el in mu_Tc_v]
+    Tc_Tc_v = [pnjl.thermo.gcp_pnjl.lattice_cut_sea.Tc(el) for el in mu_Tc_v]
     mu_over_Tc_v = [3.0 * el_mu / el_tc for el_mu, el_tc in zip(mu_Tc_v, Tc_Tc_v)]
 
     fig1 = matplotlib.pyplot.figure(num=1, figsize=(11.0, 5))
@@ -11712,19 +11674,15 @@ def epja_figure10_bu():
 
     import utils
     import pnjl.defaults
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad as cluster
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -11826,10 +11784,10 @@ def epja_figure10_bu():
                 zip(T, phi_re_v, phi_im_v), total=len(T), ncols=100
             ):
                 b_sigma_v.append(
-                    pnjl.thermo.gcp_sigma_lattice.bdensity(T_el, mu_round)
+                    pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(T_el, mu_round)
                 )
                 s_sigma_v.append(
-                    pnjl.thermo.gcp_sigma_lattice.sdensity(T_el, mu_round)
+                    pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_field(T_el, mu_round)
                 )
             with open(
                 files+"b_sigma_v_" + str(mu_round).replace('.', 'p') + ".pickle",
@@ -11871,21 +11829,21 @@ def epja_figure10_bu():
             for T_el, phi_re_el, phi_im_el in tqdm.tqdm(
                 zip(T, phi_re_v, phi_im_v), total=len(T), ncols=100
             ):
-                b_lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+                b_lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_round, 'l'
                 )
                 b_sea_u_v.append(b_lq_temp)
                 b_sea_d_v.append(b_lq_temp)
                 b_sea_s_v.append(
-                    pnjl.thermo.gcp_sea_lattice.bdensity(T_el, mu_round, 's')
+                    pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(T_el, mu_round, 's')
                 )
-                s_lq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(
+                s_lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                     T_el, mu_round, 'l'
                 )
                 s_sea_u_v.append(s_lq_temp)
                 s_sea_d_v.append(s_lq_temp)
                 s_sea_s_v.append(
-                    pnjl.thermo.gcp_sea_lattice.sdensity(T_el, mu_round, 's')
+                    pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(T_el, mu_round, 's')
                 )
             with open(
                 files+"b_sea_u_v_" + str(mu_round).replace('.', 'p') + ".pickle",
@@ -11994,16 +11952,16 @@ def epja_figure10_bu():
             for T_el, phi_re_el, phi_im_el in tqdm.tqdm(
                 zip(T, phi_re_v, phi_im_v), total=len(T), ncols=100
             ):
-                b_lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+                b_lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                     T_el, mu_round, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
                 )
-                b_sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+                b_sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                     T_el, mu_round, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
                 )
-                s_lq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+                s_lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                     T_el, mu_round, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
                 )
-                s_sq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+                s_sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                     T_el, mu_round, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
                 )
                 b_pnjl_u_v.append(b_lq_temp)
@@ -13173,7 +13131,7 @@ def epja_figure10_bu():
     pQCD_400 = [[x, y] for x, y in zip(pQCD_400_x, pQCD_400_y)]
 
     mu_Tc_v = numpy.linspace(0.0, 300.0, 200)
-    Tc_Tc_v = [pnjl.thermo.gcp_sigma_lattice.Tc(el) for el in mu_Tc_v]
+    Tc_Tc_v = [pnjl.thermo.gcp_pnjl.lattice_cut_sea.Tc(el) for el in mu_Tc_v]
     mu_over_Tc_v = [3.0 * el_mu / el_tc for el_mu, el_tc in zip(mu_Tc_v, Tc_Tc_v)]
 
     fig1 = matplotlib.pyplot.figure(num=1, figsize=(11.0, 5))
@@ -13314,11 +13272,9 @@ def epja_figure11():
 
     import utils
     import pnjl.defaults
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
@@ -13327,10 +13283,8 @@ def epja_figure11():
         as cluster_h
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -13591,7 +13545,7 @@ def epja_figure11():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols= 100
         ):
             chi_sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.qnumber_cumulant(2, T_el, mu_el)
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_field(2, T_el, mu_el)
             )
         with open(files+"chi_sigma_v_1.pickle", "wb") as file:
             pickle.dump(chi_sigma_v_1, file)
@@ -13614,13 +13568,13 @@ def epja_figure11():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_sea(
                 2, T_el, mu_el, 'l'
             )
             chi_sea_u_v_1.append(lq_temp)
             chi_sea_d_v_1.append(lq_temp)
             chi_sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_sea(
                     2, T_el, mu_el, 's'
                 )
             )
@@ -13665,10 +13619,10 @@ def epja_figure11():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.qnumber_cumulant(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_q(
                 2, T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.qnumber_cumulant(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_q(
                 2, T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             chi_pnjl_u_v_1.append(lq_temp)
@@ -13874,7 +13828,7 @@ def epja_figure11():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols= 100
         ):
             bden_sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(T_el, mu_el)
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(T_el, mu_el)
             )
         with open(files+"bden_sigma_v_1.pickle", "wb") as file:
             pickle.dump(bden_sigma_v_1, file)
@@ -13895,13 +13849,13 @@ def epja_figure11():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             bden_sea_u_v_1.append(lq_temp)
             bden_sea_d_v_1.append(lq_temp)
             bden_sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )
             )
@@ -13944,10 +13898,10 @@ def epja_figure11():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             bden_pnjl_u_v_1.append(lq_temp)
@@ -14165,7 +14119,7 @@ def epja_figure11():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols= 100
         ):
             chi_sigma_v_2.append(
-                pnjl.thermo.gcp_sigma_lattice.qnumber_cumulant(2, T_el, mu_el)
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_field(2, T_el, mu_el)
             )
         with open(files+"chi_sigma_v_2.pickle", "wb") as file:
             pickle.dump(chi_sigma_v_2, file)
@@ -14188,13 +14142,13 @@ def epja_figure11():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_sea(
                 2, T_el, mu_el, 'l'
             )
             chi_sea_u_v_2.append(lq_temp)
             chi_sea_d_v_2.append(lq_temp)
             chi_sea_s_v_2.append(
-                pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_sea(
                     2, T_el, mu_el, 's'
                 )
             )
@@ -14239,10 +14193,10 @@ def epja_figure11():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.qnumber_cumulant(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_q(
                 2, T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.qnumber_cumulant(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_q(
                 2, T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             chi_pnjl_u_v_2.append(lq_temp)
@@ -14448,7 +14402,7 @@ def epja_figure11():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols= 100
         ):
             bden_sigma_v_2.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(T_el, mu_el)
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(T_el, mu_el)
             )
         with open(files+"bden_sigma_v_2.pickle", "wb") as file:
             pickle.dump(bden_sigma_v_2, file)
@@ -14469,13 +14423,13 @@ def epja_figure11():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             bden_sea_u_v_2.append(lq_temp)
             bden_sea_d_v_2.append(lq_temp)
             bden_sea_s_v_2.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )
             )
@@ -14518,10 +14472,10 @@ def epja_figure11():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             bden_pnjl_u_v_2.append(lq_temp)
@@ -14739,7 +14693,7 @@ def epja_figure11():
             zip(T_3, mu_3, phi_re_v_3, phi_im_v_3), total=len(T_3), ncols= 100
         ):
             chi_sigma_v_3.append(
-                pnjl.thermo.gcp_sigma_lattice.qnumber_cumulant(2, T_el, mu_el)
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_field(2, T_el, mu_el)
             )
         with open(files+"chi_sigma_v_3.pickle", "wb") as file:
             pickle.dump(chi_sigma_v_3, file)
@@ -14762,13 +14716,13 @@ def epja_figure11():
             zip(T_3, mu_3, phi_re_v_3, phi_im_v_3),
             total=len(T_3), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_sea(
                 2, T_el, mu_el, 'l'
             )
             chi_sea_u_v_3.append(lq_temp)
             chi_sea_d_v_3.append(lq_temp)
             chi_sea_s_v_3.append(
-                pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_sea(
                     2, T_el, mu_el, 's'
                 )
             )
@@ -14813,10 +14767,10 @@ def epja_figure11():
             zip(T_3, mu_3, phi_re_v_3, phi_im_v_3),
             total=len(T_3), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.qnumber_cumulant(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_q(
                 2, T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.qnumber_cumulant(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_q(
                 2, T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             chi_pnjl_u_v_3.append(lq_temp)
@@ -15022,7 +14976,7 @@ def epja_figure11():
             zip(T_3, mu_3, phi_re_v_3, phi_im_v_3), total=len(T_3), ncols= 100
         ):
             bden_sigma_v_3.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(T_el, mu_el)
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(T_el, mu_el)
             )
         with open(files+"bden_sigma_v_3.pickle", "wb") as file:
             pickle.dump(bden_sigma_v_3, file)
@@ -15043,13 +14997,13 @@ def epja_figure11():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_3, mu_3, phi_re_v_3, phi_im_v_3), total=len(T_3), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             bden_sea_u_v_3.append(lq_temp)
             bden_sea_d_v_3.append(lq_temp)
             bden_sea_s_v_3.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )
             )
@@ -15092,10 +15046,10 @@ def epja_figure11():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_3, mu_3, phi_re_v_3, phi_im_v_3), total=len(T_3), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             bden_pnjl_u_v_3.append(lq_temp)
@@ -15313,7 +15267,7 @@ def epja_figure11():
             zip(T_4, mu_4, phi_re_v_4, phi_im_v_4), total=len(T_4), ncols= 100
         ):
             chi_sigma_v_4.append(
-                pnjl.thermo.gcp_sigma_lattice.qnumber_cumulant(2, T_el, mu_el)
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_field(2, T_el, mu_el)
             )
         with open(files+"chi_sigma_v_4.pickle", "wb") as file:
             pickle.dump(chi_sigma_v_4, file)
@@ -15336,13 +15290,13 @@ def epja_figure11():
             zip(T_4, mu_4, phi_re_v_4, phi_im_v_4),
             total=len(T_4), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_sea(
                 2, T_el, mu_el, 'l'
             )
             chi_sea_u_v_4.append(lq_temp)
             chi_sea_d_v_4.append(lq_temp)
             chi_sea_s_v_4.append(
-                pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_sea(
                     2, T_el, mu_el, 's'
                 )
             )
@@ -15387,10 +15341,10 @@ def epja_figure11():
             zip(T_4, mu_4, phi_re_v_4, phi_im_v_4),
             total=len(T_4), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.qnumber_cumulant(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_q(
                 2, T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.qnumber_cumulant(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_q(
                 2, T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             chi_pnjl_u_v_4.append(lq_temp)
@@ -15596,7 +15550,7 @@ def epja_figure11():
             zip(T_4, mu_4, phi_re_v_4, phi_im_v_4), total=len(T_4), ncols= 100
         ):
             bden_sigma_v_4.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(T_el, mu_el)
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(T_el, mu_el)
             )
         with open(files+"bden_sigma_v_4.pickle", "wb") as file:
             pickle.dump(bden_sigma_v_4, file)
@@ -15617,13 +15571,13 @@ def epja_figure11():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_4, mu_4, phi_re_v_4, phi_im_v_4), total=len(T_4), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             bden_sea_u_v_4.append(lq_temp)
             bden_sea_d_v_4.append(lq_temp)
             bden_sea_s_v_4.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )
             )
@@ -15666,10 +15620,10 @@ def epja_figure11():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_4, mu_4, phi_re_v_4, phi_im_v_4), total=len(T_4), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             bden_pnjl_u_v_4.append(lq_temp)
@@ -15887,7 +15841,7 @@ def epja_figure11():
             zip(T_5, mu_5, phi_re_v_5, phi_im_v_5), total=len(T_5), ncols= 100
         ):
             chi_sigma_v_5.append(
-                pnjl.thermo.gcp_sigma_lattice.qnumber_cumulant(2, T_el, mu_el)
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_field(2, T_el, mu_el)
             )
         with open(files+"chi_sigma_v_5.pickle", "wb") as file:
             pickle.dump(chi_sigma_v_5, file)
@@ -15910,13 +15864,13 @@ def epja_figure11():
             zip(T_5, mu_5, phi_re_v_5, phi_im_v_5),
             total=len(T_5), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_sea(
                 2, T_el, mu_el, 'l'
             )
             chi_sea_u_v_5.append(lq_temp)
             chi_sea_d_v_5.append(lq_temp)
             chi_sea_s_v_5.append(
-                pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_sea(
                     2, T_el, mu_el, 's'
                 )
             )
@@ -15961,10 +15915,10 @@ def epja_figure11():
             zip(T_5, mu_5, phi_re_v_5, phi_im_v_5),
             total=len(T_5), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.qnumber_cumulant(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_q(
                 2, T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.qnumber_cumulant(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_q(
                 2, T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             chi_pnjl_u_v_5.append(lq_temp)
@@ -16181,7 +16135,7 @@ def epja_figure11():
             zip(T_5, mu_5, phi_re_v_5, phi_im_v_5), total=len(T_5), ncols= 100
         ):
             bden_sigma_v_5.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(T_el, mu_el)
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(T_el, mu_el)
             )
         with open(files+"bden_sigma_v_5.pickle", "wb") as file:
             pickle.dump(bden_sigma_v_5, file)
@@ -16202,13 +16156,13 @@ def epja_figure11():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_5, mu_5, phi_re_v_5, phi_im_v_5), total=len(T_5), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             bden_sea_u_v_5.append(lq_temp)
             bden_sea_d_v_5.append(lq_temp)
             bden_sea_s_v_5.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )
             )
@@ -16251,10 +16205,10 @@ def epja_figure11():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_5, mu_5, phi_re_v_5, phi_im_v_5), total=len(T_5), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             bden_pnjl_u_v_5.append(lq_temp)
@@ -16483,7 +16437,7 @@ def epja_figure11():
             zip(T_6, mu_6, phi_re_v_6, phi_im_v_6), total=len(T_6), ncols= 100
         ):
             chi_sigma_v_6.append(
-                pnjl.thermo.gcp_sigma_lattice.qnumber_cumulant(2, T_el, mu_el)
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_field(2, T_el, mu_el)
             )
         with open(files+"chi_sigma_v_6.pickle", "wb") as file:
             pickle.dump(chi_sigma_v_6, file)
@@ -16506,13 +16460,13 @@ def epja_figure11():
             zip(T_6, mu_6, phi_re_v_6, phi_im_v_6),
             total=len(T_6), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_sea(
                 2, T_el, mu_el, 'l'
             )
             chi_sea_u_v_6.append(lq_temp)
             chi_sea_d_v_6.append(lq_temp)
             chi_sea_s_v_6.append(
-                pnjl.thermo.gcp_sea_lattice.qnumber_cumulant(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_sea(
                     2, T_el, mu_el, 's'
                 )
             )
@@ -16557,10 +16511,10 @@ def epja_figure11():
             zip(T_6, mu_6, phi_re_v_6, phi_im_v_6),
             total=len(T_6), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.qnumber_cumulant(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_q(
                 2, T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.qnumber_cumulant(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.qnumber_cumulant_q(
                 2, T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             chi_pnjl_u_v_6.append(lq_temp)
@@ -16777,7 +16731,7 @@ def epja_figure11():
             zip(T_6, mu_6, phi_re_v_6, phi_im_v_6), total=len(T_6), ncols= 100
         ):
             bden_sigma_v_6.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(T_el, mu_el)
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(T_el, mu_el)
             )
         with open(files+"bden_sigma_v_6.pickle", "wb") as file:
             pickle.dump(bden_sigma_v_6, file)
@@ -16798,13 +16752,13 @@ def epja_figure11():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_6, mu_6, phi_re_v_6, phi_im_v_6), total=len(T_6), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             bden_sea_u_v_6.append(lq_temp)
             bden_sea_d_v_6.append(lq_temp)
             bden_sea_s_v_6.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )
             )
@@ -16847,10 +16801,10 @@ def epja_figure11():
         for T_el, mu_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_6, mu_6, phi_re_v_6, phi_im_v_6), total=len(T_6), ncols= 100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             bden_pnjl_u_v_6.append(lq_temp)
@@ -17361,12 +17315,12 @@ def epja_figure11():
     R12_lQCD_0p4 = [[el[0]/170.0, el[1]] for el in R12_lQCD_0p4]
     R12_lQCD_0p8 = [[el[0]/170.0, el[1]] for el in R12_lQCD_0p8]
 
-    T_Tc_1 = [T_el/pnjl.thermo.gcp_sigma_lattice.Tc(mu_el) for T_el, mu_el in zip(T_1, mu_1)]
-    T_Tc_2 = [T_el/pnjl.thermo.gcp_sigma_lattice.Tc(mu_el) for T_el, mu_el in zip(T_2, mu_2)]
-    T_Tc_3 = [T_el/pnjl.thermo.gcp_sigma_lattice.Tc(mu_el) for T_el, mu_el in zip(T_3, mu_3)]
-    T_Tc_4 = [T_el/pnjl.thermo.gcp_sigma_lattice.Tc(mu_el) for T_el, mu_el in zip(T_4, mu_4)]
-    T_Tc_5 = [T_el/pnjl.thermo.gcp_sigma_lattice.Tc(mu_el) for T_el, mu_el in zip(T_5, mu_5)]
-    T_Tc_6 = [T_el/pnjl.thermo.gcp_sigma_lattice.Tc(mu_el) for T_el, mu_el in zip(T_6, mu_6)]
+    T_Tc_1 = [T_el/pnjl.thermo.gcp_pnjl.lattice_cut_sea.Tc(mu_el) for T_el, mu_el in zip(T_1, mu_1)]
+    T_Tc_2 = [T_el/pnjl.thermo.gcp_pnjl.lattice_cut_sea.Tc(mu_el) for T_el, mu_el in zip(T_2, mu_2)]
+    T_Tc_3 = [T_el/pnjl.thermo.gcp_pnjl.lattice_cut_sea.Tc(mu_el) for T_el, mu_el in zip(T_3, mu_3)]
+    T_Tc_4 = [T_el/pnjl.thermo.gcp_pnjl.lattice_cut_sea.Tc(mu_el) for T_el, mu_el in zip(T_4, mu_4)]
+    T_Tc_5 = [T_el/pnjl.thermo.gcp_pnjl.lattice_cut_sea.Tc(mu_el) for T_el, mu_el in zip(T_5, mu_5)]
+    T_Tc_6 = [T_el/pnjl.thermo.gcp_pnjl.lattice_cut_sea.Tc(mu_el) for T_el, mu_el in zip(T_6, mu_6)]
 
     T_HRG = numpy.linspace(0.7, 1.0, num=200)
     R12_HRG_1 = [(1.0/1.2)*math.tanh(1.2/1.0) for _ in T_HRG]
@@ -17673,30 +17627,24 @@ def epja_figure12_s():
     import matplotlib.pyplot
 
     import utils
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_2
@@ -17778,7 +17726,7 @@ def epja_figure12_s():
             total=len(T_1), ncols=100
         ):
             sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.sdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_field(
                     T_el, mu_el
                 )/(T_el**3)
             )
@@ -17803,13 +17751,13 @@ def epja_figure12_s():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_1.append(lq_temp/(T_el**3))
             sea_d_v_1.append(lq_temp/(T_el**3))
             sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.sdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                     T_el, mu_el, 's'
                 )/(T_el**3)
             )
@@ -17853,10 +17801,10 @@ def epja_figure12_s():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             pnjl_u_v_1.append(lq_temp/(T_el**3))
@@ -18260,7 +18208,7 @@ def epja_figure12_s():
             total=len(T_2), ncols=100
         ):
             sigma_v_2.append(
-                pnjl.thermo.gcp_sigma_lattice.sdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_field(
                     T_el, mu_el
                 )/(T_el**3)
             )
@@ -18285,13 +18233,13 @@ def epja_figure12_s():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_2.append(lq_temp/(T_el**3))
             sea_d_v_2.append(lq_temp/(T_el**3))
             sea_s_v_2.append(
-                pnjl.thermo.gcp_sea_lattice.sdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                     T_el, mu_el, 's'
                 )/(T_el**3)
             )
@@ -18335,10 +18283,10 @@ def epja_figure12_s():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 's'
             )
             pnjl_u_v_2.append(lq_temp/(T_el**3))
@@ -18887,30 +18835,24 @@ def epja_figure12_n():
     import matplotlib.pyplot
 
     import utils
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_2
@@ -18992,7 +18934,7 @@ def epja_figure12_n():
             total=len(T_1), ncols=100
         ):
             sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(
                     T_el, mu_el
                 )/(T_el**3)
             )
@@ -19017,13 +18959,13 @@ def epja_figure12_n():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_1.append(lq_temp/(T_el**3))
             sea_d_v_1.append(lq_temp/(T_el**3))
             sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )/(T_el**3)
             )
@@ -19067,10 +19009,10 @@ def epja_figure12_n():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             pnjl_u_v_1.append(lq_temp/(T_el**3))
@@ -19474,7 +19416,7 @@ def epja_figure12_n():
             total=len(T_2), ncols=100
         ):
             sigma_v_2.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(
                     T_el, mu_el
                 )/(T_el**3)
             )
@@ -19499,13 +19441,13 @@ def epja_figure12_n():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_2.append(lq_temp/(T_el**3))
             sea_d_v_2.append(lq_temp/(T_el**3))
             sea_s_v_2.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )/(T_el**3)
             )
@@ -19549,10 +19491,10 @@ def epja_figure12_n():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 's'
             )
             pnjl_u_v_2.append(lq_temp/(T_el**3))
@@ -20077,30 +20019,24 @@ def epja_beth_uhlenbeck1():
         matplotlib.use("TkAgg")
 
     import utils
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_2
@@ -20186,7 +20122,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_1), ncols=100
         ):
             sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.sdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_field(
                     T_el, mu_el
                 )/(T_el**3)
             )
@@ -20211,13 +20147,13 @@ def epja_beth_uhlenbeck1():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_1.append(lq_temp/(T_el**3))
             sea_d_v_1.append(lq_temp/(T_el**3))
             sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.sdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                     T_el, mu_el, 's'
                 )/(T_el**3)
             )
@@ -20261,10 +20197,10 @@ def epja_beth_uhlenbeck1():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             pnjl_u_v_1.append(lq_temp/(T_el**3))
@@ -20668,7 +20604,7 @@ def epja_beth_uhlenbeck1():
             total=len(T_2), ncols=100
         ):
             sigma_v_2.append(
-                pnjl.thermo.gcp_sigma_lattice.sdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_field(
                     T_el, mu_el
                 )/(T_el**3)
             )
@@ -20693,13 +20629,13 @@ def epja_beth_uhlenbeck1():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_2.append(lq_temp/(T_el**3))
             sea_d_v_2.append(lq_temp/(T_el**3))
             sea_s_v_2.append(
-                pnjl.thermo.gcp_sea_lattice.sdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                     T_el, mu_el, 's'
                 )/(T_el**3)
             )
@@ -20743,10 +20679,10 @@ def epja_beth_uhlenbeck1():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 's'
             )
             pnjl_u_v_2.append(lq_temp/(T_el**3))
@@ -21382,30 +21318,24 @@ def epja_beth_uhlenbeck2():
         matplotlib.use("TkAgg")
 
     import utils
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_2
@@ -21491,7 +21421,7 @@ def epja_beth_uhlenbeck2():
             total=len(T_2), ncols=100
         ):
             sigma_v_2.append(
-                pnjl.thermo.gcp_sigma_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(
                     T_el, mu_el
                 )/(T_el**3)
             )
@@ -21516,13 +21446,13 @@ def epja_beth_uhlenbeck2():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_2.append(lq_temp/(T_el**3))
             sea_d_v_2.append(lq_temp/(T_el**3))
             sea_s_v_2.append(
-                pnjl.thermo.gcp_sea_lattice.bdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(
                     T_el, mu_el, 's'
                 )/(T_el**3)
             )
@@ -21566,10 +21496,10 @@ def epja_beth_uhlenbeck2():
             zip(T_2, mu_2, phi_re_v_2, phi_im_v_2),
             total=len(T_2), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.bdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_2.Polyakov_loop, 's'
             )
             pnjl_u_v_2.append(lq_temp/(T_el**3))
@@ -22347,21 +22277,17 @@ def epja_lattice_thermo2():
     import matplotlib.pyplot
 
     import utils
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_s
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -22421,7 +22347,7 @@ def epja_lattice_thermo2():
             total=len(T_1), ncols=100
         ):
             sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.sdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_field(
                     T_el, mu_el
                 )/(T_el**3)
             )
@@ -22446,13 +22372,13 @@ def epja_lattice_thermo2():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.sdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                 T_el, mu_el, 'l'
             )
             sea_u_v_1.append(lq_temp/(T_el**3))
             sea_d_v_1.append(lq_temp/(T_el**3))
             sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.sdensity(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(
                     T_el, mu_el, 's'
                 )/(T_el**3)
             )
@@ -22496,10 +22422,10 @@ def epja_lattice_thermo2():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1),
             total=len(T_1), ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.sdensity(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_q(
                 T_el, mu_el, phi_re_el, phi_im_el, solver_1.Polyakov_loop, 's'
             )
             pnjl_u_v_1.append(lq_temp/(T_el**3))
@@ -23108,11 +23034,9 @@ def epja_mhrg_vs_hrg():
 
     import matplotlib.pyplot
 
-    import pnjl.thermo.gcp_pnjl_lattice
-    import pnjl.thermo.gcp_sea_lattice
-    import pnjl.thermo.gcp_perturbative.const
-    import pnjl.thermo.gcp_sigma_lattice
     import pnjl.thermo.gcp_pl.polynomial
+    import pnjl.thermo.gcp_perturbative.const
+    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
     import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
         as cluster
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
@@ -23121,10 +23045,8 @@ def epja_mhrg_vs_hrg():
         as cluster_h
 
     import pnjl.thermo.solvers.\
-        sigma_lattice.\
-        sea_lattice.\
+        pnjl_lattice_cut_sea.\
         pl_polynomial.\
-        pnjl_lattice.\
         pert_const.\
         no_clusters \
     as solver_1
@@ -23190,7 +23112,7 @@ def epja_mhrg_vs_hrg():
             ncols=100
         ):
             sigma_v_1.append(
-                pnjl.thermo.gcp_sigma_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_field(
                     T_el, mu_el
                 )/(T_el**4)
             )
@@ -23215,11 +23137,11 @@ def epja_mhrg_vs_hrg():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1), total=len(T_1),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_sea_lattice.pressure(T_el, mu_el, 'l')
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(T_el, mu_el, 'l')
             sea_u_v_1.append(lq_temp/(T_el**4))
             sea_d_v_1.append(lq_temp/(T_el**4))
             sea_s_v_1.append(
-                pnjl.thermo.gcp_sea_lattice.pressure(
+                pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_sea(
                     T_el, mu_el, 's'
                 )/(T_el**4)
             )
@@ -23260,10 +23182,10 @@ def epja_mhrg_vs_hrg():
             zip(T_1, mu_1, phi_re_v_1, phi_im_v_1), total=len(T_1),
             ncols=100
         ):
-            lq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            lq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 'l'
             )
-            sq_temp = pnjl.thermo.gcp_pnjl_lattice.pressure(
+            sq_temp = pnjl.thermo.gcp_pnjl.lattice_cut_sea.pressure_q(
                 T_el, mu_el, phi_re_el, phi_im_el, 's'
             )
             pnjl_u_v_1.append(lq_temp/(T_el**4))

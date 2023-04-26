@@ -48,12 +48,12 @@ import scipy.integrate
 
 import pnjl.defaults
 import pnjl.thermo.distributions
-import pnjl.thermo.gcp_sigma_lattice
+import pnjl.thermo.gcp_pnjl.lattice_cut_sea
 
 
 mass_hash = {
-    'l': pnjl.thermo.gcp_sigma_lattice.Ml,
-    's': pnjl.thermo.gcp_sigma_lattice.Ms,
+    'l': pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ml,
+    's': pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ms,
 }
 
 

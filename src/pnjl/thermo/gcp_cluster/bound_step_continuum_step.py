@@ -32,9 +32,8 @@ import scipy.integrate
 
 import pnjl.defaults
 import pnjl.thermo.distributions
-import pnjl.thermo.gcp_sea_lattice
-import pnjl.thermo.gcp_sigma_lattice
 import pnjl.thermo.gcp_pl.polynomial
+import pnjl.thermo.gcp_pnjl.lattice_cut_sea
 
 
 MI = {
@@ -101,8 +100,8 @@ def M_th(T: float, muB: float, hadron: str) -> float:
     N_I = NI[hadron]
     S_I = SI[hadron]
     M_th_i = SQRT2*math.fsum([
-        math.fsum([N_I,-S_I])*pnjl.thermo.gcp_sigma_lattice.Ml(T, muB),
-        S_I*pnjl.thermo.gcp_sigma_lattice.Ms(T, muB)
+        math.fsum([N_I,-S_I])*pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ml(T, muB),
+        S_I*pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ms(T, muB)
     ])
 
     return M_th_i

@@ -90,10 +90,8 @@ def Ml(T: float, mu: float) -> float:
     Ml : float
         Quark mass in MeV.
     """
-    
     M0 = pnjl.defaults.M0
     ML = pnjl.defaults.ML
-    
     return math.fsum([M0*Delta_ls(T, mu), ML])
 
 
@@ -112,10 +110,8 @@ def Ms(T: float, mu: float) -> float:
     Ms : float
         Quark mass in MeV.
     """
-
     M0 = pnjl.defaults.M0
     MS = pnjl.defaults.MS
-    
     return math.fsum([M0*Delta_ls(T, mu), MS])
 
 
@@ -135,16 +131,13 @@ def gcp(T: float, mu: float) -> float:
         Mean-field value in MeV^4.
     """
 
-    M0 = pnjl.defaults.M0
     GS = pnjl.defaults.GS
+    ML = pnjl.defaults.ML
 
-    if pnjl.defaults.NO_SIGMA:
-        return 0.0
-    else:
-        return math.fsum([
-            ((Delta_ls(T, mu)**2)*(M0**2))/(4.0*GS),
-            -((Delta_ls(0.0, 0.0)**2)*(M0**2))/(4.0*GS)
-        ])
+    sigma = Ml(T, mu) - ML
+    sigma0 = Ml(0.0, 0.0) - ML
+
+    return math.fsum([(sigma**2)/(4.0*GS), -(sigma0**2)/(4.0*GS)])
 
 
 @functools.lru_cache(maxsize=1024)

@@ -32,9 +32,8 @@ import scipy.integrate
 
 import pnjl.defaults
 import pnjl.thermo.distributions
-import pnjl.thermo.gcp_sea_lattice
-import pnjl.thermo.gcp_sigma_lattice
 import pnjl.thermo.gcp_pl.polynomial
+import pnjl.thermo.gcp_pnjl.lattice_cut_sea
 import pnjl.thermo.gcp_cluster.bound_step_continuum_step
 
 
@@ -111,8 +110,8 @@ def M_th(T: float, muB: float, cluster: str) -> float:
     N_I = NI[cluster]
     S_I = SI[cluster]
     M_th_i = SQRT2*math.fsum([
-        math.fsum([N_I,-S_I])*pnjl.thermo.gcp_sigma_lattice.Ml(T, muB/3.0),
-        S_I*pnjl.thermo.gcp_sigma_lattice.Ms(T, muB/3.0)
+        math.fsum([N_I,-S_I])*pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ml(T, muB/3.0),
+        S_I*pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ms(T, muB/3.0)
     ])
     return M_th_i
     
@@ -132,7 +131,7 @@ def T_Mott(muB: float, cluster: str):
         -2.0*M_I, SQRT2*M0*N_I, SQRT2*2.0*ml*N_I, -SQRT2*2.0*ml*S_I, SQRT2*2.0*ms*S_I
     ])/(M0*N_I*SQRT2)
     if math.fabs(atanh_inner) > 1.0: #|atanh_inner| is > 1 when a cluster has no bound state
-        return pnjl.thermo.gcp_sigma_lattice.Tc(muB/3.0)
+        return pnjl.thermo.gcp_pnjl.lattice_cut_sea.Tc(muB/3.0)
     else:
         return math.fsum([Tc0, -kappa*(muB**2)/Tc0, dT*math.atanh(atanh_inner)])
 

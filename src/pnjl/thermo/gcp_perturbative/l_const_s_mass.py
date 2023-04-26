@@ -48,7 +48,7 @@ import scipy.integrate
 
 import pnjl.defaults
 import pnjl.thermo.distributions
-import pnjl.thermo.gcp_sigma_lattice
+import pnjl.thermo.gcp_pnjl.lattice_cut_sea
 
 
 def cut(T, mu):
@@ -57,7 +57,7 @@ def cut(T, mu):
 
 mass_hash = {
     'l': cut,
-    's': pnjl.thermo.gcp_sigma_lattice.Ms,
+    's': pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ms,
 }
 
 

@@ -48,7 +48,6 @@ import scipy.integrate
 
 import pnjl.defaults
 import pnjl.thermo.distributions
-import pnjl.thermo.gcp_sigma_lattice
 
 
 CUTOFF = 600.0
