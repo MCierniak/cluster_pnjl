@@ -42,7 +42,7 @@ def Polyakov_loop_inner(phi, T, mu):
         return math.inf
     else:
         sigma = pnjl.thermo.gcp_pnjl.lattice_cut_sea.gcp_field(T, mu)
-        gluon = pnjl.thermo.gcp_pl.lo.U(T, phi[0], phiim)
+        gluon = pnjl.thermo.gcp_pl.lo.U(T, mu, phi[0], phiim)
         sea_l = 2.0*pnjl.thermo.gcp_pnjl.lattice_cut_sea.gcp_sea_l(T, mu)
         sea_s = pnjl.thermo.gcp_pnjl.lattice_cut_sea.gcp_sea_s(T, mu)
         perturbative_l = 2.0*pnjl.thermo.gcp_perturbative.const.gcp(

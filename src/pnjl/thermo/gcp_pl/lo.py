@@ -44,12 +44,18 @@ D3 = 71.2225
 D4 = 2.9715
 D5 = 6.61433
 
-T0 = 211.0
+KAPPA = 0.012 / 2.0
+T00 = 211.0
 
 
 @functools.lru_cache(maxsize=1024)
-def a(T: float) -> float:
-    T0T = T0/T
+def T0(mu: float) -> float:
+    return math.fsum([T00, -T00 * KAPPA * (((3.0 * mu) / T00) ** 2)])
+
+
+@functools.lru_cache(maxsize=1024)
+def a(T: float, mu: float) -> float:
+    T0T = T0(mu)/T
     T0T2 = T0T**2
     num = math.fsum([A1, A2*T0T, A3*T0T2])
     den = math.fsum([1.0, A4*T0T, A5*T0T2])    
@@ -57,14 +63,14 @@ def a(T: float) -> float:
 
 
 @functools.lru_cache(maxsize=1024)
-def b(T: float) -> float:
-    T0T = T0/T
+def b(T: float, mu: float) -> float:
+    T0T = T0(mu)/T
     return -B1*(T0T**B4)*math.expm1(B2*(T0T**B3))
 
 
 @functools.lru_cache(maxsize=1024)
-def c(T: float) -> float:
-    T0T = T0/T
+def c(T: float, mu: float) -> float:
+    T0T = T0(mu)/T
     T0T2 = T0T**2
     num = math.fsum([C1, C2*T0T, C3*T0T2])
     den = math.fsum([1.0, C4*T0T, C5*T0T2])    
@@ -72,8 +78,8 @@ def c(T: float) -> float:
 
 
 @functools.lru_cache(maxsize=1024)
-def d(T: float) -> float:
-    T0T = T0/T
+def d(T: float, mu: float) -> float:
+    T0T = T0(mu)/T
     T0T2 = T0T**2
     num = math.fsum([D1, D2*T0T, D3*T0T2])
     den = math.fsum([1.0, D4*T0T, D5*T0T2])    
@@ -96,7 +102,7 @@ def M_H(phi_re: float, phi_im: float) -> float:
 
 
 @functools.lru_cache(maxsize=1024)
-def U(T : float, phi_re : float, phi_im : float) -> float:
+def U(T : float, mu: float, phi_re : float, phi_im : float) -> float:
     """### Description
     Polyakov-loop grandcanonical thermodynamic potential.
 
@@ -115,17 +121,17 @@ def U(T : float, phi_re : float, phi_im : float) -> float:
     haar = M_H(phi_re, phi_im)
     b_term = 0.0
     if haar <= 0.0:
-        b_term = -b(T)*math.inf
+        b_term = -b(T, mu)*math.inf
     else:
-        b_term = b(T)*math.log(haar)
+        b_term = b(T, mu)*math.log(haar)
     phi_re2 = phi_re**2
     phi_re3 = phi_re**3
     phi_re4 = phi_re**4
     phi_im2 = phi_im**2
     phi_im4 = phi_im**4
-    a_term = -(a(T)/2.0)*(phi_re2 + phi_im2)
-    c_term = c(T)*(phi_re3 - 3.0*phi_im2*phi_re)
-    d_term = d(T)*(phi_im4 + phi_re4 + 2.0*phi_im2*phi_re2)
+    a_term = -(a(T, mu)/2.0)*(phi_re2 + phi_im2)
+    c_term = c(T, mu)*(phi_re3 - 3.0*phi_im2*phi_re)
+    d_term = d(T, mu)*(phi_im4 + phi_re4 + 2.0*phi_im2*phi_re2)
     return (T**4)*math.fsum([a_term, b_term, c_term, d_term])
 
 
@@ -148,7 +154,7 @@ def pressure(T: float, mu: float, phi_re: float, phi_im: float) -> float:
     pressure : float
         Value of the thermodynamic pressure in MeV^4.
     """
-    return -U(T, phi_re, phi_im)
+    return -U(T, mu, phi_re, phi_im)
 
 
 @functools.lru_cache(maxsize=1024)
@@ -170,7 +176,23 @@ def bdensity(T: float, mu: float, phi_re : float, phi_im : float) -> float:
     bdensity : float
         Value of the thermodynamic baryon density in MeV^3.
     """
-    return 0.0
+    h = 1e-2
+    if math.fsum([mu, -2*h]) > 0.0:
+        mu_vec = [
+            math.fsum([mu, 2*h]), math.fsum([mu, h]),
+            math.fsum([mu, -h]), math.fsum([mu, -2*h])
+        ]
+        deriv_coef = [
+            -1.0/(12.0*h), 8.0/(12.0*h),
+            -8.0/(12.0*h), 1.0/(12.0*h)
+        ]
+        p_vec = [
+            coef*pressure(T, mu_el, phi_re, phi_im)/3.0
+            for mu_el, coef in zip(mu_vec, deriv_coef)
+        ]
+        return math.fsum(p_vec)
+    else:
+        return bdensity(T, math.fsum([mu, h]), phi_re, phi_im)
 
 
 @functools.lru_cache(maxsize=1024)
@@ -195,7 +217,26 @@ def qnumber_cumulant(rank: int, T: float, mu: float, phi_re : float, phi_im : fl
     qnumber_cumulant : float
         Value of the thermodynamic quark number cumulant in MeV^3.
     """
-    return 0.0
+    if rank == 1:
+        return 3.0 * bdensity(T, mu, phi_re, phi_im)
+    else:
+        h = 1e-2
+        if math.fsum([mu, -2*h]) > 0.0:
+            mu_vec = [
+                math.fsum([mu, 2*h]), math.fsum([mu, h]),
+                math.fsum([mu, -h]), math.fsum([mu, -2*h])
+            ]
+            deriv_coef = [
+                -1.0/(12.0*h), 8.0/(12.0*h),
+                -8.0/(12.0*h), 1.0/(12.0*h)
+            ]
+            out_vec = [
+                coef*qnumber_cumulant(rank-1, T, mu_el, phi_re, phi_im)
+                for mu_el, coef in zip(mu_vec, deriv_coef)
+            ]
+            return math.fsum(out_vec)
+        else:
+            return qnumber_cumulant(rank, T, math.fsum([mu, h]), phi_re, phi_im)
 
 
 @functools.lru_cache(maxsize=1024)

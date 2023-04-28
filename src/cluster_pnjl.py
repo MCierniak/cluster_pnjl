@@ -3532,7 +3532,7 @@ def epja_experimental_full():
         as cluster
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_mhrg
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
+    import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_mhrg2
     import pnjl.thermo.solvers.\
         pnjl_lattice_cut_sea.\
@@ -3560,21 +3560,30 @@ def epja_experimental_full():
     muB_1 = [0.0 for el in T_1]
     muB_2 = [2.5*el for el in T_2]
 
+    reduced_spectrum = (
+        'pi0', 'pi', 'K', 'K0', 'eta', 'rho', 'omega', 'K*(892)', 'K*0(892)',
+        'p', 'n', 'etaPrime', 'a0', 'f0', 'phi', 'Lambda', 'h1', 'Sigma+',
+        'Sigma0', 'Sigma-', 'b1', 'a1', 'Delta'
+    )
+
     phi_re_v_1, phi_im_v_1 = list(), list()
     phi_re_v_2, phi_im_v_2 = list(), list()
 
     qgp_sdensity_v_1, qgp_partial_sdensity_v_1 = list(), list()
     hrg_full_sdensity_v_1, hrg_full_partial_sdensity_v_1 = list(), list()
+    hrg2_full_sdensity_v_1, hrg2_full_partial_sdensity_v_1 = list(), list()
     mhrg_sdensity_v_1, mhrg_partial_sdensity_v_1 = list(), list()
     mhrg2_sdensity_v_1, mhrg2_partial_sdensity_v_1 = list(), list()
 
     qgp_sdensity_v_2, qgp_partial_sdensity_v_2 = list(), list()
     hrg_full_sdensity_v_2, hrg_full_partial_sdensity_v_2 = list(), list()
+    hrg2_full_sdensity_v_2, hrg2_full_partial_sdensity_v_2 = list(), list()
     mhrg_sdensity_v_2, mhrg_partial_sdensity_v_2 = list(), list()
     mhrg2_sdensity_v_2, mhrg2_partial_sdensity_v_2 = list(), list()
 
     qgp_bdensity_v_2, qgp_partial_bdensity_v_2 = list(), list()
     hrg_full_bdensity_v_2, hrg_full_partial_bdensity_v_2 = list(), list()
+    hrg2_full_bdensity_v_2, hrg2_full_partial_bdensity_v_2 = list(), list()
     mhrg_bdensity_v_2, mhrg_partial_bdensity_v_2 = list(), list()
     mhrg2_bdensity_v_2, mhrg2_partial_bdensity_v_2 = list(), list()
 
@@ -3621,6 +3630,25 @@ def epja_experimental_full():
             hrg_full_sdensity_v_1 = pickle.load(file)
         with open(files+"hrg_full_partial_sdensity_v_0p0.pickle", "rb") as file:
             hrg_full_partial_sdensity_v_1 = pickle.load(file)
+
+    #HRG reduced #1
+    if calc_1:
+        print("Reduced HRG sdensity #1")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
+        ):
+            temp_hrg, temp_hrg_partials = cluster.sdensity_multi(T_el, muB_el, hadrons=reduced_spectrum)
+            hrg2_full_sdensity_v_1.append(temp_hrg/(T_el**3))
+            hrg2_full_partial_sdensity_v_1.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        with open(files+"hrg2_full_sdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(hrg2_full_sdensity_v_1, file)
+        with open(files+"hrg2_full_partial_sdensity_v_0p0.pickle", "wb") as file:
+            pickle.dump(hrg2_full_partial_sdensity_v_1, file)
+    else:
+        with open(files+"hrg2_full_sdensity_v_0p0.pickle", "rb") as file:
+            hrg2_full_sdensity_v_1 = pickle.load(file)
+        with open(files+"hrg2_full_partial_sdensity_v_0p0.pickle", "rb") as file:
+            hrg2_full_partial_sdensity_v_1 = pickle.load(file)
 
     #MHRG #1
     if False:
@@ -3729,6 +3757,40 @@ def epja_experimental_full():
             hrg_full_bdensity_v_2 = pickle.load(file)
         with open(files+"hrg_full_partial_bdensity_v_2p5.pickle", "rb") as file:
             hrg_full_partial_bdensity_v_2 = pickle.load(file)
+
+    #HRG reduced #2
+    if calc_2:
+        print("Reduced HRG sdensity #2")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+        ):
+            temp_hrg, temp_hrg_partials = cluster.sdensity_multi(T_el, muB_el, hadrons=reduced_spectrum)
+            hrg2_full_sdensity_v_2.append(temp_hrg/(T_el**3))
+            hrg2_full_partial_sdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        with open(files+"hrg2_full_sdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(hrg2_full_sdensity_v_2, file)
+        with open(files+"hrg2_full_partial_sdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(hrg2_full_partial_sdensity_v_2, file)
+        print("Reduced HRG bdensity #2")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+        ):
+            temp_hrg, temp_hrg_partials = cluster.bdensity_multi(T_el, muB_el, hadrons=reduced_spectrum)
+            hrg2_full_bdensity_v_2.append(temp_hrg/(T_el**3))
+            hrg2_full_partial_bdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        with open(files+"hrg2_full_bdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(hrg2_full_bdensity_v_2, file)
+        with open(files+"hrg2_full_partial_bdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(hrg2_full_partial_bdensity_v_2, file)
+    else:
+        with open(files+"hrg2_full_sdensity_v_2p5.pickle", "rb") as file:
+            hrg2_full_sdensity_v_2 = pickle.load(file)
+        with open(files+"hrg2_full_partial_sdensity_v_2p5.pickle", "rb") as file:
+            hrg2_full_partial_sdensity_v_2 = pickle.load(file)
+        with open(files+"hrg2_full_bdensity_v_2p5.pickle", "rb") as file:
+            hrg2_full_bdensity_v_2 = pickle.load(file)
+        with open(files+"hrg2_full_partial_bdensity_v_2p5.pickle", "rb") as file:
+            hrg2_full_partial_bdensity_v_2 = pickle.load(file)
 
     #MHRG #2
     if False:
@@ -3967,12 +4029,11 @@ def epja_experimental_full():
 
     ax1.plot(T_1, qgp_sdensity_v_1, '-', c = 'blue')
     ax1.plot(T_1, hrg_full_sdensity_v_1, '-', c = 'purple')
+    ax1.plot(T_1, hrg2_full_sdensity_v_1, '--', c = 'purple')
     ax1.plot(T_1, mhrg_sdensity_v_1, '-', c = 'green')
     ax1.plot(T_1, [sum(el) for el in zip(mhrg_sdensity_v_1, qgp_sdensity_v_1)], '-', c = 'black')
-    # ax1.plot(T_1, mhrg2_sdensity_v_1, '-', c = 'green')
-    # ax1.plot(T_1, [sum(el) for el in zip(mhrg2_sdensity_v_1, qgp_sdensity_v_1)], '-', c = 'black')
-    # ax1.plot(T_1, [el[4] for el in qgp_partial_sdensity_v_1], '-', c="red")
-    # ax1.plot(T_1, [sum(el)-sum([el[5], el[6], el[7]]) for el in qgp_partial_sdensity_v_1], '-', c="magenta")
+    ax1.plot(T_1, [el[4] for el in qgp_partial_sdensity_v_1], '-', c = 'red')
+    ax1.plot(T_1, [el[7] for el in qgp_partial_sdensity_v_1], '-', c = 'cyan')
 
     ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
     ax1.text(250, 15.5, r"QGP", color="blue", fontsize=14)
@@ -4002,12 +4063,10 @@ def epja_experimental_full():
 
     ax2.plot(T_2, qgp_sdensity_v_2, '-', c = 'blue')
     ax2.plot(T_2, hrg_full_sdensity_v_2, '-', c = 'purple')
+    ax2.plot(T_2, hrg2_full_sdensity_v_2, '--', c = 'purple')
     ax2.plot(T_2, mhrg_sdensity_v_2, '-', c = 'green')
     ax2.plot(T_2, [sum(el) for el in zip(mhrg_sdensity_v_2, qgp_sdensity_v_2)], '-', c = 'black')
-    # ax2.plot(T_2, mhrg2_sdensity_v_2, '-', c = 'green')
-    # ax2.plot(T_2, [sum(el) for el in zip(mhrg2_sdensity_v_2, qgp_sdensity_v_2)], '-', c = 'black')
-    # ax2.plot(T_2, [el[4] for el in qgp_partial_sdensity_v_2], '-', c="red")
-    # ax2.plot(T_2, [sum(el)-sum([el[5], el[6], el[7]]) for el in qgp_partial_sdensity_v_2], '-', c="magenta")
+    ax2.plot(T_2, [el[4] for el in qgp_partial_sdensity_v_2], '-', c = 'red')
 
     ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
     ax2.text(250, 17.3, r"QGP", color="blue", fontsize=14)
@@ -4035,13 +4094,10 @@ def epja_experimental_full():
 
     ax3.plot(T_2, qgp_bdensity_v_2, '-', c = 'blue')
     ax3.plot(T_2, hrg_full_bdensity_v_2, '-', c = 'purple')
+    ax3.plot(T_2, hrg2_full_bdensity_v_2, '--', c = 'purple')
     ax3.plot(T_2, mhrg_bdensity_v_2, '-', c = 'green')
     ax3.plot(T_2, [sum(el) for el in zip(mhrg_bdensity_v_2, qgp_bdensity_v_2)], '-', c = 'black')
-    # ax3.plot(T_2, mhrg2_bdensity_v_2, '-', c = 'green')
-    # ax3.plot(T_2, [sum(el) for el in zip(mhrg2_bdensity_v_2, qgp_bdensity_v_2)], '-', c = 'black')
-    # ax3.plot(T_2, [el[9]+el[10] for el in mhrg2_partial_bdensity_v_2], '-', c = 'magenta')
-    # ax3.plot(T_2, [el[15] for el in mhrg2_partial_bdensity_v_2], '-', c = 'brown')
-    # ax3.plot(T_2, [el[22] for el in mhrg2_partial_bdensity_v_2], '-', c = 'grey')
+    ax3.plot(T_2, [el[4] for el in qgp_partial_bdensity_v_2], '-', c = 'red')
 
     ax3.text(85, 1.1, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
     ax3.text(200, 0.67, r"QGP", color="blue", fontsize=14)

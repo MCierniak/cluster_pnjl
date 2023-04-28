@@ -25,6 +25,8 @@ GS = 10.08e-6
 
 T_MOTT_0 = 160.0
 
+SQRT2 = math.sqrt(2.0)
+
 
 @functools.lru_cache(maxsize=1024)
 def T_Mott(mu: float) -> float:
@@ -45,7 +47,7 @@ def Delta_ls(T: float, mu: float) -> float:
 @functools.lru_cache(maxsize=1024)
 def Ml(T: float, mu: float) -> float:
     if T < T_Mott(mu):
-        return M_L_VAC
+        return SQRT2*M_L_VAC
     else:
         return math.fsum([M0*Delta_ls(T, mu), ML])
 
@@ -53,7 +55,7 @@ def Ml(T: float, mu: float) -> float:
 @functools.lru_cache(maxsize=1024)
 def Ms(T: float, mu: float) -> float:
     if T < T_Mott(mu):
-        return M_S_VAC
+        return SQRT2*M_S_VAC
     else:
         return math.fsum([M0*Delta_ls(T, mu), MS])
     

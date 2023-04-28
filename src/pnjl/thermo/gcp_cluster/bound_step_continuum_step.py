@@ -91,15 +91,13 @@ SI = {
     '5q3': 2.0, 'd': 0.0
 }
 
-SQRT2 = math.sqrt(2.0)
-
 
 @functools.lru_cache(maxsize=1024)
 def M_th(T: float, muB: float, hadron: str) -> float:
 
     N_I = NI[hadron]
     S_I = SI[hadron]
-    M_th_i = SQRT2*math.fsum([
+    M_th_i = math.fsum([
         math.fsum([N_I,-S_I])*pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ml(T, muB/3.0),
         S_I*pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ms(T, muB/3.0)
     ])

@@ -1,30 +1,3 @@
-"""### Description
-Generalized Beth-Uhlenbeck cluster grandcanonical thermodynamic potential and 
-associated functions based on https://arxiv.org/pdf/2012.12894.pdf .
-
-### Functions
-gcp_real
-    Generalized Beth-Uhlenbeck cluster grandcanonical thermodynamic potential 
-    (real part).
-gcp_imag
-    Generalized Beth-Uhlenbeck cluster grandcanonical thermodynamic potential 
-    (imaginary part).
-pressure
-    Generalized Beth-Uhlenbeck cluster pressure.
-bdensity
-    Generalized Beth-Uhlenbeck cluster baryon density.
-qnumber_cumulant
-    Generalized Beth-Uhlenbeck cluster quark number cumulant chi_q. Based on 
-    Eq.29 of https://arxiv.org/pdf/2012.12894.pdf and the subsequent inline 
-    definition.
-sdensity
-    Generalized Beth-Uhlenbeck cluster entropy density.
-Polyakov_loop
-"""
-
-
-raise RuntimeError("Model nie dokonczony. T_Mott i T_Mott2 niezgodne z QGP")
-
 import math
 import numpy
 import functools
@@ -94,18 +67,6 @@ SI = {
     '5q3': 2.0, 'd': 0.0
 }
 
-TC02 = pnjl.defaults.TC0**2
-
-TC0DT = pnjl.defaults.TC0*pnjl.defaults.DELTA_T
-
-SQRT2 = math.sqrt(2.0)
-
-MSC_SLOPE = 15.0
-
-LAMBDA = 150.0
-
-CONT_POW_M = 2
-
 
 @functools.lru_cache(maxsize=1024)
 def M_th(T: float, muB: float, cluster: str) -> float:
@@ -117,46 +78,6 @@ def M_th(T: float, muB: float, cluster: str) -> float:
     ])
     return M_th_i
     
-
-@functools.lru_cache(maxsize=1024)
-def T_Mott(muB: float, cluster: str):
-    kappa = pnjl.defaults.KAPPA
-    dT = pnjl.defaults.DELTA_T
-    Tc0 = pnjl.defaults.TC0
-    M0 = pnjl.defaults.M0
-    ml = pnjl.defaults.ML
-    ms = pnjl.defaults.MS
-    N_I = NI[cluster]
-    S_I = SI[cluster]
-    M_I = MI[cluster]
-    atanh_inner = math.fsum([
-        -2.0*M_I, SQRT2*M0*N_I, SQRT2*2.0*ml*N_I, -SQRT2*2.0*ml*S_I, SQRT2*2.0*ms*S_I
-    ])/(M0*N_I*SQRT2)
-    if math.fabs(atanh_inner) > 1.0: #|atanh_inner| is > 1 when a cluster has no bound state
-        return pnjl.thermo.gcp_pnjl.lattice_cut_sea.Tc(muB/3.0)
-    else:
-        return math.fsum([Tc0, -kappa*(muB**2)/Tc0, dT*math.atanh(atanh_inner)])
-
-
-@functools.lru_cache(maxsize=1024)
-def T_Mott2(muB: float, cluster: str):
-    dT = pnjl.defaults.DELTA_T
-    Tc0 = pnjl.defaults.TC0
-    M0 = pnjl.defaults.M0
-    ml = pnjl.defaults.ML
-    ms = pnjl.defaults.MS
-    N_I = NI[cluster]
-    S_I = SI[cluster]
-    M_I = MI[cluster]
-    TM = T_Mott(muB, cluster)
-    suma = math.fsum(
-        [
-            -2.0*M_I, 2.0*LAMBDA*N_I, M0*N_I*SQRT2, 2.0*ml*N_I*SQRT2, -2.0*ml*S_I*SQRT2,
-            2.0*ms*S_I*SQRT2, 2.0*MSC_SLOPE*TM, M0*N_I*SQRT2*math.tanh(Tc0/dT)
-        ]
-    )
-    return suma/(2.0*MSC_SLOPE)
-
 
 @functools.lru_cache(maxsize=1024)
 def bound_factor(M: float, T: float, muB: float, cluster: str) -> float:
