@@ -290,7 +290,7 @@ def epja_figure2():
     )
     ax.add_patch(
         matplotlib.patches.FancyArrowPatch(
-            (30., 1750.), (30., 1000.), arrowstyle='<->',
+            (30., 1700.), (30., 940.), arrowstyle='<->',
             mutation_scale=20, color=col_n
         )
     )
@@ -303,7 +303,7 @@ def epja_figure2():
     )
     ax.add_patch(
         matplotlib.patches.FancyArrowPatch(
-            (50., 1150.), (50., 135.), arrowstyle='<->',
+            (50., 1125.), (50., 125.), arrowstyle='<->',
             mutation_scale=20, color=col_pi
         )
     )
@@ -316,7 +316,7 @@ def epja_figure2():
     )
     ax.add_patch(
         matplotlib.patches.FancyArrowPatch(
-            (10., 3450.), (10., 1900.), arrowstyle='<->',
+            (10., 3375.), (10., 1875.), arrowstyle='<->',
             mutation_scale=20, color=col_h
         )
     )
@@ -2946,7 +2946,7 @@ def epja_experimental_pert():
     import matplotlib.pyplot
 
     import utils
-    import pnjl.thermo.gcp_pnjl.lattice_cut_sea
+    import pnjl.thermo.gcp_perturbative.l_const_s_mass as pert
 
     import pnjl.thermo.solvers.\
         pnjl_lattice_cut_sea.\
@@ -3173,30 +3173,23 @@ def epja_experimental_pert():
     qgp_old_sdensity_v_1, qgp_old_partial_sdensity_v_1 = qgp_sdensity_old_1(files)
     qgp_old_sdensity_v_2, qgp_old_partial_sdensity_v_2 = qgp_sdensity_old_2(files)
 
-    t_sea_sdensity_1 = [
-        (2.0*pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(T_el, muB_el/3.0, 'l') + pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(T_el, muB_el/3.0, 's'))/(T_el**3)
-        for T_el, muB_el in tqdm.tqdm(zip(T_1, muB_1), total=len(T_1), ncols=100)
+    t_pmod_sdensity_1 = [
+        (2.0*pert.sdensity(T_el, muB_el/3.0, phi_re_el, phi_im_el, 'l') + pert.sdensity(T_el, muB_el/3.0, phi_re_el, phi_im_el, 's'))/(T_el**3)
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(
+            T_1, muB_1, phi_re_v_1, phi_im_v_1
+        ), total=len(T_2), ncols=100)
     ]
-    t_sea_sdensity_2 = [
-        (2.0*pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(T_el, muB_el/3.0, 'l') + pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_sea(T_el, muB_el/3.0, 's'))/(T_el**3)
-        for T_el, muB_el in tqdm.tqdm(zip(T_2, muB_2), total=len(T_2), ncols=100)
+    t_pmod_sdensity_2 = [
+        (2.0*pert.sdensity(T_el, muB_el/3.0, phi_re_el, phi_im_el, 'l') + pert.sdensity(T_el, muB_el/3.0, phi_re_el, phi_im_el, 's'))/(T_el**3)
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(
+            T_2, muB_2, phi_re_v_2, phi_im_v_2
+        ), total=len(T_2), ncols=100)
     ]
-    t_sea_bdensity_2 = [
-        (2.0*pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(T_el, muB_el/3.0, 'l') + pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_sea(T_el, muB_el/3.0, 's'))/(T_el**3)
-        for T_el, muB_el in tqdm.tqdm(zip(T_2, muB_2), total=len(T_2), ncols=100)
-    ]
-
-    t_field_sdensity_1 = [
-        pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_field(T_el, muB_el/3.0)/(T_el**3)
-        for T_el, muB_el in tqdm.tqdm(zip(T_1, muB_1), total=len(T_1), ncols=100)
-    ]
-    t_field_sdensity_2 = [
-        pnjl.thermo.gcp_pnjl.lattice_cut_sea.sdensity_field(T_el, muB_el/3.0)/(T_el**3)
-        for T_el, muB_el in tqdm.tqdm(zip(T_2, muB_2), total=len(T_2), ncols=100)
-    ]
-    t_field_bdensity_2 = [
-        pnjl.thermo.gcp_pnjl.lattice_cut_sea.bdensity_field(T_el, muB_el/3.0)/(T_el**3)
-        for T_el, muB_el in tqdm.tqdm(zip(T_2, muB_2), total=len(T_2), ncols=100)
+    t_pmod_bdensity_2 = [
+        (2.0*pert.bdensity(T_el, muB_el/3.0, phi_re_el, phi_im_el, 'l') + pert.bdensity(T_el, muB_el/3.0, phi_re_el, phi_im_el, 's'))/(T_el**3)
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(zip(
+            T_2, muB_2, phi_re_v_2, phi_im_v_2
+        ), total=len(T_2), ncols=100)
     ]
 
     t_pnjl_bdensity_2 = [
@@ -3424,8 +3417,9 @@ def epja_experimental_pert():
     ax1.plot(T_1, t_pert_ud_sdensity_1, '--', c = 'magenta')
     ax1.plot(T_1, t_gluon_sdensity_1, '-', c = 'red')
     ax1.plot(T_1, t_quark_sdensity_1, '-', c = 'purple')
-    ax1.plot(T_1, t_sea_sdensity_1, '-', c = 'cyan')
-    ax1.plot(T_1, t_field_sdensity_1, '-', c = 'orange')
+    ax1.plot(T_1, t_pmod_sdensity_1, ':', c = 'magenta')
+    # ax1.plot(T_1, [el[0] for el in qgp_partial_sdensity_v_1], ':', c = 'cyan')
+    # ax1.plot(T_1, [sum([el[1], el[2], el[3]]) for el in qgp_partial_sdensity_v_1], ':', c = 'orange')
 
     ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
     ax1.text(250, 15.5, r"QGP", color="black", fontsize=14)
@@ -3463,8 +3457,9 @@ def epja_experimental_pert():
     ax2.plot(T_2, t_pert_ud_sdensity_2, '--', c = 'magenta')
     ax2.plot(T_2, t_gluon_sdensity_2, '-', c = 'red')
     ax2.plot(T_2, t_quark_sdensity_2, '-', c = 'purple')
-    ax2.plot(T_2, t_sea_sdensity_2, '-', c = 'cyan')
-    ax2.plot(T_2, t_field_sdensity_2, '-', c = 'orange')
+    ax2.plot(T_2, t_pmod_sdensity_2, ':', c = 'magenta')
+    # ax2.plot(T_2, [el[0] for el in qgp_partial_sdensity_v_2], ':', c = 'cyan')
+    # ax2.plot(T_2, [sum([el[1], el[2], el[3]]) for el in qgp_partial_sdensity_v_2], ':', c = 'orange')
 
     ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
     ax2.text(250, 17.3, r"QGP", color="black", fontsize=14)
@@ -3499,8 +3494,9 @@ def epja_experimental_pert():
     ax3.plot(T_2, t_pert_bdensity_2, '-', c = 'magenta')
     ax3.plot(T_2, t_gluon_bdensity_2, '-', c = 'red')
     ax3.plot(T_2, t_pert_ud_bdensity_2, '--', c = 'magenta')
-    ax3.plot(T_2, t_sea_bdensity_2, '-', c = 'cyan')
-    ax3.plot(T_2, t_field_bdensity_2, '-', c = 'orange')
+    ax3.plot(T_2, t_pmod_bdensity_2, ':', c = 'magenta')
+    # ax3.plot(T_2, [el[0] for el in qgp_partial_bdensity_v_2], ':', c = 'cyan')
+    # ax3.plot(T_2, [sum([el[1], el[2], el[3]]) for el in qgp_partial_bdensity_v_2], ':', c = 'orange')
 
     ax3.text(85, 1.1, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
     ax3.text(188, -0.18, r"Perturbative correction", color="magenta", fontsize=14)
@@ -3564,10 +3560,6 @@ def epja_experimental_full():
     muB_1 = [0.0 for el in T_1]
     muB_2 = [2.5*el for el in T_2]
 
-    print(f"mu = 0.0, T_Mott = {cluster_mhrg2.T_Mott(0.0, 'pi0')}, T_Mott_2 = {cluster_mhrg2.T_Mott2(0.0, 'pi0')}")
-    print(f"mu = 2.5*T, T_Mott = {cluster_mhrg2.T_Mott(2.5*280.0, 'pi0')}, T_Mott_2 = {cluster_mhrg2.T_Mott2(2.5*280.0, 'pi0')}")
-    input()
-
     phi_re_v_1, phi_im_v_1 = list(), list()
     phi_re_v_2, phi_im_v_2 = list(), list()
 
@@ -3587,7 +3579,7 @@ def epja_experimental_full():
     mhrg2_bdensity_v_2, mhrg2_partial_bdensity_v_2 = list(), list()
 
     #QGP #1
-    if calc_1:
+    if True:
         sol = solver.sdensity_all(T_1, muB_1, label="QGP PL and sdensity #1")
         phi_re_v_1 = sol[0]
         phi_im_v_1 = sol[1]
@@ -3631,7 +3623,7 @@ def epja_experimental_full():
             hrg_full_partial_sdensity_v_1 = pickle.load(file)
 
     #MHRG #1
-    if calc_1:
+    if False:
         print("MHRG sdensity #1")
         for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
@@ -3650,7 +3642,7 @@ def epja_experimental_full():
             mhrg_partial_sdensity_v_1 = pickle.load(file)
 
     #MHRG (continuum) #1
-    if False:
+    if calc_1:
         print("MHRG (continuum) sdensity #1")
         for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
@@ -3669,7 +3661,7 @@ def epja_experimental_full():
             mhrg2_partial_sdensity_v_1 = pickle.load(file)
 
     #QGP #2
-    if calc_2:
+    if True:
         sol = solver.sdensity_all(T_2, muB_2, label="QGP PL and sdensity #2")
         phi_re_v_2 = sol[0]
         phi_im_v_2 = sol[1]
@@ -3739,7 +3731,7 @@ def epja_experimental_full():
             hrg_full_partial_bdensity_v_2 = pickle.load(file)
 
     #MHRG #2
-    if calc_2:
+    if False:
         print("MHRG sdensity #2")
         for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
@@ -3773,7 +3765,7 @@ def epja_experimental_full():
             mhrg_partial_bdensity_v_2 = pickle.load(file)
 
     #MHRG (continuum) #2
-    if False:
+    if calc_2:
         # print("MHRG (continuum) sdensity #2")
         # for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
         #     zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
@@ -3975,11 +3967,11 @@ def epja_experimental_full():
 
     ax1.plot(T_1, qgp_sdensity_v_1, '-', c = 'blue')
     ax1.plot(T_1, hrg_full_sdensity_v_1, '-', c = 'purple')
-    ax1.plot(T_1, mhrg_sdensity_v_1, '-.', c = 'green')
-    ax1.plot(T_1, [sum(el) for el in zip(mhrg_sdensity_v_1, qgp_sdensity_v_1)], '-.', c = 'black')
-    ax1.plot(T_1, mhrg2_sdensity_v_1, '-', c = 'green')
-    ax1.plot(T_1, [sum(el) for el in zip(mhrg2_sdensity_v_1, qgp_sdensity_v_1)], '-', c = 'black')
-    ax1.plot(T_1, [el[4] for el in qgp_partial_sdensity_v_1], '-', c="red")
+    ax1.plot(T_1, mhrg_sdensity_v_1, '-', c = 'green')
+    ax1.plot(T_1, [sum(el) for el in zip(mhrg_sdensity_v_1, qgp_sdensity_v_1)], '-', c = 'black')
+    # ax1.plot(T_1, mhrg2_sdensity_v_1, '-', c = 'green')
+    # ax1.plot(T_1, [sum(el) for el in zip(mhrg2_sdensity_v_1, qgp_sdensity_v_1)], '-', c = 'black')
+    # ax1.plot(T_1, [el[4] for el in qgp_partial_sdensity_v_1], '-', c="red")
     # ax1.plot(T_1, [sum(el)-sum([el[5], el[6], el[7]]) for el in qgp_partial_sdensity_v_1], '-', c="magenta")
 
     ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
@@ -4010,11 +4002,11 @@ def epja_experimental_full():
 
     ax2.plot(T_2, qgp_sdensity_v_2, '-', c = 'blue')
     ax2.plot(T_2, hrg_full_sdensity_v_2, '-', c = 'purple')
-    ax2.plot(T_2, mhrg_sdensity_v_2, '-.', c = 'green')
-    ax2.plot(T_2, [sum(el) for el in zip(mhrg_sdensity_v_2, qgp_sdensity_v_2)], '-.', c = 'black')
-    ax2.plot(T_2, mhrg2_sdensity_v_2, '-', c = 'green')
-    ax2.plot(T_2, [sum(el) for el in zip(mhrg2_sdensity_v_2, qgp_sdensity_v_2)], '-', c = 'black')
-    ax2.plot(T_2, [el[4] for el in qgp_partial_sdensity_v_2], '-', c="red")
+    ax2.plot(T_2, mhrg_sdensity_v_2, '-', c = 'green')
+    ax2.plot(T_2, [sum(el) for el in zip(mhrg_sdensity_v_2, qgp_sdensity_v_2)], '-', c = 'black')
+    # ax2.plot(T_2, mhrg2_sdensity_v_2, '-', c = 'green')
+    # ax2.plot(T_2, [sum(el) for el in zip(mhrg2_sdensity_v_2, qgp_sdensity_v_2)], '-', c = 'black')
+    # ax2.plot(T_2, [el[4] for el in qgp_partial_sdensity_v_2], '-', c="red")
     # ax2.plot(T_2, [sum(el)-sum([el[5], el[6], el[7]]) for el in qgp_partial_sdensity_v_2], '-', c="magenta")
 
     ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
@@ -4043,10 +4035,10 @@ def epja_experimental_full():
 
     ax3.plot(T_2, qgp_bdensity_v_2, '-', c = 'blue')
     ax3.plot(T_2, hrg_full_bdensity_v_2, '-', c = 'purple')
-    ax3.plot(T_2, mhrg_bdensity_v_2, '-.', c = 'green')
-    ax3.plot(T_2, [sum(el) for el in zip(mhrg_bdensity_v_2, qgp_bdensity_v_2)], '-.', c = 'black')
-    ax3.plot(T_2, mhrg2_bdensity_v_2, '-', c = 'green')
-    ax3.plot(T_2, [sum(el) for el in zip(mhrg2_bdensity_v_2, qgp_bdensity_v_2)], '-', c = 'black')
+    ax3.plot(T_2, mhrg_bdensity_v_2, '-', c = 'green')
+    ax3.plot(T_2, [sum(el) for el in zip(mhrg_bdensity_v_2, qgp_bdensity_v_2)], '-', c = 'black')
+    # ax3.plot(T_2, mhrg2_bdensity_v_2, '-', c = 'green')
+    # ax3.plot(T_2, [sum(el) for el in zip(mhrg2_bdensity_v_2, qgp_bdensity_v_2)], '-', c = 'black')
     # ax3.plot(T_2, [el[9]+el[10] for el in mhrg2_partial_bdensity_v_2], '-', c = 'magenta')
     # ax3.plot(T_2, [el[15] for el in mhrg2_partial_bdensity_v_2], '-', c = 'brown')
     # ax3.plot(T_2, [el[22] for el in mhrg2_partial_bdensity_v_2], '-', c = 'grey')
@@ -4069,6 +4061,6 @@ def epja_experimental_full():
 
 if __name__ == '__main__':
 
-    epja_experimental_pert()
+    epja_experimental_full()
 
     print("END")

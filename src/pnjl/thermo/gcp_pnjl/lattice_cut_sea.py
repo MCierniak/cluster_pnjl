@@ -23,7 +23,12 @@ MS = 155.0
 
 GS = 10.08e-6
 
-T_MOTT = 200.0
+T_MOTT_0 = 160.0
+
+
+@functools.lru_cache(maxsize=1024)
+def T_Mott(mu: float) -> float:
+    return math.fsum([T_MOTT_0, -T_MOTT_0 * KAPPA * (((3.0 * mu) / T_MOTT_0) ** 2)])
 
 
 @functools.lru_cache(maxsize=1024)
@@ -39,7 +44,7 @@ def Delta_ls(T: float, mu: float) -> float:
 
 @functools.lru_cache(maxsize=1024)
 def Ml(T: float, mu: float) -> float:
-    if T < T_MOTT:
+    if T < T_Mott(mu):
         return M_L_VAC
     else:
         return math.fsum([M0*Delta_ls(T, mu), ML])
@@ -47,7 +52,7 @@ def Ml(T: float, mu: float) -> float:
 
 @functools.lru_cache(maxsize=1024)
 def Ms(T: float, mu: float) -> float:
-    if T < T_MOTT:
+    if T < T_Mott(mu):
         return M_S_VAC
     else:
         return math.fsum([M0*Delta_ls(T, mu), MS])
@@ -97,7 +102,8 @@ sea_hash = {
 
 @functools.lru_cache(maxsize=1024)
 def pressure_sea(T: float, mu: float, typ: str) -> float:
-    return -sea_hash[typ](T, mu)
+    # return -sea_hash[typ](T, mu)
+    return 0.0
 
 
 @functools.lru_cache(maxsize=1024)
@@ -349,12 +355,13 @@ def sdensity_q(T: float, mu: float, phi_re : float, phi_im : float, typ: str) ->
 def gcp_field(T: float, mu: float) -> float:
     sigma = Ml(T, mu) - ML
     sigma0 = Ml(0.0, 0.0) - ML
-    return math.fsum([(sigma**2)/(4.0*GS), -(sigma0**2)/(4.0*GS)])
+    return -math.fsum([(sigma**2)/(4.0*GS), -(sigma0**2)/(4.0*GS)])
 
 
 @functools.lru_cache(maxsize=1024)
 def pressure_field(T: float, mu: float) -> float:
-    return -gcp_field(T, mu)
+    # return -gcp_field(T, mu)
+    return 0.0
 
 
 @functools.lru_cache(maxsize=1024)

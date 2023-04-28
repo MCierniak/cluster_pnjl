@@ -100,8 +100,8 @@ def M_th(T: float, muB: float, hadron: str) -> float:
     N_I = NI[hadron]
     S_I = SI[hadron]
     M_th_i = SQRT2*math.fsum([
-        math.fsum([N_I,-S_I])*pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ml(T, muB),
-        S_I*pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ms(T, muB)
+        math.fsum([N_I,-S_I])*pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ml(T, muB/3.0),
+        S_I*pnjl.thermo.gcp_pnjl.lattice_cut_sea.Ms(T, muB/3.0)
     ])
 
     return M_th_i
@@ -524,7 +524,7 @@ def bdensity(
     if A_I == 0.0:
         return 0.0
     else:
-        M_th_i = math.sqrt(2.0)*M_th(T, muB, hadron)
+        M_th_i = M_th(T, muB, hadron)
         integral = 0.0
         if M_th_i > M_I:
             integral, error = scipy.integrate.quad(
@@ -582,7 +582,7 @@ def sdensity(
     M_I = MI[hadron]
     D_I = DI[hadron]
     A_I = BI[hadron]
-    M_th_i = math.sqrt(2.0)*M_th(T, muB, hadron)
+    M_th_i = M_th(T, muB, hadron)
     integral = 0.0
     if M_th_i > M_I:
         integral, error = scipy.integrate.quad(
