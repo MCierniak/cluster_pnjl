@@ -46,7 +46,7 @@ def Delta_ls(T: float, mu: float) -> float:
 
 @functools.lru_cache(maxsize=1024)
 def Ml(T: float, mu: float) -> float:
-    if T < T_Mott(mu):
+    if T <= T_Mott(mu):
         return SQRT2*M_L_VAC
     else:
         return math.fsum([M0*Delta_ls(T, mu), ML])
@@ -54,7 +54,7 @@ def Ml(T: float, mu: float) -> float:
 
 @functools.lru_cache(maxsize=1024)
 def Ms(T: float, mu: float) -> float:
-    if T < T_Mott(mu):
+    if T <= T_Mott(mu):
         return SQRT2*M_S_VAC
     else:
         return math.fsum([M0*Delta_ls(T, mu), MS])

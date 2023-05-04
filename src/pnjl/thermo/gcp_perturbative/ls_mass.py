@@ -54,8 +54,8 @@ import pnjl.thermo.gcp_pnjl.lattice_cut_sea
 NF = 3.0
 NC = 3.0
 
-T0 = 154.0
-MUB0 = 100.0
+T0 = 160.0
+MUB0 = 3.0*math.pi*T0
 
 
 mass_hash = {

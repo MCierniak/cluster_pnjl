@@ -55,42 +55,8 @@ CUTOFF = 600.0
 NF = 3.0
 NC = 3.0
 
-T0 = 154.0
-MUB0 = 100.0
-
-# @functools.lru_cache(maxsize=1024)
-# def alpha_s(T : float, mu : float) -> float:
-#     """### Description
-#     QCD running coupling.
-
-#     ### Parameters
-#     T : float
-#         Temperature in MeV.
-#     mu : float
-#         Quark chemical potential in MeV.
-
-#     ### Returns
-#     alpha_s : float
-#         Value of the running coupling.
-#     """
-
-#     NF = 3.0
-#     NC = pnjl.defaults.NC
-#     C = pnjl.defaults.C
-#     D = pnjl.defaults.D
-
-#     den1 = math.fsum([11.0 * NC, -2.0*NF])
-#     den2 = math.fsum([
-#         2.0*math.log(D),
-#         2.0*math.log(T),
-#         -2.0*math.log(C)
-#     ])
-#     den3 = math.fsum([((D*T)**2), -(C**2)])
-
-#     par = math.fsum([1.0/den2, -(C**2)/den3])
-
-#     return ((12.0*math.pi)/den1)*par
-
+T0 = 100.0
+MUB0 = 3.0*math.pi*T0
 
 
 @functools.lru_cache(maxsize=1024)

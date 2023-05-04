@@ -11,64 +11,52 @@ def epja_figure1():
 
     import pnjl.defaults
 
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
-        as cluster
+    import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
+        as cluster_susd
+    import pnjl.thermo.gcp_cluster.breit_wigner \
+        as cluster_bw
 
     if platform.system() == "Linux":
         matplotlib.use("TkAgg")
 
     hadron = 'Delta'
 
-    def phase(M, T, mu):
-        MI_N = cluster.MI[hadron]
-        Mth_N = cluster.M_th(T, mu, hadron)
-        if Mth_N > MI_N:
-            if M < MI_N:
-                return 0.0
-            if M >= MI_N and M < Mth_N:
-                return 1.0
-            else:
-                return cluster.continuum_factor1(M, T, mu, hadron)
-        else:
-            T_Mott = cluster.T_Mott(mu, hadron)
-            return cluster.continuum_factor2(M, T, mu, T_Mott, hadron)
-        
-    def phase2(M, T, mu):
-        MI_N = cluster.MI[hadron]
-        Mth_N = cluster.M_th(T, mu, hadron)
-        if Mth_N > MI_N:
-            if M < MI_N:
-                return 0.0
-            if M >= MI_N and M < Mth_N:
-                return 1.0
-            else:
-                return 0.0
-        else:
-            return 0.0
+    T_Min = 155.0
+    T_Max = 175.0
 
-    T_list = numpy.linspace(135, 160, num=17)
-    M_list = numpy.linspace(0.5, 2.5, num=1000)
+    T_list = numpy.linspace(T_Min, T_Max, num=17)
+    M_list = numpy.linspace(0.5, 3.5, num=1000)
 
     muB_T = 0.0
 
+    def phase(M, T, muB, hadron):
+        delta_i = cluster_bw.bound_factor2(M, T, muB, hadron) \
+            + cluster_bw.continuum_factor1(M, T, muB, hadron) \
+            + cluster_bw.continuum_factor2(M, T, muB, hadron)
+        return delta_i
+        
+    def phase2(M, T, muB, hadron):
+        delta_i = cluster_bw.bound_factor2(M, T, muB, hadron)
+        return delta_i
+
     phase_list = [
-        [phase(M_el*1000.0, T_el, muB_T*T_el) for M_el in M_list]
+        [phase(M_el*1000.0, T_el, muB_T*T_el, hadron) for M_el in M_list]
         for T_el in T_list
     ]
     phase2_list = [
-        [phase2(M_el*1000.0, T_el, muB_T*T_el) for M_el in M_list]
+        [phase2(M_el*1000.0, T_el, muB_T*T_el, hadron) for M_el in M_list]
         for T_el in T_list
     ]
 
-    M_I = cluster.MI[hadron]
-    nLambda = 0.0#cluster.NI[hadron]*pnjl.defaults.L
+    M_I = cluster_bw.MI[hadron]
+    nLambda = cluster_bw.NI[hadron]*cluster_bw.LAMBDA
 
     Mthi_vec = [
-        cluster.M_th(T_el, muB_T*T_el, hadron)/1000.0 for T_el in T_list
+        cluster_bw.M_th(T_el, muB_T*T_el, hadron)/1000.0 for T_el in T_list
     ]
 
     Mthi0_vec = [
-        (cluster.M_th(0.0, 0.0, hadron)+nLambda)/1000.0 for _ in T_list
+        (cluster_bw.M_th(0.0, 0.0, hadron)+nLambda)/1000.0 for _ in T_list
     ]
 
     fig1 = matplotlib.pyplot.figure(num = 1, figsize = (12, 5))
@@ -85,7 +73,15 @@ def epja_figure1():
         c = 'black'
     )
     ax1.plot3D(
+        M_list, [T_list[1] for el in M_list], phase_list[1], '-',
+        c = 'black'
+    )
+    ax1.plot3D(
         M_list, [T_list[2] for el in M_list], phase_list[2], '-',
+        c = 'black'
+    )
+    ax1.plot3D(
+        M_list, [T_list[3] for el in M_list], phase_list[3], '-',
         c = 'black'
     )
     ax1.plot3D(
@@ -93,7 +89,15 @@ def epja_figure1():
         c = 'black'
     )
     ax1.plot3D(
+        M_list, [T_list[5] for el in M_list], phase_list[5], '-',
+        c = 'black'
+    )
+    ax1.plot3D(
         M_list, [T_list[6] for el in M_list], phase_list[6], '-',
+        c = 'black'
+    )
+    ax1.plot3D(
+        M_list, [T_list[7] for el in M_list], phase_list[7], '-',
         c = 'black'
     )
     ax1.plot3D(
@@ -101,7 +105,15 @@ def epja_figure1():
         c = 'black'
     )
     ax1.plot3D(
+        M_list, [T_list[9] for el in M_list], phase_list[9], '-',
+        c = 'black'
+    )
+    ax1.plot3D(
         M_list, [T_list[10] for el in M_list], phase_list[10], '-',
+        c = 'black'
+    )
+    ax1.plot3D(
+        M_list, [T_list[11] for el in M_list], phase_list[11], '-',
         c = 'black'
     )
     ax1.plot3D(
@@ -109,7 +121,15 @@ def epja_figure1():
         c = 'black'
     )
     ax1.plot3D(
+        M_list, [T_list[13] for el in M_list], phase_list[13], '-',
+        c = 'black'
+    )
+    ax1.plot3D(
         M_list, [T_list[14] for el in M_list], phase_list[14], '-',
+        c = 'black'
+    )
+    ax1.plot3D(
+        M_list, [T_list[15] for el in M_list], phase_list[15], '-',
         c = 'black'
     )
     ax1.plot3D(
@@ -117,16 +137,16 @@ def epja_figure1():
         c='black'
     )
     
-    ax1.plot3D(
-        [
-            (cluster.MSC_SLOPE*(el-cluster.T_Mott(muB_T*el, hadron)) + cluster.MI[hadron])/1000.0 if el > cluster.T_Mott(muB_T*el, hadron)-1.0 else float('NaN') for el in T_list
-        ], 
-        T_list, [0.0 for el in T_list], '--', c='green'
-    )
+    # ax1.plot3D(
+    #     [
+    #         (cluster.MSC_SLOPE*(el-cluster.T_Mott(muB_T*el, hadron)) + cluster.MI[hadron])/1000.0 if el > cluster.T_Mott(muB_T*el, hadron)-1.0 else float('NaN') for el in T_list
+    #     ], 
+    #     T_list, [0.0 for el in T_list], '--', c='green'
+    # )
     ax1.plot3D(Mthi0_vec, T_list, [0.0 for el in T_list], '--', c='red')
     ax1.plot3D(Mthi_vec, T_list, [0.0 for el in T_list], '--', c='green')
     ax1.plot3D(
-        [M_I/1000.0 for _ in T_list], T_list, [0.0 for el in T_list], '--',
+        [cluster_bw.M_i(T_el, 0.0, hadron)/1000.0 for T_el in T_list], T_list, [0.0 for el in T_list], '--',
         c='blue'
     )
     ax1.text(
@@ -148,8 +168,9 @@ def epja_figure1():
     ax1.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
     ax1.set_xticks([0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5])
     ax1.set_xticklabels([0.5, '', 1, '', 1.5, '', 2, '', 2.5])
-    ax1.set_yticks([135, 140, 145, 150, 155, 160])
-    ax1.set_yticklabels([135, 140, 145, 150, 155, ''])
+    # ax1.set_yticks([135, 140, 145, 150, 155, 160])
+    ax1.set_yticks([150, 155, 160])
+    # ax1.set_yticklabels([135, 140, 145, 150, 155, ''])
     
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -265,7 +286,7 @@ def epja_figure2():
     import pnjl.defaults
     import pnjl.thermo.gcp_pnjl.lattice_cut_sea
 
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
+    import pnjl.thermo.gcp_cluster.breit_wigner \
         as cluster
 
     col_n = '#DEA54B'
@@ -3537,7 +3558,7 @@ def epja_experimental_full():
     import pnjl.thermo.solvers.\
         pnjl_lattice_cut_sea.\
         pl_lo.\
-        pert_l_const_s_mass.\
+        pert_const.\
         no_clusters \
     as solver
 
@@ -3588,7 +3609,7 @@ def epja_experimental_full():
     mhrg2_bdensity_v_2, mhrg2_partial_bdensity_v_2 = list(), list()
 
     #QGP #1
-    if True:
+    if False:
         sol = solver.sdensity_all(T_1, muB_1, label="QGP PL and sdensity #1")
         phi_re_v_1 = sol[0]
         phi_im_v_1 = sol[1]
@@ -3689,7 +3710,7 @@ def epja_experimental_full():
             mhrg2_partial_sdensity_v_1 = pickle.load(file)
 
     #QGP #2
-    if True:
+    if False:
         sol = solver.sdensity_all(T_2, muB_2, label="QGP PL and sdensity #2")
         phi_re_v_2 = sol[0]
         phi_im_v_2 = sol[1]
@@ -4033,7 +4054,9 @@ def epja_experimental_full():
     ax1.plot(T_1, mhrg_sdensity_v_1, '-', c = 'green')
     ax1.plot(T_1, [sum(el) for el in zip(mhrg_sdensity_v_1, qgp_sdensity_v_1)], '-', c = 'black')
     ax1.plot(T_1, [el[4] for el in qgp_partial_sdensity_v_1], '-', c = 'red')
-    ax1.plot(T_1, [el[7] for el in qgp_partial_sdensity_v_1], '-', c = 'cyan')
+    ax1.plot(T_1, [sum([el[8], el[9], el[10]]) for el in qgp_partial_sdensity_v_1], '-', c = 'magenta')
+    ax1.plot(T_1, [el[8] for el in qgp_partial_sdensity_v_1], '--', c = 'magenta')
+    ax1.plot(T_1, [el[10] for el in qgp_partial_sdensity_v_1], ':', c = 'magenta')
 
     ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
     ax1.text(250, 15.5, r"QGP", color="blue", fontsize=14)
@@ -4067,6 +4090,9 @@ def epja_experimental_full():
     ax2.plot(T_2, mhrg_sdensity_v_2, '-', c = 'green')
     ax2.plot(T_2, [sum(el) for el in zip(mhrg_sdensity_v_2, qgp_sdensity_v_2)], '-', c = 'black')
     ax2.plot(T_2, [el[4] for el in qgp_partial_sdensity_v_2], '-', c = 'red')
+    ax2.plot(T_2, [sum([el[8], el[9], el[10]]) for el in qgp_partial_sdensity_v_2], '-', c = 'magenta')
+    ax2.plot(T_2, [el[8] for el in qgp_partial_sdensity_v_2], '--', c = 'magenta')
+    ax2.plot(T_2, [el[10] for el in qgp_partial_sdensity_v_2], ':', c = 'magenta')
 
     ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
     ax2.text(250, 17.3, r"QGP", color="blue", fontsize=14)
@@ -4098,6 +4124,9 @@ def epja_experimental_full():
     ax3.plot(T_2, mhrg_bdensity_v_2, '-', c = 'green')
     ax3.plot(T_2, [sum(el) for el in zip(mhrg_bdensity_v_2, qgp_bdensity_v_2)], '-', c = 'black')
     ax3.plot(T_2, [el[4] for el in qgp_partial_bdensity_v_2], '-', c = 'red')
+    ax3.plot(T_2, [sum([el[8], el[9], el[10]]) for el in qgp_partial_bdensity_v_2], '-', c = 'magenta')
+    ax3.plot(T_2, [el[8] for el in qgp_partial_bdensity_v_2], '--', c = 'magenta')
+    ax3.plot(T_2, [el[10] for el in qgp_partial_bdensity_v_2], ':', c = 'magenta')
 
     ax3.text(85, 1.1, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
     ax3.text(200, 0.67, r"QGP", color="blue", fontsize=14)
@@ -4117,6 +4146,6 @@ def epja_experimental_full():
 
 if __name__ == '__main__':
 
-    epja_experimental_full()
+    epja_figure1()
 
     print("END")
