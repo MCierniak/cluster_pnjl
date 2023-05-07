@@ -8,7 +8,6 @@ Polyakov-loop solver
 import tqdm
 import math
 import typing
-import functools
 
 import scipy.optimize
 
@@ -58,7 +57,6 @@ def Polyakov_loop_inner(phi, T, mu):
         ])
 
 
-@functools.lru_cache(maxsize=1024)
 def Polyakov_loop(
     T: float, mu: float, phi_re0: float, phi_im0: float
 ) -> typing.Tuple[float, float]:

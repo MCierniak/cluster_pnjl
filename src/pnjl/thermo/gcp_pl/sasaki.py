@@ -3,7 +3,6 @@ Mg from Braaten_2_PhysRevD_45_(1992)
 """
 
 import math
-import functools
 
 import scipy.integrate
 
@@ -18,7 +17,6 @@ A0 = (0.197*1000.0)**3
 C0 = -((0.180*1000.0)**4)
 
 
-@functools.lru_cache(maxsize=1024)
 def Mg(T: float, muB: float):
     g2 = 4.0*math.pi*pnjl.thermo.gcp_perturbative.const.alpha_s(T, muB)
     return math.fsum(
@@ -30,17 +28,14 @@ def Mg(T: float, muB: float):
     # return 0.0
 
 
-@functools.lru_cache(maxsize=1024)
 def En(p: float, M: float) -> float:
     return math.sqrt((p**2) + (M**2))
 
 
-@functools.lru_cache(maxsize=1024)
 def C1(phi_re: float, phi_im: float) -> float:
     return math.fsum([1.0, -9.0*(phi_re**2), -9.0*(phi_im**2)])
 
 
-@functools.lru_cache(maxsize=1024)
 def C2(phi_re: float, phi_im: float) -> float:
     return math.fsum(
         [
@@ -50,7 +45,6 @@ def C2(phi_re: float, phi_im: float) -> float:
     )
 
 
-@functools.lru_cache(maxsize=1024)
 def C3(phi_re: float, phi_im: float) -> float:
     return math.fsum(
         [
@@ -60,7 +54,6 @@ def C3(phi_re: float, phi_im: float) -> float:
     )
 
 
-@functools.lru_cache(maxsize=1024)
 def C4(phi_re: float, phi_im: float) -> float:
     return math.fsum(
         [
@@ -71,22 +64,18 @@ def C4(phi_re: float, phi_im: float) -> float:
     )
 
 
-@functools.lru_cache(maxsize=1024)
 def C5(phi_re: float, phi_im: float) -> float:
     return C3(phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def C6(phi_re: float, phi_im: float) -> float:
     return C2(phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def C7(phi_re: float, phi_im: float) -> float:
     return C1(phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def C8(phi_re: float, phi_im: float) -> float:
     return 1.0
 
@@ -103,12 +92,10 @@ Cn_hash = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def Cn(n: int, phi_re: float, phi_im: float) -> float:
     return Cn_hash[n](phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def M_H(phi_re: float, phi_im: float) -> float:
     phi_re2 = phi_re**2
     phi_re3 = phi_re**3
@@ -123,7 +110,6 @@ def M_H(phi_re: float, phi_im: float) -> float:
     )
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp_phi(T: float, phi_re: float, phi_im: float) -> float:
     mh = M_H(phi_re, phi_im)
     if mh <= 0.0:
@@ -132,7 +118,6 @@ def gcp_phi(T: float, phi_re: float, phi_im: float) -> float:
         return -A0*T*math.log(mh)
     
 
-@functools.lru_cache(maxsize=1024)
 def gcp_g_inner(p: float, T: float, muB: float, phi_re: float, phi_im: float) -> float:
     logterm = 0.0
     for i in range(8):
@@ -145,7 +130,6 @@ def gcp_g_inner(p: float, T: float, muB: float, phi_re: float, phi_im: float) ->
         return (p**2)*math.log1p(logterm)
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp_g(T: float, muB: float, phi_re: float, phi_im: float) -> float:
     integral, _ = scipy.integrate.quad(
         gcp_g_inner, 0.0, math.inf,
@@ -154,14 +138,12 @@ def gcp_g(T: float, muB: float, phi_re: float, phi_im: float) -> float:
     return (T/(math.pi**2))*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp(T: float, muB: float, phi_re: float, phi_im: float) -> float:
     omega_g = gcp_g(T, muB, phi_re, phi_im)
     omega_phi = gcp_phi(T, phi_re, phi_im)
     return math.fsum([omega_g, omega_phi, C0])
 
 
-@functools.lru_cache(maxsize=1024)
 def pressure(T: float, muB: float, phi_re: float, phi_im: float) -> float:
     """### Description
     Polyakov-loop pressure.
@@ -183,7 +165,6 @@ def pressure(T: float, muB: float, phi_re: float, phi_im: float) -> float:
     return -gcp(T, muB, phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity(T: float, muB: float, phi_re : float, phi_im : float) -> float:
     """### Description
     Polyakov-loop baryon density.
@@ -228,7 +209,6 @@ def bdensity(T: float, muB: float, phi_re : float, phi_im : float) -> float:
         return bdensity(T, new_muB, new_phi_re, new_phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def qnumber_cumulant(rank: int, T: float, muB: float, phi_re : float, phi_im : float) -> float:
     """### Description
     Polyakov-loop quark number cumulant chi_q. Based on Eq.29 of
@@ -278,7 +258,6 @@ def qnumber_cumulant(rank: int, T: float, muB: float, phi_re : float, phi_im : f
             return qnumber_cumulant(rank, T, new_mu, new_phi_re, new_phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity(T: float, mu: float, phi_re : float, phi_im : float) -> float:
     """### Description
     Polyakov-loop entropy density.

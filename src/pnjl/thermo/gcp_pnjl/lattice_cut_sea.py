@@ -1,5 +1,4 @@
 import math
-import functools
 
 import scipy.integrate
 
@@ -28,23 +27,19 @@ T_MOTT_0 = 160.0
 SQRT2 = math.sqrt(2.0)
 
 
-@functools.lru_cache(maxsize=1024)
 def T_Mott(mu: float) -> float:
     return math.fsum([T_MOTT_0, -T_MOTT_0 * KAPPA * (((3.0 * mu) / T_MOTT_0) ** 2)])
 
 
-@functools.lru_cache(maxsize=1024)
 def Tc(mu: float) -> float:
     return math.fsum([TC0, -TC0 * KAPPA * (((3.0 * mu) / TC0) ** 2)])
 
 
-@functools.lru_cache(maxsize=1024)
 def Delta_ls(T: float, mu: float) -> float:
     tanh_internal = math.fsum([T/DELTA_T, -Tc(mu)/DELTA_T])
     return math.fsum([0.5, -0.5*math.tanh(tanh_internal)])
 
 
-@functools.lru_cache(maxsize=1024)
 def Ml(T: float, mu: float) -> float:
     if T <= T_Mott(mu):
         return SQRT2*M_L_VAC
@@ -52,7 +47,6 @@ def Ml(T: float, mu: float) -> float:
         return math.fsum([M0*Delta_ls(T, mu), ML])
 
 
-@functools.lru_cache(maxsize=1024)
 def Ms(T: float, mu: float) -> float:
     if T <= T_Mott(mu):
         return SQRT2*M_S_VAC
@@ -60,13 +54,11 @@ def Ms(T: float, mu: float) -> float:
         return math.fsum([M0*Delta_ls(T, mu), MS])
     
 
-@functools.lru_cache(maxsize=1024)
 def En(p: float, mass: float) -> float:
     body = math.fsum([p**2, mass**2])
     return math.sqrt(body)
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp_sea_integrand(p: float, mass: float) -> float:
     en = En(p, mass)
     inner_sum = math.fsum([mass**2, 2.0*(p**2)])
@@ -74,7 +66,6 @@ def gcp_sea_integrand(p: float, mass: float) -> float:
     return math.fsum([p*en*inner_sum, (mass**4)*math.log(log_sum)])/8.0
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp_sea_l(T: float, mu: float) -> float:
     mass = Ml(T, mu)
     mass0 = Ml(0.0, 0.0)
@@ -85,7 +76,6 @@ def gcp_sea_l(T: float, mu: float) -> float:
     return (1.0/(math.pi**2))*(NC/3.0)*math.fsum([one, -two, -three, four])
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp_sea_s(T: float, mu: float) -> float:
     mass = Ms(T, mu)
     mass0 = Ms(0.0, 0.0)
@@ -102,13 +92,11 @@ sea_hash = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def pressure_sea(T: float, mu: float, typ: str) -> float:
     # return -sea_hash[typ](T, mu)
     return 0.0
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity_sea(T: float, mu: float, typ: str) -> float:
     h = 1e-2
     if math.fsum([mu, -2*h]) > 0.0:
@@ -129,7 +117,6 @@ def bdensity_sea(T: float, mu: float, typ: str) -> float:
         return bdensity_sea(T, math.fsum([mu, h]), typ)
 
 
-@functools.lru_cache(maxsize=1024)
 def qnumber_cumulant_sea(rank: int, T: float, mu: float, typ: str) -> float:
     if rank == 1:
         return 3.0 * bdensity_sea(T, mu, typ)
@@ -153,7 +140,6 @@ def qnumber_cumulant_sea(rank: int, T: float, mu: float, typ: str) -> float:
             return qnumber_cumulant_sea(rank, T, math.fsum([mu, h]), typ)
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity_sea(T: float, mu: float, typ: str) -> float:
     h = 1e-2
     if math.fsum([T, -2*h]) > 0.0:
@@ -174,7 +160,6 @@ def sdensity_sea(T: float, mu: float, typ: str) -> float:
         return sdensity_sea(math.fsum([T, h]), mu, typ)
     
 
-@functools.lru_cache(maxsize=1024)
 def gcp_q_l_integrand_real(p: float, T: float, mu: float, phi_re: float, phi_im: float) -> float:
     mass = Ml(T, mu)
     energy = En(p, mass)
@@ -187,7 +172,6 @@ def gcp_q_l_integrand_real(p: float, T: float, mu: float, phi_re: float, phi_im:
     return ((p**4)/energy)*math.fsum([fp.real, fm.real])
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp_q_l_integrand_imag(p: float, T: float, mu: float, phi_re: float, phi_im: float) -> float:
     mass = Ml(T, mu)
     energy = En(p, mass)
@@ -200,7 +184,6 @@ def gcp_q_l_integrand_imag(p: float, T: float, mu: float, phi_re: float, phi_im:
     return ((p**4)/energy)*math.fsum([fp.imag, fm.imag])
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp_q_s_integrand_real(p: float, T: float, mu: float, phi_re: float, phi_im: float) -> float:
     mass = Ms(T, mu)
     energy = En(p, mass)
@@ -213,7 +196,6 @@ def gcp_q_s_integrand_real(p: float, T: float, mu: float, phi_re: float, phi_im:
     return ((p**4)/energy)*math.fsum([fp.real, fm.real])
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp_q_s_integrand_imag(p: float, T: float, mu: float, phi_re: float, phi_im: float) -> float:
     mass = Ms(T, mu)
     energy = En(p, mass)
@@ -226,7 +208,6 @@ def gcp_q_s_integrand_imag(p: float, T: float, mu: float, phi_re: float, phi_im:
     return ((p**4)/energy)*math.fsum([fp.imag, fm.imag])
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp_q_l_real(T : float, mu : float, phi_re : float, phi_im : float) -> float:
     integral, _ = scipy.integrate.quad(
         gcp_q_l_integrand_real, 0.0, math.inf, args=(T, mu, phi_re, phi_im)
@@ -234,7 +215,6 @@ def gcp_q_l_real(T : float, mu : float, phi_re : float, phi_im : float) -> float
     return -(NC/3.0)*(1.0/(math.pi**2))*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp_q_l_imag(T : float, mu : float, phi_re : float, phi_im : float) -> float:
     integral, _ = scipy.integrate.quad(
         gcp_q_l_integrand_imag, 0.0, math.inf, args=(T, mu, phi_re, phi_im)
@@ -242,7 +222,6 @@ def gcp_q_l_imag(T : float, mu : float, phi_re : float, phi_im : float) -> float
     return -(NC/3.0)*(1.0/(math.pi**2))*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp_q_s_real(T : float, mu : float, phi_re : float, phi_im : float) -> float:
     integral, _ = scipy.integrate.quad(
         gcp_q_s_integrand_real, 0.0, math.inf, args=(T, mu, phi_re, phi_im)
@@ -250,7 +229,6 @@ def gcp_q_s_real(T : float, mu : float, phi_re : float, phi_im : float) -> float
     return -(NC/3.0)*(1.0/(math.pi**2))*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp_q_s_imag(T : float, mu : float, phi_re : float, phi_im : float) -> float:
     integral, error = scipy.integrate.quad(
         gcp_q_s_integrand_imag, 0.0, math.inf, args=(T, mu, phi_re, phi_im)
@@ -264,12 +242,10 @@ q_hash = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def pressure_q(T: float, mu: float, phi_re: float, phi_im: float, typ: str) -> float:
     return -q_hash[typ](T, mu, phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity_q(T: float, mu: float, phi_re: float, phi_im: float, typ: str) -> float:
     h = 1e-2
     if math.fsum([mu, -2*h]) > 0.0:
@@ -296,7 +272,6 @@ def bdensity_q(T: float, mu: float, phi_re: float, phi_im: float, typ: str) -> f
         return bdensity_q(T, new_mu, new_phi_re, new_phi_im, typ)
 
 
-@functools.lru_cache(maxsize=1024)
 def qnumber_cumulant_q(rank: int, T: float, mu: float, phi_re: float, phi_im: float, typ: str) -> float:
     if rank == 1:
         return 3.0 * bdensity_q(T, mu, phi_re, phi_im, typ)
@@ -326,7 +301,6 @@ def qnumber_cumulant_q(rank: int, T: float, mu: float, phi_re: float, phi_im: fl
             return qnumber_cumulant_q(rank, T, new_mu, new_phi_re, new_phi_im, typ)
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity_q(T: float, mu: float, phi_re : float, phi_im : float, typ: str) -> float:
     h = 1e-2
     if math.fsum([T, -2*h]) > 0.0:
@@ -353,20 +327,17 @@ def sdensity_q(T: float, mu: float, phi_re : float, phi_im : float, typ: str) ->
         return sdensity_q(new_T, mu, new_phi_re, new_phi_im, typ)
     
 
-@functools.lru_cache(maxsize=1024)
 def gcp_field(T: float, mu: float) -> float:
     sigma = Ml(T, mu) - ML
     sigma0 = Ml(0.0, 0.0) - ML
     return -math.fsum([(sigma**2)/(4.0*GS), -(sigma0**2)/(4.0*GS)])
 
 
-@functools.lru_cache(maxsize=1024)
 def pressure_field(T: float, mu: float) -> float:
     # return -gcp_field(T, mu)
     return 0.0
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity_field(T: float, mu: float) -> float:
     h = 1e-2
     if math.fsum([mu, -2*h]) > 0.0:
@@ -387,7 +358,6 @@ def bdensity_field(T: float, mu: float) -> float:
         return bdensity_field(T, math.fsum([mu, h]))
 
 
-@functools.lru_cache(maxsize=1024)
 def qnumber_cumulant_field(rank: int, T: float, mu: float) -> float:
     if rank == 1:
         return 3.0 * bdensity_field(T, mu)
@@ -411,7 +381,6 @@ def qnumber_cumulant_field(rank: int, T: float, mu: float) -> float:
             return qnumber_cumulant_field(rank, T, math.fsum([mu, h]))
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity_field(T: float, mu: float) -> float:
     h = 1e-2
     if math.fsum([T, -2*h]) > 0.0:

@@ -27,7 +27,6 @@ raise RuntimeError("Model nie dokonczony. T_Mott i T_Mott2 niezgodne z QGP")
 
 import math
 import numpy
-import functools
 
 import scipy.optimize
 import scipy.integrate
@@ -107,7 +106,6 @@ LAMBDA = 150.0
 CONT_POW_M = 2
 
 
-@functools.lru_cache(maxsize=1024)
 def M_th(T: float, muB: float, cluster: str) -> float:
     N_I = NI[cluster]
     S_I = SI[cluster]
@@ -118,7 +116,6 @@ def M_th(T: float, muB: float, cluster: str) -> float:
     return M_th_i
     
 
-@functools.lru_cache(maxsize=1024)
 def T_Mott(muB: float, cluster: str):
     kappa = pnjl.defaults.KAPPA
     dT = pnjl.defaults.DELTA_T
@@ -138,7 +135,6 @@ def T_Mott(muB: float, cluster: str):
         return math.fsum([Tc0, -kappa*(muB**2)/Tc0, dT*math.atanh(atanh_inner)])
 
 
-@functools.lru_cache(maxsize=1024)
 def T_Mott2(muB: float, cluster: str):
     dT = pnjl.defaults.DELTA_T
     Tc0 = pnjl.defaults.TC0
@@ -158,7 +154,6 @@ def T_Mott2(muB: float, cluster: str):
     return suma/(2.0*MSC_SLOPE)
 
 
-@functools.lru_cache(maxsize=1024)
 def bound_factor(M: float, T: float, muB: float, cluster: str) -> float:
 
     H_ZERO = pnjl.defaults.HEAVISIDE_ZERO
@@ -173,7 +168,6 @@ def bound_factor(M: float, T: float, muB: float, cluster: str) -> float:
         return 0.0
     
 
-@functools.lru_cache(maxsize=1024)
 def bound_factor2(M: float, T: float, muB: float, cluster: str) -> float:
 
     H_ZERO = pnjl.defaults.HEAVISIDE_ZERO
@@ -188,7 +182,6 @@ def bound_factor2(M: float, T: float, muB: float, cluster: str) -> float:
         return 0.0
     
 
-@functools.lru_cache(maxsize=1024)
 def continuum_factor1(M: float, T: float, muB: float, cluster: str) -> float:
     Ni = NI[cluster]
     Mi = MI[cluster]
@@ -207,7 +200,6 @@ def continuum_factor1(M: float, T: float, muB: float, cluster: str) -> float:
         return 0.0
     
 
-@functools.lru_cache(maxsize=1024)
 def continuum_factor2(M: float, T: float, muB: float, TM: float, TM2: float, cluster: str) -> float:
     Ni = NI[cluster]
     Mi = MI[cluster]
@@ -235,13 +227,11 @@ def continuum_factor2(M: float, T: float, muB: float, TM: float, TM2: float, clu
         return 0.0
     
 
-@functools.lru_cache(maxsize=1024)
 def phase_factor(M: float, T: float, muB: float, TM: float, TM2: float, cluster: str) -> float:
     delta_i = bound_factor(M, T, muB, cluster)+continuum_factor1(M, T, muB, cluster)+continuum_factor2(M, T, muB, TM, TM2, cluster)  
     return (delta_i-(1.0/(2.0*math.pi))*math.sin(2.0*math.pi*delta_i))
 
 
-@functools.lru_cache(maxsize=1024)
 def b_boson_singlet_integrand(
     M: float, p: float, T: float, muB: float,
     phi_re: float, phi_im: float, a: float, TM: float, TM2: float, cluster: str
@@ -255,7 +245,6 @@ def b_boson_singlet_integrand(
         return math.fsum([fp, -fm])*delta_i
 
 
-@functools.lru_cache(maxsize=1024)
 def b_fermion_singlet_integrand(
     M: float, p: float, T: float, muB: float,
     phi_re: float, phi_im: float, a: float, TM: float, TM2: float, cluster: str
@@ -269,7 +258,6 @@ def b_fermion_singlet_integrand(
         return math.fsum([fp, -fm])*delta_i
 
 
-@functools.lru_cache(maxsize=1024)
 def b_boson_triplet_integrand(
     M: float, p: float, T: float, muB: float,
     phi_re: float, phi_im: float, a: float, TM: float, TM2: float, cluster: str
@@ -283,7 +271,6 @@ def b_boson_triplet_integrand(
         return -math.fsum([fp, -fm])*delta_i
 
 
-@functools.lru_cache(maxsize=1024)
 def b_boson_antitriplet_integrand(
     M: float, p: float, T: float, muB: float,
     phi_re: float, phi_im: float, a: float, TM: float, TM2: float, cluster: str
@@ -297,7 +284,6 @@ def b_boson_antitriplet_integrand(
         return -math.fsum([fp, -fm])*delta_i
 
 
-@functools.lru_cache(maxsize=1024)
 def b_fermion_triplet_integrand(
     M: float, p: float, T: float, muB: float,
     phi_re: float, phi_im: float, a: float, TM: float, TM2: float, cluster: str
@@ -311,7 +297,6 @@ def b_fermion_triplet_integrand(
         return -math.fsum([fp, -fm])*delta_i
 
 
-@functools.lru_cache(maxsize=1024)
 def b_fermion_antitriplet_integrand(
     M: float, p: float, T: float, muB: float,
     phi_re: float, phi_im: float, a: float, TM: float, TM2: float, cluster: str
@@ -347,7 +332,6 @@ b_integral_hash = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity_integral(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_min: float, M_max: float, a: float, TM: float, TM2: float, cluster: str
@@ -359,7 +343,6 @@ def bdensity_integral(
     return (p**2)*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity(
     T: float, muB: float, phi_re: float, phi_im: float, cluster: str
 ) -> float:
@@ -384,7 +367,6 @@ def bdensity(
         return b_susd + (A_I*D_I/(2.0*(math.pi**2)))*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def s_boson_singlet_integrand(
     M: float, p: float, T: float, muB: float,
     phi_re: float, phi_im: float, a: float, TM: float, TM2: float, cluster: str
@@ -406,7 +388,6 @@ def s_boson_singlet_integrand(
         return math.fsum([sigma_p, sigma_m])*delta_i
     
 
-@functools.lru_cache(maxsize=1024)
 def s_fermion_singlet_integrand(
     M: float, p: float, T: float, muB: float,
     phi_re: float, phi_im: float, a: float, TM: float, TM2: float, cluster: str
@@ -428,7 +409,6 @@ def s_fermion_singlet_integrand(
         return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
-@functools.lru_cache(maxsize=1024)
 def s_boson_triplet_integrand(
     M: float, p: float, T: float, muB: float,
     phi_re: float, phi_im: float, a: float, TM: float, TM2: float, cluster: str
@@ -445,7 +425,6 @@ def s_boson_triplet_integrand(
         return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
-@functools.lru_cache(maxsize=1024)
 def s_boson_antitriplet_integrand(
     M: float, p: float, T: float, muB: float,
     phi_re: float, phi_im: float, a: float, TM: float, TM2: float, cluster: str
@@ -462,7 +441,6 @@ def s_boson_antitriplet_integrand(
         return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
-@functools.lru_cache(maxsize=1024)
 def s_fermion_triplet_integrand(
     M: float, p: float, T: float, muB: float,
     phi_re: float, phi_im: float, a: float, TM: float, TM2: float, cluster: str
@@ -479,7 +457,6 @@ def s_fermion_triplet_integrand(
         return -math.fsum([sigma_p, sigma_m])*delta_i
     
 
-@functools.lru_cache(maxsize=1024)
 def s_fermion_antitriplet_integrand(
     M: float, p: float, T: float, muB: float,
     phi_re: float, phi_im: float, a: float, TM: float, TM2: float, cluster: str
@@ -518,7 +495,6 @@ s_integral_hash = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity_integral(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_min: float, M_max: float, a: float, TM: float, TM2: float, cluster: str
@@ -530,7 +506,6 @@ def sdensity_integral(
     return (p**2)*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity(
     T: float, muB: float, phi_re: float, phi_im: float, cluster: str
 ) -> float:
@@ -555,7 +530,6 @@ def sdensity(
         return s_susd + (D_I/(2.0*(math.pi**2)))*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def qnumber_cumulant(
     rank: int, T: float, muB: float, phi_re: float, phi_im: float, cluster: str
 ) -> float:
@@ -591,7 +565,6 @@ def qnumber_cumulant(
             )
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity_multi(
     T: float, muB: float, phi_re: float, phi_im: float, hadrons="all"
 ):
@@ -605,7 +578,6 @@ def sdensity_multi(
     return math.fsum(partial), (*partial,)
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity_multi(
     T: float, muB: float, phi_re: float, phi_im: float, hadrons="all"
 ):
@@ -623,7 +595,6 @@ def bdensity_multi(
 
 
 #to trzeba przerobic...
-@functools.lru_cache(maxsize=1024)
 def pressure_ib_buns(
     T: float, mu: float, phi_re: float, phi_im: float, cluster: str
 ) -> float:
@@ -637,7 +608,6 @@ def pressure_ib_buns(
 
 
 #to też
-@functools.lru_cache(maxsize=1024)
 def pressure_is_buns(
     T: float, mu: float, phi_re: float, phi_im: float, cluster: str
 ) -> float:

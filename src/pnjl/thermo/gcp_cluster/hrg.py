@@ -7,7 +7,6 @@
 
 
 import math
-import functools
 
 import scipy.optimize
 import scipy.integrate
@@ -140,25 +139,21 @@ BI = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def En(p: float, mass: float) -> float:
     body = math.fsum([p**2, mass**2])
     return math.sqrt(body)
 
 
-@functools.lru_cache(maxsize=1024)
 def log_y_p(p: float, T: float, muB: float, mass: float, B: float) -> float:
     ensum = math.fsum([En(p, mass), -B*muB])
     return ensum/T
 
 
-@functools.lru_cache(maxsize=1024)
 def log_y_m(p: float, T: float, muB: float, mass: float, B: float) -> float:
     ensum = math.fsum([En(p, mass), B*muB])
     return ensum/T
 
 
-@functools.lru_cache(maxsize=1024)
 def f_fermion_p(p: float, T: float, muB: float, mass: float, B: float) -> float:
     logy = log_y_p(p, T, muB, mass, B)
     if logy >= EXP_LIMIT:
@@ -167,7 +162,6 @@ def f_fermion_p(p: float, T: float, muB: float, mass: float, B: float) -> float:
         return 1.0/math.fsum([math.exp(logy), 1.0])
     
 
-@functools.lru_cache(maxsize=1024)
 def f_fermion_m(p: float, T: float, muB: float, mass: float, B: float) -> float:
     logy = log_y_m(p, T, muB, mass, B)
     if logy >= EXP_LIMIT:
@@ -176,7 +170,6 @@ def f_fermion_m(p: float, T: float, muB: float, mass: float, B: float) -> float:
         return 1.0/math.fsum([math.exp(logy), 1.0])
 
 
-@functools.lru_cache(maxsize=1024)
 def f_boson_p(p: float, T: float, muB: float, mass: float, B: float) -> float:
     logy = log_y_p(p, T, muB, mass, B)
     if logy >= EXP_LIMIT:
@@ -185,7 +178,6 @@ def f_boson_p(p: float, T: float, muB: float, mass: float, B: float) -> float:
         return 1.0/math.expm1(logy)
     
 
-@functools.lru_cache(maxsize=1024)
 def f_boson_m(p: float, T: float, muB: float, mass: float, B: float) -> float:
     logy = log_y_m(p, T, muB, mass, B)
     if logy >= EXP_LIMIT:
@@ -194,17 +186,14 @@ def f_boson_m(p: float, T: float, muB: float, mass: float, B: float) -> float:
         return 1.0/math.expm1(logy)
     
 
-@functools.lru_cache(maxsize=1024)
 def fermion_pressure_integ(p: float, T: float, muB: float, M: float, B: float) -> float:
     return -((p**4)/En(p, M))*(f_fermion_p(p, T, muB, M, B) + f_fermion_m(p, T, muB, M, B))
 
 
-@functools.lru_cache(maxsize=1024)
 def boson_pressure_integ(p: float, T: float, muB: float, M: float, B: float) -> float:
     return 0.5*((p**4)/En(p, M))*(f_boson_p(p, T, muB, M, B) + f_boson_m(p, T, muB, M, B))
     
 
-@functools.lru_cache(maxsize=1024)
 def boson_sdensity_integ(p: float, T: float, muB: float, M: float, B: float) -> float:
     fp = f_boson_p(p, T, muB, M, B)
     fn = f_boson_m(p, T, muB, M, B)
@@ -217,7 +206,6 @@ def boson_sdensity_integ(p: float, T: float, muB: float, M: float, B: float) -> 
     return 0.5*(p**2)*(positive + negative)
 
 
-@functools.lru_cache(maxsize=1024)
 def fermion_sdensity_integ(p: float, T: float, muB: float, M: float, B: float) -> float:
     fp = f_fermion_p(p, T, muB, M, B)
     fn = f_fermion_m(p, T, muB, M, B)
@@ -230,14 +218,12 @@ def fermion_sdensity_integ(p: float, T: float, muB: float, M: float, B: float) -
     return (p**2)*(positive + negative)
 
 
-@functools.lru_cache(maxsize=1024)
 def boson_bdensity_integ(p: float, T: float, muB: float, M: float, B: float) -> float:
     fp = f_boson_p(p, T, muB, M, B)
     fn = f_boson_m(p, T, muB, M, B)
     return -0.5*(p**2)*(fp - fn)
 
 
-@functools.lru_cache(maxsize=1024)
 def fermion_bdensity_integ(p: float, T: float, muB: float, M: float, B: float) -> float:
     fp = f_fermion_p(p, T, muB, M, B)
     fn = f_fermion_m(p, T, muB, M, B)
@@ -440,7 +426,6 @@ bdensity_hash = {
 }
     
 
-@functools.lru_cache(maxsize=1024)
 def pressure(T: float, muB: float, hadron: str) -> float:
     
     M = MI[hadron]
@@ -454,7 +439,6 @@ def pressure(T: float, muB: float, hadron: str) -> float:
     return (D/(6.0*(math.pi**2)))*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity(T: float, muB: float, hadron: str) -> float:
     
     M = MI[hadron]
@@ -468,7 +452,6 @@ def sdensity(T: float, muB: float, hadron: str) -> float:
     return (D/(2.0*(math.pi**2)))*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity(T: float, muB: float, hadron: str) -> float:
     
     M = MI[hadron]
@@ -484,7 +467,6 @@ def bdensity(T: float, muB: float, hadron: str) -> float:
         return B*(D/(2.0*(math.pi**2)))*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def pressure_multi(
     T: float, muB: float, hadrons="all"
 ):
@@ -498,7 +480,6 @@ def pressure_multi(
     return math.fsum(partial), (*partial,)
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity_multi(
     T: float, muB: float, hadrons="all"
 ):
@@ -512,7 +493,6 @@ def sdensity_multi(
     return math.fsum(partial), (*partial,)
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity_multi(
     T: float, muB: float, hadrons="all"
 ):

@@ -18,7 +18,6 @@ sdensity
 
 
 import math
-import functools
 
 
 A1 = -44.14
@@ -45,15 +44,13 @@ D4 = 2.9715
 D5 = 6.61433
 
 KAPPA = 0.012 * (1.4/5.0)
-T00 = 220.0
+T00 = 260.0
 
 
-@functools.lru_cache(maxsize=1024)
 def T0(mu: float) -> float:
     return math.fsum([T00, -T00 * KAPPA * (((3.0 * mu) / T00) ** 2)])
 
 
-@functools.lru_cache(maxsize=1024)
 def a(T: float, mu: float) -> float:
     T0T = T0(mu)/T
     T0T2 = T0T**2
@@ -62,13 +59,11 @@ def a(T: float, mu: float) -> float:
     return num/den
 
 
-@functools.lru_cache(maxsize=1024)
 def b(T: float, mu: float) -> float:
     T0T = T0(mu)/T
     return -B1*(T0T**B4)*math.expm1(B2*(T0T**B3))
 
 
-@functools.lru_cache(maxsize=1024)
 def c(T: float, mu: float) -> float:
     T0T = T0(mu)/T
     T0T2 = T0T**2
@@ -77,7 +72,6 @@ def c(T: float, mu: float) -> float:
     return num/den
 
 
-@functools.lru_cache(maxsize=1024)
 def d(T: float, mu: float) -> float:
     T0T = T0(mu)/T
     T0T2 = T0T**2
@@ -86,7 +80,6 @@ def d(T: float, mu: float) -> float:
     return num/den
 
 
-@functools.lru_cache(maxsize=1024)
 def M_H(phi_re: float, phi_im: float) -> float:
     phi_re2 = phi_re**2
     phi_re3 = phi_re**3
@@ -101,7 +94,6 @@ def M_H(phi_re: float, phi_im: float) -> float:
     )
 
 
-@functools.lru_cache(maxsize=1024)
 def U(T : float, mu: float, phi_re : float, phi_im : float) -> float:
     """### Description
     Polyakov-loop grandcanonical thermodynamic potential.
@@ -135,7 +127,6 @@ def U(T : float, mu: float, phi_re : float, phi_im : float) -> float:
     return (T**4)*math.fsum([a_term, b_term, c_term, d_term])
 
 
-@functools.lru_cache(maxsize=1024)
 def pressure(T: float, mu: float, phi_re: float, phi_im: float) -> float:
     """### Description
     Polyakov-loop pressure.
@@ -157,7 +148,6 @@ def pressure(T: float, mu: float, phi_re: float, phi_im: float) -> float:
     return -U(T, mu, phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity(T: float, mu: float, phi_re : float, phi_im : float) -> float:
     """### Description
     Polyakov-loop baryon density.
@@ -195,7 +185,6 @@ def bdensity(T: float, mu: float, phi_re : float, phi_im : float) -> float:
         return bdensity(T, math.fsum([mu, h]), phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def qnumber_cumulant(rank: int, T: float, mu: float, phi_re : float, phi_im : float) -> float:
     """### Description
     Polyakov-loop quark number cumulant chi_q. Based on Eq.29 of
@@ -239,7 +228,6 @@ def qnumber_cumulant(rank: int, T: float, mu: float, phi_re : float, phi_im : fl
             return qnumber_cumulant(rank, T, math.fsum([mu, h]), phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity(T: float, mu: float, phi_re : float, phi_im : float) -> float:
     """### Description
     Polyakov-loop entropy density.

@@ -42,7 +42,6 @@ sdensity
 
 
 import math
-import functools
 
 import scipy.integrate
 
@@ -62,7 +61,6 @@ def cut(T, mu):
     return 600.0
 
 
-@functools.lru_cache(maxsize=1024)
 def alpha_s(T : float, mu : float) -> float:
     Q2L2 = ((T/T0)**2)+((3.0*mu/MUB0)**2)
     beta0 = (11.0*NC - 2.0*NF)
@@ -75,7 +73,6 @@ mass_hash = {
 }
 
 
-# @functools.lru_cache(maxsize=1024)
 # def alpha_s(T : float, mu : float) -> float:
 #     """### Description
 #     QCD running coupling.
@@ -109,7 +106,6 @@ mass_hash = {
 #     return ((12.0*math.pi)/den1)*par
 
 
-@functools.lru_cache(maxsize=1024)
 def I_integrand_real(
     p: float, T: float, mu: float, phi_re: float, phi_im: float
 ) -> float:
@@ -122,7 +118,6 @@ def I_integrand_real(
     return p*(fp + fm)
 
 
-@functools.lru_cache(maxsize=1024)
 def I_integrand_imag(
     p: float, T: float, mu: float, phi_re: float, phi_im: float
 ) -> float:
@@ -135,7 +130,6 @@ def I_integrand_imag(
     return p*(fp + fm)
 
 
-@functools.lru_cache(maxsize=1024)
 def I(
     T: float, mu: float, phi_re: float, phi_im: float, typ: str
 ) -> complex:
@@ -150,7 +144,6 @@ def I(
     return complex(integral_real, integral_imag)/(T**2)
 
 
-@functools.lru_cache(maxsize=1024)
 def gcp(
     T: float, mu: float, phi_re: float, phi_im: float, typ: str
 ) -> float:
@@ -161,14 +154,12 @@ def gcp(
     return (8.0/math.pi)*alpha*(T**4)*par_real
 
 
-@functools.lru_cache(maxsize=1024)
 def pressure(
     T: float, mu: float, phi_re: float, phi_im: float, typ: str
 ) -> float:
     return -gcp(T, mu, phi_re, phi_im, typ)
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity(
     T: float, mu: float, phi_re: float, phi_im: float, typ: str
 ) -> float:
@@ -197,7 +188,6 @@ def bdensity(
         return bdensity(T, new_mu, new_phi_re, new_phi_im, typ)
 
 
-@functools.lru_cache(maxsize=1024)
 def qnumber_cumulant(
     rank: int, T: float, mu: float, phi_re: float, phi_im: float, typ: str
 ) -> float:
@@ -229,7 +219,6 @@ def qnumber_cumulant(
             return qnumber_cumulant(rank, T, new_mu, new_phi_re, new_phi_im, typ)
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity(
     T: float, mu: float, phi_re : float, phi_im : float, typ: str
 ) -> float:

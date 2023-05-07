@@ -19,13 +19,10 @@ sdensity
 
 
 import math
-import typing
-import functools
 
 import pnjl.defaults
 
 
-@functools.lru_cache(maxsize=1024)
 def b2(T : float) -> float:
     """### Description
     B2 coeficient of the Polyakov-loop potential.
@@ -48,7 +45,6 @@ def b2(T : float) -> float:
     return math.fsum([A0, A1*(T0/T), A2*((T0/T)**2), A3*((T0/T)**3)])
 
 
-@functools.lru_cache(maxsize=1024)
 def U(T : float, phi_re : float, phi_im : float) -> float:
     """### Description
     Polyakov-loop grandcanonical thermodynamic potential.
@@ -81,7 +77,6 @@ def U(T : float, phi_re : float, phi_im : float) -> float:
     return ((T**4)/12.0)*math.fsum(phi_sum)
 
 
-@functools.lru_cache(maxsize=1024)
 def pressure(T: float, mu: float, phi_re: float, phi_im: float) -> float:
     """### Description
     Polyakov-loop pressure.
@@ -104,222 +99,22 @@ def pressure(T: float, mu: float, phi_re: float, phi_im: float) -> float:
     return -U(T, phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity(
     T: float, mu: float, phi_re : float, phi_im : float,
-    phi_solver: typing.Callable[
-                    [float, float, float, float],
-                    typing.Tuple[float, float]
-                ]
 ) -> float:
-    """### Description
-    Polyakov-loop baryon density.
+    return 0.0
 
-    ### Parameters
-    T : float
-        Temperature in MeV.
-    mu : float
-        Quark chemical potential in MeV.
-    phi_re : float
-        Real part of the traced Polyakov-loop in MeV.
-    phi_im : float
-        Imaginary part of the traced Polyakov-loop in MeV.
-    phi_solver : Callable
-        Function calculating the traced Polyakov-loop for given
-        T and mu. Must be of the form
-            (T: float, mu: float,
-            phi_re0: float, phi_im0: float) -> Tuple[float, float],
-            where
-                T : temperature in MeV
-                mu : quark chemical potential in MeV
-                phi_re0 : initial guess for phi_re
-                phi_im0 : initial guess for phi_im
-
-    ### Returns
-    bdensity : float
-        Value of the thermodynamic baryon density in MeV^3.
-    """
-
-    if True:
-        return 0.0
-    else:
-        h = 1e-2
-
-        if math.fsum([mu, -2*h]) > 0.0:
-
-            mu_vec = [
-                math.fsum([mu, 2*h]), math.fsum([mu, h]),
-                math.fsum([mu, -h]), math.fsum([mu, -2*h])
-            ]
-            deriv_coef = [
-                -1.0/(12.0*h), 8.0/(12.0*h),
-                -8.0/(12.0*h), 1.0/(12.0*h)
-            ]
-            phi_vec = []
-            if pnjl.defaults.D_PHI_D_MU_0:
-                phi_vec = [
-                    tuple([phi_re, phi_im])
-                    for _ in mu_vec
-                ]
-            else:
-                phi_vec = [
-                    phi_solver(T, mu_el, phi_re, phi_im)
-                    for mu_el in mu_vec
-                ]
-
-            p_vec = [
-                coef*pressure(T, mu_el, phi_el[0], phi_el[1])/3.0
-                for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
-            ]
-
-            return math.fsum(p_vec)
-
-        else:
-
-            new_mu = math.fsum([mu, h])
-            new_phi_re, new_phi_im = phi_re, phi_im
-            
-            if not pnjl.defaults.D_PHI_D_MU_0:
-                new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
-
-            return bdensity(
-                T, new_mu, new_phi_re, new_phi_im, 
-                phi_solver
-            )
-
-
-@functools.lru_cache(maxsize=1024)
 def qnumber_cumulant(
     rank: int, T: float, mu: float, phi_re : float, phi_im : float,
-    phi_solver: typing.Callable[
-                    [float, float, float, float],
-                    typing.Tuple[float, float]
-                ]
 ) -> float:
-    """### Description
-    Polyakov-loop quark number cumulant chi_q. Based on Eq.29 of
-    https://arxiv.org/pdf/2012.12894.pdf and the subsequent inline definition.
-
-    ### Parameters
-    rank : int
-        Cumulant rank. Rank 1 equals to 3 times the baryon density.
-    T : float
-        Temperature in MeV.
-    mu : float
-        Quark chemical potential in MeV.
-    phi_re : float
-        Real part of the traced Polyakov-loop in MeV.
-    phi_im : float
-        Imaginary part of the traced Polyakov-loop in MeV.
-    phi_solver : Callable
-        Function calculating the traced Polyakov-loop for given
-        T and mu. Must be of the form
-            (T: float, mu: float,
-            phi_re0: float, phi_im0: float) -> Tuple[float, float],
-            where
-                T : temperature in MeV
-                mu : quark chemical potential in MeV
-                phi_re0 : initial guess for phi_re
-                phi_im0 : initial guess for phi_im
-
-    ### Returns
-    qnumber_cumulant : float
-        Value of the thermodynamic quark number cumulant in MeV^3.
-    """
-
-    if rank == 1:
-
-        return 3.0 * bdensity(T, mu, phi_re, phi_im, phi_solver)
-
-    else:
-
-        h = 1e-2
-
-        if math.fsum([mu, -2*h]) > 0.0:
-
-            mu_vec = [
-                math.fsum([mu, 2*h]), math.fsum([mu, h]),
-                math.fsum([mu, -h]), math.fsum([mu, -2*h])
-            ]
-            deriv_coef = [
-                -1.0/(12.0*h), 8.0/(12.0*h),
-                -8.0/(12.0*h), 1.0/(12.0*h)
-            ]
-            phi_vec = []
-            if pnjl.defaults.D_PHI_D_MU_0:
-                phi_vec = [
-                    tuple([phi_re, phi_im])
-                    for _ in mu_vec
-                ]
-            else:
-                phi_vec = [
-                    phi_solver(T, mu_el, phi_re, phi_im)
-                    for mu_el in mu_vec
-                ]
-
-            out_vec = [
-                coef*qnumber_cumulant(
-                    rank-1, T, mu_el, phi_el[0], phi_el[1], 
-                    phi_solver)
-                for mu_el, coef, phi_el in zip(mu_vec, deriv_coef, phi_vec)
-            ]
-
-            return math.fsum(out_vec)
-
-        else:
-
-            new_mu = math.fsum([mu, h])
-            new_phi_re, new_phi_im = phi_re, phi_im
-            
-            if not pnjl.defaults.D_PHI_D_MU_0:
-                new_phi_re, new_phi_im = phi_solver(T, new_mu, phi_re, phi_im)
-
-            return qnumber_cumulant(
-                rank, T, new_mu, new_phi_re, new_phi_im, 
-                phi_solver
-            )
+    return 0.0
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity(
     T: float, mu: float, phi_re : float, phi_im : float,
-    phi_solver: typing.Callable[
-                    [float, float, float, float],
-                    typing.Tuple[float, float]
-                ]
 ) -> float:
-    """### Description
-    Polyakov-loop entropy density.
-
-    ### Parameters
-    T : float
-        Temperature in MeV.
-    mu : float
-        Quark chemical potential in MeV.
-    phi_re : float
-        Real part of the traced Polyakov-loop in MeV.
-    phi_im : float
-        Imaginary part of the traced Polyakov-loop in MeV.
-    phi_solver : Callable
-        Function calculating the traced Polyakov-loop for given
-        T and mu. Must be of the form
-            (T: float, mu: float,
-            phi_re0: float, phi_im0: float) -> Tuple[float, float],
-            where
-                T : temperature in MeV
-                mu : quark chemical potential in MeV
-                phi_re0 : initial guess for phi_re
-                phi_im0 : initial guess for phi_im
-
-    ### Returns
-    sdensity : float
-        Value of the thermodynamic entropy density in MeV^3.
-    """
-
     h = 1e-2
-
     if math.fsum([T, -2*h]) > 0.0:
-
         T_vec = [
             math.fsum([T, 2*h]), math.fsum([T, h]),
             math.fsum([T, -h]), math.fsum([T, -2*h])
@@ -328,34 +123,16 @@ def sdensity(
             -1.0/(12.0*h), 8.0/(12.0*h),
             -8.0/(12.0*h), 1.0/(12.0*h)
         ]
-        phi_vec = []
-        if pnjl.defaults.D_PHI_D_T_0:
-            phi_vec = [
-                tuple([phi_re, phi_im])
-                for _ in T_vec
-            ]
-        else:
-            phi_vec = [
-                phi_solver(T_el, mu, phi_re, phi_im)
-                for T_el in T_vec
-            ]
-
+        phi_vec = [
+            tuple([phi_re, phi_im])
+            for _ in T_vec
+        ]
         p_vec = [
             coef*pressure(T_el, mu, phi_el[0], phi_el[1])
             for T_el, coef, phi_el in zip(T_vec, deriv_coef, phi_vec)
         ]
-
         return math.fsum(p_vec)
-
     else:
-
         new_T = math.fsum([T, h])
         new_phi_re, new_phi_im = phi_re, phi_im
-            
-        if not pnjl.defaults.D_PHI_D_T_0:
-            new_phi_re, new_phi_im = phi_solver(new_T, mu, phi_re, phi_im)
-
-        return sdensity(
-            new_T, mu, new_phi_re, new_phi_im, 
-            phi_solver
-        )
+        return sdensity(new_T, mu, new_phi_re, new_phi_im)

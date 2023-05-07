@@ -27,7 +27,6 @@ exp_limit:
 
 import math
 import cmath
-import functools
 
 import utils
 
@@ -38,7 +37,6 @@ log_y_hash = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def En(p: float, mass: float) -> float:
     """### Description
     Relativistic energy.
@@ -58,7 +56,6 @@ def En(p: float, mass: float) -> float:
     return math.sqrt(body)
 
 
-@functools.lru_cache(maxsize=1024)
 def log_y(
         p: float, T: float, mu: float, mass: float,
         mu_factor: int, en_factor: int, typ: str) -> float:
@@ -93,7 +90,6 @@ def log_y(
     return en_factor*ensum/T
 
 
-@functools.lru_cache(maxsize=1024)
 def f_fermion_singlet(
         p: float, T: float, mu: float,
         mass: float, mu_factor: int, typ: str) -> float:
@@ -129,7 +125,6 @@ def f_fermion_singlet(
         return 1.0/math.fsum([math.exp(logy), 1.0])
 
 
-@functools.lru_cache(maxsize=1024)
 def f_boson_singlet(
         p: float, T: float, mu: float, 
         mass: float, mu_factor: int, typ: str) -> float:
@@ -165,7 +160,6 @@ def f_boson_singlet(
         return 1.0/math.expm1(logy)
 
 
-@functools.lru_cache(maxsize=1024)
 def z_fermion_triplet_case1(
     logy_p1: float, logy_p2: float, logy_p3: float,
     phi_re: float, phi_im: float
@@ -188,7 +182,6 @@ def z_fermion_triplet_case1(
     return cmath.log(complex(den_real, den_imag))
 
 
-@functools.lru_cache(maxsize=1024)
 def z_fermion_triplet_case2(
     logy_p1: float, logy_p2: float, logy_p3: float,
     phi_re: float, phi_im: float
@@ -211,7 +204,6 @@ def z_fermion_triplet_case2(
     return cmath.log(complex(den_real, den_imag)) - complex(logy_p1, 0.0)
 
 
-@functools.lru_cache(maxsize=1024)
 def z_fermion_triplet_case3(
     logy_p1: float, logy_p2: float, logy_p3: float,
     phi_re: float, phi_im: float
@@ -233,7 +225,6 @@ def z_fermion_triplet_case3(
     return cmath.log(complex(den_real, den_imag)) - complex(logy_p2, 0.0)
 
 
-@functools.lru_cache(maxsize=1024)
 def z_fermion_triplet_case4(
     logy_p1: float, logy_p2: float, logy_p3: float,
     phi_re: float, phi_im: float
@@ -250,7 +241,6 @@ z_fermion_triplet_hash = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def z_fermion_triplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str) -> complex:
@@ -264,7 +254,6 @@ def z_fermion_triplet(
     return z_fermion_triplet_hash[test](logy_p1, logy_p2, logy_p3, phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def z_fermion_antitriplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str) -> complex:
@@ -278,7 +267,6 @@ def z_fermion_antitriplet(
     return z_fermion_triplet_hash[test](logy_p1, logy_p2, logy_p3, phi_re, -phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def z_boson_triplet_case1(
     logy_p1: float, logy_p2: float, logy_p3: float,
     phi_re: float, phi_im: float
@@ -301,7 +289,6 @@ def z_boson_triplet_case1(
     return cmath.log(complex(den_real, den_imag))
 
 
-@functools.lru_cache(maxsize=1024)
 def z_boson_triplet_case2(
     logy_p1: float, logy_p2: float, logy_p3: float,
     phi_re: float, phi_im: float
@@ -324,7 +311,6 @@ def z_boson_triplet_case2(
     return cmath.log(complex(den_real, den_imag)) - complex(logy_p1, 0.0)
 
 
-@functools.lru_cache(maxsize=1024)
 def z_boson_triplet_case3(
     logy_p1: float, logy_p2: float, logy_p3: float,
     phi_re: float, phi_im: float
@@ -346,7 +332,6 @@ def z_boson_triplet_case3(
     return cmath.log(complex(den_real, den_imag)) - complex(logy_p2, 0.0)
 
 
-@functools.lru_cache(maxsize=1024)
 def z_boson_triplet_case4(
     logy_p1: float, logy_p2: float, logy_p3: float,
     phi_re: float, phi_im: float
@@ -363,7 +348,6 @@ z_boson_triplet_hash = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def z_boson_triplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str) -> complex:
@@ -377,7 +361,6 @@ def z_boson_triplet(
     return z_boson_triplet_hash[test](logy_p1, logy_p2, logy_p3, phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def z_boson_antitriplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str) -> complex:
@@ -391,7 +374,6 @@ def z_boson_antitriplet(
     return z_boson_triplet_hash[test](logy_p1, logy_p2, logy_p3, phi_re, -phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def f_fermion_triplet_case1(
     logy_p1: float, logy_p2: float, logy_p3: float,
     phi_re: float, phi_im: float
@@ -425,7 +407,6 @@ def f_fermion_triplet_case1(
     return complex(num_real, num_imag)/complex(den_real, den_imag)
 
 
-@functools.lru_cache(maxsize=1024)
 def f_fermion_triplet_case2(
     logy_p1: float, logy_p2: float, logy_p3: float,
     phi_re: float, phi_im: float
@@ -475,7 +456,6 @@ f_fermion_triplet_hash = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def f_fermion_triplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str) -> complex:
@@ -516,7 +496,6 @@ def f_fermion_triplet(
     return f_fermion_triplet_hash[test](logy_p1, logy_p2, logy_p3, phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def f_fermion_antitriplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str) -> complex:
@@ -551,7 +530,6 @@ def f_fermion_antitriplet(
     return f_fermion_triplet(p, T, mu, phi_re, -phi_im, mass, mu_factor, typ)
 
 
-@functools.lru_cache(maxsize=1024)
 def f_boson_triplet_case1(
         logy_p1: float, logy_p2: float, logy_p3: float,
         phi_re: float, phi_im: float) -> complex:
@@ -582,7 +560,6 @@ def f_boson_triplet_case1(
     return complex(num_real, num_imag)/complex(den_real, den_imag)
 
 
-@functools.lru_cache(maxsize=1024)
 def f_boson_triplet_case2(
         logy_p1: float, logy_p2: float, logy_p3: float,
         phi_re: float, phi_im: float) -> complex:
@@ -628,7 +605,6 @@ f_boson_triplet_hash = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def f_boson_triplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str) -> complex:
@@ -669,7 +645,6 @@ def f_boson_triplet(
     return f_boson_triplet_hash[test](logy_p1, logy_p2, logy_p3, phi_re, phi_im)
 
 
-@functools.lru_cache(maxsize=1024)
 def f_boson_antitriplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str) -> complex:
@@ -704,7 +679,6 @@ def f_boson_antitriplet(
     return f_boson_triplet(p, T, mu, phi_re, -phi_im, mass, mu_factor, typ)
 
 
-@functools.lru_cache(maxsize=1024)
 def dfdM_boson_singlet(
         p: float, T: float, mu: float, 
         mass: float, mu_factor: int, typ: str
@@ -719,7 +693,6 @@ def dfdM_boson_singlet(
         return exy*f2*(mass/(energy*T))
     
 
-@functools.lru_cache(maxsize=1024)
 def dfdM_fermion_singlet(
         p: float, T: float, mu: float, 
         mass: float, mu_factor: int, typ: str
@@ -734,7 +707,6 @@ def dfdM_fermion_singlet(
         return exy*f2*(mass/(energy*T))
     
 
-@functools.lru_cache(maxsize=1024)
 def dfdM_aux_boson(
     M: float, p: float, T: float, mu: float,
     phi_re: float, phi_im: float, a: int, typ: str
@@ -769,7 +741,6 @@ def dfdM_aux_boson(
                 +(complex(num_2_re, num_2_im)/complex(den_2_re, den_2_im))
     
 
-@functools.lru_cache(maxsize=1024)
 def dfdM_aux_fermion(
     M: float, p: float, T: float, mu: float,
     phi_re: float, phi_im: float, a: int, typ: str
@@ -804,7 +775,6 @@ def dfdM_aux_fermion(
                 +(complex(num_2_re, num_2_im)/complex(den_2_re, den_2_im))
     
 
-@functools.lru_cache(maxsize=1024)
 def dfdM_boson_triplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str
@@ -816,7 +786,6 @@ def dfdM_boson_triplet(
     return (fp2_i+fp_i)*aux_p*(mass/(energy*T))
     
 
-@functools.lru_cache(maxsize=1024)
 def dfdM_boson_antitriplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str
@@ -828,7 +797,6 @@ def dfdM_boson_antitriplet(
     return (fp2_i+fp_i)*aux_p*(mass/(energy*T))
 
 
-@functools.lru_cache(maxsize=1024)
 def dfdM_fermion_triplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str
@@ -840,7 +808,6 @@ def dfdM_fermion_triplet(
     return (fp2_i-fp_i)*aux_p*(mass/(energy*T))
     
 
-@functools.lru_cache(maxsize=1024)
 def dfdM_fermion_antitriplet(
         p: float, T: float, mu: float, phi_re: float, phi_im: float,
         mass: float, mu_factor: int, typ: str

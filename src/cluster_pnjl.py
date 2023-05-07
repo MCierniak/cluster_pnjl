@@ -2,6 +2,7 @@
 
 def epja_figure1():
 
+    import math
     import numpy
     import platform
 
@@ -9,10 +10,7 @@ def epja_figure1():
     from mpl_toolkits.mplot3d import Axes3D
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
-    import pnjl.defaults
 
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
-        as cluster_susd
     import pnjl.thermo.gcp_cluster.breit_wigner \
         as cluster_bw
 
@@ -30,9 +28,9 @@ def epja_figure1():
     muB_T = 0.0
 
     def phase(M, T, muB, hadron):
-        delta_i = cluster_bw.bound_factor2(M, T, muB, hadron) \
-            + cluster_bw.continuum_factor1(M, T, muB, hadron) \
-            + cluster_bw.continuum_factor2(M, T, muB, hadron)
+        delta_i = cluster_bw.continuum_factor2(M, T, muB, hadron) \
+            + cluster_bw.bound_factor2(M, T, muB, hadron) \
+            + cluster_bw.continuum_factor1(M, T, muB, hadron)
         return delta_i
         
     def phase2(M, T, muB, hadron):
@@ -43,6 +41,8 @@ def epja_figure1():
         [phase(M_el*1000.0, T_el, muB_T*T_el, hadron) for M_el in M_list]
         for T_el in T_list
     ]
+    # print(max(max(phase_list)))
+    # print(4.0*math.pi/19.0)
     phase2_list = [
         [phase2(M_el*1000.0, T_el, muB_T*T_el, hadron) for M_el in M_list]
         for T_el in T_list
@@ -463,33 +463,24 @@ def epja_experimental_annals_phys_comparison():
     import matplotlib.pyplot
 
     import pnjl.thermo.distributions
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_quad \
+    import pnjl.thermo.gcp_cluster.breit_wigner \
         as cluster
 
     if platform.system() == "Linux":
         matplotlib.use("TkAgg")
 
-    hadron = 'p'
+    hadron = 'pi0'
 
-    def phase(M, T, mu):
-        MI_N = cluster.MI[hadron]
-        Mth_N = cluster.M_th(T, mu, hadron)
-        if Mth_N > MI_N:
-            if M < MI_N:
-                return 0.0
-            if M >= MI_N and M < Mth_N:
-                return 1.0
-            else:
-                return cluster.continuum_factor1(M, T, mu, hadron)
-        else:
-            TM = cluster.T_Mott(mu, hadron)
-            TM2 = cluster.T_Mott2(mu, hadron)
-            return cluster.continuum_factor2(M, T, mu, TM, TM2, hadron)
+    def phase(M, T, muB, hadron):
+        delta_i = cluster.bound_factor2(M, T, muB, hadron) \
+            + cluster.continuum_factor1(M, T, muB, hadron) \
+            + cluster.continuum_factor2(M, T, muB, hadron)
+        return delta_i
 
-    T_1 = 10.0
-    T_2 = 100.0
-    T_3 = 125.0
-    T_4 = 150.0
+    T_1 = 100.0
+    T_2 = 160.0
+    T_3 = 165.0
+    T_4 = 250.0
 
     # muB_1 = 0.0
     # muB_2 = 0.0
@@ -501,67 +492,24 @@ def epja_experimental_annals_phys_comparison():
     muB_3 = 2.5*T_3
     muB_4 = 2.5*T_4
 
-    TM_1 = cluster.T_Mott(muB_1, hadron)
-    TM_2 = cluster.T_Mott(muB_2, hadron)
-    TM_3 = cluster.T_Mott(muB_3, hadron)
-    TM_4 = cluster.T_Mott(muB_4, hadron)
-    
-    TM2_1 = cluster.T_Mott2(muB_1, hadron)
-    TM2_2 = cluster.T_Mott2(muB_2, hadron)
-    TM2_3 = cluster.T_Mott2(muB_3, hadron)
-    TM2_4 = cluster.T_Mott2(muB_4, hadron)
-
     s_v = numpy.linspace(0.004, 13.0, num=10000)
 
     delta_v_1 = [
-            cluster.bound_factor2(math.sqrt(s_el)*1000.0, T_1, muB_1, hadron) \
-        +   cluster.continuum_factor1(math.sqrt(s_el)*1000.0, T_1, muB_1, hadron) \
-        +   cluster.continuum_factor2(math.sqrt(s_el)*1000.0, T_1, muB_1, TM_1, TM2_1, hadron)
+            phase(math.sqrt(s_el)*1000.0, T_1, muB_1, hadron)
         for s_el in s_v
     ]
     delta_v_2 = [
-            cluster.bound_factor2(math.sqrt(s_el)*1000.0, T_2, muB_2, hadron) \
-        +   cluster.continuum_factor1(math.sqrt(s_el)*1000.0, T_2, muB_2, hadron) \
-        +   cluster.continuum_factor2(math.sqrt(s_el)*1000.0, T_2, muB_2, TM_2, TM2_2, hadron)
+            phase(math.sqrt(s_el)*1000.0, T_2, muB_2, hadron)
         for s_el in s_v
     ]
     delta_v_3 = [
-            cluster.bound_factor2(math.sqrt(s_el)*1000.0, T_3, muB_3, hadron) \
-        +   cluster.continuum_factor1(math.sqrt(s_el)*1000.0, T_3, muB_3, hadron) \
-        +   cluster.continuum_factor2(math.sqrt(s_el)*1000.0, T_3, muB_3, TM_3, TM2_3, hadron)
+            phase(math.sqrt(s_el)*1000.0, T_3, muB_3, hadron)
         for s_el in s_v
     ]
     delta_v_4 = [
-            cluster.bound_factor2(math.sqrt(s_el)*1000.0, T_4, muB_4, hadron) \
-        +   cluster.continuum_factor1(math.sqrt(s_el)*1000.0, T_4, muB_4, hadron) \
-        +   cluster.continuum_factor2(math.sqrt(s_el)*1000.0, T_4, muB_4, TM_4, TM2_4, hadron)
+            phase(math.sqrt(s_el)*1000.0, T_4, muB_4, hadron)
         for s_el in s_v
     ]
-
-    f_v_1 = [
-        pnjl.thermo.distributions.f_fermion_singlet(1000.0, T_1, muB_1, math.sqrt(s_el)*1000.0, 1, '+')*d_el
-        if d_el > 0.0 else 0.0
-        for s_el, d_el in zip(s_v, delta_v_1)
-    ]
-    f_v_1_norm = [el/max(f_v_1) for el in f_v_1]
-    f_v_2 = [
-        pnjl.thermo.distributions.f_fermion_singlet(1000.0, T_2, muB_2, math.sqrt(s_el)*1000.0, 1, '+')*d_el
-        if d_el > 0.0 else 0.0
-        for s_el, d_el in zip(s_v, delta_v_2)
-    ]
-    f_v_2_norm = [el/max(f_v_2) for el in f_v_2]
-    f_v_3 = [
-        pnjl.thermo.distributions.f_fermion_singlet(1000.0, T_3, muB_3, math.sqrt(s_el)*1000.0, 1, '+')*d_el
-        if d_el > 0.0 else 0.0
-        for s_el, d_el in zip(s_v, delta_v_3)
-    ]
-    f_v_3_norm = [el/max(f_v_3) for el in f_v_3]
-    f_v_4 = [
-        pnjl.thermo.distributions.f_fermion_singlet(1000.0, T_4, muB_4, math.sqrt(s_el)*1000.0, 1, '+')*d_el
-        if d_el > 0.0 else 0.0
-        for s_el, d_el in zip(s_v, delta_v_4)
-    ]
-    f_v_4_norm = [el/max(f_v_4) for el in f_v_4]
 
     T_v_1 = numpy.linspace(0.0, 0.3, num=200)
     T_v_2 = numpy.linspace(0.0, 0.3, num=200)
@@ -573,26 +521,17 @@ def epja_experimental_annals_phys_comparison():
     muB_3 = 3.0*250.0
     muB_4 = 3.0*300.0
 
-    TM_1 = cluster.T_Mott(muB_1, hadron)
-    TM_2 = cluster.T_Mott(muB_2, hadron)
-    TM_3 = cluster.T_Mott(muB_3, hadron)
-    TM_4 = cluster.T_Mott(muB_4, hadron)
-
     Mi_v_1 = [
-        (cluster.MSC_SLOPE*(T_el*1000.0 - TM_1) + cluster.MI[hadron])/1000.0
-        if T_el*1000.0 > TM_1 else cluster.MI[hadron]/1000.0 for T_el in T_v_1
+        cluster.M_i(T_el*1000.0, muB_1, hadron)/1000.0 for T_el in T_v_1
     ]
     Mi_v_2 = [
-        (cluster.MSC_SLOPE*(T_el*1000.0 - TM_2) + cluster.MI[hadron])/1000.0
-        if T_el*1000.0 > TM_2 else cluster.MI[hadron]/1000.0 for T_el in T_v_2
+        cluster.M_i(T_el*1000.0, muB_2, hadron)/1000.0 for T_el in T_v_2
     ]
     Mi_v_3 = [
-        (cluster.MSC_SLOPE*(T_el*1000.0 - TM_3) + cluster.MI[hadron])/1000.0
-        if T_el*1000.0 > TM_3 else cluster.MI[hadron]/1000.0 for T_el in T_v_3
+        cluster.M_i(T_el*1000.0, muB_3, hadron)/1000.0 for T_el in T_v_3
     ]
     Mi_v_4 = [
-        (cluster.MSC_SLOPE*(T_el*1000.0 - TM_4) + cluster.MI[hadron])/1000.0
-        if T_el*1000.0 > TM_4 else cluster.MI[hadron]/1000.0 for T_el in T_v_4
+        cluster.M_i(T_el*1000.0, muB_4, hadron)/1000.0 for T_el in T_v_4
     ]
 
     Mth_v_1 = [
@@ -623,20 +562,16 @@ def epja_experimental_annals_phys_comparison():
     T_4 = 100.0
 
     Mi_v2_1 = [
-        (cluster.MSC_SLOPE*(T_1 - cluster.T_Mott(muB_el*1000.0, hadron)) + cluster.MI[hadron])/1000.0
-        if T_1 > cluster.T_Mott(muB_el*1000.0, hadron) else cluster.MI[hadron]/1000.0 for muB_el in muB_v_1
+        cluster.M_i(T_1, muB_el*1000.0, hadron)/1000.0 for muB_el in muB_v_1
     ]
     Mi_v2_2 = [
-        (cluster.MSC_SLOPE*(T_2 - cluster.T_Mott(muB_el*1000.0, hadron)) + cluster.MI[hadron])/1000.0
-        if T_2 > cluster.T_Mott(muB_el*1000.0, hadron) else cluster.MI[hadron]/1000.0 for muB_el in muB_v_2
+        cluster.M_i(T_2, muB_el*1000.0, hadron)/1000.0 for muB_el in muB_v_2
     ]
     Mi_v2_3 = [
-        (cluster.MSC_SLOPE*(T_3 - cluster.T_Mott(muB_el*1000.0, hadron)) + cluster.MI[hadron])/1000.0
-        if T_3 > cluster.T_Mott(muB_el*1000.0, hadron) else cluster.MI[hadron]/1000.0 for muB_el in muB_v_3
+        cluster.M_i(T_3, muB_el*1000.0, hadron)/1000.0 for muB_el in muB_v_3
     ]
     Mi_v2_4 = [
-        (cluster.MSC_SLOPE*(T_4 - cluster.T_Mott(muB_el*1000.0, hadron)) + cluster.MI[hadron])/1000.0
-        if T_4 > cluster.T_Mott(muB_el*1000.0, hadron) else cluster.MI[hadron]/1000.0 for muB_el in muB_v_4
+        cluster.M_i(T_4, muB_el*1000.0, hadron)/1000.0 for muB_el in muB_v_4
     ]
 
     Mth_v2_1 = [
@@ -705,11 +640,6 @@ def epja_experimental_annals_phys_comparison():
     ax3.plot(s_v, delta_v_2, ':', c="blue")
     ax3.plot(s_v, delta_v_3, '--', c="blue")
     ax3.plot(s_v, delta_v_4, '-.', c="blue")
-    
-    ax3.plot(s_v, f_v_1, '-', c="red")
-    ax3.plot(s_v, f_v_2, ':', c="red")
-    ax3.plot(s_v, f_v_3, '--', c="red")
-    ax3.plot(s_v, f_v_4, '-.', c="red")
 
     for tick in ax3.xaxis.get_major_ticks():
         tick.label.set_fontsize(16) 
@@ -3553,7 +3483,7 @@ def epja_experimental_full():
         as cluster
     import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
         as cluster_mhrg
-    import pnjl.thermo.gcp_cluster.bound_step_continuum_step \
+    import pnjl.thermo.gcp_cluster.breit_wigner \
         as cluster_mhrg2
     import pnjl.thermo.solvers.\
         pnjl_lattice_cut_sea.\
@@ -3672,7 +3602,7 @@ def epja_experimental_full():
             hrg2_full_partial_sdensity_v_1 = pickle.load(file)
 
     #MHRG #1
-    if False:
+    if calc_1:
         print("MHRG sdensity #1")
         for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
@@ -3691,7 +3621,7 @@ def epja_experimental_full():
             mhrg_partial_sdensity_v_1 = pickle.load(file)
 
     #MHRG (continuum) #1
-    if calc_1:
+    if True:
         print("MHRG (continuum) sdensity #1")
         for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
@@ -3814,7 +3744,7 @@ def epja_experimental_full():
             hrg2_full_partial_bdensity_v_2 = pickle.load(file)
 
     #MHRG #2
-    if False:
+    if calc_2:
         print("MHRG sdensity #2")
         for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
@@ -3848,27 +3778,22 @@ def epja_experimental_full():
             mhrg_partial_bdensity_v_2 = pickle.load(file)
 
     #MHRG (continuum) #2
-    if calc_2:
-        # print("MHRG (continuum) sdensity #2")
-        # for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
-        #     zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
-        # ):
-        #     temp_hrg, temp_hrg_partials = cluster_mhrg2.sdensity_multi(T_el, muB_el, phi_re_el, phi_im_el)
-        #     mhrg2_sdensity_v_2.append(temp_hrg/(T_el**3))
-        #     mhrg2_partial_sdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
-        # with open(files+"mhrg2_sdensity_v_2p5.pickle", "wb") as file:
-        #     pickle.dump(mhrg2_sdensity_v_2, file)
-        # with open(files+"mhrg2_partial_sdensity_v_2p5.pickle", "wb") as file:
-        #     pickle.dump(mhrg2_partial_sdensity_v_2, file)
-        with open(files+"mhrg2_sdensity_v_2p5.pickle", "rb") as file:
-            mhrg2_sdensity_v_2 = pickle.load(file)
-        with open(files+"mhrg2_partial_sdensity_v_2p5.pickle", "rb") as file:
-            mhrg2_partial_sdensity_v_2 = pickle.load(file)
+    if True:
+        print("MHRG (continuum) sdensity #2")
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+        ):
+            temp_hrg, temp_hrg_partials = cluster_mhrg2.sdensity_multi(T_el, muB_el, phi_re_el, phi_im_el)
+            mhrg2_sdensity_v_2.append(temp_hrg/(T_el**3))
+            mhrg2_partial_sdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+        with open(files+"mhrg2_sdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(mhrg2_sdensity_v_2, file)
+        with open(files+"mhrg2_partial_sdensity_v_2p5.pickle", "wb") as file:
+            pickle.dump(mhrg2_partial_sdensity_v_2, file)
         print("MHRG (continuum) bdensity #2")
-        for T_el, muB_el, phi_re_el, phi_im_el in zip(T_2, muB_2, phi_re_v_2, phi_im_v_2):
-        # for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
-        #     zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
-        # ):
+        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+        ):
             temp_hrg, temp_hrg_partials = cluster_mhrg2.bdensity_multi(T_el, muB_el, phi_re_el, phi_im_el)
             mhrg2_bdensity_v_2.append(temp_hrg/(T_el**3))
             mhrg2_partial_bdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
@@ -4026,126 +3951,140 @@ def epja_experimental_full():
     for x, y in zip(T_2[::-1], s_pert_og2_v_2_low[::-1]):
         pQCD_sdensity_2.append([x, y])
 
-    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (18.0, 5.0))
+    # fig1 = matplotlib.pyplot.figure(num = 1, figsize = (18.0, 5.0))
 
-    fig1.subplots_adjust(
-        left=0.167, bottom=0.11, right=0.988, top=0.979, wspace=0.2, hspace=0.2
-    )
+    # fig1.subplots_adjust(
+    #     left=0.167, bottom=0.11, right=0.988, top=0.979, wspace=0.2, hspace=0.2
+    # )
 
-    ax1 = fig1.add_subplot(1, 3, 1)
-    ax1.axis([80., 280., -6.0, 20.0])
+    # ax1 = fig1.add_subplot(1, 3, 1)
+    # ax1.axis([80., 280., -6.0, 20.0])
 
-    ax1.add_patch(
-        matplotlib.patches.Polygon(
-            lQCD_sdensity_1, 
-            closed = True, fill = True, color = 'green', alpha = 0.3
-        )
-    )
-    ax1.add_patch(
-        matplotlib.patches.Polygon(
-            pQCD_sdensity_1, 
-            closed = True, fill = True, color = 'red', alpha = 0.3
-        )
-    )
+    # ax1.add_patch(
+    #     matplotlib.patches.Polygon(
+    #         lQCD_sdensity_1, 
+    #         closed = True, fill = True, color = 'green', alpha = 0.3
+    #     )
+    # )
+    # ax1.add_patch(
+    #     matplotlib.patches.Polygon(
+    #         pQCD_sdensity_1, 
+    #         closed = True, fill = True, color = 'red', alpha = 0.3
+    #     )
+    # )
 
-    ax1.plot(T_1, qgp_sdensity_v_1, '-', c = 'blue')
-    ax1.plot(T_1, hrg_full_sdensity_v_1, '-', c = 'purple')
-    ax1.plot(T_1, hrg2_full_sdensity_v_1, '--', c = 'purple')
-    ax1.plot(T_1, mhrg_sdensity_v_1, '-', c = 'green')
-    ax1.plot(T_1, [sum(el) for el in zip(mhrg_sdensity_v_1, qgp_sdensity_v_1)], '-', c = 'black')
-    ax1.plot(T_1, [el[4] for el in qgp_partial_sdensity_v_1], '-', c = 'red')
-    ax1.plot(T_1, [sum([el[8], el[9], el[10]]) for el in qgp_partial_sdensity_v_1], '-', c = 'magenta')
-    ax1.plot(T_1, [el[8] for el in qgp_partial_sdensity_v_1], '--', c = 'magenta')
-    ax1.plot(T_1, [el[10] for el in qgp_partial_sdensity_v_1], ':', c = 'magenta')
+    # ax1.plot(T_1, qgp_sdensity_v_1, '-', c = 'blue')
+    # ax1.plot(T_1, hrg_full_sdensity_v_1, '-', c = 'purple')
+    # ax1.plot(T_1, hrg2_full_sdensity_v_1, '--', c = 'purple')
+    # ax1.plot(T_1, mhrg_sdensity_v_1, '-.', c = 'green')
+    # ax1.plot(T_1, mhrg2_sdensity_v_1, '-', c = 'green')
+    # ax1.plot(T_1, [sum(el) for el in zip(mhrg_sdensity_v_1, qgp_sdensity_v_1)], '-.', c = 'black')
+    # ax1.plot(T_1, [sum(el) for el in zip(mhrg2_sdensity_v_1, qgp_sdensity_v_1)], '-', c = 'black')
+    # ax1.plot(T_1, [el[4] for el in qgp_partial_sdensity_v_1], '-', c = 'red')
+    # ax1.plot(T_1, [sum([el[8], el[9], el[10]]) for el in qgp_partial_sdensity_v_1], '-', c = 'magenta')
+    # ax1.plot(T_1, [el[8] for el in qgp_partial_sdensity_v_1], '--', c = 'magenta')
+    # ax1.plot(T_1, [el[10] for el in qgp_partial_sdensity_v_1], ':', c = 'magenta')
 
-    ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
-    ax1.text(250, 15.5, r"QGP", color="blue", fontsize=14)
+    # ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
+    # ax1.text(250, 15.5, r"QGP", color="blue", fontsize=14)
 
-    for tick in ax1.xaxis.get_major_ticks():
-        tick.label.set_fontsize(16) 
-    for tick in ax1.yaxis.get_major_ticks():
-        tick.label.set_fontsize(16)
-    ax1.set_xlabel(r'T [MeV]', fontsize = 16)
-    ax1.set_ylabel(r'$\mathrm{s/T^3}$', fontsize = 16)
+    # for tick in ax1.xaxis.get_major_ticks():
+    #     tick.label.set_fontsize(16) 
+    # for tick in ax1.yaxis.get_major_ticks():
+    #     tick.label.set_fontsize(16)
+    # ax1.set_xlabel(r'T [MeV]', fontsize = 16)
+    # ax1.set_ylabel(r'$\mathrm{s/T^3}$', fontsize = 16)
 
-    ax2 = fig1.add_subplot(1, 3, 2)
-    ax2.axis([80., 280., -6.0, 20.0])
+    # ax2 = fig1.add_subplot(1, 3, 2)
+    # ax2.axis([80., 280., -6.0, 20.0])
 
-    ax2.add_patch(
-        matplotlib.patches.Polygon(
-            lQCD_sdensity_2, 
-            closed = True, fill = True, color = 'green', alpha = 0.3
-        )
-    )
-    ax2.add_patch(
-        matplotlib.patches.Polygon(
-            pQCD_sdensity_2, 
-            closed = True, fill = True, color = 'red', alpha = 0.3
-        )
-    )
+    # ax2.add_patch(
+    #     matplotlib.patches.Polygon(
+    #         lQCD_sdensity_2, 
+    #         closed = True, fill = True, color = 'green', alpha = 0.3
+    #     )
+    # )
+    # ax2.add_patch(
+    #     matplotlib.patches.Polygon(
+    #         pQCD_sdensity_2, 
+    #         closed = True, fill = True, color = 'red', alpha = 0.3
+    #     )
+    # )
 
-    ax2.plot(T_2, qgp_sdensity_v_2, '-', c = 'blue')
-    ax2.plot(T_2, hrg_full_sdensity_v_2, '-', c = 'purple')
-    ax2.plot(T_2, hrg2_full_sdensity_v_2, '--', c = 'purple')
-    ax2.plot(T_2, mhrg_sdensity_v_2, '-', c = 'green')
-    ax2.plot(T_2, [sum(el) for el in zip(mhrg_sdensity_v_2, qgp_sdensity_v_2)], '-', c = 'black')
-    ax2.plot(T_2, [el[4] for el in qgp_partial_sdensity_v_2], '-', c = 'red')
-    ax2.plot(T_2, [sum([el[8], el[9], el[10]]) for el in qgp_partial_sdensity_v_2], '-', c = 'magenta')
-    ax2.plot(T_2, [el[8] for el in qgp_partial_sdensity_v_2], '--', c = 'magenta')
-    ax2.plot(T_2, [el[10] for el in qgp_partial_sdensity_v_2], ':', c = 'magenta')
+    # ax2.plot(T_2, qgp_sdensity_v_2, '-', c = 'blue')
+    # ax2.plot(T_2, hrg_full_sdensity_v_2, '-', c = 'purple')
+    # ax2.plot(T_2, hrg2_full_sdensity_v_2, '--', c = 'purple')
+    # ax2.plot(T_2, mhrg_sdensity_v_2, '-.', c = 'green')
+    # ax2.plot(T_2, mhrg2_sdensity_v_2, '-', c = 'green')
+    # ax2.plot(T_2, [sum(el) for el in zip(mhrg_sdensity_v_2, qgp_sdensity_v_2)], '-.', c = 'black')
+    # ax2.plot(T_2, [sum(el) for el in zip(mhrg2_sdensity_v_2, qgp_sdensity_v_2)], '-', c = 'black')
+    # ax2.plot(T_2, [el[4] for el in qgp_partial_sdensity_v_2], '-', c = 'red')
+    # ax2.plot(T_2, [sum([el[8], el[9], el[10]]) for el in qgp_partial_sdensity_v_2], '-', c = 'magenta')
+    # ax2.plot(T_2, [el[8] for el in qgp_partial_sdensity_v_2], '--', c = 'magenta')
+    # ax2.plot(T_2, [el[10] for el in qgp_partial_sdensity_v_2], ':', c = 'magenta')
 
-    ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
-    ax2.text(250, 17.3, r"QGP", color="blue", fontsize=14)
+    # ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
+    # ax2.text(250, 17.3, r"QGP", color="blue", fontsize=14)
 
-    for tick in ax2.xaxis.get_major_ticks():
-        tick.label.set_fontsize(16) 
-    for tick in ax2.yaxis.get_major_ticks():
-        tick.label.set_fontsize(16)
-    ax2.set_xlabel(r'T [MeV]', fontsize = 16)
-    ax2.set_ylabel(r'$\mathrm{s/T^3}$', fontsize = 16)
+    # for tick in ax2.xaxis.get_major_ticks():
+    #     tick.label.set_fontsize(16) 
+    # for tick in ax2.yaxis.get_major_ticks():
+    #     tick.label.set_fontsize(16)
+    # ax2.set_xlabel(r'T [MeV]', fontsize = 16)
+    # ax2.set_ylabel(r'$\mathrm{s/T^3}$', fontsize = 16)
 
-    ax3 = fig1.add_subplot(1, 3, 3)
-    ax3.axis([80., 280., -0.4, 1.2])
+    # ax3 = fig1.add_subplot(1, 3, 3)
+    # ax3.axis([80., 280., -0.4, 1.2])
 
-    ax3.add_patch(
-        matplotlib.patches.Polygon(
-            lQCD_bdensity_2, closed = True, fill = True, color = "green", alpha = 0.3
-        )
-    )
-    ax3.add_patch(
-        matplotlib.patches.Polygon(
-            pQCD_bdensity_2, closed = True, fill = True, color = "red", alpha = 0.3
-        )
-    )
+    # ax3.add_patch(
+    #     matplotlib.patches.Polygon(
+    #         lQCD_bdensity_2, closed = True, fill = True, color = "green", alpha = 0.3
+    #     )
+    # )
+    # ax3.add_patch(
+    #     matplotlib.patches.Polygon(
+    #         pQCD_bdensity_2, closed = True, fill = True, color = "red", alpha = 0.3
+    #     )
+    # )
 
-    ax3.plot(T_2, qgp_bdensity_v_2, '-', c = 'blue')
-    ax3.plot(T_2, hrg_full_bdensity_v_2, '-', c = 'purple')
-    ax3.plot(T_2, hrg2_full_bdensity_v_2, '--', c = 'purple')
-    ax3.plot(T_2, mhrg_bdensity_v_2, '-', c = 'green')
-    ax3.plot(T_2, [sum(el) for el in zip(mhrg_bdensity_v_2, qgp_bdensity_v_2)], '-', c = 'black')
-    ax3.plot(T_2, [el[4] for el in qgp_partial_bdensity_v_2], '-', c = 'red')
-    ax3.plot(T_2, [sum([el[8], el[9], el[10]]) for el in qgp_partial_bdensity_v_2], '-', c = 'magenta')
-    ax3.plot(T_2, [el[8] for el in qgp_partial_bdensity_v_2], '--', c = 'magenta')
-    ax3.plot(T_2, [el[10] for el in qgp_partial_bdensity_v_2], ':', c = 'magenta')
+    # ax3.plot(T_2, qgp_bdensity_v_2, '-', c = 'blue')
+    # ax3.plot(T_2, hrg_full_bdensity_v_2, '-', c = 'purple')
+    # ax3.plot(T_2, hrg2_full_bdensity_v_2, '--', c = 'purple')
+    # ax3.plot(T_2, mhrg_bdensity_v_2, '-.', c = 'green')
+    # ax3.plot(T_2, mhrg2_bdensity_v_2, '-', c = 'green')
+    # ax3.plot(T_2, [sum(el) for el in zip(mhrg_bdensity_v_2, qgp_bdensity_v_2)], '-.', c = 'black')
+    # ax3.plot(T_2, [sum(el) for el in zip(mhrg2_bdensity_v_2, qgp_bdensity_v_2)], '-', c = 'black')
+    # ax3.plot(T_2, [el[4] for el in qgp_partial_bdensity_v_2], '-', c = 'red')
+    # ax3.plot(T_2, [sum([el[8], el[9], el[10]]) for el in qgp_partial_bdensity_v_2], '-', c = 'magenta')
+    # ax3.plot(T_2, [el[8] for el in qgp_partial_bdensity_v_2], '--', c = 'magenta')
+    # ax3.plot(T_2, [el[10] for el in qgp_partial_bdensity_v_2], ':', c = 'magenta')
 
-    ax3.text(85, 1.1, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
-    ax3.text(200, 0.67, r"QGP", color="blue", fontsize=14)
+    # ax3.text(85, 1.1, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
+    # ax3.text(200, 0.67, r"QGP", color="blue", fontsize=14)
 
-    for tick in ax3.xaxis.get_major_ticks():
-        tick.label.set_fontsize(16) 
-    for tick in ax3.yaxis.get_major_ticks():
-        tick.label.set_fontsize(16)
-    ax3.set_xlabel(r'T [MeV]', fontsize = 16)
-    ax3.set_ylabel(r'$\mathrm{n_B/T^3}$', fontsize = 16)
+    # for tick in ax3.xaxis.get_major_ticks():
+    #     tick.label.set_fontsize(16) 
+    # for tick in ax3.yaxis.get_major_ticks():
+    #     tick.label.set_fontsize(16)
+    # ax3.set_xlabel(r'T [MeV]', fontsize = 16)
+    # ax3.set_ylabel(r'$\mathrm{n_B/T^3}$', fontsize = 16)
 
-    fig1.tight_layout(pad = 0.1)
+    # fig1.tight_layout(pad = 0.1)
 
-    matplotlib.pyplot.show()
-    matplotlib.pyplot.close()
+    # matplotlib.pyplot.show()
+    # matplotlib.pyplot.close()
 
 
 if __name__ == '__main__':
 
-    epja_figure1()
+    import cProfile
+    import pstats
+
+    with cProfile.Profile() as pr:
+        epja_experimental_full()
+    
+    stats = pstats.Stats(pr)
+    stats.sort_stats(pstats.SortKey.TIME)
+    stats.dump_stats(filename="profile.dat")
 
     print("END")

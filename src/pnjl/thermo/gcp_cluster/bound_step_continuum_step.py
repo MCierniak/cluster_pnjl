@@ -24,8 +24,6 @@ Polyakov_loop
 
 
 import math
-import typing
-import functools
 
 import scipy.optimize
 import scipy.integrate
@@ -92,7 +90,6 @@ SI = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def M_th(T: float, muB: float, hadron: str) -> float:
 
     N_I = NI[hadron]
@@ -105,7 +102,6 @@ def M_th(T: float, muB: float, hadron: str) -> float:
     return M_th_i
 
 
-@functools.lru_cache(maxsize=1024)
 def b_boson_singlet_integrand(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: float
@@ -122,7 +118,6 @@ def b_boson_singlet_integrand(
     return (p**2)*math.fsum([integ_i, -integ_th])
 
 
-@functools.lru_cache(maxsize=1024)
 def b_fermion_singlet_integrand(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: float
@@ -139,7 +134,6 @@ def b_fermion_singlet_integrand(
     return (p**2)*math.fsum([integ_i, -integ_th])
 
 
-@functools.lru_cache(maxsize=1024)
 def b_boson_triplet_integrand(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: float
@@ -164,7 +158,6 @@ def b_boson_triplet_integrand(
     return (p**2)*math.fsum([integ_i, -integ_th])
 
 
-@functools.lru_cache(maxsize=1024)
 def b_boson_antitriplet_integrand(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: float
@@ -189,7 +182,6 @@ def b_boson_antitriplet_integrand(
     return (p**2)*math.fsum([integ_i, -integ_th])
 
 
-@functools.lru_cache(maxsize=1024)
 def b_fermion_triplet_integrand(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: float
@@ -214,7 +206,6 @@ def b_fermion_triplet_integrand(
     return (p**2)*math.fsum([integ_i, -integ_th])
 
 
-@functools.lru_cache(maxsize=1024)
 def b_fermion_antitriplet_integrand(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: float
@@ -239,7 +230,6 @@ def b_fermion_antitriplet_integrand(
     return (p**2)*math.fsum([integ_i, -integ_th])
 
 
-@functools.lru_cache(maxsize=1024)
 def s_boson_singlet_integrand(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: float
@@ -268,7 +258,6 @@ def s_boson_singlet_integrand(
     return (p**2)*math.fsum([integ_i, -integ_th])
 
 
-@functools.lru_cache(maxsize=1024)
 def s_fermion_singlet_integrand(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: float
@@ -297,7 +286,6 @@ def s_fermion_singlet_integrand(
     return (p**2)*math.fsum([integ_i, -integ_th])
 
 
-@functools.lru_cache(maxsize=1024)
 def s_boson_triplet_integrand(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: float
@@ -340,7 +328,6 @@ def s_boson_triplet_integrand(
     return -(p**2)*math.fsum([integ_i, -integ_th])
 
 
-@functools.lru_cache(maxsize=1024)
 def s_boson_antitriplet_integrand(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: float
@@ -383,7 +370,6 @@ def s_boson_antitriplet_integrand(
     return -(p**2)*math.fsum([integ_i, -integ_th])
 
 
-@functools.lru_cache(maxsize=1024)
 def s_fermion_triplet_integrand(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: float
@@ -426,7 +412,6 @@ def s_fermion_triplet_integrand(
     return -(p**2)*math.fsum([integ_i, -integ_th])
 
 
-@functools.lru_cache(maxsize=1024)
 def s_fermion_antitriplet_integrand(
     p: float, T: float, muB: float, phi_re: float, phi_im: float,
     M_I: float, M_TH_I: float, a: float
@@ -512,7 +497,6 @@ s_hash = {
 }
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity(
     T: float, muB: float, phi_re: float, phi_im: float, hadron: str
 ) -> float:
@@ -532,7 +516,6 @@ def bdensity(
         return (A_I*D_I/(2.0*(math.pi**2)))*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def qnumber_cumulant(
     rank: int, T: float, muB: float, phi_re: float, phi_im: float, hadron: str
 ) -> float:
@@ -573,7 +556,6 @@ def qnumber_cumulant(
                 )
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity(
     T: float, muB: float, phi_re: float, phi_im: float, hadron: str
 ) -> float:
@@ -590,7 +572,6 @@ def sdensity(
     return -(D_I/(2.0*(math.pi**2)))*integral
 
 
-@functools.lru_cache(maxsize=1024)
 def sdensity_multi(
     T: float, muB: float, phi_re: float, phi_im: float, hadrons="all"
 ):
@@ -604,7 +585,6 @@ def sdensity_multi(
     return math.fsum(partial), (*partial,)
 
 
-@functools.lru_cache(maxsize=1024)
 def bdensity_multi(
     T: float, muB: float, phi_re: float, phi_im: float, hadrons="all"
 ):
