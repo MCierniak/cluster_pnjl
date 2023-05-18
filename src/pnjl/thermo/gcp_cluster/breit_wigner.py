@@ -66,9 +66,9 @@ SI = {
     '5q3': 2.0, 'd': 0.0
 }
 
-LAMBDA = 600.0
+LAMBDA = 400.0
 
-SLOPE = 100.0
+SLOPE = 1000.0
 
 
 def Gamma_i(T: float, muB: float) -> float:
@@ -95,17 +95,7 @@ def M_th(T: float, muB: float, cluster: str) -> float:
     
 
 def bound_factor(M: float, T: float, muB: float, cluster: str) -> float:
-
-    H_ZERO = pnjl.defaults.HEAVISIDE_ZERO
-
-    Mi = M_i(T, muB, cluster)
-    M_th_i = M_th(T, muB, cluster)
-
-    if M_th_i >= Mi and False:
-        return  numpy.heaviside(math.fsum([M**2 , -Mi**2]), H_ZERO) \
-                -numpy.heaviside(math.fsum([M**2 , -M_th_i**2]), H_ZERO)
-    else:
-        return 0.0
+    return 0.0
     
 
 def bound_factor2(M: float, T: float, muB: float, cluster: str) -> float:
@@ -116,9 +106,8 @@ def bound_factor2(M: float, T: float, muB: float, cluster: str) -> float:
     M_th_i = M_th(T, muB, cluster)
 
     if M_th_i >= Mi:
-        res = numpy.heaviside(math.fsum([M**2 , -Mi**2]), 0.5) \
-                -numpy.heaviside(math.fsum([M**2 , -M_th_i**2]), 0.5)
-        return  res
+        res = numpy.heaviside(math.fsum([M**2 , -Mi**2]), 0.5) - numpy.heaviside(math.fsum([M**2 , -M_th_i**2]), 0.5)
+        return res
     else:
         return 0.0
     
@@ -145,16 +134,22 @@ def continuum_factor2(M: float, T: float, muB: float, cluster: str) -> float:
     if M_th_i < Mi:
         Ni = NI[cluster]
         Gi = Gamma_i(T, muB)
+
+        atan_inner = math.fsum([Mi**2, -M**2])/(Mi*Gi)
+        atan_norm = math.atan(Mi/Gi) 
+        resonant_f = ((atan_norm - math.atan(atan_inner))/math.pi) / (0.5 + atan_norm/math.pi)
+
+        scattering_f = 0.0
         nlambda = Ni*LAMBDA
-        atan_inner = math.fsum([MI[cluster]**2, -M**2])/(Mi*Gi)
-        acos_inner = math.fsum([2.0*M, -2.0*MI[cluster], -nlambda])/nlambda
-        aR_inner = math.fsum([M_th_i**2, -Mi**2])/(Mi*Gi)
-        aR = 4.0/(3.0*math.fsum([0.5, -math.atan(aR_inner)]))
-        if M >= MI[cluster] and M < MI[cluster] + nlambda:
-            factor = -aR*math.atan(atan_inner) + math.acos(acos_inner)/math.pi - numpy.heaviside(math.fsum([M**2 , -M_th_i**2]), 0.5)
-            return max([factor, 0.0])
-        else:
-            return 0.0
+        M_thL = math.fsum([M_th_i, nlambda])
+        M_iL = math.fsum([Mi, nlambda])
+        acos_inner = -((2.0*M)/(M_th_i - M_iL)) + (M_th_i + M_iL)/(M_th_i - M_iL)
+        if M >= M_th_i and M <= M_iL:
+            scattering_f += math.acos(acos_inner)/math.pi - numpy.heaviside(math.fsum([M**2 , -M_th_i**2]), 0.5)
+        elif M > M_thL:
+            scattering_f += -numpy.heaviside(math.fsum([M**2 , -M_th_i**2]), 0.5)
+    
+        return resonant_f + scattering_f
     else:
         return 0.0
     
@@ -284,12 +279,15 @@ def bdensity(
     if A_I == 0.0:
         return 0.0
     else:
-        M_th_0 = M_th(0.0, 0.0, cluster)
+        Mi = M_i(T, muB, cluster)
         M_min = M_th(T, muB, cluster)
-        M_max = math.fsum([M_th_0, LAMBDA*N_I])
-        b_susd = pnjl.thermo.gcp_cluster.bound_step_continuum_step.bdensity(
-            T, muB, phi_re, phi_im, cluster
-        )
+        M_max = math.inf
+        b_susd = 0.0
+        if Mi < M_min:
+            M_max = math.fsum([M_min, LAMBDA*N_I])
+            b_susd = pnjl.thermo.gcp_cluster.bound_step_continuum_step.bdensity(
+                T, muB, phi_re, phi_im, cluster
+            )
         integral, _ = scipy.integrate.quad(
             bdensity_integral, 0.0, math.inf,
             args = (T, muB, phi_re, phi_im, M_min, M_max, A_I, cluster)
@@ -445,12 +443,15 @@ def sdensity(
     if A_I == 0.0 and muB != 0.0:
         return sdensity(T, 0.0, phi_re, phi_im, cluster)
     else:
-        M_th_0 = M_th(0.0, 0.0, cluster)
-        M_max = math.fsum([M_th_0, LAMBDA*N_I])
+        Mi = M_i(T, muB, cluster)
         M_min = M_th(T, muB, cluster)
-        s_susd = pnjl.thermo.gcp_cluster.bound_step_continuum_step.sdensity(
-            T, muB, phi_re, phi_im, cluster
-        )
+        M_max = math.inf
+        s_susd = 0.0
+        if Mi < M_min:
+            M_max = math.fsum([M_min, LAMBDA*N_I])
+            s_susd = pnjl.thermo.gcp_cluster.bound_step_continuum_step.sdensity(
+                T, muB, phi_re, phi_im, cluster
+            )
         integral, _ = scipy.integrate.quad(
             sdensity_integral, 0.0, math.inf,
             args = (T, muB, phi_re, phi_im, M_min, M_max, A_I, cluster)

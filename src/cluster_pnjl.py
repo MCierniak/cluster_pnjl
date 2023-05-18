@@ -23,7 +23,7 @@ def epja_figure1():
     T_Max = 175.0
 
     T_list = numpy.linspace(T_Min, T_Max, num=17)
-    M_list = numpy.linspace(0.5, 3.5, num=1000)
+    M_list = numpy.linspace(0.0, 50.0, num=1000)
 
     muB_T = 0.0
 
@@ -3621,7 +3621,7 @@ def epja_experimental_full():
             mhrg_partial_sdensity_v_1 = pickle.load(file)
 
     #MHRG (continuum) #1
-    if True:
+    if False:
         print("MHRG (continuum) sdensity #1")
         for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
@@ -3778,7 +3778,7 @@ def epja_experimental_full():
             mhrg_partial_bdensity_v_2 = pickle.load(file)
 
     #MHRG (continuum) #2
-    if True:
+    if False:
         print("MHRG (continuum) sdensity #2")
         for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
@@ -3951,140 +3951,142 @@ def epja_experimental_full():
     for x, y in zip(T_2[::-1], s_pert_og2_v_2_low[::-1]):
         pQCD_sdensity_2.append([x, y])
 
-    # fig1 = matplotlib.pyplot.figure(num = 1, figsize = (18.0, 5.0))
+    fig1 = matplotlib.pyplot.figure(num = 1, figsize = (18.0, 5.0))
 
-    # fig1.subplots_adjust(
-    #     left=0.167, bottom=0.11, right=0.988, top=0.979, wspace=0.2, hspace=0.2
-    # )
+    fig1.subplots_adjust(
+        left=0.167, bottom=0.11, right=0.988, top=0.979, wspace=0.2, hspace=0.2
+    )
 
-    # ax1 = fig1.add_subplot(1, 3, 1)
-    # ax1.axis([80., 280., -6.0, 20.0])
+    ax1 = fig1.add_subplot(1, 3, 1)
+    ax1.axis([80., 280., -6.0, 20.0])
 
-    # ax1.add_patch(
-    #     matplotlib.patches.Polygon(
-    #         lQCD_sdensity_1, 
-    #         closed = True, fill = True, color = 'green', alpha = 0.3
-    #     )
-    # )
-    # ax1.add_patch(
-    #     matplotlib.patches.Polygon(
-    #         pQCD_sdensity_1, 
-    #         closed = True, fill = True, color = 'red', alpha = 0.3
-    #     )
-    # )
+    ax1.add_patch(
+        matplotlib.patches.Polygon(
+            lQCD_sdensity_1, 
+            closed = True, fill = True, color = 'green', alpha = 0.3
+        )
+    )
+    ax1.add_patch(
+        matplotlib.patches.Polygon(
+            pQCD_sdensity_1, 
+            closed = True, fill = True, color = 'red', alpha = 0.3
+        )
+    )
 
-    # ax1.plot(T_1, qgp_sdensity_v_1, '-', c = 'blue')
-    # ax1.plot(T_1, hrg_full_sdensity_v_1, '-', c = 'purple')
-    # ax1.plot(T_1, hrg2_full_sdensity_v_1, '--', c = 'purple')
-    # ax1.plot(T_1, mhrg_sdensity_v_1, '-.', c = 'green')
-    # ax1.plot(T_1, mhrg2_sdensity_v_1, '-', c = 'green')
-    # ax1.plot(T_1, [sum(el) for el in zip(mhrg_sdensity_v_1, qgp_sdensity_v_1)], '-.', c = 'black')
-    # ax1.plot(T_1, [sum(el) for el in zip(mhrg2_sdensity_v_1, qgp_sdensity_v_1)], '-', c = 'black')
-    # ax1.plot(T_1, [el[4] for el in qgp_partial_sdensity_v_1], '-', c = 'red')
-    # ax1.plot(T_1, [sum([el[8], el[9], el[10]]) for el in qgp_partial_sdensity_v_1], '-', c = 'magenta')
-    # ax1.plot(T_1, [el[8] for el in qgp_partial_sdensity_v_1], '--', c = 'magenta')
-    # ax1.plot(T_1, [el[10] for el in qgp_partial_sdensity_v_1], ':', c = 'magenta')
+    ax1.plot(T_1, qgp_sdensity_v_1, '-', c = 'blue')
+    ax1.plot(T_1, hrg_full_sdensity_v_1, '-', c = 'purple')
+    ax1.plot(T_1, hrg2_full_sdensity_v_1, '--', c = 'purple')
+    ax1.plot(T_1, mhrg_sdensity_v_1, '-.', c = 'green')
+    ax1.plot(T_1, mhrg2_sdensity_v_1, '-', c = 'green')
+    ax1.plot(T_1, [sum(el) for el in zip(mhrg_sdensity_v_1, qgp_sdensity_v_1)], '-.', c = 'black')
+    ax1.plot(T_1, [sum(el) for el in zip(mhrg2_sdensity_v_1, qgp_sdensity_v_1)], '-', c = 'black')
+    ax1.plot(T_1, [el[4] for el in qgp_partial_sdensity_v_1], '-', c = 'red')
+    ax1.plot(T_1, [sum([el[8], el[9], el[10]]) for el in qgp_partial_sdensity_v_1], '-', c = 'magenta')
+    ax1.plot(T_1, [el[8] for el in qgp_partial_sdensity_v_1], '--', c = 'magenta')
+    ax1.plot(T_1, [el[10] for el in qgp_partial_sdensity_v_1], ':', c = 'magenta')
 
-    # ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
-    # ax1.text(250, 15.5, r"QGP", color="blue", fontsize=14)
+    ax1.text(85, 18.5, r"$\mathrm{\mu_B/T=0}$", color="black", fontsize=14)
+    ax1.text(250, 15.5, r"QGP", color="blue", fontsize=14)
 
-    # for tick in ax1.xaxis.get_major_ticks():
-    #     tick.label.set_fontsize(16) 
-    # for tick in ax1.yaxis.get_major_ticks():
-    #     tick.label.set_fontsize(16)
-    # ax1.set_xlabel(r'T [MeV]', fontsize = 16)
-    # ax1.set_ylabel(r'$\mathrm{s/T^3}$', fontsize = 16)
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax1.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax1.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax1.set_ylabel(r'$\mathrm{s/T^3}$', fontsize = 16)
 
-    # ax2 = fig1.add_subplot(1, 3, 2)
-    # ax2.axis([80., 280., -6.0, 20.0])
+    ax2 = fig1.add_subplot(1, 3, 2)
+    ax2.axis([80., 280., -6.0, 20.0])
 
-    # ax2.add_patch(
-    #     matplotlib.patches.Polygon(
-    #         lQCD_sdensity_2, 
-    #         closed = True, fill = True, color = 'green', alpha = 0.3
-    #     )
-    # )
-    # ax2.add_patch(
-    #     matplotlib.patches.Polygon(
-    #         pQCD_sdensity_2, 
-    #         closed = True, fill = True, color = 'red', alpha = 0.3
-    #     )
-    # )
+    ax2.add_patch(
+        matplotlib.patches.Polygon(
+            lQCD_sdensity_2, 
+            closed = True, fill = True, color = 'green', alpha = 0.3
+        )
+    )
+    ax2.add_patch(
+        matplotlib.patches.Polygon(
+            pQCD_sdensity_2, 
+            closed = True, fill = True, color = 'red', alpha = 0.3
+        )
+    )
 
-    # ax2.plot(T_2, qgp_sdensity_v_2, '-', c = 'blue')
-    # ax2.plot(T_2, hrg_full_sdensity_v_2, '-', c = 'purple')
-    # ax2.plot(T_2, hrg2_full_sdensity_v_2, '--', c = 'purple')
-    # ax2.plot(T_2, mhrg_sdensity_v_2, '-.', c = 'green')
-    # ax2.plot(T_2, mhrg2_sdensity_v_2, '-', c = 'green')
-    # ax2.plot(T_2, [sum(el) for el in zip(mhrg_sdensity_v_2, qgp_sdensity_v_2)], '-.', c = 'black')
-    # ax2.plot(T_2, [sum(el) for el in zip(mhrg2_sdensity_v_2, qgp_sdensity_v_2)], '-', c = 'black')
-    # ax2.plot(T_2, [el[4] for el in qgp_partial_sdensity_v_2], '-', c = 'red')
-    # ax2.plot(T_2, [sum([el[8], el[9], el[10]]) for el in qgp_partial_sdensity_v_2], '-', c = 'magenta')
-    # ax2.plot(T_2, [el[8] for el in qgp_partial_sdensity_v_2], '--', c = 'magenta')
-    # ax2.plot(T_2, [el[10] for el in qgp_partial_sdensity_v_2], ':', c = 'magenta')
+    ax2.plot(T_2, qgp_sdensity_v_2, '-', c = 'blue')
+    ax2.plot(T_2, hrg_full_sdensity_v_2, '-', c = 'purple')
+    ax2.plot(T_2, hrg2_full_sdensity_v_2, '--', c = 'purple')
+    ax2.plot(T_2, mhrg_sdensity_v_2, '-.', c = 'green')
+    ax2.plot(T_2, mhrg2_sdensity_v_2, '-', c = 'green')
+    ax2.plot(T_2, [sum(el) for el in zip(mhrg_sdensity_v_2, qgp_sdensity_v_2)], '-.', c = 'black')
+    ax2.plot(T_2, [sum(el) for el in zip(mhrg2_sdensity_v_2, qgp_sdensity_v_2)], '-', c = 'black')
+    ax2.plot(T_2, [el[4] for el in qgp_partial_sdensity_v_2], '-', c = 'red')
+    ax2.plot(T_2, [sum([el[8], el[9], el[10]]) for el in qgp_partial_sdensity_v_2], '-', c = 'magenta')
+    ax2.plot(T_2, [el[8] for el in qgp_partial_sdensity_v_2], '--', c = 'magenta')
+    ax2.plot(T_2, [el[10] for el in qgp_partial_sdensity_v_2], ':', c = 'magenta')
 
-    # ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
-    # ax2.text(250, 17.3, r"QGP", color="blue", fontsize=14)
+    ax2.text(85, 18.5, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
+    ax2.text(250, 17.3, r"QGP", color="blue", fontsize=14)
 
-    # for tick in ax2.xaxis.get_major_ticks():
-    #     tick.label.set_fontsize(16) 
-    # for tick in ax2.yaxis.get_major_ticks():
-    #     tick.label.set_fontsize(16)
-    # ax2.set_xlabel(r'T [MeV]', fontsize = 16)
-    # ax2.set_ylabel(r'$\mathrm{s/T^3}$', fontsize = 16)
+    for tick in ax2.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax2.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax2.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax2.set_ylabel(r'$\mathrm{s/T^3}$', fontsize = 16)
 
-    # ax3 = fig1.add_subplot(1, 3, 3)
-    # ax3.axis([80., 280., -0.4, 1.2])
+    ax3 = fig1.add_subplot(1, 3, 3)
+    ax3.axis([80., 280., -0.4, 1.2])
 
-    # ax3.add_patch(
-    #     matplotlib.patches.Polygon(
-    #         lQCD_bdensity_2, closed = True, fill = True, color = "green", alpha = 0.3
-    #     )
-    # )
-    # ax3.add_patch(
-    #     matplotlib.patches.Polygon(
-    #         pQCD_bdensity_2, closed = True, fill = True, color = "red", alpha = 0.3
-    #     )
-    # )
+    ax3.add_patch(
+        matplotlib.patches.Polygon(
+            lQCD_bdensity_2, closed = True, fill = True, color = "green", alpha = 0.3
+        )
+    )
+    ax3.add_patch(
+        matplotlib.patches.Polygon(
+            pQCD_bdensity_2, closed = True, fill = True, color = "red", alpha = 0.3
+        )
+    )
 
-    # ax3.plot(T_2, qgp_bdensity_v_2, '-', c = 'blue')
-    # ax3.plot(T_2, hrg_full_bdensity_v_2, '-', c = 'purple')
-    # ax3.plot(T_2, hrg2_full_bdensity_v_2, '--', c = 'purple')
-    # ax3.plot(T_2, mhrg_bdensity_v_2, '-.', c = 'green')
-    # ax3.plot(T_2, mhrg2_bdensity_v_2, '-', c = 'green')
-    # ax3.plot(T_2, [sum(el) for el in zip(mhrg_bdensity_v_2, qgp_bdensity_v_2)], '-.', c = 'black')
-    # ax3.plot(T_2, [sum(el) for el in zip(mhrg2_bdensity_v_2, qgp_bdensity_v_2)], '-', c = 'black')
-    # ax3.plot(T_2, [el[4] for el in qgp_partial_bdensity_v_2], '-', c = 'red')
-    # ax3.plot(T_2, [sum([el[8], el[9], el[10]]) for el in qgp_partial_bdensity_v_2], '-', c = 'magenta')
-    # ax3.plot(T_2, [el[8] for el in qgp_partial_bdensity_v_2], '--', c = 'magenta')
-    # ax3.plot(T_2, [el[10] for el in qgp_partial_bdensity_v_2], ':', c = 'magenta')
+    ax3.plot(T_2, qgp_bdensity_v_2, '-', c = 'blue')
+    ax3.plot(T_2, hrg_full_bdensity_v_2, '-', c = 'purple')
+    ax3.plot(T_2, hrg2_full_bdensity_v_2, '--', c = 'purple')
+    ax3.plot(T_2, mhrg_bdensity_v_2, '-.', c = 'green')
+    ax3.plot(T_2, mhrg2_bdensity_v_2, '-', c = 'green')
+    ax3.plot(T_2, [sum(el) for el in zip(mhrg_bdensity_v_2, qgp_bdensity_v_2)], '-.', c = 'black')
+    ax3.plot(T_2, [sum(el) for el in zip(mhrg2_bdensity_v_2, qgp_bdensity_v_2)], '-', c = 'black')
+    ax3.plot(T_2, [el[4] for el in qgp_partial_bdensity_v_2], '-', c = 'red')
+    ax3.plot(T_2, [sum([el[8], el[9], el[10]]) for el in qgp_partial_bdensity_v_2], '-', c = 'magenta')
+    ax3.plot(T_2, [el[8] for el in qgp_partial_bdensity_v_2], '--', c = 'magenta')
+    ax3.plot(T_2, [el[10] for el in qgp_partial_bdensity_v_2], ':', c = 'magenta')
 
-    # ax3.text(85, 1.1, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
-    # ax3.text(200, 0.67, r"QGP", color="blue", fontsize=14)
+    ax3.text(85, 1.1, r"$\mathrm{\mu_B/T=2.5}$", color="black", fontsize=14)
+    ax3.text(200, 0.67, r"QGP", color="blue", fontsize=14)
 
-    # for tick in ax3.xaxis.get_major_ticks():
-    #     tick.label.set_fontsize(16) 
-    # for tick in ax3.yaxis.get_major_ticks():
-    #     tick.label.set_fontsize(16)
-    # ax3.set_xlabel(r'T [MeV]', fontsize = 16)
-    # ax3.set_ylabel(r'$\mathrm{n_B/T^3}$', fontsize = 16)
+    for tick in ax3.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16) 
+    for tick in ax3.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    ax3.set_xlabel(r'T [MeV]', fontsize = 16)
+    ax3.set_ylabel(r'$\mathrm{n_B/T^3}$', fontsize = 16)
 
-    # fig1.tight_layout(pad = 0.1)
+    fig1.tight_layout(pad = 0.1)
 
-    # matplotlib.pyplot.show()
-    # matplotlib.pyplot.close()
+    matplotlib.pyplot.show()
+    matplotlib.pyplot.close()
 
 
 if __name__ == '__main__':
 
-    import cProfile
-    import pstats
+    # import cProfile
+    # import pstats
 
-    with cProfile.Profile() as pr:
-        epja_experimental_full()
+    # with cProfile.Profile() as pr:
+    epja_experimental_full()
     
-    stats = pstats.Stats(pr)
-    stats.sort_stats(pstats.SortKey.TIME)
-    stats.dump_stats(filename="profile1.dat")
+    # stats = pstats.Stats(pr)
+    # stats.sort_stats(pstats.SortKey.TIME)
+    # stats.dump_stats(filename="profile_noc.dat")
+
+    # epja_figure1()
 
     print("END")
