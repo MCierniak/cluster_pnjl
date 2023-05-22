@@ -3485,6 +3485,8 @@ def epja_experimental_full():
         as cluster_mhrg
     import pnjl.thermo.gcp_cluster.breit_wigner \
         as cluster_mhrg2
+    import pnjl.thermo.gcp_cluster.cbscs \
+        as cluster_cmhrg
     import pnjl.thermo.solvers.\
         pnjl_lattice_cut_sea.\
         pl_lo.\
@@ -3505,11 +3507,11 @@ def epja_experimental_full():
         files = "/home/mcierniak/Data/2023_epja/experimental/full/"
         lattice_files = "/home/mcierniak/Data/2023_epja/lattice_data_raw/"
 
-    T_1 = numpy.linspace(1.0, 280.0, num=200)
-    T_2 = numpy.linspace(1.0, 280.0, num=200)
+    T_1 = tuple(numpy.linspace(1.0, 280.0, num=200))
+    T_2 = tuple(numpy.linspace(1.0, 280.0, num=200))
 
-    muB_1 = [0.0 for el in T_1]
-    muB_2 = [2.5*el for el in T_2]
+    muB_1 = tuple([0.0 for el in T_1])
+    muB_2 = tuple([2.5*el for el in T_2])
 
     reduced_spectrum = (
         'pi0', 'pi', 'K', 'K0', 'eta', 'rho', 'omega', 'K*(892)', 'K*0(892)',
@@ -3517,8 +3519,8 @@ def epja_experimental_full():
         'Sigma0', 'Sigma-', 'b1', 'a1', 'Delta'
     )
 
-    phi_re_v_1, phi_im_v_1 = list(), list()
-    phi_re_v_2, phi_im_v_2 = list(), list()
+    # phi_re_v_1, phi_im_v_1 = list(), list()
+    # phi_re_v_2, phi_im_v_2 = list(), list()
 
     qgp_sdensity_v_1, qgp_partial_sdensity_v_1 = list(), list()
     hrg_full_sdensity_v_1, hrg_full_partial_sdensity_v_1 = list(), list()
@@ -3539,10 +3541,10 @@ def epja_experimental_full():
     mhrg2_bdensity_v_2, mhrg2_partial_bdensity_v_2 = list(), list()
 
     #QGP #1
-    if False:
+    if calc_1:
         sol = solver.sdensity_all(T_1, muB_1, label="QGP PL and sdensity #1")
-        phi_re_v_1 = sol[0]
-        phi_im_v_1 = sol[1]
+        phi_re_v_1 = tuple(sol[0])
+        phi_im_v_1 = tuple(sol[1])
         qgp_sdensity_v_1 = sol[2]
         qgp_partial_sdensity_v_1 = sol[3]
         with open(files+"phi_re_v_0p0.pickle", "wb") as file:
@@ -3602,7 +3604,7 @@ def epja_experimental_full():
             hrg2_full_partial_sdensity_v_1 = pickle.load(file)
 
     #MHRG #1
-    if calc_1:
+    if False:
         print("MHRG sdensity #1")
         for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
             zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
@@ -3621,14 +3623,28 @@ def epja_experimental_full():
             mhrg_partial_sdensity_v_1 = pickle.load(file)
 
     #MHRG (continuum) #1
-    if False:
-        print("MHRG (continuum) sdensity #1")
-        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
-        ):
-            temp_hrg, temp_hrg_partials = cluster_mhrg2.sdensity_multi(T_el, muB_el, phi_re_el, phi_im_el)
-            mhrg2_sdensity_v_1.append(temp_hrg/(T_el**3))
-            mhrg2_partial_sdensity_v_1.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+    # if False:
+    #     print("MHRG (continuum) sdensity #1")
+    #     for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+    #         zip(T_1, muB_1, phi_re_v_1, phi_im_v_1), total=len(T_1), ncols=100
+    #     ):
+    #         temp_hrg, temp_hrg_partials = cluster_mhrg2.sdensity_multi(T_el, muB_el, phi_re_el, phi_im_el)
+    #         mhrg2_sdensity_v_1.append(temp_hrg/(T_el**3))
+    #         mhrg2_partial_sdensity_v_1.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+    #     with open(files+"mhrg2_sdensity_v_0p0.pickle", "wb") as file:
+    #         pickle.dump(mhrg2_sdensity_v_1, file)
+    #     with open(files+"mhrg2_partial_sdensity_v_0p0.pickle", "wb") as file:
+    #         pickle.dump(mhrg2_partial_sdensity_v_1, file)
+    # else:
+    #     with open(files+"mhrg2_sdensity_v_0p0.pickle", "rb") as file:
+    #         mhrg2_sdensity_v_1 = pickle.load(file)
+    #     with open(files+"mhrg2_partial_sdensity_v_0p0.pickle", "rb") as file:
+    #         mhrg2_partial_sdensity_v_1 = pickle.load(file)
+
+    #MHRG (c code) #1
+    if True:
+        print("MHRG (c code) sdensity #1")
+        mhrg2_sdensity_v_1, mhrg2_partial_sdensity_v_1 = cluster_cmhrg.cSDensityClusterAll(T_1, muB_1, phi_re_v_1, phi_im_v_1)
         with open(files+"mhrg2_sdensity_v_0p0.pickle", "wb") as file:
             pickle.dump(mhrg2_sdensity_v_1, file)
         with open(files+"mhrg2_partial_sdensity_v_0p0.pickle", "wb") as file:
@@ -3640,10 +3656,10 @@ def epja_experimental_full():
             mhrg2_partial_sdensity_v_1 = pickle.load(file)
 
     #QGP #2
-    if False:
+    if calc_2:
         sol = solver.sdensity_all(T_2, muB_2, label="QGP PL and sdensity #2")
-        phi_re_v_2 = sol[0]
-        phi_im_v_2 = sol[1]
+        phi_re_v_2 = tuple(sol[0])
+        phi_im_v_2 = tuple(sol[1])
         qgp_sdensity_v_2 = sol[2]
         qgp_partial_sdensity_v_2 = sol[3]
         sol = solver.bdensity_all(T_2, muB_2, phi_re=phi_re_v_2, phi_im=phi_im_v_2, label="QGP bdensity #2")
@@ -3778,25 +3794,49 @@ def epja_experimental_full():
             mhrg_partial_bdensity_v_2 = pickle.load(file)
 
     #MHRG (continuum) #2
-    if False:
-        print("MHRG (continuum) sdensity #2")
-        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
-        ):
-            temp_hrg, temp_hrg_partials = cluster_mhrg2.sdensity_multi(T_el, muB_el, phi_re_el, phi_im_el)
-            mhrg2_sdensity_v_2.append(temp_hrg/(T_el**3))
-            mhrg2_partial_sdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+    # if False:
+    #     print("MHRG (continuum) sdensity #2")
+    #     for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+    #         zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+    #     ):
+    #         temp_hrg, temp_hrg_partials = cluster_mhrg2.sdensity_multi(T_el, muB_el, phi_re_el, phi_im_el)
+    #         mhrg2_sdensity_v_2.append(temp_hrg/(T_el**3))
+    #         mhrg2_partial_sdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+    #     with open(files+"mhrg2_sdensity_v_2p5.pickle", "wb") as file:
+    #         pickle.dump(mhrg2_sdensity_v_2, file)
+    #     with open(files+"mhrg2_partial_sdensity_v_2p5.pickle", "wb") as file:
+    #         pickle.dump(mhrg2_partial_sdensity_v_2, file)
+    #     print("MHRG (continuum) bdensity #2")
+    #     for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
+    #         zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
+    #     ):
+    #         temp_hrg, temp_hrg_partials = cluster_mhrg2.bdensity_multi(T_el, muB_el, phi_re_el, phi_im_el)
+    #         mhrg2_bdensity_v_2.append(temp_hrg/(T_el**3))
+    #         mhrg2_partial_bdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
+    #     with open(files+"mhrg2_bdensity_v_2p5.pickle", "wb") as file:
+    #         pickle.dump(mhrg2_bdensity_v_2, file)
+    #     with open(files+"mhrg2_partial_bdensity_v_2p5.pickle", "wb") as file:
+    #         pickle.dump(mhrg2_partial_bdensity_v_2, file)
+    # else:
+    #     with open(files+"mhrg2_sdensity_v_2p5.pickle", "rb") as file:
+    #         mhrg2_sdensity_v_2 = pickle.load(file)
+    #     with open(files+"mhrg2_partial_sdensity_v_2p5.pickle", "rb") as file:
+    #         mhrg2_partial_sdensity_v_2 = pickle.load(file)
+    #     with open(files+"mhrg2_bdensity_v_2p5.pickle", "rb") as file:
+    #         mhrg2_bdensity_v_2 = pickle.load(file)
+    #     with open(files+"mhrg2_partial_bdensity_v_2p5.pickle", "rb") as file:
+    #         mhrg2_partial_bdensity_v_2 = pickle.load(file)
+
+    #MHRG (c code) #2
+    if True:
+        print("MHRG (c code) sdensity #2")
+        mhrg2_sdensity_v_2, mhrg2_partial_sdensity_v_2 = cluster_cmhrg.cSDensityClusterAll(T_2, muB_2, phi_re_v_2, phi_im_v_2)
+        print("MHRG (c code) bdensity #2")
+        mhrg2_bdensity_v_2, mhrg2_partial_bdensity_v_2 = cluster_cmhrg.cBDensityClusterAll(T_2, muB_2, phi_re_v_2, phi_im_v_2)
         with open(files+"mhrg2_sdensity_v_2p5.pickle", "wb") as file:
             pickle.dump(mhrg2_sdensity_v_2, file)
         with open(files+"mhrg2_partial_sdensity_v_2p5.pickle", "wb") as file:
             pickle.dump(mhrg2_partial_sdensity_v_2, file)
-        print("MHRG (continuum) bdensity #2")
-        for T_el, muB_el, phi_re_el, phi_im_el in tqdm.tqdm(
-            zip(T_2, muB_2, phi_re_v_2, phi_im_v_2), total=len(T_2), ncols=100
-        ):
-            temp_hrg, temp_hrg_partials = cluster_mhrg2.bdensity_multi(T_el, muB_el, phi_re_el, phi_im_el)
-            mhrg2_bdensity_v_2.append(temp_hrg/(T_el**3))
-            mhrg2_partial_bdensity_v_2.append(tuple([el/(T_el**3) for el in temp_hrg_partials]))
         with open(files+"mhrg2_bdensity_v_2p5.pickle", "wb") as file:
             pickle.dump(mhrg2_bdensity_v_2, file)
         with open(files+"mhrg2_partial_bdensity_v_2p5.pickle", "wb") as file:
@@ -3978,6 +4018,7 @@ def epja_experimental_full():
     ax1.plot(T_1, hrg2_full_sdensity_v_1, '--', c = 'purple')
     ax1.plot(T_1, mhrg_sdensity_v_1, '-.', c = 'green')
     ax1.plot(T_1, mhrg2_sdensity_v_1, '-', c = 'green')
+    ax1.plot(T_1, [el[1] for el in mhrg2_partial_sdensity_v_1], '-', c = 'cyan')
     ax1.plot(T_1, [sum(el) for el in zip(mhrg_sdensity_v_1, qgp_sdensity_v_1)], '-.', c = 'black')
     ax1.plot(T_1, [sum(el) for el in zip(mhrg2_sdensity_v_1, qgp_sdensity_v_1)], '-', c = 'black')
     ax1.plot(T_1, [el[4] for el in qgp_partial_sdensity_v_1], '-', c = 'red')

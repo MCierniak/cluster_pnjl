@@ -5,13 +5,15 @@ gsl_function_wrapper::gsl_function_wrapper(double (*func)(double, void*), size_t
     limit(i)
 {
     F.function = func;
+    gsl_set_error_handler(&gsl_integ_error);
 }
 
 gsl_function_wrapper::gsl_function_wrapper(double (*func)(double, void *)):
-    w(gsl_integration_workspace_alloc(1000)),
-    limit(1000)
+    w(gsl_integration_workspace_alloc(100000)),
+    limit(100000)
 {
     F.function = func;
+    gsl_set_error_handler(&gsl_integ_error);
 }
 
 gsl_function_wrapper::~gsl_function_wrapper()
@@ -77,4 +79,19 @@ void pbar(int i, int i_min, int i_max)
 	}
     std::cerr << " " << prog << "/100";
     if (prog == 100) std::cerr << "\n";
+}
+
+void gsl_integ_error(const char *reason, const char *file, int line, int gsl_errno)
+{
+	if (gsl_errno == GSL_EROUND) {}
+	else if (gsl_errno == GSL_EDIVERGE) {}
+	else if (gsl_errno == GSL_EOVRFLW) {}
+    else if (gsl_errno == GSL_ESING) {
+        // std::cout << "Found singularity!" << std::endl;
+    }
+	else
+	{
+		std::cout << "Errno: " << gsl_errno << std::endl;
+		throw std::runtime_error("Błąd GSL'a!");
+	}
 }

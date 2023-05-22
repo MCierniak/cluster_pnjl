@@ -3,3 +3,5 @@ profile.dat
 .vscode/
 .cache/
 .venv/
+build/
+*.so

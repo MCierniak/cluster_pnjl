@@ -17,30 +17,18 @@ namespace bscs
     };
     
     double cBDensityBosonSingletIntegrand(double p, void *pars);
-    gsl_function_wrapper cwBDensityBosonSingletIntegrand(cBDensityBosonSingletIntegrand);
     double cBDensityFermionSingletIntegrand(double p, void *pars);
-    gsl_function_wrapper cwBDensityFermionSingletIntegrand(cBDensityFermionSingletIntegrand);
     double cBDensityBosonTripletIntegrandReal(double p, void *pars);
-    gsl_function_wrapper cwBDensityBosonTripletIntegrandReal(cBDensityBosonTripletIntegrandReal);
     double cBDensityBosonAntitripletIntegrandReal(double p, void *pars);
-    gsl_function_wrapper cwBDensityBosonAntitripletIntegrandReal(cBDensityBosonAntitripletIntegrandReal);
     double cBDensityFermionTripletIntegrandReal(double p, void *pars);
-    gsl_function_wrapper cwBDensityFermionTripletIntegrandReal(cBDensityFermionTripletIntegrandReal);
     double cBDensityFermionAntitripletIntegrandReal(double p, void *pars);
-    gsl_function_wrapper cwBDensityFermionAntitripletIntegrandReal(cBDensityFermionAntitripletIntegrandReal);
     
     double cSDensityBosonSingletIntegrand(double p, void *pars);
-    gsl_function_wrapper cwSDensityBosonSingletIntegrand(cSDensityBosonSingletIntegrand);
     double cSDensityFermionSingletIntegrand(double p, void *pars);
-    gsl_function_wrapper cwSDensityFermionSingletIntegrand(cSDensityFermionSingletIntegrand);
     double cSDensityBosonTripletIntegrandReal(double p, void *pars);
-    gsl_function_wrapper cwSDensityBosonTripletIntegrandReal(cSDensityBosonTripletIntegrandReal);
     double cSDensityBosonAntitripletIntegrandReal(double p, void *pars);
-    gsl_function_wrapper cwSDensityBosonAntitripletIntegrandReal(cSDensityBosonAntitripletIntegrandReal);
     double cSDensityFermionTripletIntegrandReal(double p, void *pars);
-    gsl_function_wrapper cwSDensityFermionTripletIntegrandReal(cSDensityFermionTripletIntegrandReal);
     double cSDensityFermionAntitripletIntegrandReal(double p, void *pars);
-    gsl_function_wrapper cwSDensityFermionAntitripletIntegrandReal(cSDensityFermionAntitripletIntegrandReal);
 
     class cluster {
     protected:

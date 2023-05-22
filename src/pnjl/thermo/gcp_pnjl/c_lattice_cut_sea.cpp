@@ -1,5 +1,12 @@
 #include "c_lattice_cut_sea.h"
 
+gsl_function_wrapper cwPressureQLIntegrandReal(cPressureQLIntegrandReal);
+gsl_function_wrapper cwPressureQSIntegrandReal(cPressureQSIntegrandReal);
+gsl_function_wrapper cwBDensityQLIntegrandReal(cBDensityQLIntegrandReal);
+gsl_function_wrapper cwBDensityQSIntegrandReal(cBDensityQSIntegrandReal);
+gsl_function_wrapper cwSDensityQLIntegrandReal(cSDensityQLIntegrandReal);
+gsl_function_wrapper cwSDensityQSIntegrandReal(cSDensityQSIntegrandReal);
+
 double cTMott(const thermo &thArgs)
 {
     return G_T_MOTT_0*(1.0 - G_KAPPA*pow(thArgs.muB/G_T_MOTT_0, 2));

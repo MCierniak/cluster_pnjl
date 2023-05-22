@@ -8,6 +8,7 @@
 #include <complex>
 
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_errno.h>
 
 //Free parameters gcp_pnjl - lattice_cut_sea
 
@@ -275,13 +276,15 @@ public:
 
     double eval(double x, void *pars);
 
-    double qag(void *pars, double a, double b, double epsabs = 0.0, double epsrel = 1e-7, int key = 6);
-    double qagiu(void *pars, double a, double epsabs = 0.0, double epsrel = 1e-7);
+    double qag(void *pars, double a, double b, double epsabs = 1e-5, double epsrel = 1e-5, int key = 1);
+    double qagiu(void *pars, double a, double epsabs = 1e-5, double epsrel = 1e-5);
 };
 
 //Utility methods
 
 void pbar(double x, double x_min, double x_max, double x_step);
 void pbar(int i, int i_min, int i_max);
+
+void gsl_integ_error(const char *reason, const char *file, int line, int gsl_errno);
 
 #endif

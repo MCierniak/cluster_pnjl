@@ -9,19 +9,13 @@ double cTC(const thermo &thArgs);
 double cDeltaLS(const thermo &thArgs);
 
 double cPressureQLIntegrandReal(double p, void *pars);
-gsl_function_wrapper cwPressureQLIntegrandReal(cPressureQLIntegrandReal);
 double cPressureQSIntegrandReal(double p, void *pars);
-gsl_function_wrapper cwPressureQSIntegrandReal(cPressureQSIntegrandReal);
 
 double cBDensityQLIntegrandReal(double p, void *pars);
-gsl_function_wrapper cwBDensityQLIntegrandReal(cBDensityQLIntegrandReal);
 double cBDensityQSIntegrandReal(double p, void *pars);
-gsl_function_wrapper cwBDensityQSIntegrandReal(cBDensityQSIntegrandReal);
 
 double cSDensityQLIntegrandReal(double p, void *pars);
-gsl_function_wrapper cwSDensityQLIntegrandReal(cSDensityQLIntegrandReal);
 double cSDensityQSIntegrandReal(double p, void *pars);
-gsl_function_wrapper cwSDensityQSIntegrandReal(cSDensityQSIntegrandReal);
 
 //External methods
 double cML(const thermo &thArgs);
